@@ -43,7 +43,14 @@ public class Runner {
         try {
             report = crawler.crawl();
         } catch (CrawlerException e) {
-            logger.fatal("Something went wrong while instantiating the crawler", e);
+            try {
+                helper.release("crawler", token);
+            } catch (SynchronizerClientException e1) {
+                logger.fatal("Something went wrong while synchronizing", e);
+                System.exit(-1);
+                throw new RuntimeException(e);
+            }
+            logger.fatal("Something went wrong while running the crawler", e);
             System.exit(-1);
             throw new RuntimeException();
         }

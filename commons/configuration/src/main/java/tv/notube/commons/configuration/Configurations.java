@@ -111,7 +111,7 @@ public class Configurations {
             String apikey = serviceConf.getString("apikey");
             String secret = serviceConf.getString("secret");
             String session = serviceConf.getString("session");
-            String endpoint = serviceConf.getString("endpoint");
+            String endpoint = serviceConf.getString("endpoint").replace("&amp;", "&");
             Service service = new Service(name);
             service.setApikey(apikey);
             service.setDescription(description);

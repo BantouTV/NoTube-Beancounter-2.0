@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<analyzer>
+    <analyses>
+        <analysis name="activity-analysis" class="tv.notube.analytics.analysis.custom.ActivityAnalysis">
+            <description>this analysis summarizes the user activities over time</description>
+            <query>string.verb = TWEET OR string.verb = LISTEN OR string.verb = WATCHED</query>
+            <result>tv.notube.analytics.analysis.custom.ActivityAnalysisResult</result>
+            <methods>
+                <method name="getNumberOfActivitiesByVerb">
+                    <description>it returns the total number of activities of the verb specified as parameter</description>
+                    <parameterTypes>
+                        <type>java.lang.String</type>
+                    </parameterTypes>
+                </method>
+                <method name="getActivities">
+                    <description>it returns the activity types the user performed</description>
+                    <parameterTypes/>
+                </method>
+                <method name="getTotalActivities">
+                    <description>it returns the total number of activities of the user</description>
+                    <parameterTypes/>
+                </method>
+                 <method name="getNumberOfActivitiesByService">
+                    <description>it returns the total number of activities done on a specified service (must be a valid URL)</description>
+                    <parameterTypes>
+                        <type>java.net.URL</type>
+                    </parameterTypes>
+                </method>
+            </methods>
+        </analysis>
+        <analysis name="timeframe-analysis" class="tv.notube.analytics.analysis.custom.TimeFrameAnalysis">
+            <description>this analysis summarizes the user activities over time</description>
+            <query>string.verb = TWEET OR string.verb = LISTEN OR string.verb = WATCHED</query>
+            <result>tv.notube.analytics.analysis.custom.TimeFrameAnalysisResult</result>
+            <methods>
+                <method name="getStatistics">
+                    <description>this method returns activity statistics day by day of the last month</description>
+                    <parameterTypes>
+                        <type>java.lang.Integer</type>
+                    </parameterTypes>
+                </method>
+            </methods>
+        </analysis>
+        <analysis name="wywol-analysis" class="tv.notube.analytics.analysis.custom.WhenYouWatchOrListenAnalysis">
+            <description>returns watch or listen absolute numbers per each time slice 0 to 3</description>
+            <query>string.verb = LISTEN OR string.verb = WATCHED</query>
+            <result>tv.notube.analytics.analysis.custom.WhenYouWatchOrListenAnalysisResult</result>
+            <methods>
+                <method name="getPercentages">
+                    <description>returns watch or listen percentages per each time slice 0 to 3</description>
+                    <parameterTypes>
+                        <type>java.lang.Integer</type>
+                    </parameterTypes>
+                </method>
+                <method name="getNumbers">
+                    <description>returns watch or listen absolute numbers per each time slice 0 to 3</description>
+                    <parameterTypes>
+                        <type>java.lang.Integer</type>
+                    </parameterTypes>
+                </method>
+                <method name="getSlice">
+                    <description>returns watch or listen percentage in one single call</description>
+                    <parameterTypes />
+                </method>
+            </methods>
+        </analysis>
+    </analyses>
+</analyzer>

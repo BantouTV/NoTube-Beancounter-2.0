@@ -40,7 +40,14 @@ public class Runner {
 
         try {
             profiler.run();
-        } catch (ProfilerException e) {
+        } catch (Exception e) {
+            try {
+                helper.release("profiler", token);
+            } catch (SynchronizerClientException e1) {
+                logger.error("Error while waiting for releasing resource", e);
+                System.exit(-1);
+                return;
+            }
             logger.error("Error while profiling process", e);
             System.exit(-1);
         }

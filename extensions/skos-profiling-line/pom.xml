@@ -64,6 +64,11 @@
             <version>1.1</version>
         </dependency>
         <dependency>
+            <groupId>io.schema</groupId>
+            <artifactId>services</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>tv.notube.profiler</groupId>
             <artifactId>runner</artifactId>
             <version>1.0-SNAPSHOT</version>

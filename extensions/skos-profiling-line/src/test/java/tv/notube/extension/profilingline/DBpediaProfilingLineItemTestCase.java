@@ -5,6 +5,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import tv.notube.commons.model.UserActivities;
 import tv.notube.commons.model.activity.*;
+import tv.notube.commons.model.activity.Object;
 import tv.notube.profiler.line.ProfilingLineItem;
 import tv.notube.profiler.line.ProfilingLineItemException;
 
@@ -30,6 +31,8 @@ public class DBpediaProfilingLineItemTestCase {
 
     private ProfilingLineItem textItem;
 
+    private ProfilingLineItem fbItem;
+
     private ProfilingLineItem mbItem;
 
     private ProfilingLineItem weight;
@@ -52,6 +55,11 @@ public class DBpediaProfilingLineItemTestCase {
                 "music-brainz", "links to dbpedia resolving mbrainz ids"
         );
 
+        fbItem = new FacebookProfilingLineItem(
+                "facebook-linker",
+                "it provides links to dbpedia from FB"
+        );
+
         weight = new WeightingProfilingLineItem("weight", "weighting interests");
 
         building = new ProfileBuildingProfilingLineItem(
@@ -64,7 +72,8 @@ public class DBpediaProfilingLineItemTestCase {
                 "this just dumps")
         );
         weight.setNextProfilingLineItem(building);
-        mbItem.setNextProfilingLineItem(weight);
+        fbItem.setNextProfilingLineItem(weight);
+        mbItem.setNextProfilingLineItem(fbItem);
         textItem.setNextProfilingLineItem(mbItem);
         initItem.setNextProfilingLineItem(textItem);
     }
@@ -118,11 +127,24 @@ public class DBpediaProfilingLineItemTestCase {
         context4.setService(new URL("http://twitter.com"));
         a4.setContext(context4);
 
+        Activity a5 = new Activity();
+        a5.setVerb(Verb.LIKE);
+        Object like1 = new Object();
+        like1.setName("The Goonies");
+        like1.setDescription("Movie");
+        like1.setUrl(new URL("https://www.facebook.com/thegooniesmovie"));
+        a5.setObject(like1);
+        Context context5 = new Context();
+        context5.setDate(new DateTime());
+        context5.setService(new URL("http://facebook.com"));
+        a5.setContext(context5);
+
         List<Activity> activities = new ArrayList<Activity>();
         activities.add(a);
         activities.add(a2);
         activities.add(a3);
         activities.add(a4);
+        activities.add(a5);
 
         UserActivities userActivities =
                 new UserActivities(username, activities);

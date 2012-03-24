@@ -49,15 +49,14 @@ public class ProfilerRunnable implements Runnable {
 
     public void run() {
         profiler.profilingStarted(userId);
-
         UUID token;
         Helper helper = Helper.getInstance("http://moth.notube.tv:9090/service-1.0-SNAPSHOT/rest/synch");
         try {
-            token = helper.access("platform-profiler");
+            token = helper.access("platform-profiler-" + userId.toString());
         } catch (SynchronizerClientException e) {
+            profiler.profilingEnded(userId);
             throw new RuntimeException("Error while getting access synch", e);
         }
-
         ProfilingResult profilingResult;
         try {
             profilingResult = profilingLineContainer.profile(
@@ -65,6 +64,13 @@ public class ProfilerRunnable implements Runnable {
                     profilingLine
             );
         } catch (ProfilingLineContainerException e) {
+            try {
+                helper.release("platform-profiler-" + userId.toString(), token);
+            } catch (SynchronizerClientException e1) {
+                profiler.profilingEnded(userId);
+                throw new RuntimeException("Error while releasing access to db", e1);
+            }
+            profiler.profilingEnded(userId);
             final String errMsg = "Error while profiling object: ["
                     + objectToProfile + "] on profiling line [" + profilingLine + "]";
             throw new RuntimeException(errMsg, e);
@@ -74,16 +80,21 @@ public class ProfilerRunnable implements Runnable {
             profileStore.deleteUserProfile(profileToStore.getUsername());
             profileStore.storeUserProfile(profileToStore);
         } catch (ProfileStoreException e) {
+            try {
+                helper.release("platform-profiler-" + userId.toString(), token);
+            } catch (SynchronizerClientException e1) {
+                profiler.profilingEnded(userId);
+                throw new RuntimeException("Error while releasing access to db", e1);
+            }
             final String errMsg = "Error while storing profile: '" + profileToStore + "' on ProfileStore";
             throw new RuntimeException(errMsg, e);
         }
-
         try {
-            helper.release("platform-profiler", token);
+            helper.release("platform-profiler-" + userId.toString(), token);
         } catch (SynchronizerClientException e) {
+            profiler.profilingEnded(userId);
             throw new RuntimeException("Error while releasing access to db");
         }
-
         profiler.profilingEnded(userId);
     }
 }

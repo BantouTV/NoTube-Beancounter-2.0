@@ -61,7 +61,6 @@ public class BBC {
     }
 
     public String getProgrammeId(URL url) throws BBCException {
-/*libby - error around here - sliently fails
         Url response = bitly.call(
                 Bitly.expand(url.toString())
         );
@@ -72,8 +71,6 @@ public class BBC {
         ).split("/")[0];
         // ex: http://www.bbc.co.uk/iplayer/episode/b0183nyn/EastEnders_08_12_2011/
         return programmeId;
-*/
-        return "";
     }
 
     public boolean isBBC(URL url) {
@@ -99,6 +96,8 @@ public class BBC {
             return httpResponse.getEntity().getContent();
         } catch (IOException e) {
             throw new BBCException("Error while accessing http response", e);
+        } finally {
+            httpClient.getConnectionManager().closeExpiredConnections();
         }
     }
 }

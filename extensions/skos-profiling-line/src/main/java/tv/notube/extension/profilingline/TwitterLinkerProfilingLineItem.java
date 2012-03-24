@@ -63,7 +63,6 @@ public class TwitterLinkerProfilingLineItem extends ProfilingLineItem {
                     for(String hashTag : tweet.getHashTags()) {
                         resources.addAll(getResourcesFromHashTag(hashTag));
                     }
-
                     intermediate.addLinkedActivity(activity, resources);
                     activitiesToBeRemoved.add(activity);
                 }

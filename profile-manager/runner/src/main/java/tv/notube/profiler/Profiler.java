@@ -173,4 +173,32 @@ public class Profiler {
             statuses.put(userId, STATUS);
         }
     }
+
+    public ProfilingLineContainer getProfilingContainer() {
+        return profilingLineContainer;
+    }
+
+    public ProfileStore getProfileStore() {
+        return profileStore;
+    }
+
+    public Object getObject(UUID userId) throws ProfilerException {
+        RawDataSet rawDataSet;
+        try {
+            rawDataSet = dataManager.getRawData("user", userId);
+        } catch (DataManagerException e) {
+            final String errMsg = "Error while accessing raw data for key: [user]";
+            logger.error(errMsg, e);
+            throw new ProfilerException(errMsg, e);
+        }
+        Map<String, List<String>> registeredDataKeys;
+        try {
+            registeredDataKeys = dataManager.getRegisteredKeys();
+        } catch (DataManagerException e) {
+            final String errMsg = "Error while accessing to the registered keys";
+            logger.error(errMsg, e);
+            throw new ProfilerException("Error while accessing to the registered keys", e);
+        }
+        return rawDataSet.getNext();
+    }
 }

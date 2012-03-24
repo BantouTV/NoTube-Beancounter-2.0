@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
  */
 public class FacebookRequest extends DefaultRequest {
 
+    // TODO: make it configuarable
     private static final String CALLBACK = "http://moth.notube.tv:9090/notube-platform/rest/user/oauth/callback/facebook/";
 
     private Gson gson;

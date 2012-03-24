@@ -21,7 +21,7 @@ public class ProfilerTestCase {
 
     @Test
     public void test() throws ProfilerException {
-        profiler.run(UUID.fromString("85a9241a-53d2-4512-bac5-11badcfa6c4c"));
+        profiler.run(UUID.fromString("e651ce76-b043-4f0f-a797-29a785f39084"));
     }
 
 

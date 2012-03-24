@@ -2,6 +2,9 @@ package tv.notube.crawler.requester.request.facebook;
 
 import org.joda.time.DateTime;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * put class description here
  *

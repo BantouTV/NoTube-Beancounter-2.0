@@ -35,7 +35,7 @@ public class RegexAPI {
 
     private String apikey;
 
-    private Boolean stanbol = true;//true to use stanbol
+    private Boolean stanbol = false;//true to use stanbol
 
     public RegexAPI(String apikey) {
         httpClient = new DefaultHttpClient();

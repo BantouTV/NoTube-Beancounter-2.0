@@ -28,7 +28,7 @@ public class SpiderTest {
 
     private UserManager um;
 
-    private static final String USERID = "9a26d5a2-bdd0-426f-997b-9100a6c3aac3";
+    private static final String USERID = "4363d649-105f-45a4-a860-d999df419c78";
 
     private Spider spider;
 
@@ -93,7 +93,7 @@ public class SpiderTest {
     @AfterTest
     public void tearDown() throws UserManagerException {
         spider = null;
-        um.deleteUser(UUID.fromString(USERID));
+        // um.deleteUser(UUID.fromString(USERID));
     }
 
     @Test

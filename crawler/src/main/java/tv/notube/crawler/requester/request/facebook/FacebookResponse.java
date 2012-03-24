@@ -44,6 +44,7 @@ public class FacebookResponse implements ServiceResponse<List<Activity>>{
 
         Object object = new Object();
         object.setName(like.getName());
+        object.setDescription(like.getCategory());
         object.setUrl(new URL("http://facebook.com/" + like.getId()));
         activity.setObject(object);
 

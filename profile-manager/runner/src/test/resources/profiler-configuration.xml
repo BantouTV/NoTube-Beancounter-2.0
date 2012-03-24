@@ -36,6 +36,16 @@
                         </parameter>
                     </parameters>
                 </profiling-line-item>
+                <profiling-line-item>
+	                <name>facebook</name>
+	                <description>resolves Facebook Likes to DBPedia resources</description>
+	                <class>tv.notube.extension.profilingline.FacebookProfilingLineItem</class>
+	            </profiling-line-item>
+                <profiling-line-item>
+	                <name>BBC</name>
+	                <description>resolves BBC programmes to DBpedia</description>
+	                <class>tv.notube.extension.profilingline.BBCProfilingLineItem</class>
+	            </profiling-line-item>
 				<profiling-line-item>
 	                <name>musicbrainz</name>
 	                <description>resolves last.fm artists to DBPedia resources</description>

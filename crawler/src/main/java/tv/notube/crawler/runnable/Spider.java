@@ -62,8 +62,7 @@ public class Spider implements Runnable {
             try {
                 service = sam.getService(serviceName);
             } catch (ServiceAuthorizationManagerException e) {
-                final String errMsg = "Error while getting Service '" + serviceName +
-                        "'";
+                final String errMsg = "Error while getting Service '" + serviceName + "'";
                 logger.error(errMsg, e);
                 throw new RuntimeException(errMsg, e);
             }
