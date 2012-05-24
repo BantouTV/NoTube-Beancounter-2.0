@@ -1,4 +1,4 @@
-package tv.notube.platform.jersey;
+package tv.notube.platform;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;

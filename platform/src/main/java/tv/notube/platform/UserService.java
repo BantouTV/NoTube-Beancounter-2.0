@@ -60,7 +60,6 @@ public class UserService extends JsonService {
         this.crawler = cr;
         this.profiler = pr;
     }
-
     /*
     @POST
     @Path("/register")
