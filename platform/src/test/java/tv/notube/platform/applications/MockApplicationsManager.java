@@ -1,4 +1,4 @@
-package tv.notube.platform;
+package tv.notube.platform.applications;
 
 import tv.notube.applications.Application;
 import tv.notube.applications.ApplicationsManager;
@@ -11,7 +11,7 @@ import java.util.UUID;
  *
  * @author Enrico Candino (enrico.candino@gmail.com)
  */
-public class TestApplicationsManager implements ApplicationsManager {
+public class MockApplicationsManager implements ApplicationsManager {
     @Override
     public String registerApplication(Application application) throws ApplicationsManagerException {
         throw new UnsupportedOperationException("NIY");

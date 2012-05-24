@@ -1,15 +1,16 @@
-package tv.notube.platform;
+package tv.notube.platform.analytics;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import tv.notube.platform.AbstractJerseyTestCase;
 
 import java.io.IOException;
 
 /**
- * Reference test case for {@link AnalyticsService}.
+ * Reference test case for {@link tv.notube.platform.AnalyticsService}.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */

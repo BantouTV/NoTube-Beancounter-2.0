@@ -7,10 +7,11 @@ import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import tv.notube.analytics.Analyzer;
+import tv.notube.platform.ApplicationService;
 import tv.notube.platform.analytics.MockAnalyzer;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.platform.AnalyticsService;
-import tv.notube.platform.TestApplicationsManager;
+import tv.notube.platform.applications.MockApplicationsManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,9 +29,11 @@ public class TestServiceConfig extends GuiceServletContextListener {
             protected void configureServlets() {
                 Map<String, String> initParams = new HashMap<String, String>();
                 initParams.put(PackagesResourceConfig.PROPERTY_PACKAGES, "tv.notube.platform");
+                // add REST services
                 bind(AnalyticsService.class);
-                //bind(ResponseWriter.class);
-                bind(ApplicationsManager.class).to(TestApplicationsManager.class);
+                bind(ApplicationService.class);
+                // add bindings to mockups
+                bind(ApplicationsManager.class).to(MockApplicationsManager.class);
                 bind(Analyzer.class).to(MockAnalyzer.class);
                 // Route all requests through GuiceContainer
                 serve("/*").with(GuiceContainer.class);

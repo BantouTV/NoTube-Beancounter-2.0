@@ -1,4 +1,4 @@
-package tv.notube.platform;
+package tv.notube.platform.applications;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
@@ -9,6 +9,7 @@ import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.http.params.HttpParams;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import tv.notube.platform.AbstractJerseyTestCase;
 
 import java.io.IOException;
 
@@ -17,7 +18,6 @@ import java.io.IOException;
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
-
 
     public ApplicationServiceTestCase() {
         super(9995);
@@ -30,7 +30,6 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
         final String description = "description";
         final String email = "fake_mail@test.com";
         final String oauth = "OAUTH";
-
         PostMethod postMethod = new PostMethod(base_uri + baseQuery);
         HttpClient client = new HttpClient();
         postMethod.addParameter(name,"Fake Name");
@@ -42,6 +41,11 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+    }
+
+    @Test
+    public void testDeregister() {
+        Assert.assertTrue(false);
     }
 
 }
