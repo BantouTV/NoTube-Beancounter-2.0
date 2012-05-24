@@ -14,7 +14,7 @@ import java.util.UUID;
 public class MockApplicationsManager implements ApplicationsManager {
     @Override
     public String registerApplication(Application application) throws ApplicationsManagerException {
-        throw new UnsupportedOperationException("NIY");
+        return "APIKEY";
     }
 
     @Override
@@ -39,7 +39,7 @@ public class MockApplicationsManager implements ApplicationsManager {
 
     @Override
     public void deregisterApplication(String name) throws ApplicationsManagerException {
-        throw new UnsupportedOperationException("NIY");
+        System.out.print("Application [ " + name + " ] deleted!");
     }
 
     @Override
