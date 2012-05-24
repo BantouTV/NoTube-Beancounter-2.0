@@ -57,6 +57,7 @@
         <module>extensions</module>
         <module>analytics</module>
         <module>applications</module>
+        <module>activities</module>
   </modules>
 
     <distributionManagement>
