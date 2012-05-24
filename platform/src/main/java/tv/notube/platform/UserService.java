@@ -12,6 +12,10 @@ import tv.notube.commons.model.activity.Activity;
 import tv.notube.crawler.Crawler;
 import tv.notube.crawler.CrawlerException;
 import tv.notube.crawler.Report;
+import tv.notube.platform.responses.PlatformResponseAnalyses;
+import tv.notube.platform.responses.PlatformResponseString;
+import tv.notube.platform.responses.PlatformResponseUUID;
+import tv.notube.platform.responses.PlatformResponseUser;
 import tv.notube.profiler.Profiler;
 import tv.notube.profiler.ProfilerException;
 import tv.notube.profiler.storage.ProfileStore;
@@ -40,12 +44,22 @@ public class UserService extends JsonService {
 
     private UserManager userManager;
 
-    private ProfileStore profileStore;
+    //private ProfileStore profileStore;
 
-    private Crawler crawler;
+    //private Crawler crawler;
 
-    private Profiler profiler;
+    //private Profiler profiler;
 
+    @Inject
+    public UserService(
+            final ApplicationsManager am,
+            final UserManager um
+    ) {
+        this.applicationsManager = am;
+        this.userManager = um;
+    }
+
+    /*
     @Inject
     public UserService(
             final ApplicationsManager am,
@@ -60,7 +74,8 @@ public class UserService extends JsonService {
         this.crawler = cr;
         this.profiler = pr;
     }
-    /*
+    */
+
     @POST
     @Path("/register")
     public Response signUp(
@@ -154,13 +169,14 @@ public class UserService extends JsonService {
             return error(e, "Error while granting permissions on user " +  user.getId());
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponseAnalyses(
-                PlatformResponseAnalyses.Status.OK,
+        rb.entity(new PlatformResponseUUID(
+                PlatformResponseUUID.Status.OK,
                 "user successfully registered",
                 user.getId())
         );
         return rb.build();
     }
+
 
     @GET
     @Path("/{username}")
@@ -202,8 +218,8 @@ public class UserService extends JsonService {
         }
         if (user == null) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new PlatformResponseUser(
+                    PlatformResponseUser.Status.NOK,
                     "user '" + username + "' not found",
                     null)
             );
@@ -211,14 +227,15 @@ public class UserService extends JsonService {
         }
 
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponseAnalyses(
-                PlatformResponseAnalyses.Status.OK,
+        rb.entity(new PlatformResponseUser(
+                PlatformResponseUser.Status.OK,
                 "user '" + username + "' found",
                 user)
         );
         return rb.build();
     }
 
+    /*
     @GET
     @Path("activities/{username}")
     public Response getActivities(

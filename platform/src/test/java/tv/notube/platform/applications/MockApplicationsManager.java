@@ -31,7 +31,11 @@ public class MockApplicationsManager implements ApplicationsManager {
     @Override
     public Application getApplicationByApiKey(String name)
             throws ApplicationsManagerException {
-        throw new UnsupportedOperationException("NIY");
+        return new Application(
+                name,
+                "This is a Fake Application",
+                "fake_mail@test.com"
+        );
     }
 
     @Override
@@ -42,9 +46,7 @@ public class MockApplicationsManager implements ApplicationsManager {
 
     @Override
     public void grantPermission(String name, UUID resource, Permission.Action action)
-            throws ApplicationsManagerException {
-        throw new UnsupportedOperationException("NIY");
-    }
+            throws ApplicationsManagerException { }
 
     @Override
     public void deregisterApplication(String name) throws ApplicationsManagerException {
