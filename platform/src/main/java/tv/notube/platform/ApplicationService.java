@@ -1,6 +1,6 @@
 package tv.notube.platform;
 
-import com.sun.jersey.api.core.InjectParam;
+import com.google.inject.Inject;
 import tv.notube.applications.Application;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
@@ -17,18 +17,21 @@ import java.net.URL;
 @Produces(MediaType.APPLICATION_JSON)
 public class ApplicationService {
 
-    @InjectParam
-    private InstanceManager instanceManager;
+    private ApplicationsManager applicationsManager;
+
+    @Inject
+    public ApplicationService(final ApplicationsManager am) {
+        this.applicationsManager = am;
+    }
 
     @POST
     @Path("/register")
-    public PlatformResponse register(
+    public PlatformResponseString register(
             @FormParam("name") String name,
             @FormParam("description") String description,
             @FormParam("email") String email,
             @FormParam("oauthCallback") String oauth
     ) {
-        ApplicationsManager am = instanceManager.getApplicationManager();
         Application application = new Application(name, description, email);
         try {
             application.setOAuthCallback(new URL(oauth));
@@ -40,15 +43,15 @@ public class ApplicationService {
         }
         String apiKey;
         try {
-            apiKey = am.registerApplication(application);
+            apiKey = applicationsManager.registerApplication(application);
         } catch (ApplicationsManagerException e) {
             throw new RuntimeException(
                     "Error while registering application '" + name + "'",
                     e
             );
         }
-        return new PlatformResponse(
-                PlatformResponse.Status.OK,
+        return new PlatformResponseString(
+                PlatformResponseString.Status.OK,
                 "Application '" + name + "' successfully registered",
                 apiKey
         );
@@ -56,21 +59,21 @@ public class ApplicationService {
 
     @DELETE
     @Path("/{name}")
-    public PlatformResponse deregisterApplication(
+    public PlatformResponseString deregisterApplication(
             @PathParam("name") String name
     ) {
-        ApplicationsManager am = instanceManager.getApplicationManager();
         try {
-            am.deregisterApplication(name);
+            applicationsManager.deregisterApplication(name);
         } catch (ApplicationsManagerException e) {
             throw new RuntimeException(
                     "Error while deregistering application '" + name + "'",
                     e
             );
         }
-        return new PlatformResponse(
-                PlatformResponse.Status.OK,
+        return new PlatformResponseString(
+                PlatformResponseString.Status.OK,
                 "Application '" + name + "' successfully removed"
         );
     }
+
 }

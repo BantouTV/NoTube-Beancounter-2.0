@@ -1,14 +1,14 @@
 package tv.notube.platform;
 
-import com.google.gson.Gson;
+import com.google.inject.servlet.GuiceFilter;
+import com.sun.grizzly.http.embed.GrizzlyWebServer;
+import com.sun.grizzly.http.servlet.ServletAdapter;
 import org.apache.log4j.Logger;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import tv.notube.platform.jersey.JerseyRESTFrontendConfig;
-import tv.notube.platform.jersey.JerseyRESTFrontendFactory;
-import tv.notube.platform.jersey.RESTFrontend;
-import tv.notube.platform.jersey.RESTFrontendConfig;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+import tv.notube.platform.jerseyguice.TestServiceConfig;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -16,15 +16,11 @@ public abstract class AbstractJerseyTestCase {
 
     protected static final Logger logger = Logger.getLogger(AbstractJerseyTestCase.class);
 
-    protected static final String root_dir = "";
-
     private static final String base_uri_str = "http://localhost:%d/";
 
     protected final URI base_uri;
 
-    protected Gson gson;
-
-    private RESTFrontend frontend;
+    private GrizzlyWebServer server;
 
     protected AbstractJerseyTestCase(int port) {
         try {
@@ -34,27 +30,23 @@ public abstract class AbstractJerseyTestCase {
         }
     }
 
-    @BeforeClass
+    @BeforeTest
     public void setUp() throws Exception {
         startFrontendService();
     }
 
-    protected void startFrontendService() {
-        RESTFrontendConfig config = new JerseyRESTFrontendConfig(base_uri);
-        JerseyRESTFrontendFactory factory = JerseyRESTFrontendFactory.getInstance();
-
-        frontend = factory.create(config);
-        logger.info("Starting Grizzly...");
-        frontend.startService();
-        logger.info(
-                String.format("Grizzly started at location %s.\n", base_uri)
-        );
+    protected void startFrontendService() throws IOException {
+        server = new GrizzlyWebServer(9995);
+        ServletAdapter ga = new ServletAdapter();
+        ga.addServletListener(TestServiceConfig.class.getName());
+        ga.setServletPath("/");
+        ga.addFilter(new GuiceFilter(), "filter", null);
+        server.addGrizzlyAdapter(ga, null);
+        server.start();
     }
 
-    @AfterClass
+    @AfterTest
     public void tearDown() throws InterruptedException {
-        frontend.stopService();
-        logger.info("Grizzly stopped");
-        this.gson = null;
+        server.stop();
     }
 }

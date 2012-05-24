@@ -31,6 +31,8 @@ public class AnalysisDescription implements Serializable {
     @Expose
     private Set<MethodDescription> methodDescriptions = new HashSet<MethodDescription>();
 
+    public AnalysisDescription() {}
+
     public AnalysisDescription(
             String name,
             String description,
