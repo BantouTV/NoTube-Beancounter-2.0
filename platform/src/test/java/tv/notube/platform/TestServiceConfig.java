@@ -12,8 +12,6 @@ import tv.notube.platform.analytics.MockAnalyzer;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.platform.AnalyticsService;
 import tv.notube.platform.applications.MockApplicationsManager;
-import tv.notube.platform.user.MockUserManager;
-import tv.notube.usermanager.UserManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,11 +32,9 @@ public class TestServiceConfig extends GuiceServletContextListener {
                 // add REST services
                 bind(AnalyticsService.class);
                 bind(ApplicationService.class);
-                bind(UserService.class);
                 // add bindings to mockups
                 bind(ApplicationsManager.class).to(MockApplicationsManager.class);
                 bind(Analyzer.class).to(MockAnalyzer.class);
-                bind(UserManager.class).to(MockUserManager.class);
                 // Route all requests through GuiceContainer
                 serve("/*").with(GuiceContainer.class);
                 filter("/*").through(GuiceContainer.class, initParams);
