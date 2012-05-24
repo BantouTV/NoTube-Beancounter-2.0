@@ -1,11 +1,13 @@
 package tv.notube.platform;
 
+import tv.notube.commons.configuration.analytics.AnalysisDescription;
+
 /**
- * Created with IntelliJ IDEA.
- * User: sourcesense
- * Date: 24/05/2012
- * Time: 09:44
- * To change this template use File | Settings | File Templates.
+ *
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-public interface PlatformResponseI {
+public interface PlatformResponseI<T> {
+
+    public T getObject();
+
 }

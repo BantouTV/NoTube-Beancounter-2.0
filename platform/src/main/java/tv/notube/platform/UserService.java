@@ -1,11 +1,9 @@
 package tv.notube.platform;
 
-import com.sun.jersey.api.core.InjectParam;
 import tv.notube.applications.Application;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
 import tv.notube.applications.Permission;
-import tv.notube.commons.configuration.profiler.ProfilerConfiguration;
 import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.UserProfile;
@@ -37,9 +35,33 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 public class UserService extends JsonService {
 
-    @InjectParam
-    private InstanceManager instanceManager;
+    private ApplicationsManager applicationsManager;
 
+    private UserManager userManager;
+
+    private ProfileStore profileStore;
+
+    private Crawler crawler;
+
+    private Profiler profiler;
+
+    /**
+    public UserService(
+            final ApplicationsManager am,
+            final UserManager um,
+            final ProfileStore ps,
+            final Crawler cr,
+            final Profiler pr
+    ) {
+        this.applicationsManager = am;
+        this.userManager = um;
+        this.profileStore = ps;
+        this.crawler = cr;
+        this.profiler = pr;
+    } */
+
+
+    /*
     @POST
     @Path("/register")
     public Response signUp(
@@ -62,28 +84,26 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
-        ApplicationsManager am = instanceManager.getApplicationManager();
         boolean isAuth;
         try {
-            isAuth = am.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(apiKey);
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authorizing your application");
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "Your application is not authorized.Sorry.")
             );
             return rb.build();
         }
-        UserManager um = instanceManager.getUserManager();
         try {
-            if (um.getUser(username) != null) {
+            if (userManager.getUser(username) != null) {
                 final String errMsg = "username '" + username + "' is already taken";
                 Response.ResponseBuilder rb = Response.serverError();
-                rb.entity(new PlatformResponse(
-                        PlatformResponse.Status.NOK,
+                rb.entity(new PlatformResponseAnalyses(
+                        PlatformResponseAnalyses.Status.NOK,
                         errMsg)
                 );
                 return rb.build();
@@ -99,7 +119,7 @@ public class UserService extends JsonService {
         user.setUsername(username);
         user.setPassword(password);
         try {
-            um.storeUser(user);
+            userManager.storeUser(user);
         } catch (UserManagerException e) {
             final String errMsg = "Error while storing user '" + user + "'.";
             return error(e, errMsg);
@@ -107,26 +127,26 @@ public class UserService extends JsonService {
 
         Application application;
         try {
-            application = am.getApplicationByApiKey(apiKey);
+            application = applicationsManager.getApplicationByApiKey(apiKey);
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while getting application with key '" + apiKey + "'");
         }
         if (application == null) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "Application not found")
             );
             return rb.build();
         }
 
         try {
-            am.grantPermission(
+            applicationsManager.grantPermission(
                     application.getName(),
                     user.getId(),
                     Permission.Action.DELETE
             );
-            am.grantPermission(
+            applicationsManager.grantPermission(
                     application.getName(),
                     user.getId(),
                     Permission.Action.UPDATE
@@ -135,8 +155,8 @@ public class UserService extends JsonService {
             return error(e, "Error while granting permissions on user " +  user.getId());
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponse(
-                PlatformResponse.Status.OK,
+        rb.entity(new PlatformResponseAnalyses(
+                PlatformResponseAnalyses.Status.OK,
                 "user successfully registered",
                 user.getId())
         );
@@ -159,18 +179,16 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
-        UserManager um = instanceManager.getUserManager();
-        ApplicationsManager am = instanceManager.getApplicationManager();
         boolean isAuth;
         try {
-            isAuth = am.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(apiKey);
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authenticating your application");
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
@@ -178,15 +196,15 @@ public class UserService extends JsonService {
 
         User user;
         try {
-            user = um.getUser(username);
+            user = userManager.getUser(username);
         } catch (UserManagerException e) {
             final String errMsg = "Error while getting user '" + username + "'.";
             return error(e, errMsg);
         }
         if (user == null) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "user '" + username + "' not found",
                     null)
             );
@@ -194,8 +212,8 @@ public class UserService extends JsonService {
         }
 
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponse(
-                PlatformResponse.Status.OK,
+        rb.entity(new PlatformResponseAnalyses(
+                PlatformResponseAnalyses.Status.OK,
                 "user '" + username + "' found",
                 user)
         );
@@ -218,47 +236,45 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
-        UserManager um = instanceManager.getUserManager();
-        ApplicationsManager am = instanceManager.getApplicationManager();
 
         boolean isAuth;
         try {
-            isAuth = am.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(apiKey);
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authenticating you application");
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
         }
         User user;
         try {
-            user = um.getUser(username);
+            user = userManager.getUser(username);
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
         if (user == null) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(
-                    new PlatformResponse(
-                            PlatformResponse.Status.NOK,
+                    new PlatformResponseAnalyses(
+                            PlatformResponseAnalyses.Status.NOK,
                             "user with username '" + username + "' not found")
             );
             return rb.build();
         }
         List<Activity> activities;
         try {
-            activities = um.getUserActivities(user.getId());
+            activities = userManager.getUserActivities(user.getId());
         } catch (UserManagerException e) {
             return error(e, "Error while getting user '" + username + "' activities");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponse(
-                PlatformResponse.Status.OK,
+        rb.entity(new PlatformResponseAnalyses(
+                PlatformResponseAnalyses.Status.OK,
                 "user '" + username + "' activities found",
                 activities)
         );
@@ -281,21 +297,18 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
-        UserManager um = instanceManager.getUserManager();
-        ProfileStore ps = instanceManager.getProfileStore();
-        ApplicationsManager am = instanceManager.getApplicationManager();
 
         User user;
         try {
-            user = um.getUser(username);
+            user = userManager.getUser(username);
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
         if (user == null) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(
-                    new PlatformResponse(
-                            PlatformResponse.Status.NOK,
+                    new PlatformResponseAnalyses(
+                            PlatformResponseAnalyses.Status.NOK,
                             "user with username '" + username + "' not found")
             );
             return rb.build();
@@ -303,7 +316,7 @@ public class UserService extends JsonService {
 
         boolean isAuth;
         try {
-            isAuth = am.isAuthorized(
+            isAuth = applicationsManager.isAuthorized(
                     apiKey,
                     user.getId(),
                     Permission.Action.DELETE
@@ -313,27 +326,27 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "Sorry, you're not allowed to do that")
             );
             return rb.build();
         }
 
         try {
-            um.deleteUser(user.getId());
+            userManager.deleteUser(user.getId());
         } catch (UserManagerException e) {
             throw new RuntimeException("Error while deleting user '" + username
                     + "'", e);
         }
         try {
-            ps.deleteUserProfile(username);
+            profileStore.deleteUserProfile(username);
         } catch (ProfileStoreException e) {
             return error(e, "Error while deleting user '" + username + "'");
         }
         Response.ResponseBuilder rb = Response.serverError();
-        rb.entity(new PlatformResponse(
-                PlatformResponse.Status.OK,
+        rb.entity(new PlatformResponseAnalyses(
+                PlatformResponseAnalyses.Status.OK,
                 "user with username '" + username + "' deleted")
         );
         return rb.build();
@@ -357,47 +370,45 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
-        UserManager um = instanceManager.getUserManager();
-        ApplicationsManager am = instanceManager.getApplicationManager();
         boolean isAuth;
         try {
-            isAuth = am.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(apiKey);
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authenticating your application");
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "Sorry, you're not allowed to do that")
             );
             return rb.build();
         }
         User user;
         try {
-            user = um.getUser(username);
+            user = userManager.getUser(username);
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
         if (user == null) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "user with username '" + username + "' not found")
             );
             return rb.build();
         }
         if (!user.getPassword().equals(password)) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "password for '" + username + "' incorrect")
             );
             return rb.build();
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponse(
-                PlatformResponse.Status.OK,
+        rb.entity(new PlatformResponseAnalyses(
+                PlatformResponseAnalyses.Status.OK,
                 "user '" + username + "' authenticated")
         );
         return rb.build();
@@ -410,16 +421,15 @@ public class UserService extends JsonService {
             @PathParam("username") String username,
             @QueryParam("redirect") String finalRedirect
     ) {
-        UserManager um = instanceManager.getUserManager();
         User userObj;
         try {
-            userObj = um.getUser(username);
+            userObj = userManager.getUser(username);
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
         OAuthToken oAuthToken;
         try {
-            oAuthToken = um.getOAuthToken(service, userObj.getUsername());
+            oAuthToken = userManager.getOAuthToken(service, userObj.getUsername());
         } catch (UserManagerException e) {
             return error(e, "Error while getting token for user '" + username + "' " +
                             "on service '" + service + "'");
@@ -432,7 +442,7 @@ public class UserService extends JsonService {
                             "on service '" + service + "'");
         }
         try {
-            um.setUserFinalRedirect(userObj.getUsername(), finalRedirectUrl);
+            userManager.setUserFinalRedirect(userObj.getUsername(), finalRedirectUrl);
         } catch (UserManagerException e) {
             return error(e, "Error while setting temporary final redirect URL " +
                             "for user '" + username + "' " + "on service '" + service + "'");
@@ -463,21 +473,20 @@ public class UserService extends JsonService {
             @QueryParam("oauth_token") String token,
             @QueryParam("oauth_verifier") String verifier
     ) {
-        UserManager um = instanceManager.getUserManager();
         User userObj;
         try {
-            userObj = um.getUser(username);
+            userObj = userManager.getUser(username);
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
         try {
-            um.registerOAuthService(service, userObj, token, verifier);
+            userManager.registerOAuthService(service, userObj, token, verifier);
         } catch (UserManagerException e) {
             return error(e, "Error while OAuth-like exchange for service: '" + service + "'");
         }
         URL finalRedirectUrl;
         try {
-            finalRedirectUrl = um.consumeUserFinalRedirect(userObj.getUsername());
+            finalRedirectUrl = userManager.consumeUserFinalRedirect(userObj.getUsername());
         } catch (UserManagerException e) {
             return error(e, "Error while getting final redirect URL for user '" + username + "' for service '" + service + "'");
         }
@@ -496,15 +505,14 @@ public class UserService extends JsonService {
             @PathParam("redirect") String redirect,
             @QueryParam("token") String token
     ) {
-        UserManager um = instanceManager.getUserManager();
         User userObj;
         try {
-            userObj = um.getUser(username);
+            userObj = userManager.getUser(username);
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
         try {
-            um.registerService(service, userObj, token);
+            userManager.registerService(service, userObj, token);
         } catch (UserManagerException e) {
             return error(e, "Error while OAuth-like exchange for service: '" + service + "'");
         }
@@ -545,18 +553,16 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
-        UserManager um = instanceManager.getUserManager();
         User userObj;
         try {
-            userObj = um.getUser(username);
+            userObj = userManager.getUser(username);
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
 
-        ApplicationsManager am = instanceManager.getApplicationManager();
         boolean isAuth;
         try {
-            isAuth = am.isAuthorized(
+            isAuth = applicationsManager.isAuthorized(
                     apiKey,
                     userObj.getId(),
                     Permission.Action.UPDATE
@@ -566,21 +572,21 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "You're not allow to do that. Sorry.")
             );
             return rb.build();
         }
 
         try {
-            um.deregisterService(service, userObj);
+            userManager.deregisterService(service, userObj);
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponse(
-                PlatformResponse.Status.OK,
+        rb.entity(new PlatformResponseAnalyses(
+                PlatformResponseAnalyses.Status.OK,
                 "service '" + service + "' removed from user '" + username + "'")
         );
         return rb.build();
@@ -602,31 +608,29 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
-        ApplicationsManager am = instanceManager.getApplicationManager();
         boolean isAuth;
         try {
-            isAuth = am.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(apiKey);
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authenticating you application");
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
         }
-        ProfileStore ps = instanceManager.getProfileStore();
         UserProfile up;
         try {
-            up = ps.getUserProfile(username);
+            up = profileStore.getUserProfile(username);
         } catch (ProfileStoreException e) {
             return error(e, "Error while retrieving profile for user '" + username + "'");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponse(
-                PlatformResponse.Status.OK,
+        rb.entity(new PlatformResponseAnalyses(
+                PlatformResponseAnalyses.Status.OK,
                 "profile for user '" + username + "' found",
                 up
         )
@@ -650,29 +654,26 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
-        UserManager um = instanceManager.getUserManager();
-        ApplicationsManager am = instanceManager.getApplicationManager();
         boolean isAuth;
         try {
-            isAuth = am.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(apiKey);
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authenticating your application");
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
         }
         User user;
         try {
-            user = um.getUser(username);
+            user = userManager.getUser(username);
         } catch (UserManagerException e) {
             return error(e, "Error while getting user with username [" + username + "]");
         }
-        Crawler crawler = instanceManager.getCrawler();
         Report report;
         try {
             report = crawler.crawl(user.getId());
@@ -680,8 +681,8 @@ public class UserService extends JsonService {
             return error(e, "Error while getting activities for user [" + username + "]");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponse(
-                PlatformResponse.Status.OK,
+        rb.entity(new PlatformResponseAnalyses(
+                PlatformResponseAnalyses.Status.OK,
                 "activities updated for [" + username + "]",
                 report
         )
@@ -705,37 +706,34 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
-        UserManager um = instanceManager.getUserManager();
-        ApplicationsManager am = instanceManager.getApplicationManager();
         boolean isAuth;
         try {
-            isAuth = am.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(apiKey);
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authenticating your application");
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
         }
         User user;
         try {
-            user = um.getUser(username);
+            user = userManager.getUser(username);
         } catch (UserManagerException e) {
             return error(e, "Error while getting user with username [" + username + "]");
         }
         if(user == null) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "Sorry. User [" + username + "] has not been found")
             );
             return rb.build();
         }
-        Profiler profiler = instanceManager.getProfiler();
         try {
             profiler.run(user.getId());
         } catch (ProfilerException e) {
@@ -743,8 +741,8 @@ public class UserService extends JsonService {
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
-                new PlatformResponse(
-                        PlatformResponse.Status.OK,
+                new PlatformResponseAnalyses(
+                        PlatformResponseAnalyses.Status.OK,
                         "profile updated for [" + username + "]"
                 )
         );
@@ -767,46 +765,46 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
-        UserManager um = instanceManager.getUserManager();
-        ApplicationsManager am = instanceManager.getApplicationManager();
         boolean isAuth;
         try {
-            isAuth = am.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(apiKey);
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authenticating your application");
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
         }
         User user;
         try {
-            user = um.getUser(username);
+            user = userManager.getUser(username);
         } catch (UserManagerException e) {
             return error(e, "Error while getting user with username [" + username + "]");
         }
         if(user == null) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseAnalyses(
+                    PlatformResponseAnalyses.Status.NOK,
                     "Sorry. User [" + username + "] has not been found")
             );
             return rb.build();
         }
-        Profiler profiler = instanceManager.getProfiler();
         String status = profiler.profilingStatus(user.getId());
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
-                new PlatformResponse(
-                        PlatformResponse.Status.OK,
+                new PlatformResponseAnalyses(
+                        PlatformResponseAnalyses.Status.OK,
                         "[" + username + "] " + status
                 )
         );
         return rb.build();
     }
+     /*
 
+     TODO (mid) uncommment and fix
+      */
 }

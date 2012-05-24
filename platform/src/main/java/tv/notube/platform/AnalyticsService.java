@@ -18,7 +18,6 @@ import java.lang.Object;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -41,8 +40,8 @@ public class AnalyticsService extends JsonService {
     }
 
     @GET
-    @Path("/analysis")
-    public Response getAvailableAnalysis(
+    @Path("/analyses")
+    public Response getAvailableAnalyses(
             @QueryParam("apikey") String apiKey
     ) {
         boolean isAuth;
@@ -53,8 +52,8 @@ public class AnalyticsService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseString(
+                    PlatformResponseString.Status.NOK,
                     "Your application is not authorized.Sorry.")
             );
             return rb.build();
@@ -67,10 +66,10 @@ public class AnalyticsService extends JsonService {
             return error(e, "Error while getting registered analysis");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponse(
-                PlatformResponse.Status.OK,
+        rb.entity(new PlatformResponseAnalyses(
+                PlatformResponseAnalyses.Status.OK,
                 "analysis found",
-                Arrays.asList(analysisDescriptions))
+                analysisDescriptions)
         );
         return rb.build();
     }
@@ -90,8 +89,8 @@ public class AnalyticsService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseString(
+                    PlatformResponseString.Status.NOK,
                     "Your application is not authorized.Sorry.")
             );
             return rb.build();
@@ -103,13 +102,14 @@ public class AnalyticsService extends JsonService {
             return error(e, "Error while getting registered analysis");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponse(
-                PlatformResponse.Status.OK,
+        rb.entity(new PlatformResponseAnalysis(
+                PlatformResponseAnalysis.Status.OK,
                 "analysis description",
                 analysisDescription)
         );
         return rb.build();
     }
+
 
     @GET
     @Path("/analysis/{name}/{user}/{method}")
@@ -117,6 +117,7 @@ public class AnalyticsService extends JsonService {
             @PathParam("name") String name,
             @PathParam("user") String user,
             @PathParam("method") String methodName,
+            @QueryParam("param") String param,
             @QueryParam("apikey") String apiKey,
             @Context UriInfo uriInfo
     ) {
@@ -128,8 +129,8 @@ public class AnalyticsService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseString(
+                    PlatformResponseString.Status.NOK,
                     "Your application is not authorized.Sorry.")
             );
             return rb.build();
@@ -148,8 +149,8 @@ public class AnalyticsService extends JsonService {
         }
         if (analysisResult == null) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponse(
-                    PlatformResponse.Status.NOK,
+            rb.entity(new PlatformResponseString(
+                    PlatformResponseString.Status.NOK,
                     "analysis without result")
             );
             return rb.build();
@@ -160,7 +161,7 @@ public class AnalyticsService extends JsonService {
 
         String params[] = getParams(uriInfo.getQueryParameters().get("param"));
 
-        Object result;
+        String result;
         try {
             result = getResult(
                     analysisResult,
@@ -182,7 +183,7 @@ public class AnalyticsService extends JsonService {
             return error(e, "Analysis result method not found");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponse(PlatformResponse.Status.OK, "analysis result", result));
+        rb.entity(new PlatformResponseString(PlatformResponseString.Status.OK, "analysis result", result));
         return rb.build();
     }
 
@@ -192,7 +193,7 @@ public class AnalyticsService extends JsonService {
         return values.toArray(new String[values.size()]);
     }
 
-    private Object getResult(
+    private String getResult(
             AnalysisResult analysisResult,
             String resultClassName,
             MethodDescription mds[],
@@ -204,7 +205,7 @@ public class AnalyticsService extends JsonService {
         return invokeMethod(typedResult, mds, params);
     }
 
-    private Object invokeMethod(
+    private String invokeMethod(
             Object typedResult,
             MethodDescription[] mds,
             String[] params
@@ -218,10 +219,10 @@ public class AnalyticsService extends JsonService {
                         md.getName(),
                         methodSignature
                 );
-                return method.invoke(
+                return String.valueOf(method.invoke(
                         typedResult,
                         getActualSignature(md.getParameterTypes(), params)
-                );
+                ));
             }
         }
         throw new ServiceException("method not found");
@@ -256,5 +257,7 @@ public class AnalyticsService extends JsonService {
         }
         return classes.toArray(new Class[classes.size()]);
     }
+
+
 
 }

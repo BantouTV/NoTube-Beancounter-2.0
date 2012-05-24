@@ -1,7 +1,5 @@
 package tv.notube.platform;
 
-import com.sun.jersey.api.json.JSONWithPadding;
-
 import javax.ws.rs.core.Response;
 
 /**
@@ -17,8 +15,8 @@ public class JsonService extends Service {
     ) {
         Response.ResponseBuilder rb = Response.serverError();
         rb.entity(
-                new PlatformResponse(
-                        PlatformResponse.Status.NOK,
+                new PlatformResponseString(
+                        PlatformResponseString.Status.NOK,
                         message,
                         e.getMessage()
                 )
