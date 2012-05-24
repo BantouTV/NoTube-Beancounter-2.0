@@ -1,15 +1,14 @@
-package tv.notube.platform;
+package tv.notube.platform.responses;
 
 import com.google.gson.annotations.Expose;
 import tv.notube.commons.configuration.analytics.AnalysisDescription;
+import tv.notube.platform.PlatformResponse;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.ArrayList;
 
 /**
  * Defines the result of a processing.
@@ -19,7 +18,7 @@ import java.util.ArrayList;
 @Produces(MediaType.APPLICATION_JSON)
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.PROPERTY)
-public class PlatformResponseAnalyses implements PlatformResponseI<AnalysisDescription[]> {
+public class PlatformResponseAnalyses implements PlatformResponse<AnalysisDescription[]> {
 
     public enum Status {
         OK,

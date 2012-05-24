@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import tv.notube.applications.Application;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
+import tv.notube.platform.responses.PlatformResponseString;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

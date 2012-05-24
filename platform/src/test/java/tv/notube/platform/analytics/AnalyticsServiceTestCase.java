@@ -36,6 +36,7 @@ public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        Assert.assertEquals(responseBody, "{\"message\":\"analysis found\",\"object\":[{\"name\":\"test-analysis-1\",\"description\":\"fake analysis 1\"},{\"name\":\"test-analysis-2\",\"description\":\"fake analysis 2\"}],\"status\":\"OK\"}");
     }
 
     @Test
@@ -68,7 +69,8 @@ public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("method: " + getMethod.getName() + " at uri: " + base_uri + query);
         logger.info("response body: " + responseBody);
-        assert result == HttpStatus.SC_OK : "Unexpected result: \n" + result;
+        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        Assert.assertEquals(responseBody, "{\"message\":\"analysis result\",\"object\":\"hey, [5] is your fake.\",\"status\":\"OK\"}");
     }
 
     @Test
@@ -95,7 +97,8 @@ public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("method: " + getMethod.getName() + " at uri: " + base_uri + query);
         logger.info("response body: " + responseBody);
-        assert result == HttpStatus.SC_INTERNAL_SERVER_ERROR : "Unexpected result: \n" + result;
+        Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "Unexpected result: [" + result + "]");
+        Assert.assertEquals(responseBody, "{\"message\":\"Analysis result method not found\",\"object\":\"method not found\",\"status\":\"NOK\"}");
     }
 
     @Test
@@ -119,6 +122,7 @@ public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("method: " + getMethod.getName() + " at uri: " + base_uri + query);
         logger.info("response body: " + responseBody);
-        assert result == HttpStatus.SC_OK : "Unexpected result: \n" + result;
+        Assert.assertEquals(result, HttpStatus.SC_OK, "Unexpected result: [" + result + "]");
+        Assert.assertEquals(responseBody, "{\"message\":\"analysis result\",\"object\":\"hey, no parameters here.\",\"status\":\"OK\"}");
     }
 }

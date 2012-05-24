@@ -1,5 +1,7 @@
 package tv.notube.platform;
 
+import tv.notube.platform.responses.PlatformResponseAnalyses;
+
 import javax.ws.rs.ext.Provider;
 
 /**

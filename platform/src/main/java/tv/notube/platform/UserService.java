@@ -1,5 +1,6 @@
 package tv.notube.platform;
 
+import com.google.inject.Inject;
 import tv.notube.applications.Application;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
@@ -45,7 +46,7 @@ public class UserService extends JsonService {
 
     private Profiler profiler;
 
-    /**
+    @Inject
     public UserService(
             final ApplicationsManager am,
             final UserManager um,
@@ -58,8 +59,7 @@ public class UserService extends JsonService {
         this.profileStore = ps;
         this.crawler = cr;
         this.profiler = pr;
-    } */
-
+    }
 
     /*
     @POST

@@ -42,6 +42,7 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        Assert.assertEquals(responseBody, "{\"message\":\"Application 'Fake_Name' successfully registered\",\"object\":\"APIKEY\",\"status\":\"OK\"}");
     }
 
     @Test
@@ -54,6 +55,7 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        Assert.assertEquals(responseBody, "{\"message\":\"Application 'Fake_Name' successfully removed\",\"status\":\"OK\"}");
     }
 
 }

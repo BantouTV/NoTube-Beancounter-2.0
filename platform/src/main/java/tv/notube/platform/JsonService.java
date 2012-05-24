@@ -1,5 +1,7 @@
 package tv.notube.platform;
 
+import tv.notube.platform.responses.PlatformResponseString;
+
 import javax.ws.rs.core.Response;
 
 /**
@@ -7,7 +9,7 @@ import javax.ws.rs.core.Response;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class JsonService extends Service {
+public abstract class JsonService extends Service {
 
     protected Response error(
             Exception e,

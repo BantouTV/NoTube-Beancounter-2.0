@@ -8,6 +8,9 @@ import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
 import tv.notube.commons.configuration.analytics.AnalysisDescription;
 import tv.notube.commons.configuration.analytics.MethodDescription;
+import tv.notube.platform.responses.PlatformResponseAnalyses;
+import tv.notube.platform.responses.PlatformResponseAnalysis;
+import tv.notube.platform.responses.PlatformResponseString;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
