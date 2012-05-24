@@ -1,4 +1,4 @@
-package tv.notube.platform.jerseyguice;
+package tv.notube.platform.jersey;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -7,11 +7,10 @@ import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import tv.notube.analytics.Analyzer;
+import tv.notube.platform.analytics.MockAnalyzer;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.platform.AnalyticsService;
-import tv.notube.platform.TestAnalyzer;
 import tv.notube.platform.TestApplicationsManager;
-import tv.notube.platform.ResponseWriter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +31,7 @@ public class TestServiceConfig extends GuiceServletContextListener {
                 bind(AnalyticsService.class);
                 //bind(ResponseWriter.class);
                 bind(ApplicationsManager.class).to(TestApplicationsManager.class);
-                bind(Analyzer.class).to(TestAnalyzer.class);
+                bind(Analyzer.class).to(MockAnalyzer.class);
                 // Route all requests through GuiceContainer
                 serve("/*").with(GuiceContainer.class);
                 filter("/*").through(GuiceContainer.class, initParams);

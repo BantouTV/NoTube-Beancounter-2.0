@@ -117,7 +117,6 @@ public class AnalyticsService extends JsonService {
             @PathParam("name") String name,
             @PathParam("user") String user,
             @PathParam("method") String methodName,
-            @QueryParam("param") String param,
             @QueryParam("apikey") String apiKey,
             @Context UriInfo uriInfo
     ) {
@@ -169,6 +168,7 @@ public class AnalyticsService extends JsonService {
                     mds,
                     params
             );
+            // TODO customize errors
         } catch (ClassNotFoundException e) {
             return error(e, "Analyis result not found");
         } catch (InvocationTargetException e) {
@@ -199,9 +199,16 @@ public class AnalyticsService extends JsonService {
             MethodDescription mds[],
             String params[]
     ) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, ServiceException {
-        Class analysisResultClass;
-        analysisResultClass = Class.forName(resultClassName);
-        Object typedResult = analysisResultClass.cast(analysisResult);
+        Class analysisResultClass = Class.forName(resultClassName);
+        Object typedResult;
+        try {
+            typedResult = analysisResultClass.cast(analysisResult);
+        } catch (ClassCastException e) {
+            throw new ServiceException(
+                    "[" + analysisResult + "] must extend AnalysisResult",
+                    e
+            );
+        }
         return invokeMethod(typedResult, mds, params);
     }
 

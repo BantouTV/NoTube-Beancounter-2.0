@@ -6,7 +6,7 @@ import com.sun.grizzly.http.servlet.ServletAdapter;
 import org.apache.log4j.Logger;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
-import tv.notube.platform.jerseyguice.TestServiceConfig;
+import tv.notube.platform.jersey.TestServiceConfig;
 
 import java.io.IOException;
 import java.net.URI;

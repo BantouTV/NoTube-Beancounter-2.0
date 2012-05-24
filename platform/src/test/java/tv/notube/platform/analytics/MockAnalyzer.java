@@ -1,4 +1,4 @@
-package tv.notube.platform;
+package tv.notube.platform.analytics;
 
 import org.joda.time.DateTime;
 import tv.notube.analytics.Analyzer;
@@ -9,12 +9,13 @@ import tv.notube.commons.configuration.analytics.MethodDescription;
 import tv.notube.commons.storage.model.Query;
 
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
  * @author Enrico Candino (enrico.candino@gmail.com)
  */
-public class TestAnalyzer implements Analyzer {
+public class MockAnalyzer implements Analyzer {
     @Override
     public void registerAnalysis(AnalysisDescription analysisDescription, boolean persist) throws AnalyzerException {
         throw new UnsupportedOperationException("NIY");
@@ -22,14 +23,7 @@ public class TestAnalyzer implements Analyzer {
 
     @Override
     public AnalysisDescription getAnalysisDescription(String name) throws AnalyzerException {
-        return new AnalysisDescription(
-                "test-analysis-1",
-                "fake analysis 1",
-                new Query(),
-                "com.test.fake.First",
-                "com.test.fake.first.Result",
-                new HashSet<MethodDescription>()
-        );
+        return getTestData()[0];
     }
 
     @Override
@@ -39,10 +33,7 @@ public class TestAnalyzer implements Analyzer {
 
     @Override
     public AnalysisResult getResult(String name, String username) throws AnalyzerException {
-        AnalysisResult ar = new AnalysisResult(DateTime.now());
-        ar.setName(name);
-        ar.setUser(username);
-        return ar;
+        return new FakeOneResult(DateTime.now());
     }
 
     @Override
@@ -55,15 +46,38 @@ public class TestAnalyzer implements Analyzer {
         return getTestData();
     }
 
-    public AnalysisDescription[] getTestData() {
+    private AnalysisDescription[] getTestData() {
         AnalysisDescription[] analysisDescriptions = new AnalysisDescription[2];
+        Set<MethodDescription> mds = new HashSet<MethodDescription>();
+        mds.add(
+                new MethodDescription(
+                        "getFakeSomething",
+                        "just a fake method",
+                        new String[] { "java.lang.Integer" }
+                )
+        );
+        mds.add(
+                new MethodDescription(
+                        "getFakeSomething",
+                        "the same fake method with no parameters",
+                        new String[] {}
+                )
+        );
         analysisDescriptions[0] = new AnalysisDescription(
                 "test-analysis-1",
                 "fake analysis 1",
                 new Query(),
-                "com.test.fake.First",
-                "com.test.fake.first.Result",
-                new HashSet<MethodDescription>()
+                "tv.notube.platform.analytics.FakeOne",
+                "tv.notube.platform.analytics.FakeOneResult",
+                mds
+        );
+        mds = new HashSet<MethodDescription>();
+        mds.add(
+                new MethodDescription(
+                        "getAnotherFakeSomething",
+                        "just a another fake method",
+                        new String[]{ "java.lang.String", "java.lang.Boolean" }
+                )
         );
         analysisDescriptions[1] = new AnalysisDescription(
                 "test-analysis-2",
@@ -71,7 +85,7 @@ public class TestAnalyzer implements Analyzer {
                 new Query(),
                 "com.test.fake.Second",
                 "com.test.fake.second.Result",
-                new HashSet<MethodDescription>()
+                mds
         );
         return analysisDescriptions;
     }

@@ -38,11 +38,17 @@ public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    public void getAnalysisResult() throws IOException {
+    public void testGetAnalysisDescription() {
+        // TODO: test with asserts method getAnalysisDescripton
+        Assert.assertTrue(false);
+    }
+
+    @Test
+    public void testGetAnalysisResult() throws IOException {
         final String baseQuery = "analytics/analysis/%s/%s/%s?param=%s&apikey=%s";
-        final String name = "timeframe-analysis";
+        final String name = "test-analysis-1";
         final String user = "8c33b0e6-d3cf-4909-b04c-df93056e64a8";
-        final String methodName = "getStatistics";
+        final String methodName = "getFakeSomething";
         final String param = "5";
         final String query = String.format(
                 baseQuery,
@@ -53,6 +59,7 @@ public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
                 APIKEY
         );
         // Perform GET
+        logger.info("query: [" + query + "]");
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
         int result = client.executeMethod(getMethod);
@@ -64,12 +71,38 @@ public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
+    public void testGetAnalysisResultShouldBeReturnError() throws IOException {
+        final String baseQuery = "analytics/analysis/%s/%s/%s?param=%s&apikey=%s";
+        final String name = "test-analysis-1";
+        final String user = "8c33b0e6-d3cf-4909-b04c-df93056e64a8";
+        final String methodName = "thisMethodDoesNotExist";
+        final String param = "5";
+        final String query = String.format(
+                baseQuery,
+                name,
+                user,
+                methodName,
+                param,
+                APIKEY
+        );
+        // Perform GET
+        logger.info("query: [" + query + "]");
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("method: " + getMethod.getName() + " at uri: " + base_uri + query);
+        logger.info("response body: " + responseBody);
+        assert result == HttpStatus.SC_INTERNAL_SERVER_ERROR : "Unexpected result: \n" + result;
+    }
+
+    @Test
     public void getAnalysisResultWithNoParameters() throws IOException {
         final String baseQuery = "analytics/analysis/%s/%s/%s?apikey=%s";
-        final String name = "activity-analysis";
+        final String name = "test-analysis-1";
         final String user = "8c33b0e6-d3cf-4909-b04c-df93056e64a8";
-        final String methodName = "getTotalActivities";
-
+        final String methodName = "getFakeSomething";
         final String query = String.format(
                 baseQuery,
                 name,
@@ -77,7 +110,6 @@ public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
                 methodName,
                 APIKEY
         );
-
         // Perform GET
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -88,6 +120,4 @@ public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assert result == HttpStatus.SC_OK : "Unexpected result: \n" + result;
     }
-
-
 }
