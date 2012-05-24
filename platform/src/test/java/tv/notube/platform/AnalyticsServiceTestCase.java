@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 
 /**
- * put class description here
+ * Reference test case for {@link AnalyticsService}.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
@@ -39,11 +39,9 @@ public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
         HttpClient client = new HttpClient();
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
-        /*
         logger.info("result code: " + result);
         logger.info("method: " + getMethod.getName() + " at uri: " + base_uri + query);
         logger.info("response body: " + responseBody);
-        */
         assert result == HttpStatus.SC_OK : "Unexpected result: \n" + result;
     }
 
