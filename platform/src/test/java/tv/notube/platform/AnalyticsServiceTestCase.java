@@ -12,9 +12,9 @@ import java.io.IOException;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class JsonAnalyticsServiceTestCase extends AbstractJerseyTestCase {
+public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
 
-    public JsonAnalyticsServiceTestCase() {
+    public AnalyticsServiceTestCase() {
         super(9995);
     }
 
@@ -39,9 +39,11 @@ public class JsonAnalyticsServiceTestCase extends AbstractJerseyTestCase {
         HttpClient client = new HttpClient();
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
+        /*
         logger.info("result code: " + result);
         logger.info("method: " + getMethod.getName() + " at uri: " + base_uri + query);
         logger.info("response body: " + responseBody);
+        */
         assert result == HttpStatus.SC_OK : "Unexpected result: \n" + result;
     }
 

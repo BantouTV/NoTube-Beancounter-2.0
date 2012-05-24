@@ -1,12 +1,15 @@
 package tv.notube.platform;
 
 import com.google.gson.annotations.Expose;
+import tv.notube.commons.configuration.analytics.AnalysisDescription;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
 
 /**
  * Defines the result of a processing.
@@ -16,7 +19,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Produces(MediaType.APPLICATION_JSON)
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.PROPERTY)
-public class PlatformResponse {
+public class PlatformResponseAnalyses implements PlatformResponseI<AnalysisDescription[]> {
 
     public enum Status {
         OK,
@@ -30,19 +33,19 @@ public class PlatformResponse {
     private String message;
 
     @Expose
-    private Object object;
+    private AnalysisDescription[] analysisDescriptions;
 
-    public PlatformResponse(){}
+    public PlatformResponseAnalyses(){}
 
-    public PlatformResponse(Status s, String m) {
+    public PlatformResponseAnalyses(Status s, String m) {
         status = s;
         message = m;
     }
 
-    public PlatformResponse(Status s, String m, Object o) {
+    public PlatformResponseAnalyses(Status s, String m, AnalysisDescription[] ad) {
         status = s;
         message = m;
-        object = o;
+        analysisDescriptions = ad;
     }
 
     public Status getStatus() {
@@ -61,11 +64,11 @@ public class PlatformResponse {
         this.message = message;
     }
 
-    public Object getObject() {
-        return object;
+    public AnalysisDescription[] getObject() {
+        return analysisDescriptions;
     }
 
-    public void setObject(Object object) {
-        this.object = object;
+    public void setObject(AnalysisDescription[] ad) {
+        this.analysisDescriptions = ad;
     }
 }

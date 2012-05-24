@@ -1,6 +1,7 @@
 package tv.notube.platform;
 
 import com.google.gson.annotations.Expose;
+import tv.notube.commons.configuration.analytics.AnalysisDescription;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -9,14 +10,13 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Defines the result of a processing.
  *
- * @author Davide Palmisano ( dpalmisano@gmail.com )
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-@Produces("application/x-javascript")
+@Produces(MediaType.APPLICATION_JSON)
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.PROPERTY)
-public class JsonpPlatformResponse {
+public class PlatformResponseString implements PlatformResponseI<String> {
 
     public enum Status {
         OK,
@@ -30,19 +30,19 @@ public class JsonpPlatformResponse {
     private String message;
 
     @Expose
-    private Object object;
+    private String string;
 
-    public JsonpPlatformResponse(){}
+    public PlatformResponseString(){}
 
-    public JsonpPlatformResponse(Status s, String m) {
+    public PlatformResponseString(Status s, String m) {
         status = s;
         message = m;
     }
 
-    public JsonpPlatformResponse(Status s, String m, Object o) {
+    public PlatformResponseString(Status s, String m, String str) {
         status = s;
         message = m;
-        object = o;
+        string = str;
     }
 
     public Status getStatus() {
@@ -61,11 +61,12 @@ public class JsonpPlatformResponse {
         this.message = message;
     }
 
-    public Object getObject() {
-        return object;
+    public String getObject() {
+        return string;
     }
 
-    public void setObject(Object object) {
-        this.object = object;
+    public void setObject(String str) {
+        this.string = str;
     }
+
 }

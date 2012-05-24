@@ -1,6 +1,6 @@
 package tv.notube.platform;
 
-import com.sun.jersey.api.core.InjectParam;
+import com.google.inject.Inject;
 import tv.notube.analytics.Analyzer;
 import tv.notube.analytics.AnalyzerException;
 import tv.notube.analytics.analysis.AnalysisResult;
@@ -28,20 +28,26 @@ import java.util.List;
  */
 @Path("/analytics")
 @Produces(MediaType.APPLICATION_JSON)
-public class JsonAnalyticsService extends JsonService {
+public class AnalyticsService extends JsonService {
 
-    @InjectParam
-    private InstanceManager instanceManager;
+    private ApplicationsManager applicationsManager;
+
+    private Analyzer analyzer;
+
+    @Inject
+    public AnalyticsService(final ApplicationsManager am, final Analyzer an) {
+        this.applicationsManager = am;
+        this.analyzer = an;
+    }
 
     @GET
     @Path("/analysis")
     public Response getAvailableAnalysis(
             @QueryParam("apikey") String apiKey
     ) {
-        ApplicationsManager am = instanceManager.getApplicationManager();
         boolean isAuth;
         try {
-            isAuth = am.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(apiKey);
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authorizing your application");
         }
@@ -54,7 +60,6 @@ public class JsonAnalyticsService extends JsonService {
             return rb.build();
         }
 
-        Analyzer analyzer = instanceManager.getAnalyzer();
         AnalysisDescription[] analysisDescriptions;
         try {
             analysisDescriptions = analyzer.getRegisteredAnalysis();
@@ -77,10 +82,9 @@ public class JsonAnalyticsService extends JsonService {
             @QueryParam("apikey") String apiKey
     ) {
 
-        ApplicationsManager am = instanceManager.getApplicationManager();
         boolean isAuth;
         try {
-            isAuth = am.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(apiKey);
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authorizing your application");
         }
@@ -92,7 +96,6 @@ public class JsonAnalyticsService extends JsonService {
             );
             return rb.build();
         }
-        Analyzer analyzer = instanceManager.getAnalyzer();
         AnalysisDescription analysisDescription;
         try {
             analysisDescription = analyzer.getAnalysisDescription(name);
@@ -117,10 +120,9 @@ public class JsonAnalyticsService extends JsonService {
             @QueryParam("apikey") String apiKey,
             @Context UriInfo uriInfo
     ) {
-        ApplicationsManager am = instanceManager.getApplicationManager();
         boolean isAuth;
         try {
-            isAuth = am.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(apiKey);
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authorizing your application");
         }
@@ -132,7 +134,6 @@ public class JsonAnalyticsService extends JsonService {
             );
             return rb.build();
         }
-        Analyzer analyzer = instanceManager.getAnalyzer();
         AnalysisDescription analysisDescription;
         try {
             analysisDescription = analyzer.getAnalysisDescription(name);

@@ -1,7 +1,8 @@
-package tv.notube.platform.writers;
+package tv.notube.platform;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.inject.Inject;
 import org.joda.time.DateTime;
 import tv.notube.commons.model.gson.DateTimeAdapter;
 import tv.notube.platform.PlatformResponse;
@@ -20,8 +21,8 @@ import java.lang.reflect.Type;
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-@Provider
 @Produces(MediaType.APPLICATION_JSON)
+@Provider
 public class ResponseWriter implements MessageBodyWriter<PlatformResponse> {
 
     public boolean isWriteable(
