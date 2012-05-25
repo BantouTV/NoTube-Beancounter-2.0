@@ -19,82 +19,80 @@ import java.util.UUID;
 public class MockUserManager implements UserManager {
 
     @Override
-    public void storeUser(User user) throws UserManagerException {
+    public void storeUser(User user) throws UserManagerException { }
+
+    @Override
+    public User getUser(UUID userId) throws UserManagerException {
         throw new UnsupportedOperationException("NIY");
     }
 
     @Override
-    public User getUser(UUID userId) throws UserManagerException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
     public User getUser(String username) throws UserManagerException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return (username.equals("NotExistingUser") ? null : new User());
     }
 
     @Override
     public void storeUserActivities(UUID userId, List<Activity> activities) throws UserManagerException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException("NIY");
     }
 
     @Override
     public List<Activity> getUserActivities(UUID userId) throws UserManagerException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException("NIY");
     }
 
     @Override
     public List<Activity> getUserActivities(String username) throws UserManagerException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException("NIY");
     }
 
     @Override
     public void deleteUser(UUID userId) throws UserManagerException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException("NIY");
     }
 
     @Override
     public List<UUID> getUsersToBeProfiled() throws UserManagerException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException("NIY");
     }
 
     @Override
     public List<UUID> getUsersToCrawled() throws UserManagerException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException("NIY");
     }
 
     @Override
     public OAuthToken getOAuthToken(String service, String username) throws UserManagerException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException("NIY");
     }
 
     @Override
     public void registerService(String service, User user, String token) throws UserManagerException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException("NIY");
     }
 
     @Override
     public void registerOAuthService(String service, User user, String token, String verifier) throws UserManagerException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException("NIY");
     }
 
     @Override
     public ServiceAuthorizationManager getServiceAuthorizationManager() throws UserManagerException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException("NIY");
     }
 
     @Override
     public void deregisterService(String service, User userObj) throws UserManagerException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException("NIY");
     }
 
     @Override
     public void setUserFinalRedirect(String username, URL url) throws UserManagerException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException("NIY");
     }
 
     @Override
     public URL consumeUserFinalRedirect(String username) throws UserManagerException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException("NIY");
     }
 }
