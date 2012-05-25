@@ -62,6 +62,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        Assert.assertEquals(responseBody, "{\"message\":\"user 'ExistingUser' found\",\"status\":\"OK\"}");
     }
 
     @Test
@@ -79,7 +80,8 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
-        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
+        Assert.assertEquals(responseBody, "{\"message\":\"user 'NotExistingUser' not found\",\"status\":\"NOK\"}");
     }
 
 }
