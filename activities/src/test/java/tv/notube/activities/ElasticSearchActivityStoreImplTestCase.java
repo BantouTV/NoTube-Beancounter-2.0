@@ -1,7 +1,6 @@
 package tv.notube.activities;
 
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
 import java.util.UUID;
@@ -11,19 +10,10 @@ import java.util.UUID;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
+@Guice
 public class ElasticSearchActivityStoreImplTestCase {
 
     private ActivityStore as;
-
-    @BeforeTest
-    public void setUp() {
-        as = new ElasticSearchActivityStoreImpl();
-    }
-
-    @AfterTest
-    public void tearDown() {
-        as = null;
-    }
 
     @Test
     public void testCRUD() {
