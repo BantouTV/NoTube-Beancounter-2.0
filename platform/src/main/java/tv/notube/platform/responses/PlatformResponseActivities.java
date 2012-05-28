@@ -1,7 +1,8 @@
 package tv.notube.platform.responses;
 
-import com.google.gson.annotations.Expose;
-import tv.notube.commons.configuration.analytics.AnalysisDescription;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.annotate.JsonTypeName;
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.platform.PlatformResponse;
 
@@ -18,52 +19,25 @@ import java.util.List;
  *
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-@Produces(MediaType.APPLICATION_JSON)
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.PROPERTY)
-public class PlatformResponseActivities implements PlatformResponse<List<Activity>> {
-
-    public enum Status {
-        OK,
-        NOK
-    }
-
-    private Status status;
-
-    private String message;
+//@Produces(MediaType.APPLICATION_JSON)
+//@XmlRootElement
+//@XmlAccessorType(XmlAccessType.PROPERTY)
+public class PlatformResponseActivities extends PlatformResponse<List<Activity>> {
 
     private List<Activity> activities;
 
     public PlatformResponseActivities(){}
 
     public PlatformResponseActivities(Status s, String m) {
-        status = s;
-        message = m;
+        super(s, m);
     }
 
     public PlatformResponseActivities(Status s, String m, List<Activity> act) {
-        status = s;
-        message = m;
+        super(s, m);
         activities = act;
     }
 
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    @XmlElement
+    //@JsonProperty("activities")
     public List<Activity> getObject() {
         return activities;
     }

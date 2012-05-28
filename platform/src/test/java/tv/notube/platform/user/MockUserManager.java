@@ -6,11 +6,16 @@ import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.*;
 import tv.notube.commons.model.activity.bbc.BBCProgramme;
 import tv.notube.commons.model.activity.bbc.GenreBuilder;
+import tv.notube.commons.model.activity.Activity;
+import tv.notube.commons.model.auth.OAuthAuth;
+import tv.notube.commons.model.auth.SimpleAuth;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.UserManagerException;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +29,7 @@ import java.util.UUID;
 public class MockUserManager implements UserManager {
 
     @Override
-    public void storeUser(User user) throws UserManagerException { }
+    public void storeUser(User user) throws UserManagerException {}
 
     @Override
     public User getUser(UUID userId) throws UserManagerException {
@@ -33,7 +38,25 @@ public class MockUserManager implements UserManager {
 
     @Override
     public User getUser(String username) throws UserManagerException {
-        return (username.equals("NotExistingUser") ? null : new User());
+        return username.equals("test-user") ? getTestUser("test-user") : null;
+    }
+
+    private User getTestUser(String username) {
+        User user = new User();
+        try {
+            user.setReference(new URI("http://notube.tv/" + user.getId()));
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        user.setUsername(username);
+        user.setForcedProfiling(false);
+        user.setName("Fake Name");
+        user.setSurname("Fake Surname");
+        user.setPassword("abc");
+        user.setProfiledAt(DateTime.now());
+        user.addService("fake-service-1", new SimpleAuth("fake-session", "fake-username"));
+        user.addService("fake-service-2", new OAuthAuth("fake-session", "fake-secret"));
+        return user;
     }
 
     @Override
@@ -104,6 +127,8 @@ public class MockUserManager implements UserManager {
     private List<Activity> getActivities() {
         List<Activity> activities = new ArrayList<Activity>();
         Song s = new Song();
+        s.setName("Song Name");
+        s.setDescription("Just a fake song");
         s.setMbid("3278462378462");
         Activity a1 = new Activity(
                 Verb.LIKE,

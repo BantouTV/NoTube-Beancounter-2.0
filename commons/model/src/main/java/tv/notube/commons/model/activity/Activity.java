@@ -1,5 +1,7 @@
 package tv.notube.commons.model.activity;
 
+import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.annotate.JsonTypeName;
 import tv.notube.commons.model.activity.bbc.BBCGenre;
 import tv.notube.commons.model.activity.bbc.BBCProgramme;
 

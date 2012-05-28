@@ -18,56 +18,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Produces(MediaType.APPLICATION_JSON)
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.PROPERTY)
-public class PlatformResponseAnalysis implements PlatformResponse<AnalysisDescription> {
+public class PlatformResponseAnalysis extends PlatformResponse<AnalysisDescription> {
 
-    public enum Status {
-        OK,
-        NOK
-    }
-
-    @Expose
-    private Status status;
-
-    @Expose
-    private String message;
-
-    @Expose
     private AnalysisDescription analysisDescription;
 
     public PlatformResponseAnalysis(){}
 
     public PlatformResponseAnalysis(Status s, String m) {
-        status = s;
-        message = m;
+        super(s, m);
     }
 
     public PlatformResponseAnalysis(Status s, String m, AnalysisDescription ad) {
-        status = s;
-        message = m;
+        super(s, m);
         analysisDescription = ad;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     public AnalysisDescription getObject() {
         return analysisDescription;
-    }
-
-    public void setObject(AnalysisDescription ad) {
-        this.analysisDescription = ad;
     }
 }

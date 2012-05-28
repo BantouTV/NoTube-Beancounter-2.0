@@ -21,6 +21,7 @@
     	<module>storage</module>
         <module>skos</module>
         <module>configuration</module>
+        <module>tests</module>
   </modules>
 
 </project>

@@ -1,8 +1,5 @@
 package tv.notube.commons.model.auth;
 
-import com.google.gson.annotations.Expose;
-import tv.notube.commons.model.auth.Auth;
-
 /**
  * put class description here
  *
@@ -10,7 +7,6 @@ import tv.notube.commons.model.auth.Auth;
  */
 public class OAuthAuth extends Auth {
 
-    @Expose
     private String secret;
 
     public OAuthAuth(String session, String secret) {

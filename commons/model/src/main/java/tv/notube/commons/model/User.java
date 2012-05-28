@@ -1,6 +1,5 @@
 package tv.notube.commons.model;
 
-import com.google.gson.annotations.Expose;
 import org.joda.time.DateTime;
 import tv.notube.commons.model.auth.Auth;
 
@@ -20,23 +19,18 @@ public class User extends Referenceable implements Serializable {
 
     private static final long serialVersionUID = 324345235L;
 
-    @Expose
     private String name;
 
-    @Expose
     private String surname;
 
-    @Expose
     private DateTime profiledAt;
 
     private boolean forcedProfiling;
 
-    @Expose
     private Map<String, Auth> services = new HashMap<String, Auth>();
 
     private String password;
 
-    @Expose
     private String username;
 
     public String getName() {

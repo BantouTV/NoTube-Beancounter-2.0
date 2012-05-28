@@ -3,7 +3,6 @@ package tv.notube.platform;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceServletContextListener;
-import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
@@ -32,7 +31,6 @@ public class TestServiceConfig extends GuiceServletContextListener {
             @Override
             protected void configureServlets() {
                 Map<String, String> initParams = new HashMap<String, String>();
-                initParams.put(PackagesResourceConfig.PROPERTY_PACKAGES, "tv.notube.platform");
                 // add REST services
                 bind(AnalyticsService.class);
                 bind(ApplicationService.class);

@@ -1,6 +1,5 @@
 package tv.notube.platform.responses;
 
-import com.google.gson.annotations.Expose;
 import tv.notube.commons.model.User;
 import tv.notube.platform.PlatformResponse;
 
@@ -16,52 +15,25 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-@Produces(MediaType.APPLICATION_JSON)
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.PROPERTY)
-public class PlatformResponseUser implements PlatformResponse<User> {
-
-    public enum Status {
-        OK,
-        NOK
-    }
-
-    private Status status;
-
-    private String message;
+//@Produces(MediaType.APPLICATION_JSON)
+//@XmlRootElement
+//@XmlAccessorType(XmlAccessType.PROPERTY)
+public class PlatformResponseUser extends PlatformResponse<User> {
 
     private User user;
 
     public PlatformResponseUser(){}
 
     public PlatformResponseUser(Status s, String m) {
-        status = s;
-        message = m;
+        super(s, m);
     }
 
     public PlatformResponseUser(Status s, String m, User user) {
-        status = s;
-        message = m;
-        user = user;
+        super(s, m);
+        this.user = user;
     }
 
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    @XmlElement
+    //@XmlElement
     public User getObject() {
         return user;
     }

@@ -18,49 +18,19 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.PROPERTY)
-public class PlatformResponseUUID implements PlatformResponse<UUID> {
+public class PlatformResponseUUID extends PlatformResponse<UUID> {
 
-    public enum Status {
-        OK,
-        NOK
-    }
-
-    @Expose
-    private Status status;
-
-    @Expose
-    private String message;
-
-    @Expose
     private UUID UUID;
 
     public PlatformResponseUUID(){}
 
     public PlatformResponseUUID(Status s, String m) {
-        status = s;
-        message = m;
+        super(s, m);
     }
 
     public PlatformResponseUUID(Status s, String m, UUID id) {
-        status = s;
-        message = m;
+        super(s,m);
         UUID = id;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     public UUID getObject() {

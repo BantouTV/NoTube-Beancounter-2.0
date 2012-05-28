@@ -1,6 +1,6 @@
 package tv.notube.platform;
 
-import tv.notube.platform.responses.PlatformResponseString;
+import tv.notube.platform.responses.StringPlatformResponse;
 
 import javax.ws.rs.core.Response;
 
@@ -17,8 +17,8 @@ public abstract class JsonService extends Service {
     ) {
         Response.ResponseBuilder rb = Response.serverError();
         rb.entity(
-                new PlatformResponseString(
-                        PlatformResponseString.Status.NOK,
+                new StringPlatformResponse(
+                        StringPlatformResponse.Status.NOK,
                         message,
                         e.getMessage()
                 )
