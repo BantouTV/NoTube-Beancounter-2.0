@@ -8,10 +8,16 @@ import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import tv.notube.analytics.Analyzer;
+import tv.notube.crawler.Crawler;
 import tv.notube.platform.analytics.MockAnalyzer;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.platform.applications.MockApplicationsManager;
+import tv.notube.platform.user.MockCrawler;
+import tv.notube.platform.user.MockProfileStore;
+import tv.notube.platform.user.MockProfiler;
 import tv.notube.platform.user.MockUserManager;
+import tv.notube.profiler.Profiler;
+import tv.notube.profiler.storage.ProfileStore;
 import tv.notube.usermanager.UserManager;
 
 import javax.ws.rs.ext.MessageBodyReader;
@@ -39,6 +45,9 @@ public class TestServiceConfig extends GuiceServletContextListener {
                 bind(ApplicationsManager.class).to(MockApplicationsManager.class);
                 bind(Analyzer.class).to(MockAnalyzer.class);
                 bind(UserManager.class).to(MockUserManager.class);
+                bind(ProfileStore.class).to(MockProfileStore.class);
+                bind(Crawler.class).to(MockCrawler.class);
+                bind(Profiler.class).to(MockProfiler.class);
                 // add bindings for Jackson
                 bind(JacksonJaxbJsonProvider.class).asEagerSingleton();
                 bind(MessageBodyReader.class).to(JacksonJsonProvider.class);

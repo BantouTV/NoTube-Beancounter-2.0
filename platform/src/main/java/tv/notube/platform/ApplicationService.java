@@ -8,6 +8,7 @@ import tv.notube.platform.responses.StringPlatformResponse;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -15,7 +16,7 @@ import java.net.URL;
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 @Path("/application")
-@Produces(MediaType.TEXT_PLAIN)
+@Produces(MediaType.APPLICATION_JSON)
 public class ApplicationService {
 
     private ApplicationsManager applicationsManager;
@@ -27,7 +28,7 @@ public class ApplicationService {
 
     @POST
     @Path("/register")
-    public StringPlatformResponse register(
+    public Response register(
             @FormParam("name") String name,
             @FormParam("description") String description,
             @FormParam("email") String email,
@@ -51,17 +52,19 @@ public class ApplicationService {
                     e
             );
         }
-        return new StringPlatformResponse(
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(new StringPlatformResponse(
                 StringPlatformResponse.Status.OK,
                 "Application '" + name + "' successfully registered",
-                apiKey
+                apiKey)
         );
+        return rb.build();
 
     }
 
     @DELETE
     @Path("/{name}")
-    public StringPlatformResponse deregisterApplication(
+    public Response deregisterApplication(
             @PathParam("name") String name
     ) {
         try {
@@ -72,10 +75,12 @@ public class ApplicationService {
                     e
             );
         }
-        return new StringPlatformResponse(
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(new StringPlatformResponse(
                 StringPlatformResponse.Status.OK,
-                "Application '" + name + "' successfully removed"
+                "Application '" + name + "' successfully removed")
         );
+        return rb.build();
     }
 
 }

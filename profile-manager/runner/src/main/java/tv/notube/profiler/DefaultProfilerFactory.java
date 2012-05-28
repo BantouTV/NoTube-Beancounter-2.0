@@ -43,7 +43,7 @@ public class DefaultProfilerFactory {
         return instance;
     }
 
-    private Profiler profiler;
+    private DefaultProfilerImpl profiler;
 
     private DefaultProfilerFactory() {
         UserManager um;
@@ -81,7 +81,7 @@ public class DefaultProfilerFactory {
             final String errMsg = "Error while getting the profile store";
             throw new RuntimeException(errMsg, e);
         }
-        profiler = new Profiler(
+        profiler = new DefaultProfilerImpl(
                 dm,
                 plc,
                 ps
@@ -259,7 +259,7 @@ public class DefaultProfilerFactory {
         return profileStore;
     }
 
-    public Profiler build() {
+    public DefaultProfilerImpl build() {
         return profiler;
     }
 

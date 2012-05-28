@@ -1,10 +1,10 @@
 package tv.notube.commons.model;
 
-import com.google.gson.annotations.Expose;
 import tv.notube.commons.model.activity.Activity;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -14,14 +14,11 @@ import java.util.List;
  */
 public class Interest extends Referenceable {
 
-    @Expose
     private boolean visible;
 
-    @Expose
     private double weight;
 
-    @Expose
-    private List<Activity> activities = new ArrayList<Activity>();
+    private Collection<Activity> activities = new ArrayList<Activity>();
 
     public void setResource(URI resource) {
         this.reference = resource;
@@ -43,7 +40,7 @@ public class Interest extends Referenceable {
         this.visible = visible;
     }
 
-    public List<Activity> getActivities() {
+    public Collection<Activity> getActivities() {
         return activities;
     }
 

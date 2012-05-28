@@ -10,9 +10,9 @@ import java.util.UUID;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class ProfilerTestCase {
+public class DefaultProfilerImplTestCase {
 
-    private Profiler profiler;
+    private DefaultProfilerImpl profiler;
 
     @BeforeTest
     public void setUp() {

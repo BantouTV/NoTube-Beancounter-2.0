@@ -29,7 +29,7 @@ public class ProfilerRunnable implements Runnable {
 
     private ProfileStore profileStore;
 
-    private Profiler profiler;
+    private DefaultProfilerImpl profiler;
 
     public ProfilerRunnable(
             UUID userId,
@@ -37,7 +37,7 @@ public class ProfilerRunnable implements Runnable {
             String profilingLine,
             ProfilingLineContainer profilingLineContainer,
             ProfileStore profileStore,
-            Profiler profiler
+            DefaultProfilerImpl profiler
     ) {
         this.userId = userId;
         this.objectToProfile = objectToProfile;

@@ -1,10 +1,8 @@
 package tv.notube.commons.model.activity.adapters;
 
 import org.joda.time.DateTime;
-import tv.notube.commons.model.activity.bbc.BBCGenre;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-import java.util.List;
 
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )

@@ -3,7 +3,7 @@ package tv.notube.extension.profilingline;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import tv.notube.profiler.DefaultProfilerFactory;
-import tv.notube.profiler.Profiler;
+import tv.notube.profiler.DefaultProfilerImpl;
 import tv.notube.profiler.ProfilerException;
 
 /**
@@ -11,7 +11,7 @@ import tv.notube.profiler.ProfilerException;
  */
 public class TestWithRunner {
 
-    private Profiler profiler;
+    private DefaultProfilerImpl profiler;
 
     @BeforeTest
     public void setUp() {

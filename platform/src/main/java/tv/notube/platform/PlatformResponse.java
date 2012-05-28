@@ -11,7 +11,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Enrico Candino ( enrico.candino@gmail.com )
  * @see {@link javax.xml.bind.annotation.XmlRootElement}
  */
-//@XmlRootElement
 public abstract class PlatformResponse<T> {
 
     public enum Status {
@@ -34,12 +33,10 @@ public abstract class PlatformResponse<T> {
         this(Status.OK, message);
     }
 
-    //@XmlElement
     public Status getStatus() {
         return status;
     }
 
-    //@XmlElement
     public String getMessage() {
         return message;
     }

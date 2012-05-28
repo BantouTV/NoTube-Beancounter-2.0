@@ -2,8 +2,7 @@ package tv.notube.profiler.runner;
 
 import org.joda.time.DateTime;
 import tv.notube.profiler.DefaultProfilerFactory;
-import tv.notube.profiler.Profiler;
-import tv.notube.profiler.ProfilerException;
+import tv.notube.profiler.DefaultProfilerImpl;
 import org.apache.log4j.Logger;
 import tv.notube.synch.client.Helper;
 import tv.notube.synch.client.SynchronizerClientException;
@@ -21,7 +20,7 @@ public class Runner {
     private static Logger logger = Logger.getLogger(Runner.class);
 
     public static void main(String args[]) {
-        Profiler profiler = DefaultProfilerFactory.getInstance().build();
+        DefaultProfilerImpl profiler = DefaultProfilerFactory.getInstance().build();
         // TODO (high) make it configurable
         Helper helper = Helper.getInstance("http://moth.notube.tv:9090/service-1.0-SNAPSHOT/rest/synch");
         logger.info("Asking for access to the synchronizer");

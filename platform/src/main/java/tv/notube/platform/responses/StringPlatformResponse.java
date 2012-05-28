@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class StringPlatformResponse extends PlatformResponse<String> {
 
-    private String object;
+    private String string;
 
     public StringPlatformResponse() {}
 
@@ -20,14 +20,14 @@ public class StringPlatformResponse extends PlatformResponse<String> {
         super(status, message);
     }
 
-    public StringPlatformResponse(Status status, String message, String object) {
+    public StringPlatformResponse(Status status, String message, String str) {
         super(status, message);
-        this.object = object;
+        this.string = str;
     }
 
     @XmlElement
     public String getObject() {
-        return object;
+        return string;
     }
 
 }

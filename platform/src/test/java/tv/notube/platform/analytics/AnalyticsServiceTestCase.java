@@ -40,9 +40,22 @@ public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    public void testGetAnalysisDescription() {
-        // TODO: test with asserts method getAnalysisDescripton
-        Assert.assertTrue(false);
+    public void testGetAnalysisDescription() throws IOException {
+        final String baseQuery = "analytics/analysis/%s?apikey=%s";
+        final String username = "test-user";
+        final String query = String.format(
+                baseQuery,
+                username,
+                APIKEY
+        );
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        Assert.assertEquals(responseBody, "{\"object\":{\"name\":\"test-analysis-1\",\"className\":\"tv.notube.platform.analytics.FakeOne\",\"query\":{\"complete\":false},\"description\":\"fake analysis 1\",\"resultClassName\":\"tv.notube.platform.analytics.FakeOneResult\",\"methodDescriptions\":[{\"name\":\"getFakeSomething\",\"parameterTypes\":[],\"description\":\"the same fake method with no parameters\"},{\"name\":\"getFakeSomething\",\"parameterTypes\":[\"java.lang.Integer\"],\"description\":\"just a fake method\"}]},\"message\":\"analysis description\",\"status\":\"OK\"}");
     }
 
     @Test

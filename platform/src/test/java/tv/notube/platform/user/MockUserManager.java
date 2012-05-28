@@ -60,24 +60,25 @@ public class MockUserManager implements UserManager {
     }
 
     @Override
-    public void storeUserActivities(UUID userId, List<Activity> activities) throws UserManagerException {
+    public void storeUserActivities(UUID userId, List<Activity> activities)
+            throws UserManagerException {
         throw new UnsupportedOperationException("NIY");
     }
 
     @Override
-    public List<Activity> getUserActivities(UUID userId) throws UserManagerException {
+    public List<Activity> getUserActivities(UUID userId)
+            throws UserManagerException {
         return getActivities();
     }
 
     @Override
-    public List<Activity> getUserActivities(String username) throws UserManagerException {
+    public List<Activity> getUserActivities(String username)
+            throws UserManagerException {
         throw new UnsupportedOperationException("NIY");
     }
 
     @Override
-    public void deleteUser(UUID userId) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
-    }
+    public void deleteUser(UUID userId) throws UserManagerException {}
 
     @Override
     public List<UUID> getUsersToBeProfiled() throws UserManagerException {
@@ -90,41 +91,48 @@ public class MockUserManager implements UserManager {
     }
 
     @Override
-    public OAuthToken getOAuthToken(String service, String username) throws UserManagerException {
+    public OAuthToken getOAuthToken(String service, String username)
+            throws UserManagerException {
+        try {
+            return new OAuthToken(new URL("http://testurl.com/"));
+        } catch (MalformedURLException e) {
+            // it never happens
+        } return null;
+    }
+
+    @Override
+    public void registerService(String service, User user, String token)
+            throws UserManagerException { }
+
+    @Override
+    public void registerOAuthService(String service, User user, String token, String verifier)
+            throws UserManagerException { }
+
+    @Override
+    public ServiceAuthorizationManager getServiceAuthorizationManager()
+            throws UserManagerException {
         throw new UnsupportedOperationException("NIY");
     }
 
     @Override
-    public void registerService(String service, User user, String token) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
-    }
+    public void deregisterService(String service, User userObj)
+            throws UserManagerException { }
 
     @Override
-    public void registerOAuthService(String service, User user, String token, String verifier) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
-    }
+    public void setUserFinalRedirect(String username, URL url)
+            throws UserManagerException {}
 
     @Override
-    public ServiceAuthorizationManager getServiceAuthorizationManager() throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
+    public URL consumeUserFinalRedirect(String username)
+            throws UserManagerException {
+        try {
+            return new URL("http://testurl.com/");
+        } catch (MalformedURLException e) {
+            // it never happens
+        } return null;
     }
 
-    @Override
-    public void deregisterService(String service, User userObj) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
-    }
-
-    @Override
-    public void setUserFinalRedirect(String username, URL url) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
-    }
-
-    @Override
-    public URL consumeUserFinalRedirect(String username) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
-    }
-
-    private List<Activity> getActivities() {
+    protected List<Activity> getActivities() {
         List<Activity> activities = new ArrayList<Activity>();
         Song s = new Song();
         s.setName("Song Name");
