@@ -12,4 +12,8 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.CONSTRUCTOR})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Random {}
+public @interface Random {
+
+    public String[] names();
+
+}

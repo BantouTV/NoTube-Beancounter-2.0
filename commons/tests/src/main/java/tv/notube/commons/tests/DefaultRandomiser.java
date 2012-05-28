@@ -5,34 +5,16 @@ package tv.notube.commons.tests;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class IntegerRandomiser implements Randomiser<Integer> {
+public abstract class DefaultRandomiser<T> implements Randomiser<T> {
 
     private String name;
 
-    private int from;
-
-    private int to;
-
-    public IntegerRandomiser(String name, int max) {
-        this(name, 0, max);
-    }
-
-    public IntegerRandomiser(String name, int from, int to) {
+    public DefaultRandomiser(String name) {
         this.name = name;
-        this.from = from;
-        this.to = to;
-    }
-
-    public Class<Integer> type() {
-        return Integer.class;
     }
 
     public String name() {
         return name;
-    }
-
-    public Integer getRandom() {
-        return from + (int)(Math.random() * ((to - from) + 1));
     }
 
     @Override
@@ -40,7 +22,7 @@ public class IntegerRandomiser implements Randomiser<Integer> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        IntegerRandomiser that = (IntegerRandomiser) o;
+        DefaultRandomiser that = (DefaultRandomiser) o;
 
         if (name != null ? !name.equals(that.name) : that.name != null)
             return false;
@@ -52,4 +34,6 @@ public class IntegerRandomiser implements Randomiser<Integer> {
     public int hashCode() {
         return name != null ? name.hashCode() : 0;
     }
+
+
 }

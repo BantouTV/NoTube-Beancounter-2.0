@@ -27,12 +27,14 @@ public class Builder {
         randomisers.add(randomiser);
     }
 
-    public Object build(Class aClass) throws BuilderException {
+    public RandomBean build(Class aClass) throws BuilderException {
         Constructor constructor = getConstructor(aClass);
+        String paramNames[] = getParamNames(constructor);
         Class<?> paramTypes[] = constructor.getParameterTypes();
         Object[] parameterInstances = instantiate(paramTypes);
+        Object bean;
         try {
-            return constructor.newInstance(parameterInstances);
+            bean = constructor.newInstance(parameterInstances);
         } catch (InstantiationException e) {
             throw new BuilderException("", e);
         } catch (IllegalAccessException e) {
@@ -40,13 +42,29 @@ public class Builder {
         } catch (InvocationTargetException e) {
             throw new BuilderException("", e);
         }
+        RandomBean rb = new RandomBean(bean);
+        int i = 0;
+        for(String paramName : paramNames) {
+            rb.putValue(paramName, parameterInstances[i]);
+            i++;
+        }
+        return rb;
     }
 
-    private Object[] instantiate(Class<?>[] types) {
+    private String[] getParamNames(Constructor constructor) {
+        Random ra = (Random) constructor.getAnnotation(Random.class);
+        return ra.names();
+    }
+
+    private Object[] instantiate(Class<?>[] types) throws BuilderException {
         Collection<Object> instances = new ArrayList<Object>();
-        for(Class<?> type : types) {
+        for (Class<?> type : types) {
             Randomiser r = filterByType(type);
-            instances.add(r.getRandom());
+            if (r != null) {
+                instances.add(r.getRandom());
+            } else {
+                instances.add(build(type).getObject());
+            }
         }
         return instances.toArray(new Object[instances.size()]);
     }
@@ -57,7 +75,8 @@ public class Builder {
                 return r;
             }
         }
-        throw new RuntimeException("Cannot find a randomiser for [" + type + "]");
+        // ok, there is no a randomiser registered return null.
+        return null;
     }
 
     private Constructor getConstructor(Class type) {
@@ -70,6 +89,6 @@ public class Builder {
                 }
             }
         }
-        throw new RuntimeException("Class [" + type + "] has no constructor annotated with @EntryPoint");
+        throw new RuntimeException("Class [" + type + "] has no constructor annotated with @EntryPoint nor an Randomiser<" + type + "> implementation has been registered");
     }
 }

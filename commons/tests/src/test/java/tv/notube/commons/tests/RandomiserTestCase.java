@@ -11,11 +11,23 @@ import org.testng.annotations.Test;
 public class RandomiserTestCase {
 
     @Test
-    public void test() {
-        StringRandomiser sr = new StringRandomiser("string-randomizer");
-        String randomString = sr.getRandom();
-        Assert.assertNotNull(randomString);
-        Assert.assertTrue(randomString.length() > 0);
+    public void stringRandomiser() {
+        StringRandomiser sr = new StringRandomiser("string-randomizer", 2, 15);
+        // exec it several time
+        for (int i = 0; i < 100; i++) {
+            String randomString = sr.getRandom();
+            Assert.assertNotNull(randomString);
+            Assert.assertTrue(randomString.length() > 0);
+            System.out.println(randomString);
+        }
+        sr = new StringRandomiser("string-randomizer", 2, 15, false);
+        // exec it several time
+        for (int i = 0; i < 100; i++) {
+            String randomString = sr.getRandom();
+            Assert.assertNotNull(randomString);
+            Assert.assertTrue(randomString.length() > 0);
+            System.out.println(randomString);
+        }
     }
 
 }

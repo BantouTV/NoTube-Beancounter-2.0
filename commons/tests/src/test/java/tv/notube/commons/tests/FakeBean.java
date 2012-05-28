@@ -13,10 +13,13 @@ public class FakeBean {
 
     private int integer;
 
-    @Random
-    public FakeBean(String string, Integer integer) {
+    private FakePoint fakePoint;
+
+    @Random(names = {"string", "integer", "fakePoint"})
+    public FakeBean(String string, Integer integer, FakePoint fakePoint) {
         this.string = string;
         this.integer = integer;
+        this.fakePoint = fakePoint;
     }
 
     public String getString() {
@@ -25,5 +28,9 @@ public class FakeBean {
 
     public int getInteger() {
         return integer;
+    }
+
+    public FakePoint getFakePoint() {
+        return fakePoint;
     }
 }
