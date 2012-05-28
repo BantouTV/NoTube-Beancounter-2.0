@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import tv.notube.applications.Application;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
-import tv.notube.platform.responses.PlatformResponseString;
+import tv.notube.platform.responses.StringPlatformResponse;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -27,7 +27,7 @@ public class ApplicationService {
 
     @POST
     @Path("/register")
-    public PlatformResponseString register(
+    public StringPlatformResponse register(
             @FormParam("name") String name,
             @FormParam("description") String description,
             @FormParam("email") String email,
@@ -51,8 +51,8 @@ public class ApplicationService {
                     e
             );
         }
-        return new PlatformResponseString(
-                PlatformResponseString.Status.OK,
+        return new StringPlatformResponse(
+                StringPlatformResponse.Status.OK,
                 "Application '" + name + "' successfully registered",
                 apiKey
         );
@@ -60,7 +60,7 @@ public class ApplicationService {
 
     @DELETE
     @Path("/{name}")
-    public PlatformResponseString deregisterApplication(
+    public StringPlatformResponse deregisterApplication(
             @PathParam("name") String name
     ) {
         try {
@@ -71,8 +71,8 @@ public class ApplicationService {
                     e
             );
         }
-        return new PlatformResponseString(
-                PlatformResponseString.Status.OK,
+        return new StringPlatformResponse(
+                StringPlatformResponse.Status.OK,
                 "Application '" + name + "' successfully removed"
         );
     }

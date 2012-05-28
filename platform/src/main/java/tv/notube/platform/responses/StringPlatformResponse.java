@@ -1,0 +1,33 @@
+package tv.notube.platform.responses;
+
+import tv.notube.platform.PlatformResponse;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+/**
+ *
+ * @author Enrico Candino ( enrico.candino@gmail.com )
+ */
+@XmlRootElement
+public class StringPlatformResponse extends PlatformResponse<String> {
+
+    private String object;
+
+    public StringPlatformResponse() {}
+
+    public StringPlatformResponse(Status status, String message) {
+        super(status, message);
+    }
+
+    public StringPlatformResponse(Status status, String message, String object) {
+        super(status, message);
+        this.object = object;
+    }
+
+    @XmlElement
+    public String getObject() {
+        return object;
+    }
+
+}

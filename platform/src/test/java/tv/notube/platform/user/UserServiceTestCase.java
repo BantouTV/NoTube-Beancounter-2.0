@@ -49,7 +49,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
     @Test
     public void testGetUserExistingUser() throws IOException {
         final String baseQuery = "user/%s?apikey=%s";
-        final String name = "ExistingUser";
+        final String name = "test-user";
         final String query = String.format(
                 baseQuery,
                 name,
@@ -62,13 +62,12 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"user 'ExistingUser' found\",\"status\":\"OK\"}");
     }
 
     @Test
     public void testGetUserNotExistingUser() throws IOException {
         final String baseQuery = "user/%s?apikey=%s";
-        final String name = "NotExistingUser";
+        final String name = "missing-user";
         final String query = String.format(
                 baseQuery,
                 name,
@@ -81,7 +80,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"user 'NotExistingUser' not found\",\"status\":\"NOK\"}");
+        Assert.assertEquals(responseBody, "{\"message\":\"user 'missing-user' not found\",\"status\":\"NOK\"}");
     }
 
 }

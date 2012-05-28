@@ -10,7 +10,6 @@ import tv.notube.analytics.Analyzer;
 import tv.notube.analytics.DefaultAnalyzerImpl;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.DefaultApplicationsManagerImpl;
-import tv.notube.platform.AnalyticsService;
 
 import java.util.HashMap;
 import java.util.Map;

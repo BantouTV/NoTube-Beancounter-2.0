@@ -5,33 +5,16 @@ import tv.notube.applications.Application;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
 import tv.notube.applications.Permission;
-import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
-import tv.notube.commons.model.UserProfile;
-import tv.notube.commons.model.activity.Activity;
-import tv.notube.crawler.Crawler;
-import tv.notube.crawler.CrawlerException;
-import tv.notube.crawler.Report;
-import tv.notube.platform.responses.PlatformResponseAnalyses;
-import tv.notube.platform.responses.PlatformResponseString;
-import tv.notube.platform.responses.PlatformResponseUUID;
-import tv.notube.platform.responses.PlatformResponseUser;
-import tv.notube.profiler.Profiler;
-import tv.notube.profiler.ProfilerException;
-import tv.notube.profiler.storage.ProfileStore;
-import tv.notube.profiler.storage.ProfileStoreException;
+import tv.notube.platform.responses.AnalysesPlatformResponse;
+import tv.notube.platform.responses.UUIDPlatformResponse;
+import tv.notube.platform.responses.UserPlatformResponse;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.UserManagerException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.util.List;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
@@ -106,8 +89,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new AnalysesPlatformResponse(
+                    AnalysesPlatformResponse.Status.NOK,
                     "Your application is not authorized.Sorry.")
             );
             return rb.build();
@@ -116,8 +99,8 @@ public class UserService extends JsonService {
             if (userManager.getUser(username) != null) {
                 final String errMsg = "username '" + username + "' is already taken";
                 Response.ResponseBuilder rb = Response.serverError();
-                rb.entity(new PlatformResponseAnalyses(
-                        PlatformResponseAnalyses.Status.NOK,
+                rb.entity(new AnalysesPlatformResponse(
+                        AnalysesPlatformResponse.Status.NOK,
                         errMsg)
                 );
                 return rb.build();
@@ -138,7 +121,6 @@ public class UserService extends JsonService {
             final String errMsg = "Error while storing user '" + user + "'.";
             return error(e, errMsg);
         }
-
         Application application;
         try {
             application = applicationsManager.getApplicationByApiKey(apiKey);
@@ -147,8 +129,8 @@ public class UserService extends JsonService {
         }
         if (application == null) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new AnalysesPlatformResponse(
+                    AnalysesPlatformResponse.Status.NOK,
                     "Application not found")
             );
             return rb.build();
@@ -169,8 +151,8 @@ public class UserService extends JsonService {
             return error(e, "Error while granting permissions on user " +  user.getId());
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponseUUID(
-                PlatformResponseUUID.Status.OK,
+        rb.entity(new UUIDPlatformResponse(
+                UUIDPlatformResponse.Status.OK,
                 "user successfully registered",
                 user.getId())
         );
@@ -202,8 +184,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new AnalysesPlatformResponse(
+                    AnalysesPlatformResponse.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
@@ -218,17 +200,18 @@ public class UserService extends JsonService {
         }
         if (user == null) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseUser(
-                    PlatformResponseUser.Status.NOK,
-                    "user '" + username + "' not found",
-                    null)
+            rb.entity(
+                    new UserPlatformResponse(
+                            UserPlatformResponse.Status.NOK,
+                            "user '" + username + "' not found"
+                    )
             );
             return rb.build();
         }
 
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponseUser(
-                PlatformResponseUser.Status.OK,
+        rb.entity(new UserPlatformResponse(
+                UserPlatformResponse.Status.OK,
                 "user '" + username + "' found",
                 user)
         );
@@ -261,8 +244,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new AnalysesPlatformResponse(
+                    AnalysesPlatformResponse.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
@@ -276,8 +259,8 @@ public class UserService extends JsonService {
         if (user == null) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(
-                    new PlatformResponseAnalyses(
-                            PlatformResponseAnalyses.Status.NOK,
+                    new AnalysesPlatformResponse(
+                            AnalysesPlatformResponse.Status.NOK,
                             "user with username '" + username + "' not found")
             );
             return rb.build();
@@ -289,8 +272,8 @@ public class UserService extends JsonService {
             return error(e, "Error while getting user '" + username + "' activities");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponseAnalyses(
-                PlatformResponseAnalyses.Status.OK,
+        rb.entity(new AnalysesPlatformResponse(
+                AnalysesPlatformResponse.Status.OK,
                 "user '" + username + "' activities found",
                 activities)
         );
@@ -323,8 +306,8 @@ public class UserService extends JsonService {
         if (user == null) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(
-                    new PlatformResponseAnalyses(
-                            PlatformResponseAnalyses.Status.NOK,
+                    new AnalysesPlatformResponse(
+                            AnalysesPlatformResponse.Status.NOK,
                             "user with username '" + username + "' not found")
             );
             return rb.build();
@@ -342,8 +325,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new AnalysesPlatformResponse(
+                    AnalysesPlatformResponse.Status.NOK,
                     "Sorry, you're not allowed to do that")
             );
             return rb.build();
@@ -361,8 +344,8 @@ public class UserService extends JsonService {
             return error(e, "Error while deleting user '" + username + "'");
         }
         Response.ResponseBuilder rb = Response.serverError();
-        rb.entity(new PlatformResponseAnalyses(
-                PlatformResponseAnalyses.Status.OK,
+        rb.entity(new AnalysesPlatformResponse(
+                AnalysesPlatformResponse.Status.OK,
                 "user with username '" + username + "' deleted")
         );
         return rb.build();
@@ -394,8 +377,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new AnalysesPlatformResponse(
+                    AnalysesPlatformResponse.Status.NOK,
                     "Sorry, you're not allowed to do that")
             );
             return rb.build();
@@ -408,23 +391,23 @@ public class UserService extends JsonService {
         }
         if (user == null) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new AnalysesPlatformResponse(
+                    AnalysesPlatformResponse.Status.NOK,
                     "user with username '" + username + "' not found")
             );
             return rb.build();
         }
         if (!user.getPassword().equals(password)) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new AnalysesPlatformResponse(
+                    AnalysesPlatformResponse.Status.NOK,
                     "password for '" + username + "' incorrect")
             );
             return rb.build();
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponseAnalyses(
-                PlatformResponseAnalyses.Status.OK,
+        rb.entity(new AnalysesPlatformResponse(
+                AnalysesPlatformResponse.Status.OK,
                 "user '" + username + "' authenticated")
         );
         return rb.build();
@@ -588,8 +571,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new AnalysesPlatformResponse(
+                    AnalysesPlatformResponse.Status.NOK,
                     "You're not allow to do that. Sorry.")
             );
             return rb.build();
@@ -601,8 +584,8 @@ public class UserService extends JsonService {
             return error(e, "Error while retrieving user '" + username + "'");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponseAnalyses(
-                PlatformResponseAnalyses.Status.OK,
+        rb.entity(new AnalysesPlatformResponse(
+                AnalysesPlatformResponse.Status.OK,
                 "service '" + service + "' removed from user '" + username + "'")
         );
         return rb.build();
@@ -632,8 +615,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new AnalysesPlatformResponse(
+                    AnalysesPlatformResponse.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
@@ -645,8 +628,8 @@ public class UserService extends JsonService {
             return error(e, "Error while retrieving profile for user '" + username + "'");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponseAnalyses(
-                PlatformResponseAnalyses.Status.OK,
+        rb.entity(new AnalysesPlatformResponse(
+                AnalysesPlatformResponse.Status.OK,
                 "profile for user '" + username + "' found",
                 up
         )
@@ -678,8 +661,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new AnalysesPlatformResponse(
+                    AnalysesPlatformResponse.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
@@ -697,8 +680,8 @@ public class UserService extends JsonService {
             return error(e, "Error while getting activities for user [" + username + "]");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponseAnalyses(
-                PlatformResponseAnalyses.Status.OK,
+        rb.entity(new AnalysesPlatformResponse(
+                AnalysesPlatformResponse.Status.OK,
                 "activities updated for [" + username + "]",
                 report
         )
@@ -730,8 +713,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new AnalysesPlatformResponse(
+                    AnalysesPlatformResponse.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
@@ -744,8 +727,8 @@ public class UserService extends JsonService {
         }
         if(user == null) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new AnalysesPlatformResponse(
+                    AnalysesPlatformResponse.Status.NOK,
                     "Sorry. User [" + username + "] has not been found")
             );
             return rb.build();
@@ -757,8 +740,8 @@ public class UserService extends JsonService {
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
-                new PlatformResponseAnalyses(
-                        PlatformResponseAnalyses.Status.OK,
+                new AnalysesPlatformResponse(
+                        AnalysesPlatformResponse.Status.OK,
                         "profile updated for [" + username + "]"
                 )
         );
@@ -789,8 +772,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new AnalysesPlatformResponse(
+                    AnalysesPlatformResponse.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
@@ -803,8 +786,8 @@ public class UserService extends JsonService {
         }
         if(user == null) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new AnalysesPlatformResponse(
+                    AnalysesPlatformResponse.Status.NOK,
                     "Sorry. User [" + username + "] has not been found")
             );
             return rb.build();
@@ -812,8 +795,8 @@ public class UserService extends JsonService {
         String status = profiler.profilingStatus(user.getId());
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
-                new PlatformResponseAnalyses(
-                        PlatformResponseAnalyses.Status.OK,
+                new AnalysesPlatformResponse(
+                        AnalysesPlatformResponse.Status.OK,
                         "[" + username + "] " + status
                 )
         );

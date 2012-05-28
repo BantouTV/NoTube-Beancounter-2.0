@@ -8,9 +8,9 @@ import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
 import tv.notube.commons.configuration.analytics.AnalysisDescription;
 import tv.notube.commons.configuration.analytics.MethodDescription;
-import tv.notube.platform.responses.PlatformResponseAnalyses;
-import tv.notube.platform.responses.PlatformResponseAnalysis;
-import tv.notube.platform.responses.PlatformResponseString;
+import tv.notube.platform.responses.AnalysesPlatformResponse;
+import tv.notube.platform.responses.AnalysisPlatformResponse;
+import tv.notube.platform.responses.StringPlatformResponse;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -55,8 +55,8 @@ public class AnalyticsService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseString(
-                    PlatformResponseString.Status.NOK,
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
                     "Your application is not authorized.Sorry.")
             );
             return rb.build();
@@ -69,8 +69,8 @@ public class AnalyticsService extends JsonService {
             return error(e, "Error while getting registered analysis");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponseAnalyses(
-                PlatformResponseAnalyses.Status.OK,
+        rb.entity(new AnalysesPlatformResponse(
+                AnalysesPlatformResponse.Status.OK,
                 "analysis found",
                 analysisDescriptions)
         );
@@ -92,8 +92,8 @@ public class AnalyticsService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseString(
-                    PlatformResponseString.Status.NOK,
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
                     "Your application is not authorized.Sorry.")
             );
             return rb.build();
@@ -105,8 +105,8 @@ public class AnalyticsService extends JsonService {
             return error(e, "Error while getting registered analysis");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponseAnalysis(
-                PlatformResponseAnalysis.Status.OK,
+        rb.entity(new AnalysisPlatformResponse(
+                AnalysisPlatformResponse.Status.OK,
                 "analysis description",
                 analysisDescription)
         );
@@ -131,8 +131,8 @@ public class AnalyticsService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseString(
-                    PlatformResponseString.Status.NOK,
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
                     "Your application is not authorized.Sorry.")
             );
             return rb.build();
@@ -151,8 +151,8 @@ public class AnalyticsService extends JsonService {
         }
         if (analysisResult == null) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseString(
-                    PlatformResponseString.Status.NOK,
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
                     "analysis without result")
             );
             return rb.build();
@@ -186,7 +186,7 @@ public class AnalyticsService extends JsonService {
             return error(e, "Analysis result method not found");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponseString(PlatformResponseString.Status.OK, "analysis result", result));
+        rb.entity(new StringPlatformResponse(StringPlatformResponse.Status.OK, "analysis result", result));
         return rb.build();
     }
 
