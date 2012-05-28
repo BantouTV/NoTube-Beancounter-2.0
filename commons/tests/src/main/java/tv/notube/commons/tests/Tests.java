@@ -15,9 +15,11 @@ import java.util.Set;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class Builder {
+public class Tests {
 
     private Set<Randomiser> randomisers = new HashSet<Randomiser>();
+
+    private Class currentType;
 
     public Set<Randomiser> getRandomisers() {
         return randomisers;
@@ -28,6 +30,7 @@ public class Builder {
     }
 
     public RandomBean build(Class aClass) throws BuilderException {
+        currentType = aClass;
         Constructor constructor = getConstructor(aClass);
         String paramNames[] = getParamNames(constructor);
         Class<?> paramTypes[] = constructor.getParameterTypes();
@@ -63,10 +66,26 @@ public class Builder {
             if (r != null) {
                 instances.add(r.getRandom());
             } else {
+                // okay, this is a recursive call.
+                // if the object is the same we should stop at some point
+                // otherwise we can easily get into stackoverflow
+                if(type.equals(currentType)) {
+                    // simply instantiate it without recurring
+                    instances.add(instantiateSingle(type));
+                    continue;
+                }
                 instances.add(build(type).getObject());
             }
         }
         return instances.toArray(new Object[instances.size()]);
+    }
+
+    private Object instantiateSingle(Class<?> type) {
+        Randomiser r = filterByType(type);
+        if (r != null) {
+            return r.getRandom();
+        }
+        throw new RuntimeException("an Randomiser<" + type + "> implementation has been registered");
     }
 
     private Randomiser filterByType(Class<?> type) {
@@ -89,6 +108,6 @@ public class Builder {
                 }
             }
         }
-        throw new RuntimeException("Class [" + type + "] has no constructor annotated with @EntryPoint nor an Randomiser<" + type + "> implementation has been registered");
+        throw new RuntimeException("Class [" + type + "] has no constructor annotated with @Random nor an Randomiser<" + type + "> implementation has been registered");
     }
 }

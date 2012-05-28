@@ -1,4 +1,4 @@
-package tv.notube.commons.tests;
+package tv.notube.commons.tests.model;
 
 import tv.notube.commons.tests.annotations.Random;
 

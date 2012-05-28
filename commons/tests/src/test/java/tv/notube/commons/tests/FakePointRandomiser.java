@@ -1,5 +1,7 @@
 package tv.notube.commons.tests;
 
+import tv.notube.commons.tests.model.FakePoint;
+
 /**
  * put class description here
  *
