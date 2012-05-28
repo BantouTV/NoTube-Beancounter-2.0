@@ -8,9 +8,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
+ * Defines the result of a processing.
  *
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
@@ -24,13 +26,10 @@ public class PlatformResponseUser implements PlatformResponse<User> {
         NOK
     }
 
-    @Expose
     private Status status;
 
-    @Expose
     private String message;
 
-    @Expose
     private User user;
 
     public PlatformResponseUser(){}
@@ -62,6 +61,7 @@ public class PlatformResponseUser implements PlatformResponse<User> {
         this.message = message;
     }
 
+    @XmlElement
     public User getObject() {
         return user;
     }

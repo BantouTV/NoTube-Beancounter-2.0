@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
+ * Defines the result of a processing.
  *
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */

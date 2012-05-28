@@ -84,4 +84,22 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         Assert.assertEquals(responseBody, "{\"message\":\"user 'NotExistingUser' not found\",\"status\":\"NOK\"}");
     }
 
+    @Test
+    public void testGetActivities() throws IOException {
+        final String baseQuery = "user/activities/%s?apikey=%s";
+        final String name = "ExistingUser";
+        final String query = String.format(
+                baseQuery,
+                name,
+                APIKEY
+        );
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+    }
+
 }

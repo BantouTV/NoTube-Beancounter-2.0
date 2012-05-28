@@ -1,24 +1,23 @@
 package tv.notube.commons.model.activity;
 
-import com.google.gson.annotations.Expose;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.net.URL;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
+@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="class")
 public class Object implements Serializable {
 
     private static final long serialVersionUID = 399673611235L;
 
-    @Expose
     private URL url;
 
-    @Expose
     private String name;
 
-    @Expose
     private String description;
 
     public URL getUrl() {

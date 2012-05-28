@@ -12,10 +12,7 @@ import tv.notube.commons.model.activity.Activity;
 import tv.notube.crawler.Crawler;
 import tv.notube.crawler.CrawlerException;
 import tv.notube.crawler.Report;
-import tv.notube.platform.responses.PlatformResponseAnalyses;
-import tv.notube.platform.responses.PlatformResponseString;
-import tv.notube.platform.responses.PlatformResponseUUID;
-import tv.notube.platform.responses.PlatformResponseUser;
+import tv.notube.platform.responses.*;
 import tv.notube.profiler.Profiler;
 import tv.notube.profiler.ProfilerException;
 import tv.notube.profiler.storage.ProfileStore;
@@ -235,7 +232,7 @@ public class UserService extends JsonService {
         return rb.build();
     }
 
-    /*
+
     @GET
     @Path("activities/{username}")
     public Response getActivities(
@@ -261,8 +258,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new PlatformResponseAnalyses(
-                    PlatformResponseAnalyses.Status.NOK,
+            rb.entity(new PlatformResponseString(
+                    PlatformResponseString.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
@@ -276,8 +273,8 @@ public class UserService extends JsonService {
         if (user == null) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(
-                    new PlatformResponseAnalyses(
-                            PlatformResponseAnalyses.Status.NOK,
+                    new PlatformResponseString(
+                            PlatformResponseString.Status.NOK,
                             "user with username '" + username + "' not found")
             );
             return rb.build();
@@ -289,14 +286,15 @@ public class UserService extends JsonService {
             return error(e, "Error while getting user '" + username + "' activities");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new PlatformResponseAnalyses(
-                PlatformResponseAnalyses.Status.OK,
+        rb.entity(new PlatformResponseActivities(
+                PlatformResponseActivities.Status.OK,
                 "user '" + username + "' activities found",
                 activities)
         );
         return rb.build();
     }
 
+    /*
     @DELETE
     @Path("/{username}")
     public Response deleteUser(

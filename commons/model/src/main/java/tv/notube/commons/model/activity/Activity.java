@@ -1,24 +1,35 @@
 package tv.notube.commons.model.activity;
 
-import com.google.gson.annotations.Expose;
+import tv.notube.commons.model.activity.bbc.BBCGenre;
+import tv.notube.commons.model.activity.bbc.BBCProgramme;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import java.io.Serializable;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
+//@XmlRootElement
+//@XmlSeeAlso({Song.class, Tweet.class, BBCProgramme.class, BBCGenre.class})
 public class Activity implements Serializable {
 
     private static final long serialVersionUID = 68843445235L;
 
-    @Expose
     private Verb verb;
 
-    @Expose
     private tv.notube.commons.model.activity.Object object;
 
-    @Expose
     private Context context;
+
+    public Activity() {}
+
+    public Activity(Verb v, Object obj, Context c) {
+        verb = v;
+        object = obj;
+        context = c;
+    }
 
     public Verb getVerb() {
         return verb;

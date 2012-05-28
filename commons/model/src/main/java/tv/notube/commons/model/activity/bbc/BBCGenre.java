@@ -1,7 +1,7 @@
 package tv.notube.commons.model.activity.bbc;
 
-import com.google.gson.annotations.Expose;
-
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
@@ -16,14 +16,13 @@ public class BBCGenre implements Serializable {
 
     private static final long serialVersionUID = 145679650135L;
 
-    @Expose
     private URL reference;
 
-    @Expose
     private String label;
 
-    @Expose
     private List<BBCGenre> subGenres = new ArrayList<BBCGenre>();
+
+    public BBCGenre() {}
 
     public BBCGenre(URL reference, String label) {
         this.reference = reference;

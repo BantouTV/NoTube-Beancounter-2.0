@@ -9,13 +9,10 @@ import java.net.URL;
  */
 public class Article extends Object {
 
-    @Expose
     private String summary;
 
-    @Expose
     private String content;
 
-    @Expose
     private URL permalink;
 
     public String getSummary() {

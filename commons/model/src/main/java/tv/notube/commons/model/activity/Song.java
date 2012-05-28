@@ -1,13 +1,12 @@
 package tv.notube.commons.model.activity;
 
-import com.google.gson.annotations.Expose;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 public class Song extends Object {
 
-    @Expose
     private String mbid;
 
     public void setMbid(String mbid) {

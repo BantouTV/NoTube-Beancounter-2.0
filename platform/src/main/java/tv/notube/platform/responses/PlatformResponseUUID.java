@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.UUID;
 
 /**
+ * Defines the result of a processing.
  *
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */

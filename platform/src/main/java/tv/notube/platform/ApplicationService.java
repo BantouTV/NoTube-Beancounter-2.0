@@ -15,7 +15,7 @@ import java.net.URL;
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 @Path("/application")
-@Produces(MediaType.APPLICATION_JSON)
+@Produces(MediaType.TEXT_PLAIN)
 public class ApplicationService {
 
     private ApplicationsManager applicationsManager;
@@ -56,6 +56,7 @@ public class ApplicationService {
                 "Application '" + name + "' successfully registered",
                 apiKey
         );
+
     }
 
     @DELETE
