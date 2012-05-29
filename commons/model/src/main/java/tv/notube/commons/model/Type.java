@@ -1,7 +1,5 @@
 package tv.notube.commons.model;
 
-import com.google.gson.annotations.Expose;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,10 +10,8 @@ import java.util.Set;
  */
 public class Type extends Referenceable {
 
-    @Expose
     private Set<Interest> interests = new HashSet<Interest>();
 
-    @Expose
     private double weight;
 
     public Type(Set<Interest> interests, double weight) {

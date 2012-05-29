@@ -5,9 +5,9 @@ package tv.notube.commons.tests;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class BuilderException extends Exception {
+public class TestsException extends Exception {
 
-    public BuilderException(String message, Exception e) {
+    public TestsException(String message, Exception e) {
         super(message, e);
     }
 }

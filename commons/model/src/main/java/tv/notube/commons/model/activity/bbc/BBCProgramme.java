@@ -1,10 +1,5 @@
 package tv.notube.commons.model.activity.bbc;
 
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +9,6 @@ import java.util.List;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-//@XmlRootElement
-//@XmlType
 public class BBCProgramme extends tv.notube.commons.model.activity.Object {
 
     private URL picture;

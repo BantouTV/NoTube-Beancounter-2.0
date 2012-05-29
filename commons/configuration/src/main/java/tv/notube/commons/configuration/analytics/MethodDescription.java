@@ -1,7 +1,5 @@
 package tv.notube.commons.configuration.analytics;
 
-import com.google.gson.annotations.Expose;
-
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -12,10 +10,8 @@ import java.util.Arrays;
  */
 public class MethodDescription implements Serializable {
 
-    @Expose
     private String name;
 
-    @Expose
     private String description;
 
     private String[] parameterTypes;

@@ -1,7 +1,5 @@
 package tv.notube.commons.model.activity.bbc;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
