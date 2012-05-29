@@ -2,6 +2,7 @@ package tv.notube.commons.tests;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import tv.notube.commons.tests.randomisers.StringRandomiser;
 
 /**
  * put class description here

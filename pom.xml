@@ -105,7 +105,28 @@
             <organization>Smartetics Ltd</organization>
             <organizationUrl>http://dpalmisano.com/</organizationUrl>
             <roles>
-                <role>Developer</role>
+                <role>product owner</role>
+                <role>developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>acowell</id>
+            <name>Alex Cowell</name>
+            <email>fillme</email>
+            <organization>Sourcesense</organization>
+            <organizationUrl>http://sourcesense.com/</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+         <developer>
+            <id>ecandino</id>
+            <name>Enrico Candino</name>
+            <email>fillme</email>
+            <organization>Sourcesense</organization>
+            <organizationUrl>http://sourcesense.com/</organizationUrl>
+            <roles>
+                <role>developer</role>
             </roles>
         </developer>
     </developers>

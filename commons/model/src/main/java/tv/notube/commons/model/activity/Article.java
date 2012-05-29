@@ -1,7 +1,5 @@
 package tv.notube.commons.model.activity;
 
-import com.google.gson.annotations.Expose;
-
 import java.net.URL;
 
 /**

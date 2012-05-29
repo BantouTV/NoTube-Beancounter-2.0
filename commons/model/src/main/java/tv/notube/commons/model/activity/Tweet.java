@@ -1,6 +1,5 @@
 package tv.notube.commons.model.activity;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;

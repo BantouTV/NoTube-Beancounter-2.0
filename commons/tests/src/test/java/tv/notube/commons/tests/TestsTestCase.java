@@ -1,6 +1,5 @@
 package tv.notube.commons.tests;
 
-import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -23,18 +22,12 @@ public class TestsTestCase {
 
     @BeforeTest
     public void setUp() {
-        tests = new Tests();
-        tests.register(new StringRandomiser("string-randomizer", 2, 15, false));
-        tests.register(new IntegerRandomiser("int-randomizer", FROM, TO));
-        tests.register(new DoubleRandomiser("double-randomizer", FROM, TO));
-        tests.register(new UUIDRandomiser("uuid-randomizer"));
-        tests.register(new URLRandomiser("url-randomizer", true, true));
+        tests = TestsBuilder.build();
         tests.register(new RecursiveBeanRandomiser("rb-randomizer"));
-        tests.register(new JodaDateTimeRandomiser("dt-randomiser", DateTime.now().minusYears(1)));
     }
 
     @Test
-    public void testWithSimpleFakeBean() throws BuilderException {
+    public void testWithSimpleFakeBean() throws TestsException {
         RandomBean<FakeBean> rb = tests.build(FakeBean.class);
         FakeBean actual = rb.getObject();
         Assert.assertNotNull(actual);
@@ -45,7 +38,7 @@ public class TestsTestCase {
     }
 
     @Test
-    public void testWithRecursiveBean() throws BuilderException {
+    public void testWithRecursiveBean() throws TestsException {
         RandomBean<RecursiveBean> rb = tests.build(RecursiveBean.class);
         RecursiveBean actual = rb.getObject();
         Assert.assertNotNull(actual);
@@ -54,11 +47,17 @@ public class TestsTestCase {
     }
 
     @Test
-    public void testWithJodaDateTime() throws BuilderException {
+    public void testWithJodaDateTime() throws TestsException {
         RandomBean<FakeBeanWithDate> rb = tests.build(FakeBeanWithDate.class);
         FakeBeanWithDate actual = rb.getObject();
         Assert.assertNotNull(actual);
         Assert.assertEquals(actual.getDate(), rb.getValue("date"));
+    }
+
+    @Test
+    public void testAssert() throws TestsException {
+        RandomBean<FakeBean> rb = tests.build(FakeBean.class);
+        tests.assertCompliance(rb);
     }
 
 }

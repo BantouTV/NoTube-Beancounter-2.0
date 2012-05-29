@@ -1,7 +1,6 @@
 package tv.notube.commons.model.auth;
 
 import tv.notube.commons.model.Service;
-import tv.notube.commons.model.auth.AuthHandler;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )

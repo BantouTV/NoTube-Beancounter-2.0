@@ -23,7 +23,4 @@ public interface Profiler {
 
     public Object getObject(UUID userId) throws ProfilerException;
 
-
-
-
 }

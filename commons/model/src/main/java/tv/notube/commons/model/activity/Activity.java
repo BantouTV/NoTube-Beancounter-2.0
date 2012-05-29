@@ -1,20 +1,10 @@
 package tv.notube.commons.model.activity;
 
-import org.codehaus.jackson.annotate.JsonTypeInfo;
-import org.codehaus.jackson.annotate.JsonTypeName;
-import tv.notube.commons.model.activity.bbc.BBCGenre;
-import tv.notube.commons.model.activity.bbc.BBCProgramme;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
 import java.io.Serializable;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-//@XmlRootElement
-//@XmlSeeAlso({Song.class, Tweet.class, BBCProgramme.class, BBCGenre.class})
 public class Activity implements Serializable {
 
     private static final long serialVersionUID = 68843445235L;

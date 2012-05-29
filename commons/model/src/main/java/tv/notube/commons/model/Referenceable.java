@@ -1,7 +1,5 @@
 package tv.notube.commons.model;
 
-import com.google.gson.annotations.Expose;
-
 import java.io.Serializable;
 import java.net.URI;
 import java.util.UUID;
@@ -13,10 +11,8 @@ public abstract class Referenceable implements Serializable {
 
     private static final long serialVersionUID = 91420635L;
 
-    @Expose
     protected UUID id;
 
-    @Expose
     protected URI reference;
 
     public Referenceable() {

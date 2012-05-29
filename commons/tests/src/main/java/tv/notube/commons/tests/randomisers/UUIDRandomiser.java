@@ -1,4 +1,6 @@
-package tv.notube.commons.tests;
+package tv.notube.commons.tests.randomisers;
+
+import tv.notube.commons.tests.DefaultRandomiser;
 
 import java.util.UUID;
 

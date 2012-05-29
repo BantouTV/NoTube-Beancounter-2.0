@@ -4,11 +4,8 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import tv.notube.commons.model.Service;
 import tv.notube.commons.model.User;
-import tv.notube.commons.model.UserCredential;
 import tv.notube.commons.model.activity.Activity;
-import tv.notube.crawler.requester.DefaultRequest;
 import tv.notube.crawler.requester.DefaultRequester;
-import tv.notube.crawler.requester.Request;
 import tv.notube.crawler.requester.RequesterException;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.UserManagerException;
@@ -101,4 +98,7 @@ public class Spider implements Runnable {
         return um.getUser(id);
     }
 
+    public String getName() {
+        return name;
+    }
 }

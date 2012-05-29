@@ -1,6 +1,5 @@
 package tv.notube.commons.model.activity;
 
-import com.google.gson.annotations.Expose;
 import org.joda.time.DateTime;
 import tv.notube.commons.model.activity.adapters.DateTimeAdapterJAXB;
 

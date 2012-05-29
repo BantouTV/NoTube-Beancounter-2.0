@@ -1,7 +1,5 @@
 package tv.notube.commons.model.activity;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
