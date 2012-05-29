@@ -37,7 +37,7 @@ public abstract class AbstractCrawlerTestCase {
     protected void startFrontendService() throws IOException {
         server = new GrizzlyWebServer(9995);
         ServletAdapter ga = new ServletAdapter();
-        ga.addServletListener(TestServiceConfig.class.getName());
+        ga.addServletListener(TestCrawlerConfig.class.getName());
         ga.setServletPath("/");
         ga.addFilter(new GuiceFilter(), "filter", null);
         server.addGrizzlyAdapter(ga, null);

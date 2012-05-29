@@ -6,7 +6,6 @@ import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.*;
 import tv.notube.commons.model.activity.bbc.BBCProgramme;
 import tv.notube.commons.model.activity.bbc.GenreBuilder;
-import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.auth.OAuthAuth;
 import tv.notube.commons.model.auth.SimpleAuth;
 import tv.notube.usermanager.UserManager;
@@ -33,7 +32,7 @@ public class MockUserManager implements UserManager {
 
     @Override
     public User getUser(UUID userId) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
+        return getTestUser("test-user");
     }
 
     @Override
@@ -87,7 +86,14 @@ public class MockUserManager implements UserManager {
 
     @Override
     public List<UUID> getUsersToCrawled() throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
+        List<UUID> ids = new ArrayList<UUID>();
+        UUID u1 = new UUID(DateTime.now().getMillis(), DateTime.now().getMillis());
+        UUID u2 = new UUID(DateTime.now().getMillis(), DateTime.now().getMillis());
+        UUID u3 = new UUID(DateTime.now().getMillis(), DateTime.now().getMillis());
+        ids.add(u1);
+        ids.add(u2);
+        ids.add(u3);
+        return ids;
     }
 
     @Override
@@ -111,7 +117,7 @@ public class MockUserManager implements UserManager {
     @Override
     public ServiceAuthorizationManager getServiceAuthorizationManager()
             throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
+        return new MockServiceAuthorizationManager();
     }
 
     @Override

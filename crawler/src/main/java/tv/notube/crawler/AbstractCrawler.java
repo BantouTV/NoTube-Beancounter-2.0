@@ -1,5 +1,6 @@
 package tv.notube.crawler;
 
+import com.google.inject.Inject;
 import tv.notube.usermanager.UserManager;
 
 /**
