@@ -40,7 +40,7 @@ public class DefaultActivityLogImplTestCase {
         activityLog.delete(OWNER);
     }
 
-    @Test
+    @Test(enabled = false)
     public void simpleTest() throws ActivityLogException {
         DateTime before = new DateTime();
         for(int i=0; i < 10; i++) {
@@ -64,7 +64,7 @@ public class DefaultActivityLogImplTestCase {
         Assert.assertEquals(0, activities.length);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testQueryOnFields() throws ActivityLogException {
         DateTime before = new DateTime();
         for(int i=0; i < 10; i++) {
@@ -105,7 +105,7 @@ public class DefaultActivityLogImplTestCase {
         Assert.assertEquals(activities.length, 0);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testQueryOnFieldsWithDate() throws ActivityLogException {
         DateTime before = new DateTime();
         for(int i=0; i < 10; i++) {
@@ -131,7 +131,7 @@ public class DefaultActivityLogImplTestCase {
         Assert.assertEquals(activities.length, 0);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testOnSimpleFields()
             throws MalformedURLException, ActivityLogException {
         DateTime before = new DateTime();
@@ -161,7 +161,7 @@ public class DefaultActivityLogImplTestCase {
         Assert.assertEquals(activities.length, 0);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testDeleteByDateRange()
             throws ActivityLogException, InterruptedException {
         DateTime before = new DateTime();
@@ -185,7 +185,7 @@ public class DefaultActivityLogImplTestCase {
         Assert.assertEquals(activities.length, 0);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testSerializableObjects()
             throws ActivityLogException, SerializationManagerException {
         DateTime before = new DateTime();
@@ -209,7 +209,7 @@ public class DefaultActivityLogImplTestCase {
         Assert.assertEquals(activities.length, 0);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testDeleteByDateRangeAndOwner() throws ActivityLogException {
         DateTime before = new DateTime();
         for (int i = 0; i < 10; i++) {
@@ -236,7 +236,7 @@ public class DefaultActivityLogImplTestCase {
         Assert.assertEquals(activities.length, 0);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testMultipleFields() throws MalformedURLException, ActivityLogException {
         DateTime before = new DateTime();
         URLField urlField1 = new URLField(

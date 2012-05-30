@@ -1,8 +1,9 @@
 package tv.notube.crawler;
 
 import com.google.inject.AbstractModule;
-
+import tv.notube.crawler.requester.DefaultRequester;
 import tv.notube.crawler.requester.Requester;
+import tv.notube.usermanager.DefaultUserManagerImpl;
 import tv.notube.usermanager.UserManager;
 
 /**
@@ -14,7 +15,7 @@ public class ProductionCrawlerModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(ParallelCrawlerImpl.class);
-        bind(UserManager.class).to(MockUserManager.class);
-        bind(Requester.class).to(MockRequester.class);
+        bind(UserManager.class).to(DefaultUserManagerImpl.class);
+        bind(Requester.class).to(DefaultRequester.class);
     }
 }

@@ -27,7 +27,7 @@ public class GenreBuilderTestCase {
         builder = null;
     }
 
-    @Test
+    @Test(enabled = false)
     public void test() throws MalformedURLException {
         BBCGenre bbcGenre = builder.lookup(
                 new URL("http://www.bbc.co.uk/programmes/genres/sport#genre")

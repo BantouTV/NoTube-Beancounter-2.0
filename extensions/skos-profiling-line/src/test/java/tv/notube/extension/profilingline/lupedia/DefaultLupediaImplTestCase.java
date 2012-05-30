@@ -28,7 +28,7 @@ public class DefaultLupediaImplTestCase {
         lupedia = null;
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetResources() throws LupediaException, URISyntaxException {
         final String text = "Bassiano is a small city located 100 kms south of Rome";
         List<URI> uris = lupedia.getResources(text);

@@ -19,7 +19,7 @@ public class Tests {
 
     private Class currentType;
 
-    public void register(Randomiser randomiser) {
+    public synchronized void register(Randomiser randomiser) {
         randomisers.add(randomiser);
     }
 
@@ -51,7 +51,7 @@ public class Tests {
         }
     }
 
-    public <T> Collection<RandomBean<T>> build(Class<? extends T> aClass, int size)
+    public synchronized <T> Collection<RandomBean<T>> build(Class<? extends T> aClass, int size)
             throws TestsException {
         Collection<RandomBean<T>> result = new ArrayList<RandomBean<T>>();
         for(int i=0; i < size; i++) {
@@ -60,7 +60,7 @@ public class Tests {
         return result;
     }
 
-    public <T> RandomBean<T> build(Class<? extends T> aClass) throws TestsException {
+    public synchronized <T> RandomBean<T> build(Class<? extends T> aClass) throws TestsException {
         currentType = aClass;
         Constructor constructor = getConstructor(aClass);
         String paramNames[] = getParamNames(constructor);
@@ -116,7 +116,7 @@ public class Tests {
         if (r != null) {
             return r.getRandom();
         }
-        throw new RuntimeException("an Randomiser<" + type + "> implementation has been registered");
+        throw new RuntimeException("an Randomiser<" + type + "> implementation has not been registered");
     }
 
     private Randomiser filterByType(Class<?> type) {

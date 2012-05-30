@@ -15,7 +15,7 @@ import tv.notube.commons.configuration.usermanager.UserManagerConfiguration;
  */
 public class ConfigurationsTestCase {
 
-    @Test
+    @Test(enabled = false)
     public void testUserManagerConfiguration() throws ConfigurationsException {
         UserManagerConfiguration userManagerConfiguration = Configurations.getConfiguration(
                 "usermanager-configuration.xml",
@@ -25,7 +25,7 @@ public class ConfigurationsTestCase {
         Assert.assertEquals(userManagerConfiguration.getProfilingRate(), 10);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testAnalyticsConfiguration() throws ConfigurationsException {
         AnalyticsConfiguration analyticsConfiguration = Configurations.getConfiguration(
                 "analytics-configuration.xml",
@@ -34,7 +34,7 @@ public class ConfigurationsTestCase {
         Assert.assertNotNull(analyticsConfiguration);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testProfilerConfiguration() throws ConfigurationsException {
         ProfilerConfiguration profilerConfiguration = Configurations.getConfiguration(
                 "profiler-configuration.xml",
@@ -43,7 +43,7 @@ public class ConfigurationsTestCase {
         Assert.assertNotNull(profilerConfiguration);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testServiceAuthorizationManagerConfiguration() throws ConfigurationsException {
         ServiceAuthorizationManagerConfiguration samConfiguration = Configurations.getConfiguration(
                 "sam-configuration.xml",
@@ -53,7 +53,7 @@ public class ConfigurationsTestCase {
         Assert.assertEquals(samConfiguration.getServices().size(), 3);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testStorageConfiguration() throws ConfigurationsException {
         StorageConfiguration sConfiguration = Configurations.getConfiguration(
                 "storage-configuration.xml",

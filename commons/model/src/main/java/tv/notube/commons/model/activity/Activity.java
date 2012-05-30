@@ -1,5 +1,7 @@
 package tv.notube.commons.model.activity;
 
+import tv.notube.commons.tests.annotations.Random;
+
 import java.io.Serializable;
 
 /**
@@ -17,6 +19,7 @@ public class Activity implements Serializable {
 
     public Activity() {}
 
+    @Random(names = { "v", "obj", "c"} )
     public Activity(Verb v, Object obj, Context c) {
         verb = v;
         object = obj;

@@ -5,7 +5,7 @@ import org.joda.time.DateTime;
 import tv.notube.commons.model.Service;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.Activity;
-import tv.notube.crawler.requester.DefaultRequester;
+import tv.notube.crawler.requester.Requester;
 import tv.notube.crawler.requester.RequesterException;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.UserManagerException;
@@ -27,14 +27,14 @@ public class Spider implements Runnable {
 
     private UserManager um;
 
-    private DefaultRequester requester;
+    private Requester requester;
 
     private User user;
 
-    public Spider(String name, UserManager um, UUID id) throws SpiderException {
+    public Spider(String name, UserManager um, UUID id, Requester req) throws SpiderException {
         this.name = name;
         this.um = um;
-        this.requester = new DefaultRequester();
+        this.requester = req;
         try {
             this.user = getUser(id);
         } catch (UserManagerException e) {
@@ -68,9 +68,7 @@ public class Spider implements Runnable {
                         requester.call(service, user.getAuth(serviceName))
                 );
             } catch (RequesterException e) {
-                final String errMsg = "Error while calling service '" +
-                        serviceName +
-                        "'";
+                final String errMsg = "Error while calling service '" + serviceName + "'";
                 logger.error(errMsg, e);
                 throw new RuntimeException(errMsg, e);
             }

@@ -58,7 +58,7 @@ public class UserDataSourceTestCase {
         dataSource = null;
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetRawData() throws DataSourceException, UserManagerException {
         RawDataSet<UserActivities> rawData = dataSource.getRawData();
         Assert.assertNotNull(rawData);

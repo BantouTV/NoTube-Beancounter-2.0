@@ -1,5 +1,6 @@
 package tv.notube.crawler;
 
+import tv.notube.crawler.requester.DefaultRequester;
 import tv.notube.usermanager.DefaultUserManagerFactory;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.UserManagerFactoryException;
@@ -26,7 +27,7 @@ public class DefaultCrawlerFactory implements CrawlerFactory {
             final String errMsg = "Error while build user manager";
             throw new RuntimeException(errMsg, e);
         }
-        crawler = new ParallelCrawlerImpl(um);
+        crawler = new ParallelCrawlerImpl(um, new DefaultRequester());
     }
 
     private Crawler crawler;

@@ -40,7 +40,7 @@ public class MyBatisKVStoreTestCase {
         kVStore = null;
     }
 
-    @Test
+    @Test(enabled = false)
     public void testCRUD() throws MalformedURLException, KVStoreException {
         final String KEY = "key-1";
         TestClass expected = new TestClass();
@@ -71,7 +71,7 @@ public class MyBatisKVStoreTestCase {
         Assert.assertEquals(0, fields.length);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testWithQuery() throws MalformedURLException, KVStoreException {
         for (int i = 0; i < 100; i++) {
             TestClass obj = new TestClass();
@@ -98,7 +98,7 @@ public class MyBatisKVStoreTestCase {
         }
     }
 
-    @Test
+    @Test(enabled = false)
     public void testWithLimitAndOffset() throws MalformedURLException, KVStoreException {
         for (int i = 0; i < 100; i++) {
             TestClass obj = new TestClass();

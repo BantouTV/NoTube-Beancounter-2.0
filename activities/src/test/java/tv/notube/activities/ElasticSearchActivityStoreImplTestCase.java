@@ -16,7 +16,7 @@ public class ElasticSearchActivityStoreImplTestCase {
 
     private ActivityStore as;
 
-    @Test
+    @Test(enabled = false)
     public void testCRUD() {
         final UUID userId = UUID.randomUUID();
         Activity activity = getRandomActivity();

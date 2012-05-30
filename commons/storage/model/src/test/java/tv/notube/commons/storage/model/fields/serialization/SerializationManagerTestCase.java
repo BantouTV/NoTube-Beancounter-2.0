@@ -14,7 +14,7 @@ import java.net.URL;
  */
 public class SerializationManagerTestCase {
 
-    @Test
+    @Test(enabled = false)
     public void testSerialize() throws MalformedURLException, SerializationManagerException {
         SerializationManager sm = new SerializationManager();
         TestClass expected = new TestClass();

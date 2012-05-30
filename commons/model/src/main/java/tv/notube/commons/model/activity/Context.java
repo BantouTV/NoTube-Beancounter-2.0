@@ -2,6 +2,7 @@ package tv.notube.commons.model.activity;
 
 import org.joda.time.DateTime;
 import tv.notube.commons.model.activity.adapters.DateTimeAdapterJAXB;
+import tv.notube.commons.tests.annotations.Random;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -26,6 +27,7 @@ public class Context implements Serializable {
 
     public Context() {}
 
+    @Random( names = { "d" } )
     public Context(DateTime d) {
         date = d;
     }

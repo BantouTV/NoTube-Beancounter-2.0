@@ -128,7 +128,7 @@ public class StorageAnalyzerImplTestCase {
         return new DefaultAnalyzerImpl(kvs, alog);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testExecution() throws AnalyzerException {
         AnalysisDescription analysisDescriptions[] =
                 analyzer.getRegisteredAnalysis();

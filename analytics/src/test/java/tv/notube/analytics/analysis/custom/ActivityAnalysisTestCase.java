@@ -43,7 +43,7 @@ public class ActivityAnalysisTestCase {
         activityAnalysis.registerQuery(query);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testRun() throws AnalysisException {
         AnalysisResult analysisResult =
                 activityAnalysis.run("user-manager-8c33b0e6-d3cf-4909-b04c-df93056e64a8");

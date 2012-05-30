@@ -16,7 +16,7 @@ public class DefaultProfilerFactoryTestCase {
         profiler = DefaultProfilerFactory.getInstance().build();
     }
 
-    @Test
+    @Test(enabled = false)
     public void test() {
         Assert.assertNotNull(profiler);
     }

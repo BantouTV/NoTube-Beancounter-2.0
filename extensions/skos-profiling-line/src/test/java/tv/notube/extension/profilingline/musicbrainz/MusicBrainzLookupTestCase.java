@@ -26,7 +26,7 @@ public class MusicBrainzLookupTestCase {
         musicbrainz = new MusicBrainzLookup();
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetResources() throws URISyntaxException, MusicBrainzLooupException {
         URI uri = musicbrainz.resolve("244afcb7-fa9a-49b1-9aa6-0149512d1c52");
         Assert.assertNotNull(uri);

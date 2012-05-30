@@ -32,7 +32,7 @@ public class SkosTestCase {
         skos = null;
     }
 
-    @Test
+    @Test(enabled = false)
     public void testSkos() throws SkosException, URISyntaxException {
         List<URI> actual = skos.getSkos(new URI("http://dbpedia.org/resource/Bassiano"));
         Assert.assertEquals(1, actual.size());

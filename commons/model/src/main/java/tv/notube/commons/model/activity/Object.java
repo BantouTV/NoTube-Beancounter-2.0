@@ -1,5 +1,7 @@
 package tv.notube.commons.model.activity;
 
+import tv.notube.commons.tests.annotations.Random;
+
 import java.io.Serializable;
 import java.net.URL;
 
@@ -15,6 +17,16 @@ public class Object implements Serializable {
     private String name;
 
     private String description;
+
+    public Object() {
+        super();
+    }
+
+    @Random( names = { "url" } )
+    public Object(URL url) {
+        super();
+        this.url = url;
+    }
 
     public URL getUrl() {
         return url;

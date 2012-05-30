@@ -2,39 +2,43 @@ package tv.notube.commons.tests.randomisers;
 
 import tv.notube.commons.tests.Randomiser;
 
+import java.util.Random;
+
 /**
  * put class description here
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class LongRandomiser implements Randomiser<Integer> {
+public class LongRandomiser implements Randomiser<Long> {
 
     private String name;
 
-    private int from;
+    private long from;
 
-    private int to;
+    private long to;
 
-    public LongRandomiser(String name, int max) {
+    private Random random = new Random();
+
+    public LongRandomiser(String name, long max) {
         this(name, 0, max);
     }
 
-    public LongRandomiser(String name, int from, int to) {
+    public LongRandomiser(String name, long from, long to) {
         this.name = name;
         this.from = from;
         this.to = to;
     }
 
-    public Class<Integer> type() {
-        return Integer.class;
+    public Class<Long> type() {
+        return Long.class;
     }
 
     public String name() {
         return name;
     }
 
-    public Integer getRandom() {
-        return from + (int)(Math.random() * ((to - from) + 1));
+    public Long getRandom() {
+        return from + (long)(random.nextDouble() * ((to - from) + 1));
     }
 
     @Override

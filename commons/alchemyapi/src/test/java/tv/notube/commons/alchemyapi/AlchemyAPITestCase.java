@@ -27,7 +27,7 @@ public class AlchemyAPITestCase {
         alchemyAPI = null;
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetRankedConcept() throws AlchemyAPIException {
         final String text = "Rome is the capital of Italy, " +
                 "a european southern country.";
@@ -38,7 +38,7 @@ public class AlchemyAPITestCase {
         Assert.assertEquals(alchemyAPIResponse.getIdentified().size(), 8);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetNamedEntities() throws AlchemyAPIException {
         final String text = "Samuel Palmisano is the CEO of IBM inc. and he " +
                 "lives in New York";
@@ -49,7 +49,7 @@ public class AlchemyAPITestCase {
         Assert.assertEquals(alchemyAPIResponse.getIdentified().size(), 1);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetWebNamedEntities() throws AlchemyAPIException, MalformedURLException {
         final URL url = new URL("http://www.guardian.co.uk/theguardian/2011/nov/19/read-serious-books-zoe-williams?INTCMP=SRCH");
         AlchemyAPIResponse alchemyAPIResponse = alchemyAPI.getNamedEntities(
@@ -59,7 +59,7 @@ public class AlchemyAPITestCase {
         Assert.assertTrue(alchemyAPIResponse.getIdentified().size() > 0);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetWebRankedConcepts() throws AlchemyAPIException,
             MalformedURLException {
         final URL url = new URL("http://www.guardian.co.uk/theguardian/2011/nov/19/read-serious-books-zoe-williams?INTCMP=SRCH");

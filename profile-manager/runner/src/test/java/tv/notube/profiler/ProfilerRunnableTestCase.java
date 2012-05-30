@@ -18,7 +18,7 @@ public class ProfilerRunnableTestCase {
 
     private UUID userId = UUID.fromString("4363d649-105f-45a4-a860-d999df419c78");
 
-    @Test
+    @Test(enabled = false)
     public void test() throws ProfilerException {
         DefaultProfilerImpl profiler = DefaultProfilerFactory.getInstance().build();
         ProfileStore ps = profiler.getProfileStore();

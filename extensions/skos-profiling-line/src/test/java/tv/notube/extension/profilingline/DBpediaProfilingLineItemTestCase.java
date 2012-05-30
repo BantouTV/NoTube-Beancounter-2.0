@@ -78,7 +78,7 @@ public class DBpediaProfilingLineItemTestCase {
         initItem.setNextProfilingLineItem(textItem);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testSimple() throws MalformedURLException,
             ProfilingLineItemException {
         String username = "dpalmisano";
@@ -152,7 +152,7 @@ public class DBpediaProfilingLineItemTestCase {
         initItem.execute(userActivities);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testRichTweet() throws MalformedURLException, ProfilingLineItemException {
         Tweet tweet = new Tweet();
         tweet.addHashTag("raiperunanotte");

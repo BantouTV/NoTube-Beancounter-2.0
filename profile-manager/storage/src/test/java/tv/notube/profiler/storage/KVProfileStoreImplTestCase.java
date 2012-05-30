@@ -55,7 +55,7 @@ public class KVProfileStoreImplTestCase {
         profileStore = null;
     }
 
-    @Test
+    @Test(enabled = false)
     public void testCRUD() throws URISyntaxException, MalformedURLException, ProfileStoreException {
         final String username = "user-for-test";
         UserProfile expected = new UserProfile();
