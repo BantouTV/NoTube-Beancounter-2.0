@@ -122,18 +122,21 @@ public class ElasticSearchActivityStoreImplTestCase {
 
         Map<String, Object> source = hit.getSource();
         assertEquals(source.get("userId"), userId.toString());
-        assertEquals(source.get("verb"), String.valueOf(Verb.TWEET));
 
-        Map<String, Object> object = (Map<String, Object>) source.get("object");
-        assertEquals(object.size(), 6);
+        Map<String, Object> activity = (Map<String, Object>) source.get("activity");
+        assertEquals(activity.get("verb"), String.valueOf(Verb.TWEET));
+
+        Map<String, Object> object = (Map<String, Object>) activity.get("object");
+        assertEquals(object.size(), 7);
         assertEquals(object.get("text"), "This is a test tweet!");
         assertEquals(object.get("url"), "http://twitter.com/#!/test-user/status/175538466216611841");
         assertEquals(object.get("hashTags"), Collections.emptyList());
         assertEquals(object.get("urls"), Collections.emptyList());
         assertEquals(object.get("name"), "Test");
+        assertEquals(object.get("@class"), Tweet.class.getName());
         assertNull(object.get("description"));
 
-        Map<String, Object> context = (Map<String, Object>) source.get("context");
+        Map<String, Object> context = (Map<String, Object>) activity.get("context");
         assertEquals(context.size(), 3);
         assertEquals(context.get("date"), dateTime.getMillis());
         assertEquals(context.get("service"), serviceUrl);
@@ -186,20 +189,23 @@ public class ElasticSearchActivityStoreImplTestCase {
 
             Map<String, Object> source = hit.getSource();
             assertEquals(source.get("userId"), userId.toString());
-            assertEquals(source.get("verb"), String.valueOf(Verb.TWEET));
 
-            Map<String, Object> object = (Map<String, Object>) source.get("object");
+            Map<String, Object> activity = (Map<String, Object>) source.get("activity");
+            assertEquals(activity.get("verb"), String.valueOf(Verb.TWEET));
+
+            Map<String, Object> object = (Map<String, Object>) activity.get("object");
             String url = (String) object.get("url");
             int tweetNumber = Integer.valueOf(url.substring(url.length() - 1), 10);
-            assertEquals(object.size(), 6);
+            assertEquals(object.size(), 7);
             assertEquals(object.get("text"), "This is test tweet number " + tweetNumber + "!");
             assertEquals(url, "http://twitter.com/#!/test-user/status/17553846621661184" + tweetNumber);
             assertEquals(object.get("hashTags"), Collections.emptyList());
             assertEquals(object.get("urls"), Collections.emptyList());
             assertEquals(object.get("name"), "Test");
+            assertEquals(object.get("@class"), Tweet.class.getName());
             assertNull(object.get("description"));
 
-            Map<String, Object> context = (Map<String, Object>) source.get("context");
+            Map<String, Object> context = (Map<String, Object>) activity.get("context");
             assertEquals(context.size(), 3);
             assertEquals(context.get("date"), dateTime.getMillis());
             assertEquals(context.get("service"), serviceUrl);
@@ -208,7 +214,7 @@ public class ElasticSearchActivityStoreImplTestCase {
     }
 
     @Test
-    public void getLatestTweetByAUserGivenTheyHaveOneTweet() throws Exception {
+    public void getLatestTweetByAUserGivenOneUserAndTheyHaveOneTweet() throws Exception {
         clearIndices();
 
         UUID userId = UUID.randomUUID();
@@ -234,6 +240,99 @@ public class ElasticSearchActivityStoreImplTestCase {
         client.admin().indices().refresh(new RefreshRequest(INDEX_NAME)).actionGet();
 
         Collection<Activity> activities = as.getByUser(userId, 1);
+        assertEquals(activities.size(), 1);
+    }
+
+    @Test
+    public void getLatestTwoTweetsByAUserGivenOneUserAndTheyHaveTwoTweets() throws Exception {
+        clearIndices();
+
+        UUID userId = UUID.randomUUID();
+        int numTweets = 2;
+        ActivityBuilder ab = new DefaultActivityBuilder();
+        Collection<Activity> activities = new ArrayList<Activity>(numTweets);
+
+        String serviceUrl = "http://twitter.com";
+
+        for (int i = 0; i < numTweets; i++) {
+            ab.push();
+            ab.setVerb(Verb.TWEET);
+            Map<String, Object> fields = new HashMap<String, Object>();
+            fields.put("setText", "This is test tweet number " + i + "!");
+            ab.setObject(
+                    Tweet.class,
+                    new URL("http://twitter.com/#!/test-user/status/17553846621661184" + i),
+                    "Test",
+                    fields
+            );
+            DateTime dateTime = new DateTime();
+            ab.setContext(dateTime.minusDays(i), new URL(serviceUrl));
+            activities.add(ab.pop());
+        }
+
+        as.store(userId, activities);
+
+        // Refresh so we're looking at the latest version of the index.
+        client.admin().indices().refresh(new RefreshRequest(INDEX_NAME)).actionGet();
+
+        activities = as.getByUser(userId, 2);
+        assertEquals(activities.size(), 2);
+    }
+
+    @Test
+    public void getLatestTweetByAUserGivenUserHasOneTweetAndTwoTotalUsers() throws Exception {
+        clearIndices();
+
+        UUID userId1 = UUID.randomUUID();
+        UUID userId2 = UUID.randomUUID();
+
+        int numTweets = 1;
+        ActivityBuilder ab = new DefaultActivityBuilder();
+        Collection<Activity> activities = new ArrayList<Activity>(numTweets);
+
+        String serviceUrl = "http://twitter.com";
+
+        for (int i = 0; i < numTweets; i++) {
+            ab.push();
+            ab.setVerb(Verb.TWEET);
+            Map<String, Object> fields = new HashMap<String, Object>();
+            fields.put("setText", "This is test tweet number " + i + " from user " + userId1 + "!");
+            ab.setObject(
+                    Tweet.class,
+                    new URL("http://twitter.com/#!/test-user/status/17553846621661184" + i),
+                    "Test",
+                    fields
+            );
+            DateTime dateTime = new DateTime();
+            ab.setContext(dateTime.minusDays(i), new URL(serviceUrl));
+            activities.add(ab.pop());
+        }
+
+        as.store(userId1, activities);
+        activities.clear();
+
+        for (int i = 0; i < numTweets; i++) {
+            ab.push();
+            ab.setVerb(Verb.TWEET);
+            Map<String, Object> fields = new HashMap<String, Object>();
+            fields.put("setText", "This is test tweet number " + i + " from user " + userId2+ "!");
+            ab.setObject(
+                    Tweet.class,
+                    new URL("http://twitter.com/#!/test-user/status/17553846621661184" + i),
+                    "Test",
+                    fields
+            );
+            DateTime dateTime = new DateTime();
+            ab.setContext(dateTime.minusDays(i), new URL(serviceUrl));
+            activities.add(ab.pop());
+        }
+
+        as.store(userId2, activities);
+
+        // Refresh so we're looking at the latest version of the index.
+        client.admin().indices().refresh(new RefreshRequest(INDEX_NAME)).actionGet();
+
+        activities = as.getByUser(userId1, 1);
         assertEquals(activities.size(), 1);
     }
 

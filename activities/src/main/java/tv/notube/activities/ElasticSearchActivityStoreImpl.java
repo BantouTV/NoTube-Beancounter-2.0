@@ -1,5 +1,7 @@
 package tv.notube.activities;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -10,6 +12,7 @@ import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.joda.time.DateTime;
+import tv.notube.activities.model.activity.ElasticSearchActivity;
 import tv.notube.commons.model.activity.*;
 
 import java.io.IOException;
@@ -18,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * <a href="http://www.elasticsearch.org">ElasticSearch</a> based implementation
@@ -69,28 +74,22 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
 
     @Override
     public Collection<Activity> getByUser(UUID uuidId, int max) throws ActivityStoreException {
-
         Node node = NodeBuilder.nodeBuilder().local(true).node();
         Client client = node.client();
 
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                .setQuery(QueryBuilders.matchAllQuery())
+                .setQuery(queryString("userId:" + uuidId.toString()))
                 .execute().actionGet();
 
         Collection<Activity> activities = new ArrayList<Activity>();
 
         for (SearchHit hit : searchResponse.getHits()) {
             try {
-                Map<String, Object> source = hit.getSource();
-                source.remove("userId");
+                @SuppressWarnings("unchecked")
+                Map<String, Object> activity =
+                        (Map<String, Object>) hit.getSource().get("activity");
 
-                Map<String, Object> context = (Map<String, Object>) source.get("context");
-                if (context.get("service").equals("http://twitter.com")) {
-                    tv.notube.commons.model.activity.Object object = mapper.readValue(mapper.writeValueAsBytes(source.get("object")), Tweet.class);
-                }
-                source.put("object", null);
-                source.put("context", null);
-                activities.add(mapper.readValue(mapper.writeValueAsBytes(source), Activity.class));
+                activities.add(mapper.readValue(mapper.writeValueAsBytes(activity), Activity.class));
             } catch (IOException ioe) {
                 // TODO
             }
@@ -112,27 +111,18 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
     }
 
     private void indexActivity(UUID userId, Activity activity, Client client) {
-        //IndexableActivity ia = new IndexableActivity(uuidId, activity);
+        ElasticSearchActivity esa = new ElasticSearchActivity(userId, activity);
+
         try {
             client.prepareIndex(INDEX_NAME, INDEX_TYPE)
-                    .setSource(createActivityJson(userId, activity))
+                    .setSource(createActivityJson(esa))
                     .execute().actionGet();
         } catch (IOException ioe) {
             // TODO.
         }
     }
 
-/*    private Map<String, Object> createActivityJson(IndexableActivity ia) {
-        return null;
-    }*/
-
-    private String createActivityJson(UUID userId, Activity activity) throws IOException {
-        // TODO: This is nasty =P
-        // Shouldn't the userId be an attribute of every Activity?
-        String jsonString = mapper.writeValueAsString(activity);
-        jsonString = jsonString.substring(0, jsonString.length() - 1);
-        jsonString += ",\"userId\":\"" + userId + "\"}";
-
-        return jsonString;
+    private byte[] createActivityJson(ElasticSearchActivity esa) throws IOException {
+        return mapper.writeValueAsBytes(esa);
     }
 }
