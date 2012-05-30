@@ -29,13 +29,13 @@ public class UserManagerTestCase {
 
     private UUID userId;
 
-    @BeforeTest
+    @BeforeTest(enabled = false)
     public void setUp() throws UserManagerFactoryException {
         userManager = DefaultUserManagerFactory.getInstance().build();
         userId = UUID.randomUUID();
     }
 
-    @AfterTest
+    @AfterTest(enabled = false)
     public void tearDown() throws UserManagerException {
         userManager.deleteUser(userId);
         userManager = null;

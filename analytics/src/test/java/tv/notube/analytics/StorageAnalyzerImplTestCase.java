@@ -38,7 +38,7 @@ public class StorageAnalyzerImplTestCase {
 
     private Analyzer analyzer;
 
-    @BeforeTest
+    @BeforeTest(enabled = false)
     public void setUp() throws AnalysisException, AnalyzerException {
         analyzer = getAnalyzer();
         MethodDescription getAmount;

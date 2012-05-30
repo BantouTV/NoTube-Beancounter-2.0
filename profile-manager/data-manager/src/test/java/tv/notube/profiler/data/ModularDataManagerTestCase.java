@@ -15,13 +15,14 @@ import tv.notube.usermanager.UserManagerFactoryException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ModularDataManagerTest {
+// TODO (low) understand why this test keeps running also disabled
+public class ModularDataManagerTestCase {
 
-    private static Logger logger = Logger.getLogger(ModularDataManagerTest.class);
+    private static Logger logger = Logger.getLogger(ModularDataManagerTestCase.class);
 
     private DataManager dataManager;
 
-    @BeforeTest
+    //@BeforeTest(enabled = false)
     public void setUp() throws UserManagerFactoryException, DataManagerConfigurationException, DataManagerException {
         UserManager um = DefaultUserManagerFactory.getInstance().build();
         DataManagerConfiguration dataManagerConfiguration = new DataManagerConfiguration();
@@ -33,12 +34,12 @@ public class ModularDataManagerTest {
         dataManager = new ModularDataManager(um, dataManagerConfiguration);
     }
 
-    @AfterTest
+    //@AfterTest(enabled = false)
     public void tearDown() {
         dataManager = null;
     }
 
-    @Test
+    //@Test(enabled = false)
     public void testGetUserRawData() throws DataManagerException {
         RawDataSet<UserActivities> userRawDataSet =
                 dataManager.getRawData("user");
@@ -51,7 +52,7 @@ public class ModularDataManagerTest {
         }
     }
 
-    @Test
+    //@Test(enabled = false)
     public void testGetProfilingLinesForAKey() throws DataManagerException {
         List<String> userProfilingLines = dataManager.getRegisteredKeys().get("user");
         List<String> expectedUserProfilingLines = new ArrayList<String>();

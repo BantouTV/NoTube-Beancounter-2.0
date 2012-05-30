@@ -18,10 +18,11 @@ import java.util.Properties;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
+// TODO (low) understand why this test keeps running also disabled
 public class ActivityAnalysisTestCase {
     private ActivityAnalysis activityAnalysis;
 
-    @BeforeTest
+    //@BeforeTest(enabled = false)
     public void setUp() throws AnalysisException {
         Properties prop = new Properties();
         prop.setProperty("url", "jdbc:mysql://moth.notube.tv:3306/alog");
@@ -43,7 +44,7 @@ public class ActivityAnalysisTestCase {
         activityAnalysis.registerQuery(query);
     }
 
-    @Test(enabled = false)
+    //@Test(enabled = false)
     public void testRun() throws AnalysisException {
         AnalysisResult analysisResult =
                 activityAnalysis.run("user-manager-8c33b0e6-d3cf-4909-b04c-df93056e64a8");

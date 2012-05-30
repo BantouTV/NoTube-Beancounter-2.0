@@ -11,7 +11,7 @@ public class DefaultProfilerFactoryTestCase {
 
     private DefaultProfilerImpl profiler;
 
-    @BeforeTest
+    @BeforeTest(enabled = false)
     public void setUp() {
         profiler = DefaultProfilerFactory.getInstance().build();
     }

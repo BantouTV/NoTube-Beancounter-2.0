@@ -26,7 +26,7 @@ public class DefaultActivityLogImplTestCase {
 
     private static final String OWNER = "test-owner";
 
-    @BeforeTest
+    @BeforeTest(enabled = false)
     public void setUp() throws ActivityLogException {
         Properties properties = new Properties();
         properties.setProperty("url", "jdbc:mysql://127.0.0.1:3306/alog");
@@ -35,7 +35,7 @@ public class DefaultActivityLogImplTestCase {
         activityLog = new DefaultActivityLogImpl(properties);
     }
 
-    @AfterTest
+    @AfterTest(enabled = false)
     public void tearDown() throws ActivityLogException {
         activityLog.delete(OWNER);
     }
