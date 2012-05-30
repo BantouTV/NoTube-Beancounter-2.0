@@ -1,4 +1,4 @@
-package tv.notube.platform.analytics;
+package tv.notube.analytics;
 
 /**
  * put class description here

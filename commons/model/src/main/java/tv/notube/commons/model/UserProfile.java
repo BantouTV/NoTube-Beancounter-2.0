@@ -1,5 +1,7 @@
 package tv.notube.commons.model;
 
+import tv.notube.commons.tests.annotations.*;
+
 import java.util.*;
 
 /**
@@ -22,6 +24,14 @@ public class UserProfile extends Referenceable {
     private Collection<Type> types = new ArrayList<Type>();
 
     private Set<Interest> interests = new HashSet<Interest>();
+
+    public UserProfile() {}
+
+    @tv.notube.commons.tests.annotations.Random(names = { "username"} )
+    public UserProfile(String username) {
+        this.username = username;
+        this.visibility = Visibility.PUBLIC;
+    }
 
     public Visibility getVisibility() {
         return visibility;

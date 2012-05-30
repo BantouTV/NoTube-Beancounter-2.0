@@ -1,14 +1,18 @@
-package tv.notube.platform.user;
+package tv.notube.usermanager;
 
 import org.joda.time.DateTime;
 import tv.notube.commons.model.OAuthToken;
+import tv.notube.commons.model.Service;
 import tv.notube.commons.model.User;
-import tv.notube.commons.model.activity.*;
-import tv.notube.commons.model.activity.bbc.BBCProgramme;
-import tv.notube.commons.model.activity.bbc.GenreBuilder;
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.auth.OAuthAuth;
 import tv.notube.commons.model.auth.SimpleAuth;
+import tv.notube.commons.tests.RandomBean;
+import tv.notube.commons.tests.Tests;
+import tv.notube.commons.tests.TestsBuilder;
+import tv.notube.commons.tests.TestsException;
+import tv.notube.commons.tests.randomisers.IntegerRandomiser;
+import tv.notube.commons.tests.randomisers.UUIDRandomiser;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.UserManagerException;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
@@ -17,23 +21,54 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-/**
- * put class description here
- *
- * @author Davide Palmisano ( dpalmisano@gmail.com )
- */
 public class MockUserManager implements UserManager {
+
+    private Tests tests = TestsBuilder.getInstance().build();
+
+    private Map<UUID, List<Activity>> activities = new HashMap<UUID, List<Activity>>();
+
+    private List<UUID> userUUIDs = new ArrayList<UUID>();
+
+    public MockUserManager() {
+        // instantiate users
+        for(int i=0; i <= (new IntegerRandomiser("anon", 20)).getRandom(); i++) {
+            userUUIDs.add(new UUIDRandomiser("anon").getRandom());
+        }
+    }
 
     @Override
     public void storeUser(User user) throws UserManagerException {}
 
     @Override
-    public User getUser(UUID userId) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
+    public synchronized User getUser(UUID userId) throws UserManagerException {
+        User user;
+        try {
+            user = tests.build(User.class).getObject();
+        } catch (TestsException e) {
+            throw new UserManagerException("Error while building random user with id [" + userId + "]");
+        }
+        user.setId(userId);
+        user.addService("fake-oauth-service", new OAuthAuth("fake-session", "fake-secret"));
+        user.addService("fake-simple-service", new SimpleAuth("fake-session", "fake-username"));
+        Collection<Service> services = new ArrayList<Service>();
+        try {
+            Collection<RandomBean<Service>> randomBeansServices = tests.build(Service.class, 3);
+            for(RandomBean<Service> bean : randomBeansServices) {
+                services.add(bean.getObject());
+                user.addService(
+                        bean.getObject().getName(),
+                        new SimpleAuth(
+                                bean.getObject().getDescription(),
+                                bean.getObject().getSecret()
+                        )
+                );
+            }
+        } catch (TestsException e) {
+            throw new UserManagerException("Error while building random services for user with id [" + userId + "]");
+        }
+        return user;
     }
 
     @Override
@@ -60,15 +95,15 @@ public class MockUserManager implements UserManager {
     }
 
     @Override
-    public void storeUserActivities(UUID userId, List<Activity> activities)
+    public synchronized void storeUserActivities(UUID userId, List<Activity> activities)
             throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
+        this.activities.put(userId, activities);
     }
 
     @Override
-    public List<Activity> getUserActivities(UUID userId)
+    public synchronized List<Activity> getUserActivities(UUID userId)
             throws UserManagerException {
-        return getActivities();
+        return activities.get(userId);
     }
 
     @Override
@@ -87,7 +122,7 @@ public class MockUserManager implements UserManager {
 
     @Override
     public List<UUID> getUsersToCrawled() throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
+        return userUUIDs;
     }
 
     @Override
@@ -102,21 +137,21 @@ public class MockUserManager implements UserManager {
 
     @Override
     public void registerService(String service, User user, String token)
-            throws UserManagerException { }
+            throws UserManagerException {}
 
     @Override
     public void registerOAuthService(String service, User user, String token, String verifier)
-            throws UserManagerException { }
+            throws UserManagerException {}
 
     @Override
-    public ServiceAuthorizationManager getServiceAuthorizationManager()
+    public synchronized ServiceAuthorizationManager getServiceAuthorizationManager()
             throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
+        return new MockServiceAuthorizationManager();
     }
 
     @Override
     public void deregisterService(String service, User userObj)
-            throws UserManagerException { }
+            throws UserManagerException {}
 
     @Override
     public void setUserFinalRedirect(String username, URL url)
@@ -130,54 +165,5 @@ public class MockUserManager implements UserManager {
         } catch (MalformedURLException e) {
             // it never happens
         } return null;
-    }
-
-    protected List<Activity> getActivities() {
-        List<Activity> activities = new ArrayList<Activity>();
-        Song s = new Song();
-        s.setName("Song Name");
-        s.setDescription("Just a fake song");
-        s.setMbid("3278462378462");
-        Activity a1 = new Activity(
-                Verb.LIKE,
-                s,
-                new Context(DateTime.now())
-        );
-        BBCProgramme p = new BBCProgramme();
-        try {
-            p.addGenre(GenreBuilder.getInstance().lookup(new URL("http://www.bbc.co.uk/programmes/genres/sport#genre")));
-        } catch (MalformedURLException e) {
-            // never happens
-        }
-        p.addActor("Pippo Franco");
-        p.addActor("Marisa Laurito");
-        p.setMediumSynopsis("just a fake BBC programme");
-        Activity a2 = new Activity(
-                Verb.LISTEN,
-                p,
-                new Context(DateTime.now())
-        );
-        Tweet t = new Tweet();
-        t.setText("just #fake tweet check it http://t.com/3423");
-        t.setName("fake tweet name");
-        try {
-            t.setUrl(new URL("http://twitter.com/2347223423/32"));
-        } catch (MalformedURLException e) {
-            // never happens
-        }
-        t.addHashTag("fake");
-        try {
-            t.addUrl(new URL("http://t.com/3423"));
-        } catch (MalformedURLException e) {
-            // never happens
-        }
-        Activity a3= new Activity(
-                Verb.LISTEN,
-                t,
-                new Context(DateTime.now()));
-        activities.add(a1);
-        activities.add(a2);
-        activities.add(a3);
-        return activities;
     }
 }

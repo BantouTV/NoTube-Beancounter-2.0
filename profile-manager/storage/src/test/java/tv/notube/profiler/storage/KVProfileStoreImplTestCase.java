@@ -58,7 +58,7 @@ public class KVProfileStoreImplTestCase {
     @Test(enabled = false)
     public void testCRUD() throws URISyntaxException, MalformedURLException, ProfileStoreException {
         final String username = "user-for-test";
-        UserProfile expected = new UserProfile();
+        UserProfile expected = new UserProfile(username);
         expected.setUsername(username);
         expected.setVisibility(UserProfile.Visibility.PUBLIC);
         expected.setReference(new URI("http://notube.tv/profile/dpalmisano"));

@@ -1,4 +1,4 @@
-package tv.noube.crawler;
+package tv.notube.crawler.requester;
 
 import tv.notube.commons.model.Service;
 import tv.notube.commons.model.activity.Activity;

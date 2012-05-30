@@ -1,8 +1,6 @@
-package tv.notube.platform.analytics;
+package tv.notube.analytics;
 
 import org.joda.time.DateTime;
-import tv.notube.analytics.Analyzer;
-import tv.notube.analytics.AnalyzerException;
 import tv.notube.analytics.analysis.AnalysisResult;
 import tv.notube.commons.configuration.analytics.AnalysisDescription;
 import tv.notube.commons.configuration.analytics.MethodDescription;
@@ -67,8 +65,8 @@ public class MockAnalyzer implements Analyzer {
                 "test-analysis-1",
                 "fake analysis 1",
                 new Query(),
-                "tv.notube.platform.analytics.FakeOne",
-                "tv.notube.platform.analytics.FakeOneResult",
+                "tv.notube.analytics.FakeOne",
+                "tv.notube.analytics.FakeOneResult",
                 mds
         );
         mds = new HashSet<MethodDescription>();

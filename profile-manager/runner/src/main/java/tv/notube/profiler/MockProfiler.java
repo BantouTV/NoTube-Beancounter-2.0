@@ -1,4 +1,4 @@
-package tv.notube.platform.user;
+package tv.notube.profiler;
 
 import tv.notube.profiler.Profiler;
 import tv.notube.profiler.ProfilerException;

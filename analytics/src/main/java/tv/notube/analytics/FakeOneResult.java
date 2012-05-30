@@ -1,4 +1,4 @@
-package tv.notube.platform.analytics;
+package tv.notube.analytics;
 
 import org.joda.time.DateTime;
 import tv.notube.analytics.analysis.AnalysisResult;

@@ -1,9 +1,4 @@
-package tv.notube.platform.applications;
-
-import tv.notube.applications.Application;
-import tv.notube.applications.ApplicationsManager;
-import tv.notube.applications.ApplicationsManagerException;
-import tv.notube.applications.Permission;
+package tv.notube.applications;
 
 import java.util.UUID;
 

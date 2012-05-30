@@ -1,9 +1,9 @@
-package tv.notube.platform.user;
+package tv.notube.profiler.storage;
 
-import tv.notube.commons.model.Interest;
 import tv.notube.commons.model.UserProfile;
-import tv.notube.profiler.storage.ProfileStore;
-import tv.notube.profiler.storage.ProfileStoreException;
+import tv.notube.commons.tests.Tests;
+import tv.notube.commons.tests.TestsBuilder;
+import tv.notube.commons.tests.TestsException;
 
 import java.io.OutputStream;
 import java.util.*;
@@ -13,6 +13,8 @@ import java.util.*;
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class MockProfileStore implements ProfileStore {
+
+    private Tests tests = TestsBuilder.getInstance().build();
 
     @Override
     public void storeUserProfile(UserProfile userProfile) throws ProfileStoreException {
@@ -27,17 +29,11 @@ public class MockProfileStore implements ProfileStore {
     }
 
     private UserProfile getProfile(String username) {
-        MockUserManager um = new MockUserManager();
-        UserProfile up = new UserProfile();
-        up.setVisibility(UserProfile.Visibility.PUBLIC);
-        up.setUsername(username);
-        Interest i1 = new Interest();
-        i1.setWeight(0.5);
-        i1.setActivities(um.getActivities());
-        Set<Interest> interests = new HashSet<Interest>();
-        interests.add(i1);
-        up.setInterests(interests);
-        return up;
+        try {
+            return tests.build(UserProfile.class).getObject();
+        } catch (TestsException e) {
+            throw new RuntimeException("cannot build a random UserProfile for [" + username + "]", e);
+        }
     }
 
     @Override

@@ -1,4 +1,4 @@
-package tv.notube.platform.user;
+package tv.notube.crawler;
 
 import org.joda.time.DateTime;
 import tv.notube.crawler.Crawler;

@@ -1,4 +1,4 @@
-package tv.noube.crawler;
+package tv.notube.usermanager;
 
 import tv.notube.commons.model.Service;
 import tv.notube.commons.model.User;

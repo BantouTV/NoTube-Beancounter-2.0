@@ -2,6 +2,8 @@ package tv.noube.crawler;
 
 import com.google.inject.AbstractModule;
 
+import tv.notube.crawler.requester.MockRequester;
+import tv.notube.usermanager.MockUserManager;
 import tv.notube.crawler.Crawler;
 import tv.notube.crawler.ParallelCrawlerImpl;
 import tv.notube.crawler.requester.Requester;
