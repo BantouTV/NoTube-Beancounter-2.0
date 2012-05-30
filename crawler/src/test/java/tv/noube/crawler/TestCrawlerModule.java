@@ -9,6 +9,7 @@ import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import tv.notube.crawler.ParallelCrawlerImpl;
+import tv.notube.crawler.requester.Requester;
 import tv.notube.usermanager.UserManager;
 
 import javax.ws.rs.ext.MessageBodyReader;
@@ -20,7 +21,7 @@ import java.util.Map;
  * 
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-public class TestCrawlerConfig extends GuiceServletContextListener {
+public class TestCrawlerModule extends GuiceServletContextListener {
 
     @Override
     protected Injector getInjector() {
@@ -33,6 +34,7 @@ public class TestCrawlerConfig extends GuiceServletContextListener {
                 bind(ParallelCrawlerImpl.class);
                 // bind Production Implementations
                 bind(UserManager.class).to(MockUserManager.class);
+                bind(Requester.class).to(MockRequester.class);
                 // add bindings for Jackson
                 bind(JacksonJaxbJsonProvider.class).asEagerSingleton();
                 bind(MessageBodyReader.class).to(JacksonJsonProvider.class);
