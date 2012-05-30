@@ -22,7 +22,7 @@ public class TestsTestCase {
 
     @BeforeTest
     public void setUp() {
-        tests = TestsBuilder.build();
+        tests = TestsBuilder.getInstance().build();
         tests.register(new RecursiveBeanRandomiser("rb-randomizer"));
     }
 

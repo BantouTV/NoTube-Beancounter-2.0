@@ -24,7 +24,7 @@ public class DefaultApplicationsManagerImplTestCase {
 
     private final static String applicationName = "n-screen";
 
-    @BeforeTest
+    @BeforeTest(enabled = false)
     public void setUp() throws MalformedURLException, ApplicationsManagerException {
         Properties properties = new Properties();
         properties.setProperty("url", "jdbc:mysql://localhost:3306/kvs");
@@ -37,12 +37,12 @@ public class DefaultApplicationsManagerImplTestCase {
         applicationsManager = new DefaultApplicationsManagerImpl(kVStore);
     }
 
-    @AfterTest
+    @AfterTest(enabled = false)
     public void tearDown() throws ApplicationsManagerException {
         applicationsManager.deregisterApplication(applicationName);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testCRUD() throws MalformedURLException,
             ApplicationsManagerException {
         Application application = getApplication(applicationName);
@@ -60,7 +60,7 @@ public class DefaultApplicationsManagerImplTestCase {
         Assert.assertNull(actual);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testPermissions() throws ApplicationsManagerException,
             MalformedURLException {
         UUID resourceId = UUID.randomUUID();

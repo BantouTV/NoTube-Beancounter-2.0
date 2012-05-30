@@ -1,30 +1,44 @@
 package tv.noube.crawler;
 
 import tv.notube.commons.model.OAuthToken;
+import tv.notube.commons.model.Service;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.Activity;
+import tv.notube.commons.model.auth.OAuthAuth;
+import tv.notube.commons.model.auth.SimpleAuth;
+import tv.notube.commons.tests.RandomBean;
 import tv.notube.commons.tests.Tests;
 import tv.notube.commons.tests.TestsBuilder;
 import tv.notube.commons.tests.TestsException;
+import tv.notube.commons.tests.randomisers.IntegerRandomiser;
+import tv.notube.commons.tests.randomisers.UUIDRandomiser;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.UserManagerException;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
 
 import java.net.URL;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class MockUserManager implements UserManager {
 
-    private Tests tests = TestsBuilder.build();
+    private Tests tests = TestsBuilder.getInstance().build();
 
-    @Override
-    public void storeUser(User user) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
+    private Map<UUID, List<Activity>> activities = new HashMap<UUID, List<Activity>>();
+
+    private List<UUID> userUUIDs = new ArrayList<UUID>();
+
+    public MockUserManager() {
+        // instantiate users
+        for(int i=0; i <= (new IntegerRandomiser("anon", 20)).getRandom(); i++) {
+            userUUIDs.add(new UUIDRandomiser("anon").getRandom());
+        }
     }
 
     @Override
-    public User getUser(UUID userId) throws UserManagerException {
+    public void storeUser(User user) throws UserManagerException {}
+
+    @Override
+    public synchronized User getUser(UUID userId) throws UserManagerException {
         User user;
         try {
             user = tests.build(User.class).getObject();
@@ -32,6 +46,24 @@ public class MockUserManager implements UserManager {
             throw new UserManagerException("Error while building random user with id [" + userId + "]");
         }
         user.setId(userId);
+        user.addService("fake-oauth-service", new OAuthAuth("fake-session", "fake-secret"));
+        user.addService("fake-simple-service", new SimpleAuth("fake-session", "fake-username"));
+        Collection<Service> services = new ArrayList<Service>();
+        try {
+            Collection<RandomBean<Service>> randomBeansServices = tests.build(Service.class, 3);
+            for(RandomBean<Service> bean : randomBeansServices) {
+                services.add(bean.getObject());
+                user.addService(
+                        bean.getObject().getName(),
+                        new SimpleAuth(
+                                bean.getObject().getDescription(),
+                                bean.getObject().getSecret()
+                        )
+                );
+            }
+        } catch (TestsException e) {
+            throw new UserManagerException("Error while building random services for user with id [" + userId + "]");
+        }
         return user;
     }
 
@@ -41,13 +73,14 @@ public class MockUserManager implements UserManager {
     }
 
     @Override
-    public void storeUserActivities(UUID userId, List<Activity> activities) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
+    public synchronized void storeUserActivities(UUID userId, List<Activity> activities)
+            throws UserManagerException {
+        this.activities.put(userId, activities);
     }
 
     @Override
-    public List<Activity> getUserActivities(UUID userId) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
+    public synchronized List<Activity> getUserActivities(UUID userId) throws UserManagerException {
+        return activities.get(userId);
     }
 
     @Override
@@ -67,7 +100,7 @@ public class MockUserManager implements UserManager {
 
     @Override
     public List<UUID> getUsersToCrawled() throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
+        return userUUIDs;
     }
 
     @Override
@@ -86,8 +119,8 @@ public class MockUserManager implements UserManager {
     }
 
     @Override
-    public ServiceAuthorizationManager getServiceAuthorizationManager() throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
+    public synchronized ServiceAuthorizationManager getServiceAuthorizationManager() throws UserManagerException {
+        return new MockServiceAuthorizationManager();
     }
 
     @Override

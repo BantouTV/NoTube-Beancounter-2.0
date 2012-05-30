@@ -37,12 +37,12 @@ public class MockServiceAuthorizationManager implements ServiceAuthorizationMana
     }
 
     @Override
-    public Service getService(String serviceName) throws ServiceAuthorizationManagerException {
-        HashMap<String, Service> nameToService = new HashMap<String, Service>();
-        Service s1 = new Service("fake-service-1");
-        Service s2 = new Service("fake-service-2");
-        nameToService.put(s1.getName(), s1);
-        nameToService.put(s2.getName(), s2);
-        return nameToService.get(serviceName);
+    public synchronized Service getService(String serviceName) throws ServiceAuthorizationManagerException {
+        HashMap<String, Service> services = new HashMap<String, Service>();
+        Service s1 = new Service("fake-oauth-service");
+        Service s2 = new Service("fake-simple-service");
+        services.put(s1.getName(), s1);
+        services.put(s2.getName(), s2);
+        return services.get(serviceName);
     }
 }

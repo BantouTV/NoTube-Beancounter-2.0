@@ -44,7 +44,7 @@ public class WhenYouWatchOrListenAnalysisTestCase {
         analysis.registerQuery(query);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testRun() throws AnalysisException {
         AnalysisResult analysisResult =
                 analysis.run("user-manager-cf227e63-f01d-4a2c-a747-90362b2d0531");

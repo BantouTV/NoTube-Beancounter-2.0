@@ -27,7 +27,7 @@ public class RegexAPITestCase {
         RegexAPI = null;
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetRankedConcept() throws RegexAPIException {
         final String text = "a sentence about Franz Ferdinand, which is " +
                 "the name of a band and some old dead guy. Sausages. iPhone. RDF";
@@ -38,7 +38,7 @@ public class RegexAPITestCase {
         Assert.assertEquals(RegexAPIResponse.getIdentified().size(), 1);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetNamedEntities() throws RegexAPIException {
         final String text = "Samuel Palmisano is the CEO of IBM inc. and he lives in New York";
         RegexAPIResponse RegexAPIResponse = RegexAPI.getNamedEntities(
@@ -48,7 +48,7 @@ public class RegexAPITestCase {
         Assert.assertEquals(RegexAPIResponse.getIdentified().size(), 1);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetWebNamedEntities() throws RegexAPIException, MalformedURLException {
         final URL url = new URL("http://www.guardian.co.uk/theguardian/2011/nov/19/read-serious-books-zoe-williams?INTCMP=SRCH");
         RegexAPIResponse RegexAPIResponse = RegexAPI.getNamedEntities(
@@ -58,7 +58,7 @@ public class RegexAPITestCase {
         Assert.assertTrue(RegexAPIResponse.getIdentified().size() > 0);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetWebRankedConcepts() throws RegexAPIException,
             MalformedURLException {
         final URL url = new URL("http://www.guardian.co.uk/theguardian/2011/nov/19/read-serious-books-zoe-williams?INTCMP=SRCH");

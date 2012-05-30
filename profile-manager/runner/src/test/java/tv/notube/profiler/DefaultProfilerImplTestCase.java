@@ -14,12 +14,12 @@ public class DefaultProfilerImplTestCase {
 
     private DefaultProfilerImpl profiler;
 
-    @BeforeTest
+    @BeforeTest(enabled = false)
     public void setUp() {
         profiler = DefaultProfilerFactory.getInstance().build();
     }
 
-    @Test
+    @Test(enabled = false)
     public void test() throws ProfilerException {
         profiler.run(UUID.fromString("e651ce76-b043-4f0f-a797-29a785f39084"));
     }

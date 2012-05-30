@@ -29,19 +29,19 @@ public class UserManagerTestCase {
 
     private UUID userId;
 
-    @BeforeTest
+    @BeforeTest(enabled = false)
     public void setUp() throws UserManagerFactoryException {
         userManager = DefaultUserManagerFactory.getInstance().build();
         userId = UUID.randomUUID();
     }
 
-    @AfterTest
+    @AfterTest(enabled = false)
     public void tearDown() throws UserManagerException {
         userManager.deleteUser(userId);
         userManager = null;
     }
 
-    @Test
+    @Test(enabled = false)
     public void testUserCRUD() throws URISyntaxException, UserManagerException {
         User user = new User();
         user.setId(userId);
@@ -66,7 +66,7 @@ public class UserManagerTestCase {
         Assert.assertTrue(users.contains(userId));
     }
 
-    @Test
+    @Test(enabled = false)
     public void testActivityCRUD()
             throws URISyntaxException, UserManagerException, MalformedURLException {
         User user = new User();
@@ -104,7 +104,7 @@ public class UserManagerTestCase {
         Assert.assertEquals(1, actual.size());
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetToken() throws URISyntaxException, UserManagerException {
         User user = new User();
         user.setId(userId);

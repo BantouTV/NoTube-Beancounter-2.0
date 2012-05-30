@@ -11,12 +11,12 @@ public class DefaultProfilerFactoryTestCase {
 
     private DefaultProfilerImpl profiler;
 
-    @BeforeTest
+    @BeforeTest(enabled = false)
     public void setUp() {
         profiler = DefaultProfilerFactory.getInstance().build();
     }
 
-    @Test
+    @Test(enabled = false)
     public void test() {
         Assert.assertNotNull(profiler);
     }

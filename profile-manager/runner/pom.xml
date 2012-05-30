@@ -58,11 +58,6 @@
             <artifactId>profiling-line-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>tv.notube.synch</groupId>
-            <artifactId>client</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
         <!--
         <dependency>
             <groupId>tv.notube.extensions</groupId>

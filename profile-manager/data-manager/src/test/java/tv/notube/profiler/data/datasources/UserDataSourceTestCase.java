@@ -29,7 +29,7 @@ public class UserDataSourceTestCase {
 
     private UUID userId;
 
-    @BeforeTest
+    @BeforeTest(enabled = false)
     public void setUp() throws DataSourceException, UserManagerFactoryException, URISyntaxException, UserManagerException {
         userManager = DefaultUserManagerFactory.getInstance().build();
         userId = initUserManager(userManager);
@@ -52,13 +52,13 @@ public class UserDataSourceTestCase {
         return userId;
     }
 
-    @AfterTest
+    @AfterTest(enabled = false)
     public void tearDown() throws DataSourceException {
         dataSource.dispose();
         dataSource = null;
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetRawData() throws DataSourceException, UserManagerException {
         RawDataSet<UserActivities> rawData = dataSource.getRawData();
         Assert.assertNotNull(rawData);

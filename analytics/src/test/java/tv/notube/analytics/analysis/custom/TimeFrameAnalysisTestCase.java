@@ -44,7 +44,7 @@ public class TimeFrameAnalysisTestCase {
         timeFrameAnalysis.registerQuery(query);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testRun() throws AnalysisException {
         AnalysisResult analysisResult =
                 timeFrameAnalysis.run("user-manager-8c33b0e6-d3cf-4909-b04c-df93056e64a8");

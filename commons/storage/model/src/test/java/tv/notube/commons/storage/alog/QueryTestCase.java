@@ -12,7 +12,7 @@ import tv.notube.commons.storage.model.Query;
  */
 public class QueryTestCase {
 
-    @Test
+    @Test(enabled = false)
     public void testCompile() {
         final String expected = "stringfield.name = 'name' AND stringfield" +
                 ".value = 'Davide' OR integerfield.name = 'age' AND " +
@@ -26,7 +26,7 @@ public class QueryTestCase {
         Assert.assertEquals(query.compile(), expected);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testDecompile() throws QueryException {
         final String actual = "integer.newRecommendations = 0 OR     string" +
                 ".name =       Mazzini";

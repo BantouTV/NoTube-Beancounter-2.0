@@ -17,7 +17,7 @@ import java.net.URL;
  */
 public class BeanMapperTestCase {
 
-    @Test
+    @Test(enabled = false)
     public void testFieldsMapping() throws MalformedURLException, BeanMapperException {
         BeanMapper<TestObject> bm = new BeanMapper<TestObject>();
         TestObject expected = new TestObject();

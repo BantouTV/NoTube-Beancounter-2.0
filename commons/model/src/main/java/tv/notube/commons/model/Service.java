@@ -1,5 +1,7 @@
 package tv.notube.commons.model;
 
+import tv.notube.commons.tests.annotations.Random;
+
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -24,6 +26,14 @@ public class Service implements Serializable {
     private String authRequest;
 
     private URL sessionEndpoint;
+
+    @Random(names = {"name", "description", "secret", "authRequest"})
+    public Service(String name, String description, String secret, String authRequest) {
+        this.name = name;
+        this.description = description;
+        this.secret = secret;
+        this.authRequest = authRequest;
+    }
 
     public Service(String name) {
         this.name = name;

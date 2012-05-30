@@ -2,6 +2,8 @@ package tv.notube.crawler;
 
 import com.google.inject.Inject;
 import org.apache.log4j.Logger;
+import tv.notube.crawler.requester.DefaultRequester;
+import tv.notube.crawler.requester.Requester;
 import tv.notube.crawler.runnable.Spider;
 import tv.notube.crawler.runnable.SpiderException;
 import tv.notube.usermanager.UserManager;
@@ -21,9 +23,15 @@ public class ParallelCrawlerImpl extends AbstractCrawler {
 
     private ExecutorService executor = Executors.newCachedThreadPool();
 
+    private Requester requester;
+
     @Inject
-    public ParallelCrawlerImpl(UserManager userManager) {
+    public ParallelCrawlerImpl(
+            UserManager userManager,
+            Requester requester)
+    {
         super(userManager);
+        this.requester = requester;
     }
 
     public Report crawl() throws CrawlerException {
@@ -42,9 +50,10 @@ public class ParallelCrawlerImpl extends AbstractCrawler {
                 count++;
                 try {
                     executor.submit(new Spider(
-                            "spider-" + id.toString(),
+                            "runnable-" + id.toString(),
                             getUserManager(),
-                            id)
+                            id,
+                            requester)
                     );
                 } catch (SpiderException e) {
                     final String errMsg = "Error while instantiating Job '" + id.toString() + "'";
@@ -53,6 +62,7 @@ public class ParallelCrawlerImpl extends AbstractCrawler {
                 }
             }
         }
+        executor.shutdown();
         long end = System.currentTimeMillis();
         return new Report(count, start, end);
     }
@@ -61,9 +71,10 @@ public class ParallelCrawlerImpl extends AbstractCrawler {
         Spider spider;
         try {
             spider = new Spider(
-                    "spider-single-" + userId.toString(),
+                    "runnable-single-" + userId.toString(),
                     getUserManager(),
-                    userId
+                    userId,
+                    requester
             );
         } catch (SpiderException e) {
             throw new CrawlerException(
@@ -76,4 +87,9 @@ public class ParallelCrawlerImpl extends AbstractCrawler {
         long end = System.currentTimeMillis();
         return new Report(1, start, end);
     }
+
+    public boolean isCompleted() {
+        return executor.isTerminated();
+    }
+
 }

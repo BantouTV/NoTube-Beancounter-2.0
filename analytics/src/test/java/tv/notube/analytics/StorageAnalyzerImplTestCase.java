@@ -38,7 +38,7 @@ public class StorageAnalyzerImplTestCase {
 
     private Analyzer analyzer;
 
-    @BeforeTest
+    @BeforeTest(enabled = false)
     public void setUp() throws AnalysisException, AnalyzerException {
         analyzer = getAnalyzer();
         MethodDescription getAmount;
@@ -128,7 +128,7 @@ public class StorageAnalyzerImplTestCase {
         return new DefaultAnalyzerImpl(kvs, alog);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testExecution() throws AnalyzerException {
         AnalysisDescription analysisDescriptions[] =
                 analyzer.getRegisteredAnalysis();

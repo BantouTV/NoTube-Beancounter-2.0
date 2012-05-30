@@ -20,7 +20,7 @@ public class ActivityLogTestCase extends AbstractJerseyTestCase {
         super(9995);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetActivities() throws IOException {
         final String baseQuery = "activities/%s";
         final String owner = "recommender";
@@ -43,7 +43,7 @@ public class ActivityLogTestCase extends AbstractJerseyTestCase {
         assert result == HttpStatus.SC_OK : "Unexpected result: \n" + result;
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetActivitiesWithNoQuery() throws IOException {
         final String baseQuery = "activities/%s";
         final String owner = "recommender";
@@ -64,7 +64,7 @@ public class ActivityLogTestCase extends AbstractJerseyTestCase {
         assert result == HttpStatus.SC_OK : "Unexpected result: \n" + result;
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetFields() throws IOException {
         final String baseQuery = "activities/fields/%s";
         final UUID activityID = UUID.fromString("0921bffc-1759-41d8-9b2c-726f50a3c511");

@@ -25,7 +25,7 @@ public class ConfigurationManagerTestCase {
         configurationManager = null;
     }
 
-    @Test
+    @Test(enabled = false)
     public void testGetConfigurations() {
         KVStoreConfiguration KVStoreConfiguration =
                 configurationManager.getKVStoreConfiguration();
