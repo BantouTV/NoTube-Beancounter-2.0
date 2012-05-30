@@ -4,3 +4,7 @@
 *.iml
 *.ipr
 .idea/
+
+# Eclipse files
+*.project
+*.settings
