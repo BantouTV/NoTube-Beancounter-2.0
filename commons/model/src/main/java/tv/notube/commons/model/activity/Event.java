@@ -1,6 +1,5 @@
 package tv.notube.commons.model.activity;
 
-import com.google.gson.annotations.Expose;
 import org.joda.time.DateTime;
 
 /**
@@ -8,13 +7,10 @@ import org.joda.time.DateTime;
  */
 public class Event extends tv.notube.commons.model.activity.Object {
 
-    @Expose
     private DateTime start;
 
-    @Expose
     private DateTime end;
 
-    @Expose
     private String summary;
 
     public DateTime getStart() {

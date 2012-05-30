@@ -1,7 +1,5 @@
 package tv.notube.commons.model.auth;
 
-import com.google.gson.annotations.Expose;
-
 import java.io.Serializable;
 
 /**
@@ -13,7 +11,6 @@ public abstract class Auth implements Serializable {
 
     private static final long serialVersionUID = 11251145235L;
 
-    @Expose
     private String session;
 
     public Auth(String session) {

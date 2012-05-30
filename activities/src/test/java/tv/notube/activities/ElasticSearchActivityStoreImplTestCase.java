@@ -11,6 +11,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.joda.time.DateTime;
 import org.testng.annotations.AfterClass;
@@ -27,20 +28,19 @@ import tv.notube.commons.model.activity.Verb;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertNull;
 import static tv.notube.activities.ElasticSearchActivityStoreImpl.INDEX_NAME;
 import static tv.notube.activities.ElasticSearchActivityStoreImpl.INDEX_TYPE;
 
 /**
- * put class description here
- *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
+ * @author Alex Cowell ( alxcwll@gmail.com )
  */
 public class ElasticSearchActivityStoreImplTestCase {
 
@@ -70,6 +70,8 @@ public class ElasticSearchActivityStoreImplTestCase {
     @AfterClass
     public void afterClass() throws Exception {
         node.close();
+
+        // TODO: Remove the ES data dir
     }
 
     @BeforeTest
@@ -83,6 +85,7 @@ public class ElasticSearchActivityStoreImplTestCase {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void storeASingleTweetForAUser() throws Exception {
         clearIndices();
 
@@ -99,7 +102,9 @@ public class ElasticSearchActivityStoreImplTestCase {
                 "Test",
                 fields
         );
-        ab.setContext(new DateTime(), new URL("http://twitter.com"));
+        DateTime dateTime = new DateTime();
+        String serviceUrl = "http://twitter.com";
+        ab.setContext(dateTime, new URL(serviceUrl));
 
         as.store(userId, ab.pop());
 
@@ -111,12 +116,32 @@ public class ElasticSearchActivityStoreImplTestCase {
 
         SearchHits hits = searchResponse.getHits();
         assertEquals(hits.getTotalHits(), 1);
-        assertEquals(hits.getAt(0).getType(), INDEX_TYPE);
-        assertEquals(hits.getAt(0).getSource().get("userId").toString(), userId.toString());
-        assertEquals(hits.getAt(0).getSource().get("setText").toString(), "This is a test tweet!");
+
+        SearchHit hit = hits.getAt(0);
+        assertEquals(hit.getType(), INDEX_TYPE);
+
+        Map<String, Object> source = hit.getSource();
+        assertEquals(source.get("userId"), userId.toString());
+        assertEquals(source.get("verb"), String.valueOf(Verb.TWEET));
+
+        Map<String, Object> object = (Map<String, Object>) source.get("object");
+        assertEquals(object.size(), 6);
+        assertEquals(object.get("text"), "This is a test tweet!");
+        assertEquals(object.get("url"), "http://twitter.com/#!/test-user/status/175538466216611841");
+        assertEquals(object.get("hashTags"), Collections.emptyList());
+        assertEquals(object.get("urls"), Collections.emptyList());
+        assertEquals(object.get("name"), "Test");
+        assertNull(object.get("description"));
+
+        Map<String, Object> context = (Map<String, Object>) source.get("context");
+        assertEquals(context.size(), 3);
+        assertEquals(context.get("date"), dateTime.getMillis());
+        assertEquals(context.get("service"), serviceUrl);
+        assertNull(context.get("mood"));
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void storeMultipleTweetsForAUser() throws Exception {
         clearIndices();
 
@@ -125,6 +150,9 @@ public class ElasticSearchActivityStoreImplTestCase {
         int numTweets = 5;
         ActivityBuilder ab = new DefaultActivityBuilder();
         Collection<Activity> activities = new ArrayList<Activity>(numTweets);
+
+        DateTime dateTime = new DateTime();
+        String serviceUrl = "http://twitter.com";
 
         for (int i = 0; i < numTweets; i++) {
             ab.push();
@@ -137,7 +165,7 @@ public class ElasticSearchActivityStoreImplTestCase {
                     "Test",
                     fields
             );
-            ab.setContext(new DateTime(), new URL("http://twitter.com"));
+            ab.setContext(dateTime, new URL(serviceUrl));
             activities.add(ab.pop());
         }
 
@@ -148,11 +176,70 @@ public class ElasticSearchActivityStoreImplTestCase {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(QueryBuilders.matchAllQuery())
                 .execute().actionGet();
-        assertEquals(searchResponse.getHits().getTotalHits(), 5);
+
+        SearchHits hits = searchResponse.getHits();
+        assertEquals(hits.getTotalHits(), numTweets);
+
+        for (int i = 0; i < numTweets; i++) {
+            SearchHit hit = hits.getAt(i);
+            assertEquals(hit.getType(), INDEX_TYPE);
+
+            Map<String, Object> source = hit.getSource();
+            assertEquals(source.get("userId"), userId.toString());
+            assertEquals(source.get("verb"), String.valueOf(Verb.TWEET));
+
+            Map<String, Object> object = (Map<String, Object>) source.get("object");
+            String url = (String) object.get("url");
+            int tweetNumber = Integer.valueOf(url.substring(url.length() - 1), 10);
+            assertEquals(object.size(), 6);
+            assertEquals(object.get("text"), "This is test tweet number " + tweetNumber + "!");
+            assertEquals(url, "http://twitter.com/#!/test-user/status/17553846621661184" + tweetNumber);
+            assertEquals(object.get("hashTags"), Collections.emptyList());
+            assertEquals(object.get("urls"), Collections.emptyList());
+            assertEquals(object.get("name"), "Test");
+            assertNull(object.get("description"));
+
+            Map<String, Object> context = (Map<String, Object>) source.get("context");
+            assertEquals(context.size(), 3);
+            assertEquals(context.get("date"), dateTime.getMillis());
+            assertEquals(context.get("service"), serviceUrl);
+            assertNull(context.get("mood"));
+        }
+    }
+
+    @Test
+    public void getLatestTweetByAUserGivenTheyHaveOneTweet() throws Exception {
+        clearIndices();
+
+        UUID userId = UUID.randomUUID();
+        ActivityBuilder ab = new DefaultActivityBuilder();
+
+        ab.push();
+        ab.setVerb(Verb.TWEET);
+        Map<String, Object> fields = new HashMap<String, Object>();
+        fields.put("setText", "This is a test tweet!");
+        ab.setObject(
+                Tweet.class,
+                new URL("http://twitter.com/#!/test-user/status/175538466216611841"),
+                "Test",
+                fields
+        );
+        DateTime dateTime = new DateTime();
+        String serviceUrl = "http://twitter.com";
+        ab.setContext(dateTime, new URL(serviceUrl));
+
+        as.store(userId, ab.pop());
+
+        // Refresh to ensure the addition was committed.
+        client.admin().indices().refresh(new RefreshRequest(INDEX_NAME)).actionGet();
+
+        Collection<Activity> activities = as.getByUser(userId, 1);
+        assertEquals(activities.size(), 1);
     }
 
     @Test
     public void testCRUD() throws Exception {
+        // TODO
         final UUID userId = UUID.randomUUID();
     }
 

@@ -1,10 +1,6 @@
 package tv.notube.profiler;
 
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import tv.notube.commons.configuration.Configurations;
-import tv.notube.commons.model.activity.*;
-import tv.notube.profiler.container.DefaultProfilingLineContainer;
 import tv.notube.profiler.container.ProfilingLineContainer;
 import tv.notube.profiler.storage.ProfileStore;
 
@@ -24,7 +20,7 @@ public class ProfilerRunnableTestCase {
 
     @Test
     public void test() throws ProfilerException {
-        Profiler profiler = DefaultProfilerFactory.getInstance().build();
+        DefaultProfilerImpl profiler = DefaultProfilerFactory.getInstance().build();
         ProfileStore ps = profiler.getProfileStore();
         ProfilingLineContainer plContainer = profiler.getProfilingContainer();
         Object o = profiler.getObject(userId);

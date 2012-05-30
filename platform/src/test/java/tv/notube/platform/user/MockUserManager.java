@@ -1,13 +1,23 @@
 package tv.notube.platform.user;
 
+import org.joda.time.DateTime;
 import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
+import tv.notube.commons.model.activity.*;
+import tv.notube.commons.model.activity.bbc.BBCProgramme;
+import tv.notube.commons.model.activity.bbc.GenreBuilder;
 import tv.notube.commons.model.activity.Activity;
+import tv.notube.commons.model.auth.OAuthAuth;
+import tv.notube.commons.model.auth.SimpleAuth;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.UserManagerException;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,7 +29,7 @@ import java.util.UUID;
 public class MockUserManager implements UserManager {
 
     @Override
-    public void storeUser(User user) throws UserManagerException { }
+    public void storeUser(User user) throws UserManagerException {}
 
     @Override
     public User getUser(UUID userId) throws UserManagerException {
@@ -28,28 +38,47 @@ public class MockUserManager implements UserManager {
 
     @Override
     public User getUser(String username) throws UserManagerException {
-        return (username.equals("NotExistingUser") ? null : new User());
+        return username.equals("test-user") ? getTestUser("test-user") : null;
+    }
+
+    private User getTestUser(String username) {
+        User user = new User();
+        try {
+            user.setReference(new URI("http://notube.tv/" + user.getId()));
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        user.setUsername(username);
+        user.setForcedProfiling(false);
+        user.setName("Fake Name");
+        user.setSurname("Fake Surname");
+        user.setPassword("abc");
+        user.setProfiledAt(DateTime.now());
+        user.addService("fake-service-1", new SimpleAuth("fake-session", "fake-username"));
+        user.addService("fake-service-2", new OAuthAuth("fake-session", "fake-secret"));
+        return user;
     }
 
     @Override
-    public void storeUserActivities(UUID userId, List<Activity> activities) throws UserManagerException {
+    public void storeUserActivities(UUID userId, List<Activity> activities)
+            throws UserManagerException {
         throw new UnsupportedOperationException("NIY");
     }
 
     @Override
-    public List<Activity> getUserActivities(UUID userId) throws UserManagerException {
+    public List<Activity> getUserActivities(UUID userId)
+            throws UserManagerException {
+        return getActivities();
+    }
+
+    @Override
+    public List<Activity> getUserActivities(String username)
+            throws UserManagerException {
         throw new UnsupportedOperationException("NIY");
     }
 
     @Override
-    public List<Activity> getUserActivities(String username) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
-    }
-
-    @Override
-    public void deleteUser(UUID userId) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
-    }
+    public void deleteUser(UUID userId) throws UserManagerException {}
 
     @Override
     public List<UUID> getUsersToBeProfiled() throws UserManagerException {
@@ -62,37 +91,93 @@ public class MockUserManager implements UserManager {
     }
 
     @Override
-    public OAuthToken getOAuthToken(String service, String username) throws UserManagerException {
+    public OAuthToken getOAuthToken(String service, String username)
+            throws UserManagerException {
+        try {
+            return new OAuthToken(new URL("http://testurl.com/"));
+        } catch (MalformedURLException e) {
+            // it never happens
+        } return null;
+    }
+
+    @Override
+    public void registerService(String service, User user, String token)
+            throws UserManagerException { }
+
+    @Override
+    public void registerOAuthService(String service, User user, String token, String verifier)
+            throws UserManagerException { }
+
+    @Override
+    public ServiceAuthorizationManager getServiceAuthorizationManager()
+            throws UserManagerException {
         throw new UnsupportedOperationException("NIY");
     }
 
     @Override
-    public void registerService(String service, User user, String token) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
-    }
+    public void deregisterService(String service, User userObj)
+            throws UserManagerException { }
 
     @Override
-    public void registerOAuthService(String service, User user, String token, String verifier) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
-    }
+    public void setUserFinalRedirect(String username, URL url)
+            throws UserManagerException {}
 
     @Override
-    public ServiceAuthorizationManager getServiceAuthorizationManager() throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
+    public URL consumeUserFinalRedirect(String username)
+            throws UserManagerException {
+        try {
+            return new URL("http://testurl.com/");
+        } catch (MalformedURLException e) {
+            // it never happens
+        } return null;
     }
 
-    @Override
-    public void deregisterService(String service, User userObj) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
-    }
-
-    @Override
-    public void setUserFinalRedirect(String username, URL url) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
-    }
-
-    @Override
-    public URL consumeUserFinalRedirect(String username) throws UserManagerException {
-        throw new UnsupportedOperationException("NIY");
+    protected List<Activity> getActivities() {
+        List<Activity> activities = new ArrayList<Activity>();
+        Song s = new Song();
+        s.setName("Song Name");
+        s.setDescription("Just a fake song");
+        s.setMbid("3278462378462");
+        Activity a1 = new Activity(
+                Verb.LIKE,
+                s,
+                new Context(DateTime.now())
+        );
+        BBCProgramme p = new BBCProgramme();
+        try {
+            p.addGenre(GenreBuilder.getInstance().lookup(new URL("http://www.bbc.co.uk/programmes/genres/sport#genre")));
+        } catch (MalformedURLException e) {
+            // never happens
+        }
+        p.addActor("Pippo Franco");
+        p.addActor("Marisa Laurito");
+        p.setMediumSynopsis("just a fake BBC programme");
+        Activity a2 = new Activity(
+                Verb.LISTEN,
+                p,
+                new Context(DateTime.now())
+        );
+        Tweet t = new Tweet();
+        t.setText("just #fake tweet check it http://t.com/3423");
+        t.setName("fake tweet name");
+        try {
+            t.setUrl(new URL("http://twitter.com/2347223423/32"));
+        } catch (MalformedURLException e) {
+            // never happens
+        }
+        t.addHashTag("fake");
+        try {
+            t.addUrl(new URL("http://t.com/3423"));
+        } catch (MalformedURLException e) {
+            // never happens
+        }
+        Activity a3= new Activity(
+                Verb.LISTEN,
+                t,
+                new Context(DateTime.now()));
+        activities.add(a1);
+        activities.add(a2);
+        activities.add(a3);
+        return activities;
     }
 }

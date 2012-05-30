@@ -2,9 +2,7 @@ package tv.notube.commons.model.activity;
 
 import org.joda.time.DateTime;
 
-import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.Map;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )

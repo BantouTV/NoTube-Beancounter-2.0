@@ -1,13 +1,46 @@
 package tv.notube.platform;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * This is the most generic response the REST platform is able to deliver.
  *
  * @author Enrico Candino ( enrico.candino@gmail.com )
  * @see {@link javax.xml.bind.annotation.XmlRootElement}
  */
-public interface PlatformResponse<T> {
+public abstract class PlatformResponse<T> {
 
-    public T getObject();
+    public enum Status {
+        OK,
+        NOK
+    }
+
+    private Status status;
+
+    private String message;
+
+    public PlatformResponse() {}
+
+    public PlatformResponse(Status status, String message) {
+        this.status = status;
+        this.message = message;
+    }
+
+    public PlatformResponse(String message) {
+        this(Status.OK, message);
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public abstract T getObject();
 
 }

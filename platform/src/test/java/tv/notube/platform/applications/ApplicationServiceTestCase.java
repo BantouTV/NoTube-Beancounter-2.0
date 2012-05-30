@@ -3,11 +3,7 @@ package tv.notube.platform.applications;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.params.DefaultHttpParams;
-import org.apache.commons.httpclient.params.HttpClientParams;
-import org.apache.http.params.HttpParams;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import tv.notube.platform.AbstractJerseyTestCase;
@@ -42,12 +38,12 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"Application 'Fake_Name' successfully registered\",\"object\":\"APIKEY\",\"status\":\"OK\"}");
+        Assert.assertEquals(responseBody, "{\"object\":\"APIKEY\",\"message\":\"Application 'Fake_Name' successfully registered\",\"status\":\"OK\"}");
     }
 
     @Test
     public void testDeregister() throws IOException {
-        final String baseQuery = "application/Fake_Name";
+        final String baseQuery = "application/test-user";
         DeleteMethod deleteMethod = new DeleteMethod(base_uri + baseQuery);
         HttpClient client = new HttpClient();
         int result = client.executeMethod(deleteMethod);
@@ -55,7 +51,7 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"Application 'Fake_Name' successfully removed\",\"status\":\"OK\"}");
+        Assert.assertEquals(responseBody, "{\"message\":\"Application 'test-user' successfully removed\",\"status\":\"OK\"}");
     }
 
 }

@@ -1,8 +1,10 @@
 package tv.notube.commons.model.activity;
 
-import com.google.gson.annotations.Expose;
 import org.joda.time.DateTime;
+import tv.notube.commons.model.activity.adapters.DateTimeAdapterJAXB;
 
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.lang.*;
 import java.lang.Object;
@@ -11,19 +13,24 @@ import java.net.URL;
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
+@XmlRootElement
 public class Context implements Serializable {
 
     private static final long serialVersionUID = 325277757335L;
 
-    @Expose
     private DateTime date;
 
-    @Expose
     private URL service;
 
-    @Expose
     private String mood;
 
+    public Context() {}
+
+    public Context(DateTime d) {
+        date = d;
+    }
+
+    @XmlJavaTypeAdapter(DateTimeAdapterJAXB.class)
     public DateTime getDate() {
         return date;
     }

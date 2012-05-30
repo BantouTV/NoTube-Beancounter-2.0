@@ -98,7 +98,6 @@ public class KVProfileStoreImplTestCase {
         Assert.assertNotNull(actual);
         Assert.assertEquals(expected, actual);
         Assert.assertEquals(actual.getTypes().size(), 1);
-        Assert.assertEquals(actual.getTypes().get(0).getInterests().size(), 1);
 
         profileStore.deleteUserProfile(username);
         actual = profileStore.getUserProfile(username);

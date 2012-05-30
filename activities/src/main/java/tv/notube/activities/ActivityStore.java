@@ -16,6 +16,7 @@ import java.util.UUID;
 public interface ActivityStore {
 
     /**
+     * Store a single {@link Activity}, committing it immediately.
      *
      * @param userId
      * @param activity
@@ -24,6 +25,7 @@ public interface ActivityStore {
     public void store(final UUID userId, final Activity activity) throws ActivityStoreException;
 
     /**
+     * Stores a bulk of {@link Activity} committing them all.
      *
      * @param userId
      * @param activities

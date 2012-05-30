@@ -1,7 +1,5 @@
 package tv.notube.commons.model.activity;
 
-import com.google.gson.annotations.Expose;
-
 import java.io.Serializable;
 
 /**
@@ -11,14 +9,19 @@ public class Activity implements Serializable {
 
     private static final long serialVersionUID = 68843445235L;
 
-    @Expose
     private Verb verb;
 
-    @Expose
     private tv.notube.commons.model.activity.Object object;
 
-    @Expose
     private Context context;
+
+    public Activity() {}
+
+    public Activity(Verb v, Object obj, Context c) {
+        verb = v;
+        object = obj;
+        context = c;
+    }
 
     public Verb getVerb() {
         return verb;

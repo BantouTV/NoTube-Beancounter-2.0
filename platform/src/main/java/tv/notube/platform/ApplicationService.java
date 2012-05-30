@@ -4,10 +4,11 @@ import com.google.inject.Inject;
 import tv.notube.applications.Application;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
-import tv.notube.platform.responses.PlatformResponseString;
+import tv.notube.platform.responses.StringPlatformResponse;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -27,7 +28,7 @@ public class ApplicationService {
 
     @POST
     @Path("/register")
-    public PlatformResponseString register(
+    public Response register(
             @FormParam("name") String name,
             @FormParam("description") String description,
             @FormParam("email") String email,
@@ -51,16 +52,19 @@ public class ApplicationService {
                     e
             );
         }
-        return new PlatformResponseString(
-                PlatformResponseString.Status.OK,
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(new StringPlatformResponse(
+                StringPlatformResponse.Status.OK,
                 "Application '" + name + "' successfully registered",
-                apiKey
+                apiKey)
         );
+        return rb.build();
+
     }
 
     @DELETE
     @Path("/{name}")
-    public PlatformResponseString deregisterApplication(
+    public Response deregisterApplication(
             @PathParam("name") String name
     ) {
         try {
@@ -71,10 +75,12 @@ public class ApplicationService {
                     e
             );
         }
-        return new PlatformResponseString(
-                PlatformResponseString.Status.OK,
-                "Application '" + name + "' successfully removed"
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(new StringPlatformResponse(
+                StringPlatformResponse.Status.OK,
+                "Application '" + name + "' successfully removed")
         );
+        return rb.build();
     }
 
 }

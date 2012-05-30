@@ -1,6 +1,5 @@
 package tv.notube.commons.configuration.analytics;
 
-import com.google.gson.annotations.Expose;
 import tv.notube.commons.storage.model.Query;
 
 import java.io.Serializable;
@@ -16,10 +15,8 @@ import java.util.Set;
  */
 public class AnalysisDescription implements Serializable {
 
-    @Expose
     public String name;
 
-    @Expose
     public String description;
 
     private Query query;
@@ -28,7 +25,6 @@ public class AnalysisDescription implements Serializable {
 
     private String resultClassName;
 
-    @Expose
     private Set<MethodDescription> methodDescriptions = new HashSet<MethodDescription>();
 
     public AnalysisDescription() {}

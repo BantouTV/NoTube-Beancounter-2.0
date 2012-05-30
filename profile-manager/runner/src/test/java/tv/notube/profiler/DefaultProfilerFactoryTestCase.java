@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
  */
 public class DefaultProfilerFactoryTestCase {
 
-    private Profiler profiler;
+    private DefaultProfilerImpl profiler;
 
     @BeforeTest
     public void setUp() {

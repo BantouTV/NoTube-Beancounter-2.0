@@ -58,7 +58,7 @@ public class MockApplicationsManager implements ApplicationsManager {
     @Override
     public boolean isAuthorized(String apiKey, UUID resource, Permission.Action action)
             throws ApplicationsManagerException {
-        throw new UnsupportedOperationException("NIY");
+        return true;
     }
 
     @Override

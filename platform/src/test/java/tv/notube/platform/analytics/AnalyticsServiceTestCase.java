@@ -36,13 +36,26 @@ public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"analysis found\",\"object\":[{\"name\":\"test-analysis-1\",\"description\":\"fake analysis 1\"},{\"name\":\"test-analysis-2\",\"description\":\"fake analysis 2\"}],\"status\":\"OK\"}");
+        Assert.assertEquals(responseBody, "{\"object\":[{\"name\":\"test-analysis-1\",\"className\":\"tv.notube.platform.analytics.FakeOne\",\"query\":{\"complete\":false},\"description\":\"fake analysis 1\",\"resultClassName\":\"tv.notube.platform.analytics.FakeOneResult\",\"methodDescriptions\":[{\"name\":\"getFakeSomething\",\"parameterTypes\":[],\"description\":\"the same fake method with no parameters\"},{\"name\":\"getFakeSomething\",\"parameterTypes\":[\"java.lang.Integer\"],\"description\":\"just a fake method\"}]},{\"name\":\"test-analysis-2\",\"className\":\"com.test.fake.Second\",\"query\":{\"complete\":false},\"description\":\"fake analysis 2\",\"resultClassName\":\"com.test.fake.second.Result\",\"methodDescriptions\":[{\"name\":\"getAnotherFakeSomething\",\"parameterTypes\":[\"java.lang.String\",\"java.lang.Boolean\"],\"description\":\"just a another fake method\"}]}],\"message\":\"analysis found\",\"status\":\"OK\"}");
     }
 
     @Test
-    public void testGetAnalysisDescription() {
-        // TODO: test with asserts method getAnalysisDescripton
-        Assert.assertTrue(false);
+    public void testGetAnalysisDescription() throws IOException {
+        final String baseQuery = "analytics/analysis/%s?apikey=%s";
+        final String username = "test-user";
+        final String query = String.format(
+                baseQuery,
+                username,
+                APIKEY
+        );
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        Assert.assertEquals(responseBody, "{\"object\":{\"name\":\"test-analysis-1\",\"className\":\"tv.notube.platform.analytics.FakeOne\",\"query\":{\"complete\":false},\"description\":\"fake analysis 1\",\"resultClassName\":\"tv.notube.platform.analytics.FakeOneResult\",\"methodDescriptions\":[{\"name\":\"getFakeSomething\",\"parameterTypes\":[],\"description\":\"the same fake method with no parameters\"},{\"name\":\"getFakeSomething\",\"parameterTypes\":[\"java.lang.Integer\"],\"description\":\"just a fake method\"}]},\"message\":\"analysis description\",\"status\":\"OK\"}");
     }
 
     @Test
@@ -70,7 +83,7 @@ public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
         logger.info("method: " + getMethod.getName() + " at uri: " + base_uri + query);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"analysis result\",\"object\":\"hey, [5] is your fake.\",\"status\":\"OK\"}");
+        Assert.assertEquals(responseBody, "{\"object\":\"hey, [5] is your fake.\",\"message\":\"analysis result\",\"status\":\"OK\"}");
     }
 
     @Test
@@ -98,7 +111,7 @@ public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
         logger.info("method: " + getMethod.getName() + " at uri: " + base_uri + query);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"Analysis result method not found\",\"object\":\"method not found\",\"status\":\"NOK\"}");
+        Assert.assertEquals(responseBody, "{\"object\":\"method not found\",\"message\":\"Analysis result method not found\",\"status\":\"NOK\"}");
     }
 
     @Test
@@ -123,6 +136,6 @@ public class AnalyticsServiceTestCase extends AbstractJerseyTestCase {
         logger.info("method: " + getMethod.getName() + " at uri: " + base_uri + query);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"analysis result\",\"object\":\"hey, no parameters here.\",\"status\":\"OK\"}");
+        Assert.assertEquals(responseBody, "{\"object\":\"hey, no parameters here.\",\"message\":\"analysis result\",\"status\":\"OK\"}");
     }
 }
