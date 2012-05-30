@@ -7,15 +7,15 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-public class DateTimeAdapterJAXB extends XmlAdapter<String, DateTime> {
+public class DateTimeAdapterJAXB extends XmlAdapter<Long, DateTime> {
 
     @Override
-    public DateTime unmarshal(String s) throws Exception {
-        return new DateTime(s);
+    public DateTime unmarshal(Long l) throws Exception {
+        return new DateTime(l);
     }
 
     @Override
-    public String marshal(DateTime dateTime) throws Exception {
-        return dateTime.toString();
+    public Long marshal(DateTime dateTime) throws Exception {
+        return dateTime.getMillis();
     }
 }
