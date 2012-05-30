@@ -14,11 +14,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * put class description here
- *
- * @author Davide Palmisano ( dpalmisano@gmail.com )
- */
 public class MockUserManager implements UserManager {
 
     private Tests tests = TestsBuilder.build();

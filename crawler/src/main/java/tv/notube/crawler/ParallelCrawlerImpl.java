@@ -1,5 +1,6 @@
 package tv.notube.crawler;
 
+import com.google.inject.Inject;
 import org.apache.log4j.Logger;
 import tv.notube.crawler.runnable.Spider;
 import tv.notube.crawler.runnable.SpiderException;
@@ -20,6 +21,7 @@ public class ParallelCrawlerImpl extends AbstractCrawler {
 
     private ExecutorService executor = Executors.newCachedThreadPool();
 
+    @Inject
     public ParallelCrawlerImpl(UserManager userManager) {
         super(userManager);
     }

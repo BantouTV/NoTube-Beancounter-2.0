@@ -2,6 +2,7 @@ package tv.notube.commons.model;
 
 import org.joda.time.DateTime;
 import tv.notube.commons.model.auth.Auth;
+import tv.notube.commons.tests.annotations.Random;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,6 +33,19 @@ public class User extends Referenceable implements Serializable {
     private String password;
 
     private String username;
+
+    public User() {
+        super();
+    }
+
+    @Random(names = {"name", "surname", "username", "password"})
+    public User(String name, String surname, String username, String password) {
+        super();
+        this.name = name;
+        this.surname = surname;
+        this.username = username;
+        this.password = password;
+    }
 
     public String getName() {
         return name;
