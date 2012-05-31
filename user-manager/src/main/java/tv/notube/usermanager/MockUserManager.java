@@ -83,6 +83,7 @@ public class MockUserManager implements UserManager {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+        user.setId(userUUIDs.get(0));
         user.setUsername(username);
         user.setForcedProfiling(false);
         user.setName("Fake Name");

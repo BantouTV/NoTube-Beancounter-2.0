@@ -1,0 +1,947 @@
+2115 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpState, HttpConnection)
+2115 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpConnection)
+2115 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+2115 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.canResponseHaveBody(int)
+2116 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(String)
+2116 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(char[])
+2117 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable(int)
+2118 [main] WARN  org.apache.commons.httpclient.HttpMethodBase  - Going to buffer response body of large or unknown size. Using getResponseBodyAsStream instead is recommended.
+2118 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Buffering response body
+2119 [main] DEBUG httpclient.wire.content  - << "6"
+2119 [main] DEBUG httpclient.wire.content  - << "3"
+2119 [main] DEBUG httpclient.wire.content  - << "[\r]"
+2119 [main] DEBUG httpclient.wire.content  - << "[\n]"
+2119 [main] DEBUG httpclient.wire.content  - << "{"object":"MOCK-ERROR","message":"Error while retrieving profile for user 'status'","status":"NOK"}"
+2119 [main] DEBUG httpclient.wire.content  - << "[\r]"
+2119 [main] DEBUG httpclient.wire.content  - << "[\n]"
+2119 [main] DEBUG httpclient.wire.content  - << "0"
+2119 [main] DEBUG httpclient.wire.content  - << "[\r]"
+2119 [main] DEBUG httpclient.wire.content  - << "[\n]"
+2119 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+2119 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+2119 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+2119 [main] DEBUG httpclient.wire.content  - << "[\r]"
+2119 [main] DEBUG httpclient.wire.content  - << "[\n]"
+2119 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+2119 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Should close connection in response to directive: close
+2119 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.close()
+2119 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.closeSockedAndStreams()
+2120 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.releaseConnection()
+2120 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Releasing connection back to connection manager.
+2120 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - result code: 500
+2120 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - response body: {"object":"MOCK-ERROR","message":"Error while retrieving profile for user 'status'","status":"NOK"}
+0    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.useragent = Jakarta Commons-HttpClient/3.1
+3    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.protocol.version = HTTP/1.1
+5    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.connection-manager.class = class org.apache.commons.httpclient.SimpleHttpConnectionManager
+5    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.protocol.cookie-policy = default
+5    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.protocol.element-charset = US-ASCII
+5    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.protocol.content-charset = ISO-8859-1
+7    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.method.retry-handler = org.apache.commons.httpclient.DefaultHttpMethodRetryHandler@2a114025
+7    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.dateparser.patterns = [EEE, dd MMM yyyy HH:mm:ss zzz, EEEE, dd-MMM-yy HH:mm:ss zzz, EEE MMM d HH:mm:ss yyyy, EEE, dd-MMM-yyyy HH:mm:ss z, EEE, dd-MMM-yyyy HH-mm-ss z, EEE, dd MMM yy HH:mm:ss z, EEE dd-MMM-yyyy HH:mm:ss z, EEE dd MMM yyyy HH:mm:ss z, EEE dd-MMM-yyyy HH-mm-ss z, EEE dd-MMM-yy HH:mm:ss z, EEE dd MMM yy HH:mm:ss z, EEE,dd-MMM-yy HH:mm:ss z, EEE,dd-MMM-yyyy HH:mm:ss z, EEE, dd-MM-yyyy HH:mm:ss z]
+28   [main] DEBUG org.apache.commons.httpclient.methods.GetMethod  - enter GetMethod(String)
+30   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Java version: 1.6.0_31
+30   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Java vendor: Apple Inc.
+30   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Java class path: /Applications/IntelliJ IDEA 11 CE.app/plugins/testng/lib/testng.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/deploy.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/dt.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/javaws.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/jce.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/jconsole.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/management-agent.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/plugin.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/sa-jdi.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/charsets.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/classes.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/jsse.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/ui.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext/apple_provider.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext/dnsns.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext/localedata.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext/sunjce_provider.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext/sunpkcs11.jar:/Users/sourcesense/NoTube-Beancounter-2.0/platform/target/test-classes:/Users/sourcesense/NoTube-Beancounter-2.0/platform/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/user-manager/target/classes:/Users/sourcesense/.m2/repository/com/google/code/gson/gson/2.1/gson-2.1.jar:/Users/sourcesense/NoTube-Beancounter-2.0/commons/configuration/target/classes:/Users/sourcesense/.m2/repository/commons-configuration/commons-configuration/1.6/commons-configuration-1.6.jar:/Users/sourcesense/.m2/repository/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar:/Users/sourcesense/.m2/repository/commons-lang/commons-lang/2.4/commons-lang-2.4.jar:/Users/sourcesense/.m2/repository/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar:/Users/sourcesense/.m2/repository/commons-digester/commons-digester/1.8/commons-digester-1.8.jar:/Users/sourcesense/.m2/repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar:/Users/sourcesense/.m2/repository/commons-beanutils/commons-beanutils-core/1.8.0/commons-beanutils-core-1.8.0.jar:/Users/sourcesense/.m2/repository/log4j/log4j/1.2.16/log4j-1.2.16.jar:/Users/sourcesense/NoTube-Beancounter-2.0/commons/storage/kvs/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/commons/storage/model/target/classes:/Users/sourcesense/.m2/repository/joda-time/joda-time/2.0/joda-time-2.0.jar:/Users/sourcesense/.m2/repository/org/mybatis/mybatis/3.0.6/mybatis-3.0.6.jar:/Users/sourcesense/.m2/repository/mysql/mysql-connector-java/5.1.18/mysql-connector-java-5.1.18.jar:/Users/sourcesense/NoTube-Beancounter-2.0/commons/storage/alog/core/target/classes:/Users/sourcesense/.m2/repository/org/apache/httpcomponents/httpclient/4.1.2/httpclient-4.1.2.jar:/Users/sourcesense/.m2/repository/org/apache/httpcomponents/httpcore/4.1.2/httpcore-4.1.2.jar:/Users/sourcesense/.m2/repository/commons-codec/commons-codec/1.2/commons-codec-1.2.jar:/Users/sourcesense/.m2/repository/org/scribe/scribe/1.2.3/scribe-1.2.3.jar:/Users/sourcesense/NoTube-Beancounter-2.0/profile-manager/storage/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/profile-manager/profiling-line-api/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/commons/model/target/classes:/Users/sourcesense/.m2/repository/org/codehaus/jackson/jackson-jaxrs/1.8.4/jackson-jaxrs-1.8.4.jar:/Users/sourcesense/.m2/repository/org/codehaus/jackson/jackson-core-asl/1.7.1/jackson-core-asl-1.7.1.jar:/Users/sourcesense/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.7.1/jackson-mapper-asl-1.7.1.jar:/Users/sourcesense/NoTube-Beancounter-2.0/commons/tests/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/profile-manager/runner/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/profile-manager/data-manager/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/profile-manager/profiling-line-container/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/analytics/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/applications/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/crawler/target/classes:/Users/sourcesense/.m2/repository/org/openrdf/sesame/sesame-model/2.4.0/sesame-model-2.4.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-collections/2.8.0/aduna-commons-collections-2.8.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-concurrent/2.7.0/aduna-commons-concurrent-2.7.0.jar:/Users/sourcesense/.m2/repository/org/slf4j/slf4j-api/1.6.1/slf4j-api-1.6.1.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-io/2.10.0/aduna-commons-io-2.10.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-i18n/1.4.0/aduna-commons-i18n-1.4.0.jar:/Users/sourcesense/.m2/repository/org/openrdf/sesame/sesame-rio-api/2.4.0/sesame-rio-api-2.4.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-lang/2.9.0/aduna-commons-lang-2.9.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-net/2.7.0/aduna-commons-net-2.7.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-text/2.7.0/aduna-commons-text-2.7.0.jar:/Users/sourcesense/.m2/repository/org/openrdf/sesame/sesame-rio-rdfxml/2.4.0/sesame-rio-rdfxml-2.4.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-xml/2.7.0/aduna-commons-xml-2.7.0.jar:/Users/sourcesense/.m2/repository/com/rosaloves/bitlyj/2.0.0/bitlyj-2.0.0.jar:/Users/sourcesense/.m2/repository/com/google/inject/guice/2.0/guice-2.0.jar:/Users/sourcesense/.m2/repository/aopalliance/aopalliance/1.0/aopalliance-1.0.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/jersey-bundle/1.6/jersey-bundle-1.6.jar:/Users/sourcesense/.m2/repository/javax/ws/rs/jsr311-api/1.1.1/jsr311-api-1.1.1.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/jersey-json/1.6/jersey-json-1.6.jar:/Users/sourcesense/.m2/repository/org/codehaus/jettison/jettison/1.1/jettison-1.1.jar:/Users/sourcesense/.m2/repository/stax/stax-api/1.0.1/stax-api-1.0.1.jar:/Users/sourcesense/.m2/repository/com/sun/xml/bind/jaxb-impl/2.2.3-1/jaxb-impl-2.2.3-1.jar:/Users/sourcesense/.m2/repository/javax/xml/bind/jaxb-api/2.2.2/jaxb-api-2.2.2.jar:/Users/sourcesense/.m2/repository/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2.jar:/Users/sourcesense/.m2/repository/javax/activation/activation/1.1/activation-1.1.jar:/Users/sourcesense/.m2/repository/org/codehaus/jackson/jackson-xc/1.8.4/jackson-xc-1.8.4.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/jersey-core/1.6/jersey-core-1.6.jar:/Users/sourcesense/.m2/repository/asm/asm/3.1/asm-3.1.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/contribs/jersey-guice/1.6/jersey-guice-1.6.jar:/Users/sourcesense/.m2/repository/com/google/inject/extensions/guice-servlet/2.0/guice-servlet-2.0.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/jersey-grizzly2/1.6/jersey-grizzly2-1.6.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-http/2.0.1-b2/grizzly-http-2.0.1-b2.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-framework/2.0.1-b2/grizzly-framework-2.0.1-b2.jar:/Users/sourcesense/.m2/repository/org/glassfish/gmbal/gmbal-api-only/3.0.0-b023/gmbal-api-only-3.0.0-b023.jar:/Users/sourcesense/.m2/repository/org/glassfish/external/management-api/3.0.0-b012/management-api-3.0.0-b012.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-http-server/2.0.1-b2/grizzly-http-server-2.0.1-b2.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-rcm/2.0.1-b2/grizzly-rcm-2.0.1-b2.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-http-servlet/2.0.1-b2/grizzly-http-servlet-2.0.1-b2.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-framework/2.0.1-b2/grizzly-framework-2.0.1-b2-tests.jar:/Users/sourcesense/.m2/repository/org/glassfish/javax.servlet/3.0/javax.servlet-3.0.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/jersey-server/1.6/jersey-server-1.6.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-servlet-webserver/1.9.8/grizzly-servlet-webserver-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-http/1.9.8/grizzly-http-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-framework/1.9.8/grizzly-framework-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-utils/1.9.8/grizzly-utils-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-rcm/1.9.8/grizzly-rcm-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-portunif/1.9.8/grizzly-portunif-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-http-servlet/1.9.8/grizzly-http-servlet-1.9.8.jar:/Users/sourcesense/.m2/repository/javax/servlet/servlet-api/2.5/servlet-api-2.5.jar:/Users/sourcesense/.m2/repository/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar:/Users/sourcesense/.m2/repository/org/testng/testng/6.3/testng-6.3.jar:/Users/sourcesense/.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar:/Users/sourcesense/.m2/repository/org/beanshell/bsh/2.0b4/bsh-2.0b4.jar:/Users/sourcesense/.m2/repository/com/beust/jcommander/1.12/jcommander-1.12.jar:/Users/sourcesense/.m2/repository/org/yaml/snakeyaml/1.6/snakeyaml-1.6.jar:/Applications/IntelliJ IDEA 11 CE.app/plugins/testng/lib/testng-jdk15.jar:/Applications/IntelliJ IDEA 11 CE.app/lib/idea_rt.jar
+30   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Operating system name: Mac OS X
+30   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Operating system architecture: x86_64
+30   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Operating system version: 10.6.8
+48   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunPKCS11-Darwin 1.6: SunPKCS11 accessing Mac OS X SmartCardServices
+48   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SUN 1.6: SUN (DSA key/parameter generation; DSA signing; SHA-1, MD5 digests; SecureRandom; X.509 certificates; JKS keystore; PKIX CertPathValidator; PKIX CertPathBuilder; LDAP, Collection CertStores, JavaPolicy Policy; JavaLoginConfig Configuration)
+48   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Apple 1.0: Apple Provider (implements DES, Triple DES, AES, Blowfish, PBE, Diffie-Hellman, HMAC/MD5, HMAC/SHA1)
+48   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunRsaSign 1.5: Sun RSA signature provider
+48   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunJSSE 1.6: Sun JSSE provider(PKCS12, SunX509 key/trust factories, SSLv3, TLSv1)
+48   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunJCE 1.6: SunJCE Provider (implements RSA, DES, Triple DES, AES, Blowfish, ARCFOUR, RC2, PBE, Diffie-Hellman, HMAC)
+48   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunJGSS 1.0: Sun (Kerberos v5, SPNEGO)
+48   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunSASL 1.5: Sun SASL provider(implements client mechanisms for: DIGEST-MD5, GSSAPI, EXTERNAL, PLAIN, CRAM-MD5; server mechanisms for: DIGEST-MD5, GSSAPI, CRAM-MD5)
+48   [main] DEBUG org.apache.commons.httpclient.HttpClient  - XMLDSig 1.0: XMLDSig (DOM XMLSignatureFactory; DOM KeyInfoFactory)
+48   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunPCSC 1.6: Sun PC/SC provider
+53   [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HttpMethod)
+53   [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HostConfiguration,HttpMethod,HttpState)
+63   [main] DEBUG org.apache.commons.httpclient.HttpMethodDirector  - Attempt number 1 to process request
+63   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.open()
+63   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Open connection to localhost:9995
+64   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.execute(HttpState, HttpConnection)
+64   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequest(HttpState, HttpConnection)
+65   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestLine(HttpState, HttpConnection)
+65   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.generateRequestLine(HttpConnection, String, String, String, String)
+66   [main] DEBUG httpclient.wire.header  - >> "GET /analytics/analysis/test-analysis-1/8c33b0e6-d3cf-4909-b04c-df93056e64a8/getFakeSomething?apikey=APIKEY HTTP/1.1[\r][\n]"
+66   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+66   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+66   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+66   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestHeaders(HttpState,HttpConnection)
+66   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addRequestHeaders(HttpState, HttpConnection)
+66   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addUserAgentRequestHeaders(HttpState, HttpConnection)
+66   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addHostRequestHeader(HttpState, HttpConnection)
+66   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Adding Host request header
+67   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addCookieRequestHeader(HttpState, HttpConnection)
+79   [main] DEBUG org.apache.commons.httpclient.HttpState  - enter HttpState.getCookies()
+80   [main] DEBUG org.apache.commons.httpclient.cookie.CookieSpec  - enter CookieSpecBase.match(String, int, String, boolean, Cookie[])
+80   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addProxyConnectionHeader(HttpState, HttpConnection)
+80   [main] DEBUG httpclient.wire.header  - >> "User-Agent: Jakarta Commons-HttpClient/3.1[\r][\n]"
+80   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+80   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+80   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+80   [main] DEBUG httpclient.wire.header  - >> "Host: localhost:9995[\r][\n]"
+81   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+81   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+81   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+81   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.writeLine()
+81   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+81   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+81   [main] DEBUG httpclient.wire.header  - >> "[\r][\n]"
+81   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.flushRequestOutputStream()
+81   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponse(HttpState, HttpConnection)
+81   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readStatusLine(HttpState, HttpConnection)
+81   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.readLine()
+83   [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+83   [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1881 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 200 OK[\r][\n]"
+1881 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 200 OK[\r][\n]"
+1883 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseHeaders(HttpState,HttpConnection)
+1883 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1883 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1884 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1884 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1884 [main] DEBUG httpclient.wire.header  - << "server: grizzly/1.9.8[\r][\n]"
+1884 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1884 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1884 [main] DEBUG httpclient.wire.header  - << "Content-Type: application/json[\r][\n]"
+1884 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1884 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1884 [main] DEBUG httpclient.wire.header  - << "Transfer-Encoding: chunked[\r][\n]"
+1884 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1884 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1884 [main] DEBUG httpclient.wire.header  - << "Date: Thu, 31 May 2012 09:45:39 GMT[\r][\n]"
+1884 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1884 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1884 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1885 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processResponseHeaders(HttpState, HttpConnection)
+1885 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processCookieHeaders(Header[], HttpState, HttpConnection)
+1885 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpState, HttpConnection)
+1885 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpConnection)
+1885 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1885 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.canResponseHaveBody(int)
+1886 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(String)
+1886 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(char[])
+1887 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable(int)
+1888 [main] WARN  org.apache.commons.httpclient.HttpMethodBase  - Going to buffer response body of large or unknown size. Using getResponseBodyAsStream instead is recommended.
+1888 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Buffering response body
+1888 [main] DEBUG httpclient.wire.content  - << "4"
+1889 [main] DEBUG httpclient.wire.content  - << "f"
+1889 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1889 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1889 [main] DEBUG httpclient.wire.content  - << "{"object":"hey, no parameters here.","message":"analysis result","status":"OK"}"
+1889 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1889 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1889 [main] DEBUG httpclient.wire.content  - << "0"
+1889 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1889 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1889 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1889 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1889 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1889 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1889 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1889 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1889 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Resorting to protocol version default close connection policy
+1890 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Should NOT close connection, using HTTP/1.1
+1890 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable()
+1890 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.releaseConnection()
+1890 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Releasing connection back to connection manager.
+1890 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - result code: 200
+1890 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - method: GET at uri: http://localhost:9995/analytics/analysis/test-analysis-1/8c33b0e6-d3cf-4909-b04c-df93056e64a8/getFakeSomething?apikey=APIKEY
+1890 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - response body: {"object":"hey, no parameters here.","message":"analysis result","status":"OK"}
+1894 [main] DEBUG org.apache.commons.httpclient.methods.GetMethod  - enter GetMethod(String)
+1894 [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HttpMethod)
+1894 [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HostConfiguration,HttpMethod,HttpState)
+1895 [main] DEBUG org.apache.commons.httpclient.HttpMethodDirector  - Attempt number 1 to process request
+1895 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.open()
+1895 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Open connection to localhost:9995
+1895 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.execute(HttpState, HttpConnection)
+1895 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequest(HttpState, HttpConnection)
+1895 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestLine(HttpState, HttpConnection)
+1895 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.generateRequestLine(HttpConnection, String, String, String, String)
+1896 [main] DEBUG httpclient.wire.header  - >> "GET /analytics/analysis/test-user?apikey=APIKEY HTTP/1.1[\r][\n]"
+1896 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1896 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1896 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1896 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestHeaders(HttpState,HttpConnection)
+1896 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addRequestHeaders(HttpState, HttpConnection)
+1896 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addUserAgentRequestHeaders(HttpState, HttpConnection)
+1896 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addHostRequestHeader(HttpState, HttpConnection)
+1896 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Adding Host request header
+1896 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addCookieRequestHeader(HttpState, HttpConnection)
+1896 [main] DEBUG org.apache.commons.httpclient.HttpState  - enter HttpState.getCookies()
+1896 [main] DEBUG org.apache.commons.httpclient.cookie.CookieSpec  - enter CookieSpecBase.match(String, int, String, boolean, Cookie[])
+1896 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addProxyConnectionHeader(HttpState, HttpConnection)
+1896 [main] DEBUG httpclient.wire.header  - >> "User-Agent: Jakarta Commons-HttpClient/3.1[\r][\n]"
+1896 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1896 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1896 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1896 [main] DEBUG httpclient.wire.header  - >> "Host: localhost:9995[\r][\n]"
+1897 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1897 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1897 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1897 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.writeLine()
+1897 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1897 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1897 [main] DEBUG httpclient.wire.header  - >> "[\r][\n]"
+1897 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.flushRequestOutputStream()
+1897 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponse(HttpState, HttpConnection)
+1897 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readStatusLine(HttpState, HttpConnection)
+1897 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.readLine()
+1897 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1897 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1944 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 200 OK[\r][\n]"
+1944 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 200 OK[\r][\n]"
+1944 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseHeaders(HttpState,HttpConnection)
+1944 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1944 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1944 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1944 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1944 [main] DEBUG httpclient.wire.header  - << "server: grizzly/1.9.8[\r][\n]"
+1944 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1944 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1944 [main] DEBUG httpclient.wire.header  - << "Content-Type: application/json[\r][\n]"
+1944 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1944 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1944 [main] DEBUG httpclient.wire.header  - << "Transfer-Encoding: chunked[\r][\n]"
+1944 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1945 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1945 [main] DEBUG httpclient.wire.header  - << "Date: Thu, 31 May 2012 09:45:39 GMT[\r][\n]"
+1945 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1945 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1945 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1945 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processResponseHeaders(HttpState, HttpConnection)
+1945 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processCookieHeaders(Header[], HttpState, HttpConnection)
+1945 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpState, HttpConnection)
+1945 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpConnection)
+1945 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1945 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.canResponseHaveBody(int)
+1945 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(String)
+1945 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(char[])
+1945 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable(int)
+1945 [main] WARN  org.apache.commons.httpclient.HttpMethodBase  - Going to buffer response body of large or unknown size. Using getResponseBodyAsStream instead is recommended.
+1945 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Buffering response body
+1945 [main] DEBUG httpclient.wire.content  - << "1"
+1945 [main] DEBUG httpclient.wire.content  - << "d"
+1945 [main] DEBUG httpclient.wire.content  - << "4"
+1945 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1945 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1946 [main] DEBUG httpclient.wire.content  - << "{"object":{"name":"test-analysis-1","className":"tv.notube.analytics.FakeOne","query":{"complete":false},"description":"fake analysis 1","resultClassName":"tv.notube.analytics.FakeOneResult","methodDescriptions":[{"name":"getFakeSomething","parameterTypes":[],"description":"the same fake method with no parameters"},{"name":"getFakeSomething","parameterTypes":["java.lang.Integer"],"description":"just a fake method"}]},"message":"analysis description","status":"OK"}"
+1946 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1946 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1946 [main] DEBUG httpclient.wire.content  - << "0"
+1946 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1946 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1946 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1946 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1946 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1946 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1946 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1946 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1946 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Resorting to protocol version default close connection policy
+1946 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Should NOT close connection, using HTTP/1.1
+1946 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable()
+1946 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.releaseConnection()
+1946 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Releasing connection back to connection manager.
+1946 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - result code: 200
+1947 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - response body: {"object":{"name":"test-analysis-1","className":"tv.notube.analytics.FakeOne","query":{"complete":false},"description":"fake analysis 1","resultClassName":"tv.notube.analytics.FakeOneResult","methodDescriptions":[{"name":"getFakeSomething","parameterTypes":[],"description":"the same fake method with no parameters"},{"name":"getFakeSomething","parameterTypes":["java.lang.Integer"],"description":"just a fake method"}]},"message":"analysis description","status":"OK"}
+1949 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - query: [analytics/analysis/test-analysis-1/8c33b0e6-d3cf-4909-b04c-df93056e64a8/getFakeSomething?param=5&apikey=APIKEY]
+1949 [main] DEBUG org.apache.commons.httpclient.methods.GetMethod  - enter GetMethod(String)
+1949 [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HttpMethod)
+1949 [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HostConfiguration,HttpMethod,HttpState)
+1949 [main] DEBUG org.apache.commons.httpclient.HttpMethodDirector  - Attempt number 1 to process request
+1949 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.open()
+1949 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Open connection to localhost:9995
+1950 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.execute(HttpState, HttpConnection)
+1950 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequest(HttpState, HttpConnection)
+1950 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestLine(HttpState, HttpConnection)
+1950 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.generateRequestLine(HttpConnection, String, String, String, String)
+1950 [main] DEBUG httpclient.wire.header  - >> "GET /analytics/analysis/test-analysis-1/8c33b0e6-d3cf-4909-b04c-df93056e64a8/getFakeSomething?param=5&apikey=APIKEY HTTP/1.1[\r][\n]"
+1950 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1950 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1950 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1950 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestHeaders(HttpState,HttpConnection)
+1950 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addRequestHeaders(HttpState, HttpConnection)
+1950 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addUserAgentRequestHeaders(HttpState, HttpConnection)
+1950 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addHostRequestHeader(HttpState, HttpConnection)
+1951 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Adding Host request header
+1951 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addCookieRequestHeader(HttpState, HttpConnection)
+1951 [main] DEBUG org.apache.commons.httpclient.HttpState  - enter HttpState.getCookies()
+1951 [main] DEBUG org.apache.commons.httpclient.cookie.CookieSpec  - enter CookieSpecBase.match(String, int, String, boolean, Cookie[])
+1951 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addProxyConnectionHeader(HttpState, HttpConnection)
+1951 [main] DEBUG httpclient.wire.header  - >> "User-Agent: Jakarta Commons-HttpClient/3.1[\r][\n]"
+1951 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1951 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1951 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1951 [main] DEBUG httpclient.wire.header  - >> "Host: localhost:9995[\r][\n]"
+1951 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1951 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1951 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1951 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.writeLine()
+1951 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1952 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1952 [main] DEBUG httpclient.wire.header  - >> "[\r][\n]"
+1952 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.flushRequestOutputStream()
+1952 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponse(HttpState, HttpConnection)
+1952 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readStatusLine(HttpState, HttpConnection)
+1952 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.readLine()
+1952 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1952 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1955 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 200 OK[\r][\n]"
+1955 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 200 OK[\r][\n]"
+1955 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseHeaders(HttpState,HttpConnection)
+1955 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1955 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1955 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1955 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1955 [main] DEBUG httpclient.wire.header  - << "server: grizzly/1.9.8[\r][\n]"
+1956 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1956 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1956 [main] DEBUG httpclient.wire.header  - << "Content-Type: application/json[\r][\n]"
+1956 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1956 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1956 [main] DEBUG httpclient.wire.header  - << "Transfer-Encoding: chunked[\r][\n]"
+1956 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1956 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1956 [main] DEBUG httpclient.wire.header  - << "Date: Thu, 31 May 2012 09:45:39 GMT[\r][\n]"
+1956 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1956 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1956 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1956 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processResponseHeaders(HttpState, HttpConnection)
+1956 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processCookieHeaders(Header[], HttpState, HttpConnection)
+1956 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpState, HttpConnection)
+1957 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpConnection)
+1957 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1957 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.canResponseHaveBody(int)
+1957 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(String)
+1957 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(char[])
+1957 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable(int)
+1957 [main] WARN  org.apache.commons.httpclient.HttpMethodBase  - Going to buffer response body of large or unknown size. Using getResponseBodyAsStream instead is recommended.
+1957 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Buffering response body
+1957 [main] DEBUG httpclient.wire.content  - << "4"
+1957 [main] DEBUG httpclient.wire.content  - << "d"
+1957 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1957 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1957 [main] DEBUG httpclient.wire.content  - << "{"object":"hey, [5] is your fake.","message":"analysis result","status":"OK"}"
+1958 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1958 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1958 [main] DEBUG httpclient.wire.content  - << "0"
+1958 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1958 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1958 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1958 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1958 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1958 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1958 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1958 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1958 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Resorting to protocol version default close connection policy
+1958 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Should NOT close connection, using HTTP/1.1
+1959 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable()
+1959 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.releaseConnection()
+1959 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Releasing connection back to connection manager.
+1959 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - result code: 200
+1959 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - method: GET at uri: http://localhost:9995/analytics/analysis/test-analysis-1/8c33b0e6-d3cf-4909-b04c-df93056e64a8/getFakeSomething?param=5&apikey=APIKEY
+1959 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - response body: {"object":"hey, [5] is your fake.","message":"analysis result","status":"OK"}
+1961 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - query: [analytics/analysis/test-analysis-1/8c33b0e6-d3cf-4909-b04c-df93056e64a8/thisMethodDoesNotExist?param=5&apikey=APIKEY]
+1961 [main] DEBUG org.apache.commons.httpclient.methods.GetMethod  - enter GetMethod(String)
+1962 [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HttpMethod)
+1962 [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HostConfiguration,HttpMethod,HttpState)
+1962 [main] DEBUG org.apache.commons.httpclient.HttpMethodDirector  - Attempt number 1 to process request
+1962 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.open()
+1962 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Open connection to localhost:9995
+1962 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.execute(HttpState, HttpConnection)
+1962 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequest(HttpState, HttpConnection)
+1962 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestLine(HttpState, HttpConnection)
+1962 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.generateRequestLine(HttpConnection, String, String, String, String)
+1963 [main] DEBUG httpclient.wire.header  - >> "GET /analytics/analysis/test-analysis-1/8c33b0e6-d3cf-4909-b04c-df93056e64a8/thisMethodDoesNotExist?param=5&apikey=APIKEY HTTP/1.1[\r][\n]"
+1963 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1963 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1963 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1963 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestHeaders(HttpState,HttpConnection)
+1963 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addRequestHeaders(HttpState, HttpConnection)
+1963 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addUserAgentRequestHeaders(HttpState, HttpConnection)
+1963 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addHostRequestHeader(HttpState, HttpConnection)
+1963 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Adding Host request header
+1963 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addCookieRequestHeader(HttpState, HttpConnection)
+1963 [main] DEBUG org.apache.commons.httpclient.HttpState  - enter HttpState.getCookies()
+1963 [main] DEBUG org.apache.commons.httpclient.cookie.CookieSpec  - enter CookieSpecBase.match(String, int, String, boolean, Cookie[])
+1963 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addProxyConnectionHeader(HttpState, HttpConnection)
+1964 [main] DEBUG httpclient.wire.header  - >> "User-Agent: Jakarta Commons-HttpClient/3.1[\r][\n]"
+1964 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1964 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1964 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1964 [main] DEBUG httpclient.wire.header  - >> "Host: localhost:9995[\r][\n]"
+1964 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1964 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1964 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1964 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.writeLine()
+1964 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1964 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1964 [main] DEBUG httpclient.wire.header  - >> "[\r][\n]"
+1964 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.flushRequestOutputStream()
+1964 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponse(HttpState, HttpConnection)
+1964 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readStatusLine(HttpState, HttpConnection)
+1964 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.readLine()
+1965 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1965 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1967 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 500 Internal Server Error[\r][\n]"
+1968 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 500 Internal Server Error[\r][\n]"
+1968 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseHeaders(HttpState,HttpConnection)
+1968 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1968 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1968 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1968 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1968 [main] DEBUG httpclient.wire.header  - << "server: grizzly/1.9.8[\r][\n]"
+1968 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1968 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1968 [main] DEBUG httpclient.wire.header  - << "Content-Type: application/json[\r][\n]"
+1968 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1968 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1968 [main] DEBUG httpclient.wire.header  - << "Transfer-Encoding: chunked[\r][\n]"
+1968 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1969 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1969 [main] DEBUG httpclient.wire.header  - << "Date: Thu, 31 May 2012 09:45:39 GMT[\r][\n]"
+1969 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1969 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1969 [main] DEBUG httpclient.wire.header  - << "Connection: close[\r][\n]"
+1969 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1969 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1969 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1969 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processResponseHeaders(HttpState, HttpConnection)
+1969 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processCookieHeaders(Header[], HttpState, HttpConnection)
+1969 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpState, HttpConnection)
+1969 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpConnection)
+1969 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1969 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.canResponseHaveBody(int)
+1969 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(String)
+1969 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(char[])
+1970 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable(int)
+1970 [main] WARN  org.apache.commons.httpclient.HttpMethodBase  - Going to buffer response body of large or unknown size. Using getResponseBodyAsStream instead is recommended.
+1970 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Buffering response body
+1970 [main] DEBUG httpclient.wire.content  - << "5"
+1970 [main] DEBUG httpclient.wire.content  - << "9"
+1970 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1970 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1970 [main] DEBUG httpclient.wire.content  - << "{"object":"method not found","message":"Analysis result method not found","status":"NOK"}"
+1970 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1970 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1970 [main] DEBUG httpclient.wire.content  - << "0"
+1970 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1970 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1971 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1971 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1971 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1971 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1971 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1971 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1971 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Should close connection in response to directive: close
+1971 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.close()
+1971 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.closeSockedAndStreams()
+1971 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.releaseConnection()
+1971 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Releasing connection back to connection manager.
+1972 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - result code: 500
+1972 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - method: GET at uri: http://localhost:9995/analytics/analysis/test-analysis-1/8c33b0e6-d3cf-4909-b04c-df93056e64a8/thisMethodDoesNotExist?param=5&apikey=APIKEY
+1972 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - response body: {"object":"method not found","message":"Analysis result method not found","status":"NOK"}
+1974 [main] DEBUG org.apache.commons.httpclient.methods.GetMethod  - enter GetMethod(String)
+1974 [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HttpMethod)
+1974 [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HostConfiguration,HttpMethod,HttpState)
+1975 [main] DEBUG org.apache.commons.httpclient.HttpMethodDirector  - Attempt number 1 to process request
+1975 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.open()
+1975 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Open connection to localhost:9995
+1976 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.execute(HttpState, HttpConnection)
+1977 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequest(HttpState, HttpConnection)
+1977 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestLine(HttpState, HttpConnection)
+1977 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.generateRequestLine(HttpConnection, String, String, String, String)
+1977 [main] DEBUG httpclient.wire.header  - >> "GET /analytics/analyses?apikey=APIKEY HTTP/1.1[\r][\n]"
+1977 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1977 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1977 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1977 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestHeaders(HttpState,HttpConnection)
+1977 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addRequestHeaders(HttpState, HttpConnection)
+1977 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addUserAgentRequestHeaders(HttpState, HttpConnection)
+1977 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addHostRequestHeader(HttpState, HttpConnection)
+1977 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Adding Host request header
+1977 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addCookieRequestHeader(HttpState, HttpConnection)
+1978 [main] DEBUG org.apache.commons.httpclient.HttpState  - enter HttpState.getCookies()
+1978 [main] DEBUG org.apache.commons.httpclient.cookie.CookieSpec  - enter CookieSpecBase.match(String, int, String, boolean, Cookie[])
+1978 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addProxyConnectionHeader(HttpState, HttpConnection)
+1978 [main] DEBUG httpclient.wire.header  - >> "User-Agent: Jakarta Commons-HttpClient/3.1[\r][\n]"
+1978 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1978 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1978 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1978 [main] DEBUG httpclient.wire.header  - >> "Host: localhost:9995[\r][\n]"
+1978 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1978 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1978 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1978 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.writeLine()
+1978 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1978 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1979 [main] DEBUG httpclient.wire.header  - >> "[\r][\n]"
+1979 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.flushRequestOutputStream()
+1979 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponse(HttpState, HttpConnection)
+1979 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readStatusLine(HttpState, HttpConnection)
+1979 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.readLine()
+1979 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1979 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1988 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 200 OK[\r][\n]"
+1988 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 200 OK[\r][\n]"
+1988 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseHeaders(HttpState,HttpConnection)
+1988 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1988 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1988 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1988 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1988 [main] DEBUG httpclient.wire.header  - << "server: grizzly/1.9.8[\r][\n]"
+1988 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1988 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1988 [main] DEBUG httpclient.wire.header  - << "Content-Type: application/json[\r][\n]"
+1988 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1989 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1989 [main] DEBUG httpclient.wire.header  - << "Transfer-Encoding: chunked[\r][\n]"
+1989 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1989 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1989 [main] DEBUG httpclient.wire.header  - << "Date: Thu, 31 May 2012 09:45:39 GMT[\r][\n]"
+1989 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1989 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1989 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1989 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processResponseHeaders(HttpState, HttpConnection)
+1989 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processCookieHeaders(Header[], HttpState, HttpConnection)
+1989 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpState, HttpConnection)
+1989 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpConnection)
+1989 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1989 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.canResponseHaveBody(int)
+1989 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(String)
+1989 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(char[])
+1990 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable(int)
+1990 [main] WARN  org.apache.commons.httpclient.HttpMethodBase  - Going to buffer response body of large or unknown size. Using getResponseBodyAsStream instead is recommended.
+1990 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Buffering response body
+1990 [main] DEBUG httpclient.wire.content  - << "3"
+1990 [main] DEBUG httpclient.wire.content  - << "1"
+1990 [main] DEBUG httpclient.wire.content  - << "8"
+1990 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1990 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1990 [main] DEBUG httpclient.wire.content  - << "{"object":[{"name":"test-analysis-1","className":"tv.notube.analytics.FakeOne","query":{"complete":false},"description":"fake analysis 1","resultClassName":"tv.notube.analytics.FakeOneResult","methodDescriptions":[{"name":"getFakeSomething","parameterTypes":[],"description":"the same fake method with no parameters"},{"name":"getFakeSomething","parameterTypes":["java.lang.Integer"],"description":"just a fake method"}]},{"name":"test-analysis-2","className":"com.test.fake.Second","query":{"complete":false},"description":"fake analysis 2","resultClassName":"com.test.fake.second.Result","methodDescriptions":[{"name":"getAnotherFakeSomething","parameterTypes":["java.lang.String","java.lang.Boolean"],"description":"just a another fake method"}]}],"message":"analysis found","status":"OK"}"
+1990 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1990 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1990 [main] DEBUG httpclient.wire.content  - << "0"
+1990 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1991 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1991 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1991 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1991 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1991 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1991 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1991 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1991 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Resorting to protocol version default close connection policy
+1991 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Should NOT close connection, using HTTP/1.1
+1991 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable()
+1991 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.releaseConnection()
+1991 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Releasing connection back to connection manager.
+1991 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - result code: 200
+1991 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - response body: {"object":[{"name":"test-analysis-1","className":"tv.notube.analytics.FakeOne","query":{"complete":false},"description":"fake analysis 1","resultClassName":"tv.notube.analytics.FakeOneResult","methodDescriptions":[{"name":"getFakeSomething","parameterTypes":[],"description":"the same fake method with no parameters"},{"name":"getFakeSomething","parameterTypes":["java.lang.Integer"],"description":"just a fake method"}]},{"name":"test-analysis-2","className":"com.test.fake.Second","query":{"complete":false},"description":"fake analysis 2","resultClassName":"com.test.fake.second.Result","methodDescriptions":[{"name":"getAnotherFakeSomething","parameterTypes":["java.lang.String","java.lang.Boolean"],"description":"just a another fake method"}]}],"message":"analysis found","status":"OK"}
+0    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.useragent = Jakarta Commons-HttpClient/3.1
+2    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.protocol.version = HTTP/1.1
+4    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.connection-manager.class = class org.apache.commons.httpclient.SimpleHttpConnectionManager
+4    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.protocol.cookie-policy = default
+4    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.protocol.element-charset = US-ASCII
+4    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.protocol.content-charset = ISO-8859-1
+6    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.method.retry-handler = org.apache.commons.httpclient.DefaultHttpMethodRetryHandler@3d762027
+6    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.dateparser.patterns = [EEE, dd MMM yyyy HH:mm:ss zzz, EEEE, dd-MMM-yy HH:mm:ss zzz, EEE MMM d HH:mm:ss yyyy, EEE, dd-MMM-yyyy HH:mm:ss z, EEE, dd-MMM-yyyy HH-mm-ss z, EEE, dd MMM yy HH:mm:ss z, EEE dd-MMM-yyyy HH:mm:ss z, EEE dd MMM yyyy HH:mm:ss z, EEE dd-MMM-yyyy HH-mm-ss z, EEE dd-MMM-yy HH:mm:ss z, EEE dd MMM yy HH:mm:ss z, EEE,dd-MMM-yy HH:mm:ss z, EEE,dd-MMM-yyyy HH:mm:ss z, EEE, dd-MM-yyyy HH:mm:ss z]
+26   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Java version: 1.6.0_31
+26   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Java vendor: Apple Inc.
+26   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Java class path: /Applications/IntelliJ IDEA 11 CE.app/plugins/testng/lib/testng.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/deploy.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/dt.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/javaws.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/jce.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/jconsole.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/management-agent.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/plugin.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/sa-jdi.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/charsets.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/classes.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/jsse.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/ui.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext/apple_provider.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext/dnsns.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext/localedata.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext/sunjce_provider.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext/sunpkcs11.jar:/Users/sourcesense/NoTube-Beancounter-2.0/platform/target/test-classes:/Users/sourcesense/NoTube-Beancounter-2.0/platform/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/user-manager/target/classes:/Users/sourcesense/.m2/repository/com/google/code/gson/gson/2.1/gson-2.1.jar:/Users/sourcesense/NoTube-Beancounter-2.0/commons/configuration/target/classes:/Users/sourcesense/.m2/repository/commons-configuration/commons-configuration/1.6/commons-configuration-1.6.jar:/Users/sourcesense/.m2/repository/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar:/Users/sourcesense/.m2/repository/commons-lang/commons-lang/2.4/commons-lang-2.4.jar:/Users/sourcesense/.m2/repository/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar:/Users/sourcesense/.m2/repository/commons-digester/commons-digester/1.8/commons-digester-1.8.jar:/Users/sourcesense/.m2/repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar:/Users/sourcesense/.m2/repository/commons-beanutils/commons-beanutils-core/1.8.0/commons-beanutils-core-1.8.0.jar:/Users/sourcesense/.m2/repository/log4j/log4j/1.2.16/log4j-1.2.16.jar:/Users/sourcesense/NoTube-Beancounter-2.0/commons/storage/kvs/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/commons/storage/model/target/classes:/Users/sourcesense/.m2/repository/joda-time/joda-time/2.0/joda-time-2.0.jar:/Users/sourcesense/.m2/repository/org/mybatis/mybatis/3.0.6/mybatis-3.0.6.jar:/Users/sourcesense/.m2/repository/mysql/mysql-connector-java/5.1.18/mysql-connector-java-5.1.18.jar:/Users/sourcesense/NoTube-Beancounter-2.0/commons/storage/alog/core/target/classes:/Users/sourcesense/.m2/repository/org/apache/httpcomponents/httpclient/4.1.2/httpclient-4.1.2.jar:/Users/sourcesense/.m2/repository/org/apache/httpcomponents/httpcore/4.1.2/httpcore-4.1.2.jar:/Users/sourcesense/.m2/repository/commons-codec/commons-codec/1.2/commons-codec-1.2.jar:/Users/sourcesense/.m2/repository/org/scribe/scribe/1.2.3/scribe-1.2.3.jar:/Users/sourcesense/NoTube-Beancounter-2.0/profile-manager/storage/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/profile-manager/profiling-line-api/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/commons/model/target/classes:/Users/sourcesense/.m2/repository/org/codehaus/jackson/jackson-jaxrs/1.8.4/jackson-jaxrs-1.8.4.jar:/Users/sourcesense/.m2/repository/org/codehaus/jackson/jackson-core-asl/1.7.1/jackson-core-asl-1.7.1.jar:/Users/sourcesense/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.7.1/jackson-mapper-asl-1.7.1.jar:/Users/sourcesense/NoTube-Beancounter-2.0/commons/tests/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/profile-manager/runner/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/profile-manager/data-manager/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/profile-manager/profiling-line-container/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/analytics/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/applications/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/crawler/target/classes:/Users/sourcesense/.m2/repository/org/openrdf/sesame/sesame-model/2.4.0/sesame-model-2.4.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-collections/2.8.0/aduna-commons-collections-2.8.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-concurrent/2.7.0/aduna-commons-concurrent-2.7.0.jar:/Users/sourcesense/.m2/repository/org/slf4j/slf4j-api/1.6.1/slf4j-api-1.6.1.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-io/2.10.0/aduna-commons-io-2.10.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-i18n/1.4.0/aduna-commons-i18n-1.4.0.jar:/Users/sourcesense/.m2/repository/org/openrdf/sesame/sesame-rio-api/2.4.0/sesame-rio-api-2.4.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-lang/2.9.0/aduna-commons-lang-2.9.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-net/2.7.0/aduna-commons-net-2.7.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-text/2.7.0/aduna-commons-text-2.7.0.jar:/Users/sourcesense/.m2/repository/org/openrdf/sesame/sesame-rio-rdfxml/2.4.0/sesame-rio-rdfxml-2.4.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-xml/2.7.0/aduna-commons-xml-2.7.0.jar:/Users/sourcesense/.m2/repository/com/rosaloves/bitlyj/2.0.0/bitlyj-2.0.0.jar:/Users/sourcesense/.m2/repository/com/google/inject/guice/2.0/guice-2.0.jar:/Users/sourcesense/.m2/repository/aopalliance/aopalliance/1.0/aopalliance-1.0.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/jersey-bundle/1.6/jersey-bundle-1.6.jar:/Users/sourcesense/.m2/repository/javax/ws/rs/jsr311-api/1.1.1/jsr311-api-1.1.1.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/jersey-json/1.6/jersey-json-1.6.jar:/Users/sourcesense/.m2/repository/org/codehaus/jettison/jettison/1.1/jettison-1.1.jar:/Users/sourcesense/.m2/repository/stax/stax-api/1.0.1/stax-api-1.0.1.jar:/Users/sourcesense/.m2/repository/com/sun/xml/bind/jaxb-impl/2.2.3-1/jaxb-impl-2.2.3-1.jar:/Users/sourcesense/.m2/repository/javax/xml/bind/jaxb-api/2.2.2/jaxb-api-2.2.2.jar:/Users/sourcesense/.m2/repository/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2.jar:/Users/sourcesense/.m2/repository/javax/activation/activation/1.1/activation-1.1.jar:/Users/sourcesense/.m2/repository/org/codehaus/jackson/jackson-xc/1.8.4/jackson-xc-1.8.4.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/jersey-core/1.6/jersey-core-1.6.jar:/Users/sourcesense/.m2/repository/asm/asm/3.1/asm-3.1.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/contribs/jersey-guice/1.6/jersey-guice-1.6.jar:/Users/sourcesense/.m2/repository/com/google/inject/extensions/guice-servlet/2.0/guice-servlet-2.0.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/jersey-grizzly2/1.6/jersey-grizzly2-1.6.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-http/2.0.1-b2/grizzly-http-2.0.1-b2.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-framework/2.0.1-b2/grizzly-framework-2.0.1-b2.jar:/Users/sourcesense/.m2/repository/org/glassfish/gmbal/gmbal-api-only/3.0.0-b023/gmbal-api-only-3.0.0-b023.jar:/Users/sourcesense/.m2/repository/org/glassfish/external/management-api/3.0.0-b012/management-api-3.0.0-b012.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-http-server/2.0.1-b2/grizzly-http-server-2.0.1-b2.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-rcm/2.0.1-b2/grizzly-rcm-2.0.1-b2.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-http-servlet/2.0.1-b2/grizzly-http-servlet-2.0.1-b2.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-framework/2.0.1-b2/grizzly-framework-2.0.1-b2-tests.jar:/Users/sourcesense/.m2/repository/org/glassfish/javax.servlet/3.0/javax.servlet-3.0.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/jersey-server/1.6/jersey-server-1.6.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-servlet-webserver/1.9.8/grizzly-servlet-webserver-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-http/1.9.8/grizzly-http-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-framework/1.9.8/grizzly-framework-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-utils/1.9.8/grizzly-utils-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-rcm/1.9.8/grizzly-rcm-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-portunif/1.9.8/grizzly-portunif-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-http-servlet/1.9.8/grizzly-http-servlet-1.9.8.jar:/Users/sourcesense/.m2/repository/javax/servlet/servlet-api/2.5/servlet-api-2.5.jar:/Users/sourcesense/.m2/repository/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar:/Users/sourcesense/.m2/repository/org/testng/testng/6.3/testng-6.3.jar:/Users/sourcesense/.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar:/Users/sourcesense/.m2/repository/org/beanshell/bsh/2.0b4/bsh-2.0b4.jar:/Users/sourcesense/.m2/repository/com/beust/jcommander/1.12/jcommander-1.12.jar:/Users/sourcesense/.m2/repository/org/yaml/snakeyaml/1.6/snakeyaml-1.6.jar:/Applications/IntelliJ IDEA 11 CE.app/plugins/testng/lib/testng-jdk15.jar:/Applications/IntelliJ IDEA 11 CE.app/lib/idea_rt.jar
+26   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Operating system name: Mac OS X
+26   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Operating system architecture: x86_64
+26   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Operating system version: 10.6.8
+43   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunPKCS11-Darwin 1.6: SunPKCS11 accessing Mac OS X SmartCardServices
+43   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SUN 1.6: SUN (DSA key/parameter generation; DSA signing; SHA-1, MD5 digests; SecureRandom; X.509 certificates; JKS keystore; PKIX CertPathValidator; PKIX CertPathBuilder; LDAP, Collection CertStores, JavaPolicy Policy; JavaLoginConfig Configuration)
+43   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Apple 1.0: Apple Provider (implements DES, Triple DES, AES, Blowfish, PBE, Diffie-Hellman, HMAC/MD5, HMAC/SHA1)
+43   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunRsaSign 1.5: Sun RSA signature provider
+43   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunJSSE 1.6: Sun JSSE provider(PKCS12, SunX509 key/trust factories, SSLv3, TLSv1)
+43   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunJCE 1.6: SunJCE Provider (implements RSA, DES, Triple DES, AES, Blowfish, ARCFOUR, RC2, PBE, Diffie-Hellman, HMAC)
+43   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunJGSS 1.0: Sun (Kerberos v5, SPNEGO)
+43   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunSASL 1.5: Sun SASL provider(implements client mechanisms for: DIGEST-MD5, GSSAPI, EXTERNAL, PLAIN, CRAM-MD5; server mechanisms for: DIGEST-MD5, GSSAPI, CRAM-MD5)
+43   [main] DEBUG org.apache.commons.httpclient.HttpClient  - XMLDSig 1.0: XMLDSig (DOM XMLSignatureFactory; DOM KeyInfoFactory)
+43   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunPCSC 1.6: Sun PC/SC provider
+48   [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HttpMethod)
+48   [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HostConfiguration,HttpMethod,HttpState)
+58   [main] DEBUG org.apache.commons.httpclient.HttpMethodDirector  - Attempt number 1 to process request
+58   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.open()
+58   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Open connection to localhost:9995
+59   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.execute(HttpState, HttpConnection)
+59   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequest(HttpState, HttpConnection)
+60   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestLine(HttpState, HttpConnection)
+60   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.generateRequestLine(HttpConnection, String, String, String, String)
+61   [main] DEBUG httpclient.wire.header  - >> "DELETE /application/test-user HTTP/1.1[\r][\n]"
+61   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+61   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+61   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+61   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestHeaders(HttpState,HttpConnection)
+61   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addRequestHeaders(HttpState, HttpConnection)
+61   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addUserAgentRequestHeaders(HttpState, HttpConnection)
+61   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addHostRequestHeader(HttpState, HttpConnection)
+62   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Adding Host request header
+62   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addCookieRequestHeader(HttpState, HttpConnection)
+76   [main] DEBUG org.apache.commons.httpclient.HttpState  - enter HttpState.getCookies()
+76   [main] DEBUG org.apache.commons.httpclient.cookie.CookieSpec  - enter CookieSpecBase.match(String, int, String, boolean, Cookie[])
+76   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addProxyConnectionHeader(HttpState, HttpConnection)
+76   [main] DEBUG httpclient.wire.header  - >> "User-Agent: Jakarta Commons-HttpClient/3.1[\r][\n]"
+76   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+76   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+76   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+76   [main] DEBUG httpclient.wire.header  - >> "Host: localhost:9995[\r][\n]"
+76   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+76   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+76   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+76   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.writeLine()
+77   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+77   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+77   [main] DEBUG httpclient.wire.header  - >> "[\r][\n]"
+77   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.flushRequestOutputStream()
+77   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponse(HttpState, HttpConnection)
+77   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readStatusLine(HttpState, HttpConnection)
+77   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.readLine()
+78   [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+79   [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1815 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 200 OK[\r][\n]"
+1815 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 200 OK[\r][\n]"
+1817 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseHeaders(HttpState,HttpConnection)
+1818 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1818 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1818 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1818 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1818 [main] DEBUG httpclient.wire.header  - << "server: grizzly/1.9.8[\r][\n]"
+1818 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1818 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1818 [main] DEBUG httpclient.wire.header  - << "Content-Type: application/json[\r][\n]"
+1818 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1818 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1818 [main] DEBUG httpclient.wire.header  - << "Transfer-Encoding: chunked[\r][\n]"
+1819 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1819 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1819 [main] DEBUG httpclient.wire.header  - << "Date: Thu, 31 May 2012 09:45:58 GMT[\r][\n]"
+1819 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1819 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1819 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1819 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processResponseHeaders(HttpState, HttpConnection)
+1819 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processCookieHeaders(Header[], HttpState, HttpConnection)
+1819 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpState, HttpConnection)
+1819 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpConnection)
+1819 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1819 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.canResponseHaveBody(int)
+1821 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(String)
+1821 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(char[])
+1822 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable(int)
+1823 [main] WARN  org.apache.commons.httpclient.HttpMethodBase  - Going to buffer response body of large or unknown size. Using getResponseBodyAsStream instead is recommended.
+1823 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Buffering response body
+1823 [main] DEBUG httpclient.wire.content  - << "4"
+1823 [main] DEBUG httpclient.wire.content  - << "8"
+1823 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1823 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1823 [main] DEBUG httpclient.wire.content  - << "{"message":"Application 'test-user' successfully removed","status":"OK"}"
+1823 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1823 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1823 [main] DEBUG httpclient.wire.content  - << "0"
+1823 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1823 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1823 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1823 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1823 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1823 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1824 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1824 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1824 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Resorting to protocol version default close connection policy
+1824 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Should NOT close connection, using HTTP/1.1
+1824 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable()
+1824 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.releaseConnection()
+1824 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Releasing connection back to connection manager.
+1824 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - result code: 200
+1824 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - response body: {"message":"Application 'test-user' successfully removed","status":"OK"}
+1864 [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.addParameter(String, String)
+1864 [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.clearRequestBody()
+1864 [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.addParameter(String, String)
+1865 [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.clearRequestBody()
+1865 [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.addParameter(String, String)
+1865 [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.clearRequestBody()
+1865 [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.addParameter(String, String)
+1865 [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.clearRequestBody()
+1865 [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HttpMethod)
+1865 [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HostConfiguration,HttpMethod,HttpState)
+1865 [main] DEBUG org.apache.commons.httpclient.HttpMethodDirector  - Attempt number 1 to process request
+1865 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.open()
+1865 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Open connection to localhost:9995
+1866 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.execute(HttpState, HttpConnection)
+1866 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequest(HttpState, HttpConnection)
+1866 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestLine(HttpState, HttpConnection)
+1866 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.generateRequestLine(HttpConnection, String, String, String, String)
+1866 [main] DEBUG httpclient.wire.header  - >> "POST /application/register HTTP/1.1[\r][\n]"
+1866 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1866 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1866 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1866 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestHeaders(HttpState,HttpConnection)
+1867 [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.addRequestHeaders(HttpState, HttpConnection)
+1867 [main] DEBUG org.apache.commons.httpclient.methods.ExpectContinueMethod  - enter ExpectContinueMethod.addRequestHeaders(HttpState, HttpConnection)
+1867 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addRequestHeaders(HttpState, HttpConnection)
+1867 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addUserAgentRequestHeaders(HttpState, HttpConnection)
+1867 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addHostRequestHeader(HttpState, HttpConnection)
+1867 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Adding Host request header
+1867 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addCookieRequestHeader(HttpState, HttpConnection)
+1867 [main] DEBUG org.apache.commons.httpclient.HttpState  - enter HttpState.getCookies()
+1867 [main] DEBUG org.apache.commons.httpclient.cookie.CookieSpec  - enter CookieSpecBase.match(String, int, String, boolean, Cookie[])
+1867 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addProxyConnectionHeader(HttpState, HttpConnection)
+1867 [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.addContentLengthRequestHeader(HttpState, HttpConnection)
+1867 [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.getRequestContentLength()
+1867 [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.hasRequestContent()
+1867 [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.getParameters()
+1867 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter getContentCharSet( Header contentheader )
+1867 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Default charset used: ISO-8859-1
+1869 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - HttpMethodBase.addRequestHeader(Header)
+1869 [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.getParameters()
+1869 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter getContentCharSet( Header contentheader )
+1869 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(String)
+1869 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(char[])
+1869 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.getParameterByName(String)
+1869 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Default charset used: ISO-8859-1
+1870 [main] DEBUG httpclient.wire.header  - >> "User-Agent: Jakarta Commons-HttpClient/3.1[\r][\n]"
+1870 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1870 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1870 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1870 [main] DEBUG httpclient.wire.header  - >> "Host: localhost:9995[\r][\n]"
+1870 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1870 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1870 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1870 [main] DEBUG httpclient.wire.header  - >> "Content-Length: 124[\r][\n]"
+1870 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1870 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1870 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1870 [main] DEBUG httpclient.wire.header  - >> "Content-Type: application/x-www-form-urlencoded[\r][\n]"
+1870 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+1870 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1870 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1870 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.writeLine()
+1870 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+1870 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+1870 [main] DEBUG httpclient.wire.header  - >> "[\r][\n]"
+1870 [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.writeRequestBody(HttpState, HttpConnection)
+1870 [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.hasRequestContent()
+1870 [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.getRequestContentLength()
+1871 [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.hasRequestContent()
+1871 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getRequestOutputStream()
+1871 [main] DEBUG httpclient.wire.content  - >> "name=Fake_Name&description=This+is+a+test+registration%21&email=fake_mail%40test.com&oauthCallback=http%3A%2F%2FfakeUrlOAUTH"
+1871 [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - Request body sent
+1871 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.flushRequestOutputStream()
+1871 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponse(HttpState, HttpConnection)
+1871 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readStatusLine(HttpState, HttpConnection)
+1871 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.readLine()
+1871 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1871 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1874 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 200 OK[\r][\n]"
+1875 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 200 OK[\r][\n]"
+1875 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseHeaders(HttpState,HttpConnection)
+1875 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1875 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1875 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1875 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1875 [main] DEBUG httpclient.wire.header  - << "server: grizzly/1.9.8[\r][\n]"
+1875 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1875 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1875 [main] DEBUG httpclient.wire.header  - << "Content-Type: application/json[\r][\n]"
+1875 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1875 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1875 [main] DEBUG httpclient.wire.header  - << "Transfer-Encoding: chunked[\r][\n]"
+1875 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1875 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1875 [main] DEBUG httpclient.wire.header  - << "Date: Thu, 31 May 2012 09:45:58 GMT[\r][\n]"
+1875 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1875 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1876 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1876 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processResponseHeaders(HttpState, HttpConnection)
+1876 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processCookieHeaders(Header[], HttpState, HttpConnection)
+1876 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpState, HttpConnection)
+1876 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpConnection)
+1876 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1876 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.canResponseHaveBody(int)
+1876 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(String)
+1876 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(char[])
+1876 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable(int)
+1876 [main] WARN  org.apache.commons.httpclient.HttpMethodBase  - Going to buffer response body of large or unknown size. Using getResponseBodyAsStream instead is recommended.
+1876 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Buffering response body
+1876 [main] DEBUG httpclient.wire.content  - << "5"
+1876 [main] DEBUG httpclient.wire.content  - << "d"
+1876 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1876 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1876 [main] DEBUG httpclient.wire.content  - << "{"object":"APIKEY","message":"Application 'Fake_Name' successfully registered","status":"OK"}"
+1876 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1876 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1876 [main] DEBUG httpclient.wire.content  - << "0"
+1876 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1876 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1877 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1877 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1877 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1877 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1877 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1877 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1877 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Resorting to protocol version default close connection policy
+1877 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Should NOT close connection, using HTTP/1.1
+1877 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable()
+1877 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.releaseConnection()
+1877 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Releasing connection back to connection manager.
+1877 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - result code: 200
+1877 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - response body: {"object":"APIKEY","message":"Application 'Fake_Name' successfully registered","status":"OK"}
+0    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.useragent = Jakarta Commons-HttpClient/3.1
+2    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.protocol.version = HTTP/1.1
+4    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.connection-manager.class = class org.apache.commons.httpclient.SimpleHttpConnectionManager
+4    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.protocol.cookie-policy = default
+4    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.protocol.element-charset = US-ASCII
+4    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.protocol.content-charset = ISO-8859-1
+6    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.method.retry-handler = org.apache.commons.httpclient.DefaultHttpMethodRetryHandler@40b86944
+6    [main] DEBUG org.apache.commons.httpclient.params.DefaultHttpParams  - Set parameter http.dateparser.patterns = [EEE, dd MMM yyyy HH:mm:ss zzz, EEEE, dd-MMM-yy HH:mm:ss zzz, EEE MMM d HH:mm:ss yyyy, EEE, dd-MMM-yyyy HH:mm:ss z, EEE, dd-MMM-yyyy HH-mm-ss z, EEE, dd MMM yy HH:mm:ss z, EEE dd-MMM-yyyy HH:mm:ss z, EEE dd MMM yyyy HH:mm:ss z, EEE dd-MMM-yyyy HH-mm-ss z, EEE dd-MMM-yy HH:mm:ss z, EEE dd MMM yy HH:mm:ss z, EEE,dd-MMM-yy HH:mm:ss z, EEE,dd-MMM-yyyy HH:mm:ss z, EEE, dd-MM-yyyy HH:mm:ss z]
+27   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Java version: 1.6.0_31
+27   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Java vendor: Apple Inc.
+27   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Java class path: /Applications/IntelliJ IDEA 11 CE.app/plugins/testng/lib/testng.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/deploy.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/dt.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/javaws.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/jce.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/jconsole.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/management-agent.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/plugin.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/sa-jdi.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/charsets.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/classes.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/jsse.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/ui.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext/apple_provider.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext/dnsns.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext/localedata.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext/sunjce_provider.jar:/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/ext/sunpkcs11.jar:/Users/sourcesense/NoTube-Beancounter-2.0/platform/target/test-classes:/Users/sourcesense/NoTube-Beancounter-2.0/platform/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/user-manager/target/classes:/Users/sourcesense/.m2/repository/com/google/code/gson/gson/2.1/gson-2.1.jar:/Users/sourcesense/NoTube-Beancounter-2.0/commons/configuration/target/classes:/Users/sourcesense/.m2/repository/commons-configuration/commons-configuration/1.6/commons-configuration-1.6.jar:/Users/sourcesense/.m2/repository/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar:/Users/sourcesense/.m2/repository/commons-lang/commons-lang/2.4/commons-lang-2.4.jar:/Users/sourcesense/.m2/repository/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar:/Users/sourcesense/.m2/repository/commons-digester/commons-digester/1.8/commons-digester-1.8.jar:/Users/sourcesense/.m2/repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar:/Users/sourcesense/.m2/repository/commons-beanutils/commons-beanutils-core/1.8.0/commons-beanutils-core-1.8.0.jar:/Users/sourcesense/.m2/repository/log4j/log4j/1.2.16/log4j-1.2.16.jar:/Users/sourcesense/NoTube-Beancounter-2.0/commons/storage/kvs/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/commons/storage/model/target/classes:/Users/sourcesense/.m2/repository/joda-time/joda-time/2.0/joda-time-2.0.jar:/Users/sourcesense/.m2/repository/org/mybatis/mybatis/3.0.6/mybatis-3.0.6.jar:/Users/sourcesense/.m2/repository/mysql/mysql-connector-java/5.1.18/mysql-connector-java-5.1.18.jar:/Users/sourcesense/NoTube-Beancounter-2.0/commons/storage/alog/core/target/classes:/Users/sourcesense/.m2/repository/org/apache/httpcomponents/httpclient/4.1.2/httpclient-4.1.2.jar:/Users/sourcesense/.m2/repository/org/apache/httpcomponents/httpcore/4.1.2/httpcore-4.1.2.jar:/Users/sourcesense/.m2/repository/commons-codec/commons-codec/1.2/commons-codec-1.2.jar:/Users/sourcesense/.m2/repository/org/scribe/scribe/1.2.3/scribe-1.2.3.jar:/Users/sourcesense/NoTube-Beancounter-2.0/profile-manager/storage/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/profile-manager/profiling-line-api/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/commons/model/target/classes:/Users/sourcesense/.m2/repository/org/codehaus/jackson/jackson-jaxrs/1.8.4/jackson-jaxrs-1.8.4.jar:/Users/sourcesense/.m2/repository/org/codehaus/jackson/jackson-core-asl/1.7.1/jackson-core-asl-1.7.1.jar:/Users/sourcesense/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.7.1/jackson-mapper-asl-1.7.1.jar:/Users/sourcesense/NoTube-Beancounter-2.0/commons/tests/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/profile-manager/runner/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/profile-manager/data-manager/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/profile-manager/profiling-line-container/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/analytics/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/applications/target/classes:/Users/sourcesense/NoTube-Beancounter-2.0/crawler/target/classes:/Users/sourcesense/.m2/repository/org/openrdf/sesame/sesame-model/2.4.0/sesame-model-2.4.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-collections/2.8.0/aduna-commons-collections-2.8.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-concurrent/2.7.0/aduna-commons-concurrent-2.7.0.jar:/Users/sourcesense/.m2/repository/org/slf4j/slf4j-api/1.6.1/slf4j-api-1.6.1.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-io/2.10.0/aduna-commons-io-2.10.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-i18n/1.4.0/aduna-commons-i18n-1.4.0.jar:/Users/sourcesense/.m2/repository/org/openrdf/sesame/sesame-rio-api/2.4.0/sesame-rio-api-2.4.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-lang/2.9.0/aduna-commons-lang-2.9.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-net/2.7.0/aduna-commons-net-2.7.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-text/2.7.0/aduna-commons-text-2.7.0.jar:/Users/sourcesense/.m2/repository/org/openrdf/sesame/sesame-rio-rdfxml/2.4.0/sesame-rio-rdfxml-2.4.0.jar:/Users/sourcesense/.m2/repository/info/aduna/commons/aduna-commons-xml/2.7.0/aduna-commons-xml-2.7.0.jar:/Users/sourcesense/.m2/repository/com/rosaloves/bitlyj/2.0.0/bitlyj-2.0.0.jar:/Users/sourcesense/.m2/repository/com/google/inject/guice/2.0/guice-2.0.jar:/Users/sourcesense/.m2/repository/aopalliance/aopalliance/1.0/aopalliance-1.0.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/jersey-bundle/1.6/jersey-bundle-1.6.jar:/Users/sourcesense/.m2/repository/javax/ws/rs/jsr311-api/1.1.1/jsr311-api-1.1.1.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/jersey-json/1.6/jersey-json-1.6.jar:/Users/sourcesense/.m2/repository/org/codehaus/jettison/jettison/1.1/jettison-1.1.jar:/Users/sourcesense/.m2/repository/stax/stax-api/1.0.1/stax-api-1.0.1.jar:/Users/sourcesense/.m2/repository/com/sun/xml/bind/jaxb-impl/2.2.3-1/jaxb-impl-2.2.3-1.jar:/Users/sourcesense/.m2/repository/javax/xml/bind/jaxb-api/2.2.2/jaxb-api-2.2.2.jar:/Users/sourcesense/.m2/repository/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2.jar:/Users/sourcesense/.m2/repository/javax/activation/activation/1.1/activation-1.1.jar:/Users/sourcesense/.m2/repository/org/codehaus/jackson/jackson-xc/1.8.4/jackson-xc-1.8.4.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/jersey-core/1.6/jersey-core-1.6.jar:/Users/sourcesense/.m2/repository/asm/asm/3.1/asm-3.1.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/contribs/jersey-guice/1.6/jersey-guice-1.6.jar:/Users/sourcesense/.m2/repository/com/google/inject/extensions/guice-servlet/2.0/guice-servlet-2.0.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/jersey-grizzly2/1.6/jersey-grizzly2-1.6.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-http/2.0.1-b2/grizzly-http-2.0.1-b2.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-framework/2.0.1-b2/grizzly-framework-2.0.1-b2.jar:/Users/sourcesense/.m2/repository/org/glassfish/gmbal/gmbal-api-only/3.0.0-b023/gmbal-api-only-3.0.0-b023.jar:/Users/sourcesense/.m2/repository/org/glassfish/external/management-api/3.0.0-b012/management-api-3.0.0-b012.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-http-server/2.0.1-b2/grizzly-http-server-2.0.1-b2.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-rcm/2.0.1-b2/grizzly-rcm-2.0.1-b2.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-http-servlet/2.0.1-b2/grizzly-http-servlet-2.0.1-b2.jar:/Users/sourcesense/.m2/repository/org/glassfish/grizzly/grizzly-framework/2.0.1-b2/grizzly-framework-2.0.1-b2-tests.jar:/Users/sourcesense/.m2/repository/org/glassfish/javax.servlet/3.0/javax.servlet-3.0.jar:/Users/sourcesense/.m2/repository/com/sun/jersey/jersey-server/1.6/jersey-server-1.6.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-servlet-webserver/1.9.8/grizzly-servlet-webserver-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-http/1.9.8/grizzly-http-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-framework/1.9.8/grizzly-framework-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-utils/1.9.8/grizzly-utils-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-rcm/1.9.8/grizzly-rcm-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-portunif/1.9.8/grizzly-portunif-1.9.8.jar:/Users/sourcesense/.m2/repository/com/sun/grizzly/grizzly-http-servlet/1.9.8/grizzly-http-servlet-1.9.8.jar:/Users/sourcesense/.m2/repository/javax/servlet/servlet-api/2.5/servlet-api-2.5.jar:/Users/sourcesense/.m2/repository/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar:/Users/sourcesense/.m2/repository/org/testng/testng/6.3/testng-6.3.jar:/Users/sourcesense/.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar:/Users/sourcesense/.m2/repository/org/beanshell/bsh/2.0b4/bsh-2.0b4.jar:/Users/sourcesense/.m2/repository/com/beust/jcommander/1.12/jcommander-1.12.jar:/Users/sourcesense/.m2/repository/org/yaml/snakeyaml/1.6/snakeyaml-1.6.jar:/Applications/IntelliJ IDEA 11 CE.app/plugins/testng/lib/testng-jdk15.jar:/Applications/IntelliJ IDEA 11 CE.app/lib/idea_rt.jar
+27   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Operating system name: Mac OS X
+27   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Operating system architecture: x86_64
+27   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Operating system version: 10.6.8
+44   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunPKCS11-Darwin 1.6: SunPKCS11 accessing Mac OS X SmartCardServices
+44   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SUN 1.6: SUN (DSA key/parameter generation; DSA signing; SHA-1, MD5 digests; SecureRandom; X.509 certificates; JKS keystore; PKIX CertPathValidator; PKIX CertPathBuilder; LDAP, Collection CertStores, JavaPolicy Policy; JavaLoginConfig Configuration)
+44   [main] DEBUG org.apache.commons.httpclient.HttpClient  - Apple 1.0: Apple Provider (implements DES, Triple DES, AES, Blowfish, PBE, Diffie-Hellman, HMAC/MD5, HMAC/SHA1)
+44   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunRsaSign 1.5: Sun RSA signature provider
+44   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunJSSE 1.6: Sun JSSE provider(PKCS12, SunX509 key/trust factories, SSLv3, TLSv1)
+44   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunJCE 1.6: SunJCE Provider (implements RSA, DES, Triple DES, AES, Blowfish, ARCFOUR, RC2, PBE, Diffie-Hellman, HMAC)
+44   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunJGSS 1.0: Sun (Kerberos v5, SPNEGO)
+44   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunSASL 1.5: Sun SASL provider(implements client mechanisms for: DIGEST-MD5, GSSAPI, EXTERNAL, PLAIN, CRAM-MD5; server mechanisms for: DIGEST-MD5, GSSAPI, CRAM-MD5)
+44   [main] DEBUG org.apache.commons.httpclient.HttpClient  - XMLDSig 1.0: XMLDSig (DOM XMLSignatureFactory; DOM KeyInfoFactory)
+44   [main] DEBUG org.apache.commons.httpclient.HttpClient  - SunPCSC 1.6: Sun PC/SC provider
+49   [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.addParameter(String, String)
+49   [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.clearRequestBody()
+50   [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.addParameter(String, String)
+50   [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.clearRequestBody()
+50   [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.addParameter(String, String)
+50   [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.clearRequestBody()
+50   [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.addParameter(String, String)
+50   [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.clearRequestBody()
+50   [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HttpMethod)
+50   [main] DEBUG org.apache.commons.httpclient.HttpClient  - enter HttpClient.executeMethod(HostConfiguration,HttpMethod,HttpState)
+60   [main] DEBUG org.apache.commons.httpclient.HttpMethodDirector  - Attempt number 1 to process request
+60   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.open()
+60   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Open connection to localhost:9995
+61   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.execute(HttpState, HttpConnection)
+61   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequest(HttpState, HttpConnection)
+62   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestLine(HttpState, HttpConnection)
+62   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.generateRequestLine(HttpConnection, String, String, String, String)
+63   [main] DEBUG httpclient.wire.header  - >> "POST /user/register?apikey=APIKEY HTTP/1.1[\r][\n]"
+63   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+63   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+63   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+63   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.writeRequestHeaders(HttpState,HttpConnection)
+63   [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.addRequestHeaders(HttpState, HttpConnection)
+63   [main] DEBUG org.apache.commons.httpclient.methods.ExpectContinueMethod  - enter ExpectContinueMethod.addRequestHeaders(HttpState, HttpConnection)
+63   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addRequestHeaders(HttpState, HttpConnection)
+63   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addUserAgentRequestHeaders(HttpState, HttpConnection)
+64   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addHostRequestHeader(HttpState, HttpConnection)
+64   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Adding Host request header
+64   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addCookieRequestHeader(HttpState, HttpConnection)
+78   [main] DEBUG org.apache.commons.httpclient.HttpState  - enter HttpState.getCookies()
+79   [main] DEBUG org.apache.commons.httpclient.cookie.CookieSpec  - enter CookieSpecBase.match(String, int, String, boolean, Cookie[])
+79   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.addProxyConnectionHeader(HttpState, HttpConnection)
+79   [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.addContentLengthRequestHeader(HttpState, HttpConnection)
+79   [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.getRequestContentLength()
+79   [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.hasRequestContent()
+79   [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.getParameters()
+79   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter getContentCharSet( Header contentheader )
+79   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Default charset used: ISO-8859-1
+81   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - HttpMethodBase.addRequestHeader(Header)
+82   [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.getParameters()
+82   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter getContentCharSet( Header contentheader )
+83   [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(String)
+83   [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(char[])
+85   [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.getParameterByName(String)
+85   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Default charset used: ISO-8859-1
+85   [main] DEBUG httpclient.wire.header  - >> "User-Agent: Jakarta Commons-HttpClient/3.1[\r][\n]"
+85   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+85   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+85   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+85   [main] DEBUG httpclient.wire.header  - >> "Host: localhost:9995[\r][\n]"
+85   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+85   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+85   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+86   [main] DEBUG httpclient.wire.header  - >> "Content-Length: 70[\r][\n]"
+86   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+86   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+86   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+86   [main] DEBUG httpclient.wire.header  - >> "Content-Type: application/x-www-form-urlencoded[\r][\n]"
+86   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.print(String)
+86   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+86   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+86   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.writeLine()
+86   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[])
+86   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.write(byte[], int, int)
+86   [main] DEBUG httpclient.wire.header  - >> "[\r][\n]"
+86   [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.writeRequestBody(HttpState, HttpConnection)
+86   [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.hasRequestContent()
+86   [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - enter EntityEnclosingMethod.getRequestContentLength()
+86   [main] DEBUG org.apache.commons.httpclient.methods.PostMethod  - enter PostMethod.hasRequestContent()
+86   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getRequestOutputStream()
+86   [main] DEBUG httpclient.wire.content  - >> "name=Fake_Name&surname=Fake_Surname&username=missing-user&password=abc"
+87   [main] DEBUG org.apache.commons.httpclient.methods.EntityEnclosingMethod  - Request body sent
+87   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.flushRequestOutputStream()
+87   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponse(HttpState, HttpConnection)
+87   [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readStatusLine(HttpState, HttpConnection)
+87   [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.readLine()
+89   [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+90   [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1970 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 200 OK[\r][\n]"
+1970 [main] DEBUG httpclient.wire.header  - << "HTTP/1.1 200 OK[\r][\n]"
+1973 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseHeaders(HttpState,HttpConnection)
+1973 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1973 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1973 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1973 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1973 [main] DEBUG httpclient.wire.header  - << "server: grizzly/1.9.8[\r][\n]"
+1973 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1973 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1973 [main] DEBUG httpclient.wire.header  - << "Content-Type: application/json[\r][\n]"
+1974 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1974 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1974 [main] DEBUG httpclient.wire.header  - << "Transfer-Encoding: chunked[\r][\n]"
+1974 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1974 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1974 [main] DEBUG httpclient.wire.header  - << "Date: Thu, 31 May 2012 09:46:52 GMT[\r][\n]"
+1974 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1974 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1974 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1974 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processResponseHeaders(HttpState, HttpConnection)
+1974 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.processCookieHeaders(Header[], HttpState, HttpConnection)
+1974 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpState, HttpConnection)
+1974 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.readResponseBody(HttpConnection)
+1975 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.getResponseInputStream()
+1975 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - enter HttpMethodBase.canResponseHaveBody(int)
+1975 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(String)
+1975 [main] DEBUG org.apache.commons.httpclient.HeaderElement  - enter HeaderElement.parseElements(char[])
+1975 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable(int)
+1977 [main] WARN  org.apache.commons.httpclient.HttpMethodBase  - Going to buffer response body of large or unknown size. Using getResponseBodyAsStream instead is recommended.
+1977 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Buffering response body
+1977 [main] DEBUG httpclient.wire.content  - << "6"
+1977 [main] DEBUG httpclient.wire.content  - << "8"
+1977 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1977 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1978 [main] DEBUG httpclient.wire.content  - << "{"object":"eac3099e-c730-44fb-abdf-184af789d799","message":"user successfully registered","status":"OK"}"
+1978 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1978 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1978 [main] DEBUG httpclient.wire.content  - << "0"
+1978 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1978 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1978 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HeaderParser.parseHeaders(InputStream, String)
+1978 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readLine(InputStream, String)
+1978 [main] DEBUG org.apache.commons.httpclient.HttpParser  - enter HttpParser.readRawLine()
+1978 [main] DEBUG httpclient.wire.content  - << "[\r]"
+1978 [main] DEBUG httpclient.wire.content  - << "[\n]"
+1979 [main] DEBUG httpclient.wire.header  - << "[\r][\n]"
+1979 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Resorting to protocol version default close connection policy
+1979 [main] DEBUG org.apache.commons.httpclient.HttpMethodBase  - Should NOT close connection, using HTTP/1.1
+1979 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.isResponseAvailable()
+1979 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - enter HttpConnection.releaseConnection()
+1979 [main] DEBUG org.apache.commons.httpclient.HttpConnection  - Releasing connection back to connection manager.
+1979 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - result code: 200
+1979 [main] INFO  tv.notube.platform.AbstractJerseyTestCase  - response body: {"object":"eac3099e-c730-44fb-abdf-184af789d799","message":"user successfully registered","status":"OK"}

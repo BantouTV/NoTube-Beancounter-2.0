@@ -5,11 +5,15 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import tv.notube.commons.model.User;
 import tv.notube.platform.AbstractJerseyTestCase;
+import tv.notube.platform.responses.UserPlatformResponse;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 
 /**
  * Reference test case for {@link tv.notube.platform.UserService}
@@ -45,7 +49,10 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(postMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        Assert.assertEquals(responseBody.substring(0, 11), "{\"object\":\"");
+        Assert.assertEquals(responseBody.substring(47), "\",\"message\":\"user successfully registered\",\"status\":\"OK\"}");
     }
 
     @Test
@@ -69,6 +76,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(postMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
         Assert.assertEquals(responseBody, "{\"message\":\"username 'test-user' is already taken\",\"status\":\"NOK\"}");
     }
@@ -88,7 +96,11 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        ObjectMapper mapper = new ObjectMapper();
+        LinkedHashMap response = (LinkedHashMap<String, Object>)mapper.readValue(responseBody, Object.class);
+        Assert.assertNotNull(response);
     }
     
     @Test
@@ -106,11 +118,13 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
         Assert.assertEquals(responseBody, "{\"message\":\"user 'missing-user' not found\",\"status\":\"NOK\"}");
     }
 
-    @Test
+    // TODO (mid) waiting for the API for pushing activities
+    @Test(enabled = false)
     public void testGetActivities() throws IOException {
         final String baseQuery = "user/activities/%s?apikey=%s";
         final String name = "test-user";
@@ -162,6 +176,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(deleteMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         Assert.assertEquals(responseBody, "{\"message\":\"user with username 'test-user' deleted\",\"status\":\"OK\"}");
     }
@@ -183,6 +198,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(postMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         Assert.assertEquals(responseBody, "{\"message\":\"user 'test-user' authenticated\",\"status\":\"OK\"}");
     }
@@ -205,6 +221,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
     }
 
@@ -224,6 +241,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
     }
 
@@ -247,6 +265,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
     }
 
@@ -270,6 +289,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
     }
 
@@ -290,6 +310,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(deleteMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         Assert.assertEquals(responseBody, "{\"message\":\"service 'fake-service-1' removed from user 'test-user'\",\"status\":\"OK\"}");
     }
@@ -309,6 +330,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
     }
 
@@ -327,6 +349,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         // TODO this will be automatically solved using random tests
         // Assert.assertEquals(responseBody, "{\"object\":{\"submittedProcesses\":1,\"startedAt\":1338226509813,\"endedAt\":1338226509813},\"message\":\"activities updated for [test-user]\",\"status\":\"OK\"}");
@@ -347,6 +370,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         Assert.assertEquals(responseBody, "{\"message\":\"profile updated for [test-user]\",\"status\":\"OK\"}");
     }
@@ -366,9 +390,12 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         Assert.assertEquals(responseBody, "{\"message\":\"[test-user] TEST-PROFILING-STATUS\",\"status\":\"OK\"}");
     }
+
+
 
     @Test
     public void testGetProfilingStatusEmptyUsername() throws IOException {
@@ -385,6 +412,9 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        //Assert.assertTrue(false);
+        // TODO (mid - warning) with empty username this calls "user/profile/{username}"
+        // this is working because we don't have a "status" user.......
         Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
         Assert.assertEquals(responseBody, "{\"object\":\"MOCK-ERROR\",\"message\":\"Error while retrieving profile for user 'status'\",\"status\":\"NOK\"}");
     }
@@ -398,6 +428,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
     }
 }
