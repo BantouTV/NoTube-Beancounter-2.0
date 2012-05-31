@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<analyzer>
+    <alog>
+        <host>localhost</host>
+        <port>3306</port>
+        <db>alog</db>
+        <username>alog</username>
+        <password>alog</password>
+    </alog>
+    <kvs>
+        <host>localhost</host>
+        <port>3306</port>
+        <db>alog</db>
+        <username>alog</username>
+        <password>alog</password>
+    </kvs>
+    <analyses>
+        <analysis name="">
+            <description></description>
+            <query></query>
+            <class></class>
+            <result></result>
+            <methods>
+                <method name="">
+                    <description></description>
+                    <parameterTypes>
+                        <type></type>
+                        <type></type>
+                    </parameterTypes>
+                </method>
+            </methods>
+        </analysis>
+    </analyses>
+
+</analyzer>
+
+

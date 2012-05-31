@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tv.notube.commons.storage.kvs.mybatis.mappers.KVSMapper">
+
+    <insert id="insertObject" parameterType="map">
+        INSERT INTO data (kvstable, kvskey, object)
+        VALUES(#{kvstable}, #{key}, #{object, javaType=byte[], jdbcType=BLOB, typeHandler=org.apache.ibatis.type.ByteArrayTypeHandler})
+    </insert>
+
+    <insert id="insertField" parameterType="map">
+        INSERT INTO stringfield (kvstable, kvskey, name, value)
+        VALUES (#{kvstable}, #{key}, #{name}, #{value})
+    </insert>
+
+    <select id="selectByKey" parameterType="map" resultMap="bytesRM">
+        SELECT object FROM data WHERE kvskey = #{key} AND kvstable = #{kvstable}
+    </select>
+
+    <select id="selectFieldsByKey" parameterType="map" resultMap="stringFieldRM">
+           SELECT name, value FROM stringfield WHERE kvskey = #{key} AND kvstable = #{kvstable}
+    </select>
+
+    <select id="selectByField" parameterType="map" resultType="java.lang.String">
+        SELECT data.kvskey
+        FROM data, stringfield
+        WHERE stringfield.field = #{field} AND stringfield.value = #{value} AND data.kvskey = stringfield.kvskey AND data.kvstable = #{kvstable}
+    </select>
+
+    <select id="selectByQuery" parameterType="map" resultType="java.lang.String">
+        SELECT data.kvskey
+        FROM data LEFT JOIN stringfield ON data.kvstable = stringfield.kvstable AND data.kvskey = stringfield.kvskey
+        WHERE ${query}
+    </select>
+
+    <select id="selectByQueryWithLimit" parameterType="map" resultType="java.lang.String">
+        SELECT data.kvskey
+        FROM data LEFT JOIN stringfield ON data.kvstable = stringfield.kvstable AND data.kvskey = stringfield.kvskey
+        WHERE ${query}
+        LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
+
+    <select id="selectByTable" parameterType="map" resultType="java.lang.String">
+        SELECT data.kvskey
+        FROM data
+        WHERE data.kvstable = #{kvstable}
+    </select>
+
+    <delete id="deleteObject" parameterType="map">
+        DELETE FROM data WHERE kvskey = #{key} AND kvstable = #{kvstable}
+    </delete>
+
+    <delete id="deleteFields" parameterType="map">
+        DELETE FROM stringfield WHERE kvskey = #{key} AND kvstable = #{kvstable}
+    </delete>
+
+    <resultMap id="bytesRM" type="tv.notube.commons.storage.model.fields.Bytes">
+        <result property="bytes" column="object" jdbcType="BLOB"
+                typeHandler="org.apache.ibatis.type.ByteArrayTypeHandler"/>
+    </resultMap>
+
+    <resultMap id="stringFieldRM" type="tv.notube.commons.storage.model.fields.StringField">
+        <constructor>
+            <arg column="name" javaType="java.lang.String"/>
+            <arg column="value" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+
+</mapper>
