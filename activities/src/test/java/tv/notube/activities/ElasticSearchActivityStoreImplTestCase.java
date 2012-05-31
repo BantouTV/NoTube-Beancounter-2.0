@@ -28,7 +28,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +52,8 @@ public class ElasticSearchActivityStoreImplTestCase {
 
     @BeforeClass
     public void beforeClass() throws Exception {
-        node = NodeBuilder.nodeBuilder().local(true).node();
+        //node = NodeBuilder.nodeBuilder().local(true).node();
+        node = NodeBuilder.nodeBuilder().node();
         client = node.client();
 
         try {
@@ -78,11 +78,12 @@ public class ElasticSearchActivityStoreImplTestCase {
 
     @BeforeTest
     public void setUp() throws Exception {
-        as = new ElasticSearchActivityStoreImpl("localhost", 9200);
+        as = ElasticSearchActivityStoreFactory.getInstance().build();
     }
 
     @AfterTest
     public void tearDown() throws Exception {
+        ((ElasticSearchActivityStoreImpl) as).closeClient();
         as = null;
     }
 

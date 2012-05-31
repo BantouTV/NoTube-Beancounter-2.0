@@ -1,23 +1,24 @@
 package tv.notube.activities;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.cluster.node.DiscoveryNode;
+import org.elasticsearch.common.collect.ImmutableList;
+import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.joda.time.DateTime;
 import tv.notube.activities.model.activity.ElasticSearchActivity;
+import tv.notube.commons.configuration.activities.ElasticSearchConfiguration;
+import tv.notube.commons.configuration.activities.NodeInfo;
 import tv.notube.commons.model.activity.*;
 
-import javax.xml.ws.Action;
 import java.io.IOException;
 import java.lang.Object;
 import java.util.ArrayList;
@@ -42,15 +43,14 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
     public static final String INDEX_NAME = "beancounter";
     public static final String INDEX_TYPE = "activity";
 
-    private String hostname;
-    private int port;
     private ObjectMapper mapper;
+    private ElasticSearchConfiguration configuration;
+    //private Client client;
 
-    public ElasticSearchActivityStoreImpl(String hostname, int port) {
+    public ElasticSearchActivityStoreImpl(ElasticSearchConfiguration configuration) {
+        this.configuration = configuration;
+        //client = getClient();
         mapper = new ObjectMapper();
-
-        this.hostname = hostname;
-        this.port = port;
     }
 
     @Override
@@ -58,8 +58,9 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
         // TODO: Make it work over HTTP.
 //        Client client = new TransportClient()
 //                .addTransportAddress(new InetSocketTransportAddress(hostname, port));
-        Node node = NodeBuilder.nodeBuilder().local(true).node();
-        Client client = node.client();
+//        Node node = NodeBuilder.nodeBuilder().local(true).node();
+        //Client client = node.client();
+        Client client = getClient();
 
         indexActivity(userId, activity, client);
 
@@ -68,8 +69,9 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
 
     @Override
     public void store(UUID userId, Collection<Activity> activities) throws ActivityStoreException {
-        Node node = NodeBuilder.nodeBuilder().local(true).node();
-        Client client = node.client();
+//        Node node = NodeBuilder.nodeBuilder().local(true).node();
+        //Client client = node.client();
+        Client client = getClient();
 
         for (Activity activity : activities) {
             indexActivity(userId, activity, client);
@@ -80,8 +82,9 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
 
     @Override
     public Collection<Activity> getByUser(UUID uuidId, int max) throws ActivityStoreException {
-        Node node = NodeBuilder.nodeBuilder().local(true).node();
-        Client client = node.client();
+//        Node node = NodeBuilder.nodeBuilder().local(true).node();
+//        Client client = node.client();
+        Client client = getClient();
 
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString("userId:" + uuidId.toString()))
@@ -108,15 +111,16 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
 
     @Override
     public Collection<Activity> getByUserAndDateRange(UUID uuid, DateTime from, DateTime to) throws ActivityStoreException {
-        Node node = NodeBuilder.nodeBuilder().local(true).node();
-        Client client = node.client();
+//        Node node = NodeBuilder.nodeBuilder().local(true).node();
+//        Client client = node.client();
+        Client client = getClient();
 
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
                 .setQuery(queryString("userId:" + uuid.toString()))
-                .setFilter(FilterBuilders.numericRangeFilter("activity.activity.context.date")
-                        .from(from.getMillis()).to(to.getMillis()))
-                .execute().actionGet();
+                .setFilter(numericRangeFilter(INDEX_TYPE + ".activity.context.date")
+                        .from(from.getMillis())
+                        .to(to.getMillis())
+                ).execute().actionGet();
 
         Collection<Activity> activities = new ArrayList<Activity>();
 
@@ -139,18 +143,21 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
 
     @Override
     public Map<UUID, Collection<Activity>> getByDateRange(DateTime from, DateTime to) throws ActivityStoreException {
-        Node node = NodeBuilder.nodeBuilder().local(true).node();
-        Client client = node.client();
+//        Node node = NodeBuilder.nodeBuilder().local(true).node();
+//        Client client = node.client();
+        Client client = getClient();
 
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
                 .setQuery(QueryBuilders.matchAllQuery())
-                .setFilter(FilterBuilders.numericRangeFilter("activity.activity.context.date")
-                        .from(from.getMillis()).to(to.getMillis()))
-                .execute().actionGet();
+                .setFilter(numericRangeFilter(INDEX_TYPE + ".activity.context.date")
+                        .from(from.getMillis())
+                        .to(to.getMillis())
+                ).execute().actionGet();
 
         Map<UUID, Collection<Activity>> activitiesMap = new HashMap<UUID, Collection<Activity>>();
 
+        // TODO: Use facets or some type of grouping to avoid populating the map
+        // manually.
         for (SearchHit hit : searchResponse.getHits()) {
             try {
                 UUID userId = UUID.fromString((String) hit.getSource().get("userId"));
@@ -173,6 +180,10 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
         return activitiesMap;
     }
 
+    public void closeClient() {
+        //client.close();
+    }
+
     private void indexActivity(UUID userId, Activity activity, Client client) {
         ElasticSearchActivity esa = new ElasticSearchActivity(userId, activity);
 
@@ -187,5 +198,26 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
 
     private byte[] createActivityJson(ElasticSearchActivity esa) throws IOException {
         return mapper.writeValueAsBytes(esa);
+    }
+
+    private Client getClient() {
+        Settings settings = ImmutableSettings.settingsBuilder()
+                .put("client.transport.sniff", true).build();
+        TransportClient client = new TransportClient(settings);
+
+        for (NodeInfo node : configuration.getNodes()) {
+            client.addTransportAddress(
+                    new InetSocketTransportAddress(node.getHost(), node.getPort())
+            );
+        }
+
+        ImmutableList<DiscoveryNode> nodes = client.connectedNodes();
+        if (nodes.isEmpty()) {
+            client.close();
+            throw new RuntimeException("Could not connect to elasticsearch cluster."
+                    + " Please check the elasticsearch-configuration.xml file.");
+        }
+
+        return client;
     }
 }
