@@ -31,7 +31,7 @@ public class ElasticSearchActivityStoreFactory implements ActivityStoreFactory {
                     ElasticSearchConfiguration.class
             );
         } catch (ConfigurationsException cex) {
-            final String message = "Error while loading configuration from" +
+            final String message = "Error while loading configuration from " +
                     "[" + ELASTICSEARCH_CONF + "]";
             throw new RuntimeException(message, cex);
         }

@@ -4,7 +4,11 @@
 *.iml
 *.ipr
 .idea/
+target/
 
 # Eclipse files
 *.project
 *.settings
+
+# elasticsearch
+data/
