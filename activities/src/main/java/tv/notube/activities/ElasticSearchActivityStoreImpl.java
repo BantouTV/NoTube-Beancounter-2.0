@@ -45,47 +45,28 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
 
     private ObjectMapper mapper;
     private ElasticSearchConfiguration configuration;
-    //private Client client;
+    private Client client;
 
     public ElasticSearchActivityStoreImpl(ElasticSearchConfiguration configuration) {
         this.configuration = configuration;
-        //client = getClient();
+        client = getClient();
         mapper = new ObjectMapper();
     }
 
     @Override
     public void store(UUID userId, Activity activity) throws ActivityStoreException {
-        // TODO: Make it work over HTTP.
-//        Client client = new TransportClient()
-//                .addTransportAddress(new InetSocketTransportAddress(hostname, port));
-//        Node node = NodeBuilder.nodeBuilder().local(true).node();
-        //Client client = node.client();
-        Client client = getClient();
-
         indexActivity(userId, activity, client);
-
-        client.close();
     }
 
     @Override
     public void store(UUID userId, Collection<Activity> activities) throws ActivityStoreException {
-//        Node node = NodeBuilder.nodeBuilder().local(true).node();
-        //Client client = node.client();
-        Client client = getClient();
-
         for (Activity activity : activities) {
             indexActivity(userId, activity, client);
         }
-
-        client.close();
     }
 
     @Override
     public Collection<Activity> getByUser(UUID uuidId, int max) throws ActivityStoreException {
-//        Node node = NodeBuilder.nodeBuilder().local(true).node();
-//        Client client = node.client();
-        Client client = getClient();
-
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString("userId:" + uuidId.toString()))
                 .execute().actionGet();
@@ -104,17 +85,11 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
             }
         }
 
-        client.close();
-
         return activities;
     }
 
     @Override
     public Collection<Activity> getByUserAndDateRange(UUID uuid, DateTime from, DateTime to) throws ActivityStoreException {
-//        Node node = NodeBuilder.nodeBuilder().local(true).node();
-//        Client client = node.client();
-        Client client = getClient();
-
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString("userId:" + uuid.toString()))
                 .setFilter(numericRangeFilter(INDEX_TYPE + ".activity.context.date")
@@ -136,17 +111,11 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
             }
         }
 
-        client.close();
-
         return activities;
     }
 
     @Override
     public Map<UUID, Collection<Activity>> getByDateRange(DateTime from, DateTime to) throws ActivityStoreException {
-//        Node node = NodeBuilder.nodeBuilder().local(true).node();
-//        Client client = node.client();
-        Client client = getClient();
-
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(QueryBuilders.matchAllQuery())
                 .setFilter(numericRangeFilter(INDEX_TYPE + ".activity.context.date")
@@ -175,13 +144,11 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
             }
         }
 
-        client.close();
-
         return activitiesMap;
     }
 
     public void closeClient() {
-        //client.close();
+        client.close();
     }
 
     private void indexActivity(UUID userId, Activity activity, Client client) {

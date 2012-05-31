@@ -12,9 +12,9 @@ import org.elasticsearch.node.NodeBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.joda.time.DateTime;
-import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import tv.notube.commons.model.activity.Activity;
@@ -50,9 +50,8 @@ public class ElasticSearchActivityStoreImplTestCase {
     private Client client;
     private String tweetServiceUrl = "http://twitter.com";
 
-    @BeforeClass
-    public void beforeClass() throws Exception {
-        //node = NodeBuilder.nodeBuilder().local(true).node();
+    @BeforeSuite
+    public void beforeSuite() throws Exception {
         node = NodeBuilder.nodeBuilder().node();
         client = node.client();
 
@@ -69,8 +68,8 @@ public class ElasticSearchActivityStoreImplTestCase {
                 .waitForYellowStatus()).actionGet();
     }
 
-    @AfterClass
-    public void afterClass() throws Exception {
+    @AfterSuite
+    public void afterSuite() throws Exception {
         node.close();
 
         // TODO: Remove the ES data dir
