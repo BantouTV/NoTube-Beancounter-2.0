@@ -9,10 +9,16 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import tv.notube.commons.model.User;
+import tv.notube.commons.tests.Tests;
+import tv.notube.commons.tests.TestsBuilder;
+import tv.notube.commons.tests.TestsException;
 import tv.notube.platform.AbstractJerseyTestCase;
 import tv.notube.platform.responses.UserPlatformResponse;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.LinkedHashMap;
 
 /**
@@ -21,6 +27,8 @@ import java.util.LinkedHashMap;
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class UserServiceTestCase extends AbstractJerseyTestCase {
+
+    private Tests tests = TestsBuilder.getInstance().build();
 
     private final static String APIKEY = "APIKEY";
 
@@ -36,6 +44,36 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         final String username = "missing-user";
         final String password = "abc";
         final String query = String.format(
+                baseQuery,
+                APIKEY
+        );
+        PostMethod postMethod = new PostMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("name", name);
+        postMethod.addParameter("surname", surname);
+        postMethod.addParameter("username", username);
+        postMethod.addParameter("password", password);
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
+        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        Assert.assertEquals(responseBody.substring(0, 11), "{\"object\":\"");
+        Assert.assertEquals(responseBody.substring(47), "\",\"message\":\"user successfully registered\",\"status\":\"OK\"}");
+    }
+
+    @Test
+    public void testSignUpRandom() throws IOException, TestsException, URISyntaxException {
+
+        User user = tests.build(User.class).getObject();
+
+        String baseQuery = "user/register?apikey=%s";
+        String name = user.getName();
+        String surname = user.getSurname();
+        String username = user.getUsername();
+        String password = user.getPassword();
+        String query = String.format(
                 baseQuery,
                 APIKEY
         );
@@ -126,7 +164,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
     // TODO (mid) waiting for the API for pushing activities
     @Test(enabled = false)
     public void testGetActivities() throws IOException {
-        final String baseQuery = "user/activities/%s?apikey=%s";
+        final String baseQuery = "user/%s/activities?apikey=%s";
         final String name = "test-user";
         final String query = String.format(
                 baseQuery,
@@ -144,7 +182,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetActivitiesMissingUser() throws IOException {
-        final String baseQuery = "user/activities/%s?apikey=%s";
+        final String baseQuery = "user/%s/activities?apikey=%s";
         final String name = "missing-user";
         final String query = String.format(
                 baseQuery,
@@ -183,7 +221,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testAuthenticate() throws IOException {
-        final String baseQuery = "user/authenticate/%s?apikey=%s";
+        final String baseQuery = "user/%s/authenticate?apikey=%s";
         final String username = "test-user";
         final String password = "abc";
         final String query = String.format(
@@ -317,7 +355,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetProfile() throws IOException {
-        final String baseQuery = "user/profile/%s?apikey=%s";
+        final String baseQuery = "user/%s/profile?apikey=%s";
         final String username = "test-user";
         final String query = String.format(
                 baseQuery,
@@ -336,7 +374,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testForceUserCrawl() throws IOException {
-        final String baseQuery = "user/activities/update/%s?apikey=%s";
+        final String baseQuery = "user/%s/activities/update?apikey=%s";
         final String username = "test-user";
         final String query = String.format(
                 baseQuery,
@@ -357,7 +395,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testForceUserProfiling() throws IOException {
-        final String baseQuery = "user/profile/update/%s?apikey=%s";
+        final String baseQuery = "user/%s/profile/update?apikey=%s";
         final String username = "test-user";
         final String query = String.format(
                 baseQuery,
@@ -377,7 +415,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetProfilingStatus() throws IOException {
-        final String baseQuery = "user/profile/status/%s?apikey=%s";
+        final String baseQuery = "user/%s/profile/status?apikey=%s";
         final String username = "test-user";
         final String query = String.format(
                 baseQuery,
@@ -399,7 +437,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetProfilingStatusEmptyUsername() throws IOException {
-        final String baseQuery = "user/profile/status/%s?apikey=%s";
+        final String baseQuery = "user/%s/profile/status?apikey=%s";
         final String username = "";
         final String query = String.format(
                 baseQuery,
@@ -412,11 +450,8 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
-        //Assert.assertTrue(false);
-        // TODO (mid - warning) with empty username this calls "user/profile/{username}"
-        // this is working because we don't have a "status" user.......
-        Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"object\":\"MOCK-ERROR\",\"message\":\"Error while retrieving profile for user 'status'\",\"status\":\"NOK\"}");
+        Assert.assertEquals(result, HttpStatus.SC_NOT_FOUND, "\"Unexpected result: [" + result + "]");
+        Assert.assertEquals(responseBody, "");
     }
 
     @Test

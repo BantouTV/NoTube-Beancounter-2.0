@@ -223,7 +223,7 @@ public class UserService extends JsonService {
 
 
     @GET
-    @Path("activities/{username}")
+    @Path("/{username}/activities")
     public Response getActivities(
             @PathParam("username") String username,
             @QueryParam("apikey") String apiKey
@@ -356,7 +356,7 @@ public class UserService extends JsonService {
 
 
     @POST
-    @Path("authenticate/{username}")
+    @Path("/{username}/authenticate")
     public Response authenticate(
             @PathParam("username") String username,
             @FormParam("password") String password,
@@ -601,7 +601,7 @@ public class UserService extends JsonService {
 
 
     @GET
-    @Path("profile/{username}")
+    @Path("/{username}/profile")
     public Response getProfile(
             @PathParam("username") String username,
             @QueryParam("apikey") String apiKey
@@ -647,7 +647,7 @@ public class UserService extends JsonService {
     }
 
     @GET
-    @Path("activities/update/{username}")
+    @Path("/{username}/activities/update")
     public Response forceUserCrawl(
             @PathParam("username") String username,
             @QueryParam("apikey") String apiKey
@@ -699,7 +699,7 @@ public class UserService extends JsonService {
     }
 
     @GET
-    @Path("profile/update/{username}")
+    @Path("/{username}/profile/update")
     public Response forceUserProfiling(
             @PathParam("username") String username,
             @QueryParam("apikey") String apiKey
@@ -758,7 +758,7 @@ public class UserService extends JsonService {
     }
 
     @GET
-    @Path("profile/status/{username}")
+    @Path("/{username}/profile/status")
     public Response getProfilingStatus(
             @PathParam("username") String username,
             @QueryParam("apikey") String apiKey
