@@ -3,6 +3,8 @@ package tv.notube.commons.configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import tv.notube.commons.configuration.activities.ElasticSearchConfiguration;
+import tv.notube.commons.configuration.activities.NodeInfo;
 import tv.notube.commons.configuration.analytics.AnalysisDescription;
 import tv.notube.commons.configuration.analytics.AnalyticsConfiguration;
 import tv.notube.commons.configuration.analytics.MethodDescription;
@@ -67,8 +69,26 @@ public class Configurations {
         if (serviceClass.equals(StorageConfiguration.class)) {
             return storageConfiguration(xmlConfiguration);
         }
+        if (serviceClass.equals(ElasticSearchConfiguration.class)) {
+            return elasticSearchConfiguration(xmlConfiguration);
+        }
         final String errMsg = "Class [" + serviceClass + "] is not supported";
         throw new ConfigurationsException(errMsg);
+    }
+
+    private static <T extends Configuration> T elasticSearchConfiguration(XMLConfiguration xmlConfiguration) {
+        ElasticSearchConfiguration configuration = new ElasticSearchConfiguration();
+        List nodes = xmlConfiguration.configurationsAt("node");
+
+        for (Object o : nodes) {
+            HierarchicalConfiguration nodeConf = (HierarchicalConfiguration) o;
+            String host = nodeConf.getString("host");
+            String port = nodeConf.getString("port");
+
+            configuration.addNode(new NodeInfo(host, Integer.parseInt(port, 10)));
+        }
+
+        return (T) configuration;
     }
 
     private static <T extends Configuration> T storageConfiguration(XMLConfiguration xmlConfiguration) {
