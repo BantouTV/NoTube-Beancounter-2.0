@@ -29,7 +29,6 @@ import tv.notube.commons.model.activity.Verb;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +36,6 @@ import java.util.UUID;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static tv.notube.activities.ElasticSearchActivityStoreImpl.INDEX_NAME;
 import static tv.notube.activities.ElasticSearchActivityStoreImpl.INDEX_TYPE;

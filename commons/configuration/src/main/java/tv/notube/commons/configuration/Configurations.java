@@ -85,7 +85,10 @@ public class Configurations {
             String host = nodeConf.getString("host");
             String port = nodeConf.getString("port");
 
-            configuration.addNode(new NodeInfo(host, Integer.parseInt(port, 10)));
+            try {
+                // TODO: What is the desired behaviour?
+                configuration.addNode(new NodeInfo(host, Integer.parseInt(port, 10)));
+            } catch (NumberFormatException ignore) {}
         }
 
         return (T) configuration;
