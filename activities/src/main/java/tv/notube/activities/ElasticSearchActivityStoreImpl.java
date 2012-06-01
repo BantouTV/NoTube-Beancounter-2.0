@@ -13,6 +13,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.sort.SortOrder;
 import org.joda.time.DateTime;
 import tv.notube.activities.model.activity.ElasticSearchActivity;
 import tv.notube.commons.configuration.activities.ElasticSearchConfiguration;
@@ -69,55 +70,33 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
     public Collection<Activity> getByUser(UUID uuidId, int max) throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString("userId:" + uuidId.toString()))
+                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
+                .setSize(max)
                 .execute().actionGet();
 
-        Collection<Activity> activities = new ArrayList<Activity>();
-
-        for (SearchHit hit : searchResponse.getHits()) {
-            try {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> activity =
-                        (Map<String, Object>) hit.getSource().get("activity");
-
-                activities.add(mapper.readValue(mapper.writeValueAsBytes(activity), Activity.class));
-            } catch (IOException ioe) {
-                // TODO
-            }
-        }
-
-        return activities;
+        return retrieveActivitiesFromSearchResponse(searchResponse);
     }
 
     @Override
-    public Collection<Activity> getByUserAndDateRange(UUID uuid, DateTime from, DateTime to) throws ActivityStoreException {
+    public Collection<Activity> getByUserAndDateRange(UUID uuid, DateTime from, DateTime to)
+            throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString("userId:" + uuid.toString()))
+                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
                 .setFilter(numericRangeFilter(INDEX_TYPE + ".activity.context.date")
                         .from(from.getMillis())
                         .to(to.getMillis())
                 ).execute().actionGet();
 
-        Collection<Activity> activities = new ArrayList<Activity>();
-
-        for (SearchHit hit : searchResponse.getHits()) {
-            try {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> activity =
-                        (Map<String, Object>) hit.getSource().get("activity");
-
-                activities.add(mapper.readValue(mapper.writeValueAsBytes(activity), Activity.class));
-            } catch (IOException ioe) {
-                // TODO
-            }
-        }
-
-        return activities;
+        return retrieveActivitiesFromSearchResponse(searchResponse);
     }
 
     @Override
-    public Map<UUID, Collection<Activity>> getByDateRange(DateTime from, DateTime to) throws ActivityStoreException {
+    public Map<UUID, Collection<Activity>> getByDateRange(DateTime from, DateTime to)
+            throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(QueryBuilders.matchAllQuery())
+                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
                 .setFilter(numericRangeFilter(INDEX_TYPE + ".activity.context.date")
                         .from(from.getMillis())
                         .to(to.getMillis())
@@ -167,9 +146,33 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
         return mapper.writeValueAsBytes(esa);
     }
 
+    private Collection<Activity> retrieveActivitiesFromSearchResponse(
+            SearchResponse searchResponse
+    ) {
+        Collection<Activity> activities = new ArrayList<Activity>();
+
+        for (SearchHit hit : searchResponse.getHits()) {
+            try {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> activity =
+                        (Map<String, Object>) hit.getSource().get("activity");
+
+                activities.add(mapper.readValue(
+                        mapper.writeValueAsBytes(activity),
+                        Activity.class
+                ));
+            } catch (IOException ioe) {
+                // TODO
+            }
+        }
+
+        return activities;
+    }
+
     private Client getClient() {
         Settings settings = ImmutableSettings.settingsBuilder()
-                .put("client.transport.sniff", true).build();
+                .put("client.transport.sniff", true)
+                .build();
         TransportClient client = new TransportClient(settings);
 
         for (NodeInfo node : configuration.getNodes()) {

@@ -11,7 +11,9 @@ import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.sort.SortOrder;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeSuite;
@@ -35,6 +37,8 @@ import java.util.UUID;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 import static tv.notube.activities.ElasticSearchActivityStoreImpl.INDEX_NAME;
 import static tv.notube.activities.ElasticSearchActivityStoreImpl.INDEX_TYPE;
 
@@ -110,7 +114,6 @@ public class ElasticSearchActivityStoreImplTestCase {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void storeMultipleTweetsForAUser() throws Exception {
         clearIndex();
 
@@ -125,52 +128,13 @@ public class ElasticSearchActivityStoreImplTestCase {
 
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(QueryBuilders.matchAllQuery())
+                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
                 .execute().actionGet();
 
         SearchHits hits = searchResponse.getHits();
         assertEquals(hits.getTotalHits(), numTweets);
 
-        //assertHitsEqualTweetActivities(hits, userId, tweetActivities);
-
-        for (int i = 0; i < numTweets; i++) {
-            SearchHit hit = hits.getAt(i);
-            assertEquals(hit.getType(), INDEX_TYPE);
-
-            Map<String, Object> source = hit.getSource();
-            assertEquals(source.get("userId"), userId.toString());
-
-            Map<String, Object> activity = (Map<String, Object>) source.get("activity");
-            assertEquals(activity.get("verb"), String.valueOf(Verb.TWEET));
-
-            Map<String, Object> object = (Map<String, Object>) activity.get("object");
-            String url = (String) object.get("url");
-            int tweetNumber = Integer.valueOf(url.substring(url.length() - 1), 10);
-            assertEquals(object.size(), 7);
-            assertEquals(object.get("text"), "This is test tweet number "
-                    + tweetNumber + " from user " + userId.toString() + "!");
-            assertEquals(url, "http://twitter.com/#!/test-user/status/" + tweetNumber);
-            assertEquals(object.get("hashTags"), Collections.emptyList());
-            assertEquals(object.get("urls"), Collections.emptyList());
-            assertEquals(object.get("name"), "Test");
-            assertEquals(object.get("@class"), Tweet.class.getName());
-            assertNull(object.get("description"));
-
-            Map<String, Object> context = (Map<String, Object>) activity.get("context");
-            assertEquals(context.size(), 3);
-            assertEquals(context.get("date"), dateTime.minusDays(tweetNumber).getMillis());
-            assertEquals(context.get("service"), tweetServiceUrl);
-            assertNull(context.get("mood"));
-        }
-    }
-
-    private void assertHitsEqualTweetActivities(SearchHits hits, UUID userId, List<Activity> tweetActivities) {
-        int numTweets = tweetActivities.size();
-        assertEquals(hits.getTotalHits(), numTweets);
-
-        for (int i = 0; i < numTweets; i++) {
-            SearchHit hit = hits.getAt(i);
-            assertHitEqualsTweetActivity(hit, userId, tweetActivities.get(i));
-        }
+        assertHitsEqualTweetActivities(hits, userId, tweetActivities);
     }
 
     @Test
@@ -178,14 +142,16 @@ public class ElasticSearchActivityStoreImplTestCase {
         clearIndex();
 
         UUID userId = UUID.randomUUID();
+        Activity activity = createTweetActivity(0, userId, new DateTime());
 
-        as.store(userId, createTweetActivity(0, userId, new DateTime()));
+        as.store(userId, activity);
 
         // Refresh to ensure the addition was committed.
         refreshIndex();
 
-        Collection<Activity> activities = as.getByUser(userId, 1);
+        List<Activity> activities = (List<Activity>) as.getByUser(userId, 1);
         assertEquals(activities.size(), 1);
+        assertEquals(activities.get(0), activity);
     }
 
     @Test
@@ -194,29 +160,89 @@ public class ElasticSearchActivityStoreImplTestCase {
 
         UUID userId = UUID.randomUUID();
         int numTweets = 2;
+        List<Activity> tweetActivities
+                = (List<Activity>) createTweetActivities(userId, new DateTime(), numTweets);
 
-        as.store(userId, createTweetActivities(userId, new DateTime(), numTweets));
+        as.store(userId, tweetActivities);
 
         refreshIndex();
 
-        Collection<Activity> activities = as.getByUser(userId, 2);
+        List<Activity> activities = (List<Activity>) as.getByUser(userId, 2);
         assertEquals(activities.size(), numTweets);
+
+        for (int i = 0; i < activities.size(); i++) {
+            assertEquals(activities.get(i), tweetActivities.get(i));
+        }
     }
 
     @Test
-    public void getLatestTweetByAUserGivenUserHasOneTweetAndTwoTotalUsers() throws Exception {
+    public void getLatestTweetByAUserGivenOneUserAndTheyHaveTwoTweets() throws Exception {
+        clearIndex();
+
+        UUID userId = UUID.randomUUID();
+        int numTweets = 2;
+        List<Activity> tweetActivities
+                = (List<Activity>) createTweetActivities(userId, new DateTime(), numTweets);
+
+        as.store(userId, tweetActivities);
+
+        refreshIndex();
+
+        List<Activity> activities = (List<Activity>) as.getByUser(userId, 1);
+        assertEquals(activities.size(), 1);
+        assertEquals(activities.get(0), tweetActivities.get(0));
+    }
+
+    @Test
+    public void getLatestTwoTweetsByAUserGivenOneUserAndTheyHaveOneTweet() throws Exception {
+        clearIndex();
+
+        UUID userId = UUID.randomUUID();
+        Activity activity = createTweetActivity(0, userId, new DateTime());
+
+        as.store(userId, activity);
+
+        refreshIndex();
+
+        List<Activity> activities = (List<Activity>) as.getByUser(userId, 2);
+        assertEquals(activities.size(), 1);
+        assertEquals(activities.get(0), activity);
+    }
+
+    @Test
+    public void gettingLatestTweetsOfAUserShouldReturnTheMostRecentTweets() throws Exception {
+        clearIndex();
+
+        UUID userId = UUID.randomUUID();
+        as.store(userId, createTweetActivities(userId, new DateTime(), 10));
+
+        refreshIndex();
+
+        Collection<Activity> activities = as.getByUser(userId, 3);
+        assertEquals(activities.size(), 3);
+
+        DateTime threeDaysAgo = new DateTime().minusDays(3);
+        for (Activity activity : activities) {
+            assertTrue(activity.getContext().getDate().isAfter(threeDaysAgo));
+        }
+    }
+
+    @Test
+    public void getLatestTweetOfAUserGivenUserHasOneTweetAndTwoTotalUsers() throws Exception {
         clearIndex();
 
         UUID userId1 = UUID.randomUUID();
         UUID userId2 = UUID.randomUUID();
+        Activity activity = createTweetActivity(0, userId1, new DateTime());
 
-        as.store(userId1, createTweetActivity(0, userId1, new DateTime()));
+        as.store(userId1, activity);
         as.store(userId2, createTweetActivity(1, userId2, new DateTime()));
 
         refreshIndex();
 
-        Collection<Activity> activities = as.getByUser(userId1, 1);
+        List<Activity> activities = (List<Activity>) as.getByUser(userId1, 1);
         assertEquals(activities.size(), 1);
+        assertEquals(activities.get(0), activity);
     }
 
     @Test
@@ -224,16 +250,23 @@ public class ElasticSearchActivityStoreImplTestCase {
         clearIndex();
 
         UUID userId = UUID.randomUUID();
-        DateTime dateTime = new DateTime();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
 
-        as.store(userId, createTweetActivities(userId, dateTime, 10));
+        List<Activity> tweetActivities
+                = (List<Activity>) createTweetActivities(userId, dateTime, 10);
+        as.store(userId, tweetActivities);
 
         refreshIndex();
 
         Collection<Activity> userActivities = as.getByUser(userId, 10);
-        Collection<Activity> activities = as.getByUserAndDateRange(userId, new DateTime().minusDays(5), new DateTime());
+        List<Activity> activities
+                = (List<Activity>) as.getByUserAndDateRange(userId, dateTime.minusDays(4), dateTime);
         assertEquals(userActivities.size(), 10);
         assertEquals(activities.size(), 5);
+
+        for (int i = 0; i < activities.size(); i++) {
+            assertEquals(activities.get(i), tweetActivities.get(i));
+        }
     }
 
     @Test
@@ -242,21 +275,34 @@ public class ElasticSearchActivityStoreImplTestCase {
 
         UUID userId1 = UUID.randomUUID();
         UUID userId2 = UUID.randomUUID();
-        DateTime dateTime = new DateTime();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
 
-        as.store(userId1, createTweetActivities(userId1, dateTime, 10));
-        as.store(userId2, createTweetActivities(userId2, dateTime, 10));
+        List<Activity> activities1
+                = (List<Activity>) createTweetActivities(userId1, dateTime, 10);
+        List<Activity> activities2
+                = (List<Activity>) createTweetActivities(userId2, dateTime, 10);
+        as.store(userId1, activities1);
+        as.store(userId2, activities2);
 
         refreshIndex();
 
-        Map<UUID, Collection<Activity>> allActivity = as.getByDateRange(new DateTime().minusDays(5), new DateTime());
+        Map<UUID, Collection<Activity>> allActivity
+                = as.getByDateRange(dateTime.minusDays(5), dateTime);
         assertEquals(allActivity.size(), 2);
 
-        Collection<Activity> activities = allActivity.get(userId1);
+        List<Activity> activities = (List<Activity>) allActivity.get(userId1);
         assertEquals(activities.size(), 5);
 
-        activities = allActivity.get(userId2);
+        for (int i = 0; i < activities.size(); i++) {
+            assertEquals(activities.get(i), activities1.get(i));
+        }
+
+        activities = (List<Activity>) allActivity.get(userId2);
         assertEquals(activities.size(), 5);
+
+        for (int i = 0; i < activities.size(); i++) {
+            assertEquals(activities.get(i), activities2.get(i));
+        }
     }
 
     private void refreshIndex() {
@@ -289,7 +335,10 @@ public class ElasticSearchActivityStoreImplTestCase {
                 "Test",
                 fields
         );
-        ab.setContext(dateTime.minusDays(tweetId), new URL(tweetServiceUrl));
+        ab.setContext(
+                dateTime.withZone(DateTimeZone.UTC).minusDays(tweetId),
+                new URL(tweetServiceUrl)
+        );
 
         return ab.pop();
     }
@@ -304,37 +353,6 @@ public class ElasticSearchActivityStoreImplTestCase {
         }
 
         return activities;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void assertHitEqualsTweetActivity(
-            SearchHit hit,
-            UUID userId, List<Object> hashTags, List<Object> urls,
-            DateTime dateTime
-    ) throws Exception {
-        assertEquals(hit.getType(), INDEX_TYPE);
-
-        Map<String, Object> source = hit.getSource();
-        assertEquals(source.get("userId"), userId.toString());
-
-        Map<String, Object> activity = (Map<String, Object>) source.get("activity");
-        assertEquals(activity.get("verb"), String.valueOf(Verb.TWEET));
-
-        Map<String, Object> object = (Map<String, Object>) activity.get("object");
-        assertEquals(object.size(), 7);
-        assertEquals(object.get("text"), "This is test tweet number 0 from user " + userId.toString() + "!");
-        assertEquals(object.get("url"), "http://twitter.com/#!/test-user/status/0");
-        assertEquals(object.get("hashTags"), hashTags);
-        assertEquals(object.get("urls"), urls);
-        assertEquals(object.get("name"), "Test");
-        assertEquals(object.get("@class"), Tweet.class.getName());
-        assertNull(object.get("description"));
-
-        Map<String, Object> context = (Map<String, Object>) activity.get("context");
-        assertEquals(context.size(), 3);
-        assertEquals(context.get("date"), dateTime.getMillis());
-        assertEquals(context.get("service"), tweetServiceUrl);
-        assertNull(context.get("mood"));
     }
 
     @SuppressWarnings("unchecked")
@@ -364,5 +382,16 @@ public class ElasticSearchActivityStoreImplTestCase {
         assertEquals(context.get("date"), tweetContext.getDate().getMillis());
         assertEquals(context.get("service"), tweetServiceUrl);
         assertNull(context.get("mood"));
+    }
+
+    private void assertHitsEqualTweetActivities(SearchHits hits, UUID userId, Collection<Activity> tweetActivities) {
+        List<Activity> activities = new ArrayList<Activity>(tweetActivities);
+        int numTweets = activities.size();
+        assertEquals(hits.getTotalHits(), numTweets);
+
+        for (int i = 0; i < numTweets; i++) {
+            SearchHit hit = hits.getAt(i);
+            assertHitEqualsTweetActivity(hit, userId, activities.get(i));
+        }
     }
 }
