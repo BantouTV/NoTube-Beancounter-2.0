@@ -18,7 +18,7 @@ import java.util.*;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class TwitterResponse  implements ServiceResponse<List<Activity>> {
+public class TwitterResponse implements ServiceResponse<List<Activity>> {
 
     private final String twitter = "http://twitter.com";
 

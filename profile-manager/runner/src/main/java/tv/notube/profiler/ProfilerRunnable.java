@@ -47,7 +47,6 @@ public class ProfilerRunnable implements Runnable {
 
     public void run() {
         profiler.profilingStarted(userId);
-        UUID token;
         ProfilingResult profilingResult;
         try {
             profilingResult = profilingLineContainer.profile(

@@ -2,7 +2,6 @@ package tv.notube.crawler;
 
 import com.google.inject.Inject;
 import org.apache.log4j.Logger;
-import tv.notube.crawler.requester.DefaultRequester;
 import tv.notube.crawler.requester.Requester;
 import tv.notube.crawler.runnable.Spider;
 import tv.notube.crawler.runnable.SpiderException;

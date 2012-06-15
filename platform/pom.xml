@@ -2,17 +2,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>tv.notube</groupId>
-    <artifactId>platform</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>war</packaging>
-    <name>NoTube 2.0 Web REST API</name>
-
     <parent>
-	    <groupId>tv.notube</groupId>
+        <groupId>tv.notube</groupId>
         <artifactId>parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
+
+    <artifactId>platform</artifactId>
+    <packaging>war</packaging>
+    <name>NoTube 2.0 Web REST API</name>
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
@@ -95,8 +93,8 @@
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
-            <version>1.6</version>
             <artifactId>jersey-bundle</artifactId>
+            <version>1.6</version>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
@@ -152,6 +150,7 @@
         -->
     </dependencies>
     <build>
+        <finalName>notube-platform</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -189,7 +188,6 @@
                 </configuration>
             </plugin>
         </plugins>
-        <finalName>notube-platform</finalName>
     </build>
 
 </project>
