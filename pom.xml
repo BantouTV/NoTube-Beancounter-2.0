@@ -58,6 +58,7 @@
         <module>analytics</module>
         <module>applications</module>
         <module>activities</module>
+        <module>listeners</module>
     </modules>
 
     <distributionManagement>
@@ -83,9 +84,7 @@
         </repository>
         <repository>
             <id>jboss-public-repository-group</id>
-            <url>
-                https://repository.jboss.org/nexus/content/groups/public-jboss/
-            </url>
+            <url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
         </repository>
         <repository>
             <id>java-net</id>
@@ -119,10 +118,20 @@
                 <role>developer</role>
             </roles>
         </developer>
-         <developer>
+        <developer>
             <id>ecandino</id>
             <name>Enrico Candino</name>
             <email>fillme</email>
+            <organization>Sourcesense</organization>
+            <organizationUrl>http://sourcesense.com/</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>bibryam</id>
+            <name>Bilgin Ibryam</name>
+            <email>callme</email>
             <organization>Sourcesense</organization>
             <organizationUrl>http://sourcesense.com/</organizationUrl>
             <roles>
