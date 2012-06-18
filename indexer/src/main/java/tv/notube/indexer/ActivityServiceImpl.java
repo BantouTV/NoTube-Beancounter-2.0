@@ -22,18 +22,10 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public void store(Activity activity) throws ActivityStoreException {
-
-        activityStore.store(
-                getUserUUID(
-                        activity.getVerb(),
-                        activity.getObject().getName()
-                ),
-                activity
-        );
-
+        activityStore.store(getUserUUID(), activity);
     }
 
-    private UUID getUserUUID(Verb v, String username) {
+    private UUID getUserUUID() {
         // TODO (hardcoded)
         return UUID.fromString(String.valueOf("12345678-1234-1234-1234-123456789ab"));
     }
