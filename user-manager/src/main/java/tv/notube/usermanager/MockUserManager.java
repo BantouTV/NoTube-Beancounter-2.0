@@ -13,8 +13,6 @@ import tv.notube.commons.tests.TestsBuilder;
 import tv.notube.commons.tests.TestsException;
 import tv.notube.commons.tests.randomisers.IntegerRandomiser;
 import tv.notube.commons.tests.randomisers.UUIDRandomiser;
-import tv.notube.usermanager.UserManager;
-import tv.notube.usermanager.UserManagerException;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
 
 import java.net.MalformedURLException;
