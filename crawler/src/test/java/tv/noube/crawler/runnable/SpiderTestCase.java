@@ -52,7 +52,7 @@ public class SpiderTestCase {
         List<Activity> expectedAs = userManager.getUserActivities(actualUUID);
         Assert.assertNotNull(userManager.getUserActivities(actualUUID));
         int maxActivities = 100 * userManager.getUser(actualUUID).getServices().size();
-        org.testng.Assert.assertTrue(expectedAs.size() >= 0 && expectedAs.size() <= maxActivities);
+        Assert.assertTrue(expectedAs.size() >= 0 && expectedAs.size() <= maxActivities);
 
     }
 

@@ -162,7 +162,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
     }
 
     // TODO (mid) waiting for the API for pushing activities
-    @Test(enabled = false)
+    @Test
     public void testGetActivities() throws IOException {
         final String baseQuery = "user/%s/activities?apikey=%s";
         final String name = "test-user";

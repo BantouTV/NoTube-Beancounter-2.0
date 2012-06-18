@@ -59,6 +59,7 @@
         <module>applications</module>
         <module>activities</module>
         <module>listeners</module>
+        <module>indexer</module>
     </modules>
 
     <distributionManagement>
