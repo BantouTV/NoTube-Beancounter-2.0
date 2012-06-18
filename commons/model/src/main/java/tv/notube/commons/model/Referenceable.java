@@ -19,6 +19,10 @@ public abstract class Referenceable implements Serializable {
         id = UUID.randomUUID();
     }
 
+    public Referenceable(UUID id) {
+        this.id = id;
+    }
+
     public UUID getId() {
         return id;
     }

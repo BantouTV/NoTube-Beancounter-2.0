@@ -25,7 +25,13 @@ public class UserProfile extends Referenceable {
 
     private Set<Interest> interests = new HashSet<Interest>();
 
-    public UserProfile() {}
+    public UserProfile() {
+        super();
+    }
+
+    public UserProfile(UUID id) {
+        super(id);
+    }
 
     @tv.notube.commons.tests.annotations.Random(names = { "username"} )
     public UserProfile(String username) {
