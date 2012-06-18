@@ -1,4 +1,4 @@
-package tv.notube.extension.profilingline.tagdef;
+package tv.notube.commons.tagdef;
 
 import java.util.ArrayList;
 import java.util.List;

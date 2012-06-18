@@ -1,10 +1,10 @@
-package tv.notube.extension.profilingline.tagdef;
+package tv.notube.commons.tagdef;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import tv.notube.extension.profilingline.tagdef.handler.TagDefResponseHandler;
+import tv.notube.commons.tagdef.handler.TagDefResponseHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
