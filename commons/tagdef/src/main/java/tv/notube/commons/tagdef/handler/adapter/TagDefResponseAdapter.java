@@ -1,8 +1,8 @@
-package tv.notube.extension.profilingline.tagdef.handler.adapter;
+package tv.notube.commons.tagdef.handler.adapter;
 
 import com.google.gson.*;
-import tv.notube.extension.profilingline.tagdef.Def;
-import tv.notube.extension.profilingline.tagdef.TagDefResponse;
+import tv.notube.commons.tagdef.Def;
+import tv.notube.commons.tagdef.TagDefResponse;
 
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;

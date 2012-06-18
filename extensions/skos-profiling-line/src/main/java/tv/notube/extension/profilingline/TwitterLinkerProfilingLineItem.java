@@ -3,8 +3,8 @@ package tv.notube.extension.profilingline;
 import tv.notube.commons.regexapi.*;
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.Tweet;
-import tv.notube.extension.profilingline.tagdef.TagDef;
-import tv.notube.extension.profilingline.tagdef.TagDefException;
+import tv.notube.commons.tagdef.TagDef;
+import tv.notube.commons.tagdef.TagDefException;
 import tv.notube.profiler.line.ProfilingLineItem;
 import tv.notube.profiler.line.ProfilingLineItemException;
 

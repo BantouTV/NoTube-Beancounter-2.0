@@ -1,4 +1,4 @@
-package tv.notube.extension.profilingline.tagdef.handler;
+package tv.notube.commons.tagdef.handler;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -6,11 +6,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
-import tv.notube.commons.regexapi.RegexAPIResponse;
-import tv.notube.commons.regexapi.handlers.gson.RegexAPIResponseAdapter;
-import tv.notube.extension.profilingline.tagdef.TagDef;
-import tv.notube.extension.profilingline.tagdef.TagDefResponse;
-import tv.notube.extension.profilingline.tagdef.handler.adapter.TagDefResponseAdapter;
+import tv.notube.commons.tagdef.TagDefResponse;
+import tv.notube.commons.tagdef.handler.adapter.TagDefResponseAdapter;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

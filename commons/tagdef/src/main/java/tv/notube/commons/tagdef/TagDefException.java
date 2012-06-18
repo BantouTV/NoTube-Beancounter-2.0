@@ -1,4 +1,4 @@
-package tv.notube.extension.profilingline.tagdef;
+package tv.notube.commons.tagdef;
 
 /**
  * put class description here
