@@ -59,7 +59,8 @@
         <module>applications</module>
         <module>activities</module>
         <module>listeners</module>
-        <module>indexer</module>
+        <module>indexer</module> 
+        <module>realtime-profiler</module>   
     </modules>
 
     <distributionManagement>
