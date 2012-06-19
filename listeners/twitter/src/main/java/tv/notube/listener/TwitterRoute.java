@@ -36,21 +36,7 @@ public class TwitterRoute extends RouteBuilder {
                     }
                 })
 
-
-        //  .unmarshal().json(JsonLibrary.Jackson, TwitterTweet.class)
-
-
-
-        //.to("file:outbox");
                 .to("kestrel://{{kestrel.queue.url}}");
-//
-//        from("kestrel://{{kestrel.queue.url}}?concurrentConsumers=10&waitTimeMs=500")
-//                .process(new Processor() {
-//                    @Override
-//                    public void process(Exchange exchange) throws Exception {
-//                        System.out.println("received " + exchange.getIn().getBody());
-//                    }
-//                });
 
     }
 }

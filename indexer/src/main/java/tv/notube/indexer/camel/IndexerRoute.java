@@ -23,7 +23,34 @@ public class IndexerRoute extends RouteBuilder {
     public IndexerRoute() {
         ActivityStore activityStore = ElasticSearchActivityStoreFactory.getInstance().build();
         activityService = new ActivityServiceImpl(activityStore);
+    }
 
+
+    public void configure() {
+
+        registerActivityConverter();
+
+
+        from("kestrel://{{kestrel.queue.url}}?concurrentConsumers=10&waitTimeMs=500")
+
+                 .unmarshal().json(JsonLibrary.Jackson, TwitterTweet.class)
+
+                .convertBodyTo(Activity.class)
+
+                .process(new Processor() {
+                    @Override
+                    public void process(Exchange exchange) throws Exception {
+
+                        System.out.println("indexing activity " + exchange.getIn().getBody());
+
+                        activityService.store(exchange.getIn().getBody(Activity.class));
+
+                    }
+                })
+        ;
+    }
+
+    private void registerActivityConverter() {
         getContext().getTypeConverterRegistry()
                 .addTypeConverter(Activity.class, TwitterTweet.class, new TypeConverterSupport() {
 
@@ -42,27 +69,5 @@ public class IndexerRoute extends RouteBuilder {
                         return (T)activity;
                     }
                 });
-    }
-
-
-    public void configure() {
-
-        from("kestrel://{{kestrel.queue.url}}?concurrentConsumers=10&waitTimeMs=500")
-
-                .unmarshal().json(JsonLibrary.Jackson, TwitterTweet.class)
-
-                .convertBodyTo(Activity.class)
-
-                .process(new Processor() {
-                    @Override
-                    public void process(Exchange exchange) throws Exception {
-
-                        System.out.println("received a tweet " + exchange.getIn().getBody());
-
-                        activityService.store(exchange.getIn().getBody(Activity.class));
-
-                    }
-                })
-        ;
     }
 }
