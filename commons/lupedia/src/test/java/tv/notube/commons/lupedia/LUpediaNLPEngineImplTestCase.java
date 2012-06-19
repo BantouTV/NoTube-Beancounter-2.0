@@ -8,6 +8,7 @@ import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.commons.nlp.NLPEngineException;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 
 /**
@@ -25,10 +26,12 @@ public class LUpediaNLPEngineImplTestCase {
     }
 
     @Test
-    public void test() throws NLPEngineException {
-        final String text = "hey darling, do you know that London will host the 2012 Olympic Games?";
+    public void test() throws NLPEngineException, URISyntaxException {
+        final String text = "London is a great city, but Rome is amazing too.";
         Collection<URI> uris = nlpEngine.enrich(text);
-        Assert.assertEquals(uris.size(), 1);
+        Assert.assertEquals(uris.size(), 2);
+        Assert.assertTrue(uris.contains(new URI("http://dbpedia.org/resource/London")));
+        Assert.assertTrue(uris.contains(new URI("http://dbpedia.org/resource/Rome")));
     }
 
 }

@@ -1,7 +1,5 @@
 package tv.notube.commons.lupedia;
 
-import java.net.URI;
-
 /**
  * put class description here
  *
@@ -9,17 +7,41 @@ import java.net.URI;
  */
 public class LUpediaEntity {
 
-    private int startOffset;
+    public int startOffset;
 
-    private int endOffset;
+    public int endOffset;
 
-    private URI instanceUri;
+    public String instanceUri;
 
-    private URI instanceClass;
+    public String instanceClass;
 
-    private URI predicateUri;
+    public String predicateUri;
 
-    private double weight;
+    public double weight;
+
+    public String getInstanceUri() {
+        return instanceUri;
+    }
+
+    public void setInstanceUri(String instanceUri) {
+        this.instanceUri = instanceUri;
+    }
+
+    public String getInstanceClass() {
+        return instanceClass;
+    }
+
+    public void setInstanceClass(String instanceClass) {
+        this.instanceClass = instanceClass;
+    }
+
+    public String getPredicateUri() {
+        return predicateUri;
+    }
+
+    public void setPredicateUri(String predicateUri) {
+        this.predicateUri = predicateUri;
+    }
 
     public int getStartOffset() {
         return startOffset;
@@ -35,30 +57,6 @@ public class LUpediaEntity {
 
     public void setEndOffset(int endOffset) {
         this.endOffset = endOffset;
-    }
-
-    public URI getInstanceUri() {
-        return instanceUri;
-    }
-
-    public void setInstanceUri(URI instanceUri) {
-        this.instanceUri = instanceUri;
-    }
-
-    public URI getInstanceClass() {
-        return instanceClass;
-    }
-
-    public void setInstanceClass(URI instanceClass) {
-        this.instanceClass = instanceClass;
-    }
-
-    public URI getPredicateUri() {
-        return predicateUri;
-    }
-
-    public void setPredicateUri(URI predicateUri) {
-        this.predicateUri = predicateUri;
     }
 
     public double getWeight() {

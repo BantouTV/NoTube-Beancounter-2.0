@@ -1,15 +1,16 @@
 package tv.notube.commons.lupedia;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.type.TypeFactory;
+import org.codehaus.jackson.type.JavaType;
+import org.codehaus.jackson.type.TypeReference;
 import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.commons.nlp.NLPEngineException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
+import java.io.UnsupportedEncodingException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -25,6 +26,11 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
 
     @Override
     public Collection<URI> enrich(String text) throws NLPEngineException {
+        try {
+            text = URLEncoder.encode(text, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("UTF-8 is not supported on this platform", e);
+        }
         URL query;
         // TODO (high) this should be configurable
         String queryStr = String.format(QUERY_PATTERN, text, 0.85);
@@ -37,7 +43,7 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
         ObjectMapper mapper = new ObjectMapper();
         List<LUpediaEntity> entities;
         try {
-            entities = mapper.readValue(is, List.class);
+            entities = mapper.readValue(is, TypeFactory.defaultInstance().constructCollectionType(List.class, LUpediaEntity.class));
         } catch (IOException e) {
             throw new NLPEngineException(
                     "error while parsing json from [" + queryStr + "]",
@@ -48,14 +54,18 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
                 is.close();
             } catch (IOException e) {
                 throw new NLPEngineException(
-                        "error while closing stream from [" + queryStr + "]",
+                        "error while closing stream from [" + query.toString() + "]",
                         e
                 );
             }
         }
         Collection<URI> result = new ArrayList<URI>();
         for(LUpediaEntity entity : entities) {
-            result.add(entity.getInstanceUri());
+            try {
+                result.add(new URI(entity.getInstanceUri()));
+            } catch (URISyntaxException e) {
+                // unlikely but could happen
+            }
         }
         return result;
     }
@@ -67,13 +77,6 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
         } catch (IOException e) {
             throw new NLPEngineException(
                     "Error while opening connection from [" + query + "]", e
-            );
-        }
-        try {
-            urlConnection.connect();
-        } catch (IOException e) {
-            throw new NLPEngineException(
-                    "Error while connecting to [" + query + "]", e
             );
         }
         try {
