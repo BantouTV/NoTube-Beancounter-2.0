@@ -1,9 +1,11 @@
 package tv.notube.commons.lupedia;
 
+import de.l3s.boilerpipe.BoilerpipeProcessingException;
+import de.l3s.boilerpipe.document.TextDocument;
+import de.l3s.boilerpipe.extractors.ArticleExtractor;
+import de.l3s.boilerpipe.extractors.DefaultExtractor;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.TypeFactory;
-import org.codehaus.jackson.type.JavaType;
-import org.codehaus.jackson.type.TypeReference;
 import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.commons.nlp.NLPEngineException;
 
@@ -11,9 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * put class description here
@@ -59,7 +59,7 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
                 );
             }
         }
-        Collection<URI> result = new ArrayList<URI>();
+        Set<URI> result = new HashSet<URI>();
         for(LUpediaEntity entity : entities) {
             try {
                 result.add(new URI(entity.getInstanceUri()));
@@ -90,6 +90,12 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
 
     @Override
     public Collection<URI> enrich(URL url) throws NLPEngineException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        String text;
+        try {
+            text = ArticleExtractor.INSTANCE.getText(url);
+        } catch (BoilerpipeProcessingException e) {
+            throw new NLPEngineException("Error while removing boiler plate from [" + url +  "]", e);
+        }
+        return enrich(text);
     }
 }
