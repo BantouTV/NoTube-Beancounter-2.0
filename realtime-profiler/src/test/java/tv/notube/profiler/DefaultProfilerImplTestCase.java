@@ -1,4 +1,4 @@
-package tv.notube.profiler.rules.custom;
+package tv.notube.profiler;
 
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
@@ -12,6 +12,7 @@ import tv.notube.commons.model.activity.Tweet;
 import tv.notube.commons.model.activity.Verb;
 import tv.notube.profiler.DefaultProfilerImpl;
 import tv.notube.profiler.ProfilerException;
+import tv.notube.profiler.rules.custom.TweetProfilingRule;
 import tv.notube.profiler.store.InMemoryProfileStore;
 import tv.notube.profiler.store.ProfileStore;
 import tv.notube.profiler.Profiler;
@@ -77,6 +78,25 @@ public class DefaultProfilerImplTestCase {
         numOfInts = actual.getInterests().size();
         Assert.assertTrue(numOfInts > 0 && numOfInts <= LIMIT);
         dumpInterests(actual, System.out);
+
+        // add an activity that leads to no interests
+        actual = profiler.profile(userId, getEmptyActivity());
+        Assert.assertNotNull(actual);
+        numOfInts = actual.getInterests().size();
+        Assert.assertTrue(numOfInts > 0 && numOfInts <= LIMIT);
+        dumpInterests(actual, System.out);
+    }
+
+    private Activity getEmptyActivity() {
+        Activity activity = new Activity();
+        activity.setVerb(Verb.TWEET);
+
+        Tweet t = new Tweet();
+        t.setText("sdulifysudkfh");
+        activity.setObject(t);
+
+        activity.setContext(new Context());
+        return activity;
     }
 
     private void dumpInterests(UserProfile actual, PrintStream out) {

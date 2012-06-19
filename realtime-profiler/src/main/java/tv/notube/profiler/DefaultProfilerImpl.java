@@ -68,20 +68,30 @@ public class DefaultProfilerImpl implements Profiler {
             throw new ProfilerException();
         }
         UserProfile newProfile;
+        Collection<URI> activityInterests;
         try {
-            newProfile = computeNewProfile(activity, type, opr.getResult(), old, userId);
+            activityInterests = opr.getResult();
         } catch (ProfilingRuleException e) {
             throw new ProfilerException();
         }
-        try {
-            ps.store(newProfile);
-        } catch (ProfileStoreException e) {
-            throw new ProfilerException();
+        if (activityInterests.size() != 0) {
+            newProfile = computeNewProfile(activity, activityInterests, old, userId);
+            try {
+                ps.store(newProfile);
+            } catch (ProfileStoreException e) {
+                throw new ProfilerException();
+            }
+            return newProfile;
         }
-        return newProfile;
+        if(old != null) {
+            return old;
+        }
+        UserProfile empty = new UserProfile(userId);
+        empty.setInterests(new HashSet<Interest>());
+        return new UserProfile(userId);
     }
 
-    private UserProfile computeNewProfile(Activity activity, Class<? extends Object> type, Collection<URI> references, UserProfile old, UUID userId) {
+    private UserProfile computeNewProfile(Activity activity, Collection<URI> references, UserProfile old, UUID userId) {
         Set<Interest> oldInterests = new HashSet<Interest>();
         if(old != null) {
             // grab the old interests
