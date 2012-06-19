@@ -36,7 +36,36 @@
             <artifactId>guice</artifactId>
             <version>2.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-core</artifactId>
+            <version>2.10-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-kestrel</artifactId>
+            <version>2.10-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-jackson</artifactId>
+            <version>2.10-SNAPSHOT</version>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Allows to be run via 'mvn compile exec:java' -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>tv.notube.indexer.camel.IndexerMain</mainClass>
+                    <includePluginDependencies>false</includePluginDependencies>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 
 </project>

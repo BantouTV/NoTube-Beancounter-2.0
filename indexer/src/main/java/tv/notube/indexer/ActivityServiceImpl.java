@@ -15,7 +15,6 @@ public class ActivityServiceImpl implements ActivityService {
 
     private final ActivityStore activityStore;
 
-    @Inject
     public ActivityServiceImpl(final ActivityStore activityStore) {
         this.activityStore = activityStore;
     }
