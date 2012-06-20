@@ -16,12 +16,13 @@ public final class MockProfiles implements Profiles {
     private Set<UserProfile> profiles = new HashSet<UserProfile>();
 
     public synchronized void store(UserProfile up) throws ProfilesException {
+        profiles.remove(up);
         profiles.add(up);
     }
 
     public UserProfile lookup(UUID userId) throws ProfilesException {
         for(UserProfile up : profiles) {
-            if(up.getId().equals(userId)) {
+            if(up.getUserId().equals(userId)) {
                 return up;
             }
         }

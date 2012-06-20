@@ -1,7 +1,5 @@
 package tv.notube.commons.model;
 
-import tv.notube.commons.tests.annotations.*;
-
 import java.util.*;
 
 /**
@@ -9,7 +7,7 @@ import java.util.*;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class UserProfile extends Referenceable {
+public class UserProfile {
 
     public enum Visibility {
         PRIVATE,
@@ -21,16 +19,12 @@ public class UserProfile extends Referenceable {
 
     private String username;
 
-    private Collection<Type> types = new ArrayList<Type>();
+    private UUID userId;
 
     private Set<Interest> interests = new HashSet<Interest>();
 
-    public UserProfile() {
-        super();
-    }
-
-    public UserProfile(UUID id) {
-        super(id);
+    public UserProfile(UUID userId) {
+        this.userId = userId;
     }
 
     @tv.notube.commons.tests.annotations.Random(names = { "username"} )
@@ -55,14 +49,6 @@ public class UserProfile extends Referenceable {
         this.username = username;
     }
 
-    public Collection<Type> getTypes() {
-        return types;
-    }
-
-    public void setTypes(Collection<Type> types) {
-        this.types = types;
-    }
-
     public void setInterests(Set<Interest> interests) {
         this.interests = interests;
     }
@@ -71,8 +57,30 @@ public class UserProfile extends Referenceable {
         return interests;
     }
 
-    public void addType(Type type) {
-        this.types.add(type);
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public void setUserId(UUID userId) {
+        this.userId = userId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserProfile that = (UserProfile) o;
+
+        if (userId != null ? !userId.equals(that.userId) : that.userId != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return userId != null ? userId.hashCode() : 0;
     }
 
     @Override
@@ -80,7 +88,6 @@ public class UserProfile extends Referenceable {
         return "UserProfile{" +
                 "visibility=" + visibility +
                 ", username='" + username + '\'' +
-                ", types=" + types +
                 ", interests=" + interests +
                 "} " + super.toString();
     }

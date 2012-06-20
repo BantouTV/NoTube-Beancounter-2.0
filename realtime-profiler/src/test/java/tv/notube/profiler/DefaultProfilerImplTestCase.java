@@ -12,6 +12,8 @@ import tv.notube.commons.model.activity.Tweet;
 import tv.notube.commons.model.activity.Verb;
 import tv.notube.profiler.rules.custom.TweetProfilingRule;
 import tv.notube.profiles.MockProfiles;
+import tv.notube.profiles.Profiles;
+import tv.notube.profiles.ProfilesException;
 
 import java.io.PrintStream;
 import java.net.MalformedURLException;
@@ -28,6 +30,8 @@ public class DefaultProfilerImplTestCase {
 
     private Profiler profiler;
 
+    private Profiles ps;
+
     private Properties properties;
 
     private static final int LIMIT = 5;
@@ -41,8 +45,9 @@ public class DefaultProfilerImplTestCase {
         properties.setProperty("verb.multiplier.TWEET", "10");
         // profiles are made only of top 5 interests
         properties.setProperty("interest.limit", String.valueOf(LIMIT));
+        ps = new MockProfiles();
         profiler = new DefaultProfilerImpl(
-                new MockProfiles(),
+                ps,
                 new LUpediaNLPEngineImpl(),
                 null,
                 properties
@@ -52,7 +57,7 @@ public class DefaultProfilerImplTestCase {
 
     @Test
     public void testMultipleRuns() throws ProfilerException,
-            MalformedURLException {
+            MalformedURLException, ProfilesException {
         final UUID userId = UUID.randomUUID();
         // this is the compute of the first profile
         UserProfile actual = profiler.profile(userId, getFirstActivity());
@@ -97,7 +102,7 @@ public class DefaultProfilerImplTestCase {
 
     private void dumpInterests(UserProfile actual, PrintStream out) {
         for(Interest i : actual.getInterests()) {
-            out.println(i.getReference() + " | " + i.getWeight());
+            out.println(i.getResource() + " | " + i.getWeight());
         }
         out.println();
     }

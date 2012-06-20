@@ -9,6 +9,7 @@ import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.profiler.rules.ObjectProfilingRule;
 import tv.notube.profiler.rules.ProfilingRule;
 import tv.notube.profiler.rules.ProfilingRuleException;
+import tv.notube.profiler.utils.Utils;
 import tv.notube.profiles.Profiles;
 import tv.notube.profiles.ProfilesException;
 
@@ -24,7 +25,7 @@ import java.util.*;
  */
 public class DefaultProfilerImpl implements Profiler {
 
-    private Map<Class<? extends tv.notube.commons.model.activity.Object>,Class<? extends ObjectProfilingRule>>
+    private Map<Class<? extends tv.notube.commons.model.activity.Object>, Class<? extends ObjectProfilingRule>>
             objectRules = new HashMap<Class<? extends Object>, Class<? extends ObjectProfilingRule>>();
 
     private Profiles ps;
@@ -51,214 +52,172 @@ public class DefaultProfilerImpl implements Profiler {
         throw new UnsupportedOperationException("NIY");
     }
 
+    private ObjectProfilingRule getRule(Activity activity) throws ProfilerException {
+        Class<? extends Object> type = activity.getObject().getClass();
+        Class<? extends ObjectProfilingRule> ruleClass = objectRules.get(type);
+        ObjectProfilingRule opr = build(
+                ruleClass,
+                type,
+                activity.getObject(),
+                this.getNLPEngine(),
+                this.linkEng
+        );
+        return opr;
+    }
+
     public UserProfile profile(UUID userId, Activity activity) throws ProfilerException {
         // grab the old profile
         UserProfile old;
         try {
             old = getProfile(userId);
         } catch (ProfilesException e) {
-            throw new ProfilerException();
+            throw new ProfilerException("", e);
         }
-        Class<? extends Object> type = activity.getObject().getClass();
-        Class<? extends ObjectProfilingRule> ruleClass = objectRules.get(type);
-        ObjectProfilingRule opr = build(ruleClass, type, activity.getObject(), this.getNLPEngine(), this.linkEng);
+        ObjectProfilingRule opr = getRule(activity);
         try {
             opr.run(properties);
         } catch (ProfilingRuleException e) {
-            throw new ProfilerException();
+            throw new ProfilerException("", e);
         }
-        UserProfile newProfile;
-        Collection<URI> activityInterests;
+        double multiplier = getMultiplier(activity.getVerb());
+        Collection<URI> activityReferences;
         try {
-            activityInterests = opr.getResult();
+            activityReferences = opr.getResult();
         } catch (ProfilingRuleException e) {
-            throw new ProfilerException();
+            throw new ProfilerException("", e);
         }
-        if (activityInterests.size() != 0) {
-            newProfile = computeNewProfile(activity, activityInterests, old, userId);
-            try {
-                ps.store(newProfile);
-            } catch (ProfilesException e) {
-                throw new ProfilerException();
-            }
-            return newProfile;
-        }
-        if(old != null) {
-            return old;
-        }
-        UserProfile empty = new UserProfile(userId);
-        empty.setInterests(new HashSet<Interest>());
-        return new UserProfile(userId);
-    }
-
-    private UserProfile computeNewProfile(Activity activity, Collection<URI> references, UserProfile old, UUID userId) {
-        Set<Interest> oldInterests = new HashSet<Interest>();
-        if(old != null) {
-            // grab the old interests
-            oldInterests = old.getInterests();
-        }
-        // make unweighted interests the new ones
-        Set<Interest> newInterests = new HashSet<Interest>();
-        Set<URI> oldOrModifiedInterests = new HashSet<URI>();
-        for(URI reference : references) {
-            if(isOld(oldInterests, reference)) {
-                Interest oldInterest = getInterest(oldInterests, reference);
-                // reset the weight
-                oldInterest.setWeight(0.0d);
-                oldInterest.addActivity(activity);
-                newInterests.add(oldInterest);
-                oldOrModifiedInterests.add(reference);
+        if (activityReferences.size() == 0) {
+            if (old != null) {
+                return old;
             } else {
-                Interest i = new Interest();
-                i.setReference(reference);
-                i.addActivity(activity);
-                newInterests.add(i);
+                UserProfile up = toProfile(userId, new HashSet<Interest>());
+                up.setVisibility(UserProfile.Visibility.PUBLIC);
+                try {
+                    ps.store(up);
+                } catch (ProfilesException e) {
+                    throw new ProfilerException(
+                            "Error while storing profile for user [" + userId + "]", e
+                    );
+                }
+                return up;
             }
         }
-        // do the same for old interests
-        for(Interest oldInt : oldInterests) {
-            if(isOld(references, oldInt.getReference())) {
-                Interest oldInterest = getInterest(oldInterests, oldInt.getReference());
-                // reset the weight
-                oldInterest.setWeight(0.0d);
-                oldInterest.addActivity(activity);
-                newInterests.add(oldInterest);
-                oldOrModifiedInterests.add(oldInt.getReference());
-            } else {
-                Interest i = new Interest();
-                i.setReference(oldInt.getReference());
-                i.addActivity(activity);
-                newInterests.add(i);
-            }
-        }
-        Set<ModifiedInterest> result;
-        // weight them
-        result = weight(newInterests, oldOrModifiedInterests);
-        // limit them, only the top 10 for example if they are more but exclude
-        // the new ones or the interests that have been increased
-        Set<ModifiedInterest> interests = limit(
-                Integer.parseInt(properties.getProperty("interest.limit")),
-                result
+        Collection<Interest> interests = toInterests(
+                activity,
+                activityReferences,
+                multiplier
         );
-        // normalize them: their sum must be 1
-        return buildProfile(normalize(interests), userId);
-    }
-
-    private boolean isOld(Collection<URI> references, URI reference) {
-        return references.contains(reference);
-    }
-
-    private Set<Interest> normalize(Set<ModifiedInterest> mis) {
-        double sum = 0.0;
-        for(ModifiedInterest mi : mis) {
-            sum += mi.getRawWeight();
+        if (old == null) {
+            // return this as a profile, it's the first one after all
+            interests = limit(new ArrayList<Interest>(interests));
+            interests = normalize(interests);
+            UserProfile up = toProfile(userId, interests);
+            try {
+                ps.store(up);
+            } catch (ProfilesException e) {
+                throw new ProfilerException(
+                        "Error while storing profile for user [" + userId + "]", e
+                );
+            }
+            return up;
         }
-        Set<Interest> interests = new HashSet<Interest>();
-        for(ModifiedInterest mi : mis) {
-            Interest i = mi.getInterest();
-            i.setWeight(mi.getRawWeight() / sum);
+        interests = merge(interests, old.getInterests());
+        // return the new profile
+        interests = limit(new ArrayList<Interest>(interests));
+        interests = normalize(interests);
+        UserProfile up = toProfile(userId, interests);
+        try {
+            ps.store(up);
+        } catch (ProfilesException e) {
+            throw new ProfilerException(
+                    "Error while storing profile for user [" + userId + "]", e
+            );
+        }
+        return up;
+    }
+
+    private Collection<Interest> merge(Collection<Interest> activityInterests, Set<Interest> oldInterests) {
+        Collection<Interest> merged = new HashSet<Interest>();
+        Collection<Interest> newInterests = new HashSet<Interest>();
+        // put in merged only the nu ones
+        for(Interest interest : activityInterests) {
+            if(Utils.contains(interest, oldInterests)) {
+                URI resource = interest.getResource();
+                Interest oldInterest = Utils.retrieve(resource, oldInterests);
+                merged.add(
+                        Utils.merge(interest, oldInterest)
+                );
+                // remove it from the old ones
+                oldInterests.remove(oldInterest);
+            } else {
+                newInterests.add(interest);
+            }
+        }
+        // now perform the union between newOnes and oldOnes
+        List<Interest> union = Utils.union(newInterests, oldInterests);
+        // if |union| + |merged| > limit, than free some space.
+        if(union.size() + merged.size() > getLimit()) {
+            Collections.sort(union);
+            union = Utils.cut(union, union.size() - merged.size());
+        }
+        // then add the merged ones
+        for(Interest m : merged) {
+            union.add(m);
+        }
+        return union;
+    }
+
+    private int getLimit() {
+        return Integer.parseInt(properties.getProperty("interest.limit"));
+    }
+
+    private Collection<Interest> normalize(Collection<Interest> interests) {
+        double sum = 0.0d;
+        for(Interest i : interests) {
+            sum += i.getWeight();
+        }
+        for(Interest i : interests) {
+            i.setWeight( i.getWeight() / sum );
+        }
+        return interests;
+    }
+
+    private Collection<Interest> limit(List<Interest> interests) {
+        int limit = getLimit();
+        if (interests.size() > limit) {
+            // sort them again
+            Collections.sort(interests);
+            Collection<Interest> limited = new HashSet<Interest>();
+            for (int i = 0; i < limit; i++) {
+                limited.add(interests.get(i));
+            }
+            return limited;
+        }
+        return interests;
+    }
+
+    private UserProfile toProfile(UUID userId, Collection<Interest> interests) {
+        UserProfile up = new UserProfile(userId);
+        up.setInterests(new HashSet<Interest>(interests));
+        up.setVisibility(UserProfile.Visibility.PUBLIC);
+        return up;
+    }
+
+    private Collection<Interest> toInterests(Activity activity, Collection<URI> activityReferences, double multiplier) {
+        Collection<Interest> interests = new HashSet<Interest>();
+        int numOfRefs = activityReferences.size();
+        for(URI reference : activityReferences) {
+            Interest i = new Interest(reference);
+            i.addActivity(activity.getId());
+            i.setVisible(true);
+            i.setWeight(multiplier / numOfRefs);
             interests.add(i);
         }
         return interests;
     }
 
-    private Set<ModifiedInterest> limit(int limit, Set<ModifiedInterest> result) {
-        List<ModifiedInterest> mis = new ArrayList<ModifiedInterest>(result);
-        Collections.sort(mis);
-        Set<ModifiedInterest> limitedMis = new HashSet<ModifiedInterest>();
-        if(result.size() <= limit) {
-            return result;
-        }
-        // put first the modified or new ones
-        // todo check if it's ordered in the correct way
-        for (int i = 0; i < result.size(); i++) {
-            if (mis.get(i).isModified()) {
-                limitedMis.add(mis.get(i));
-            }
-        }
-        for (int i = 0; i < limit - limitedMis.size(); i++) {
-            if (!mis.get(i).isModified()) {
-                limitedMis.add(mis.get(i));
-            }
-        }
-        return limitedMis;
-    }
-
-    private Set<ModifiedInterest> weight(Set<Interest> newInterests, Set<URI> oldOrModifiedInterests) {
-        Set<ModifiedInterest> modified = new HashSet<ModifiedInterest>();
-        for(Interest i : newInterests) {
-            double rawWeight = 0.0d;
-            Collection<Activity> iActivities = i.getActivities();
-            for(Activity ai : iActivities) {
-                rawWeight += getMultiplier(ai.getVerb());
-            }
-            modified.add(new ModifiedInterest(
-                    i,
-                    rawWeight,
-                    oldOrModifiedInterests.contains(i.getReference())
-                    )
-            );
-        }
-        return modified;
-    }
-
     private double getMultiplier(Verb verb) {
         return Double.parseDouble(properties.getProperty("verb.multiplier." + verb));
-    }
-
-    private UserProfile buildProfile(Set<Interest> newInterests, UUID userId) {
-        UserProfile up = new UserProfile(userId);
-        up.setInterests(newInterests);
-        up.setVisibility(UserProfile.Visibility.PUBLIC);
-        return up;
-    }
-
-    private Interest getInterest(Set<Interest> oldInterests, URI reference) {
-        for(Interest i : oldInterests) {
-            if(i.getReference().equals(reference)) {
-                return i;
-            }
-        }
-        throw new IllegalStateException("[" + reference + "] should be present in the old interests but it's not");
-    }
-
-    private boolean isOld(Set<Interest> oldInterests, URI reference) {
-        Interest i = new Interest();
-        i.setReference(reference);
-        for(Interest oldi : oldInterests) {
-            if(oldi.getReference().equals(reference)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private ObjectProfilingRule build(
-            Class<? extends ObjectProfilingRule> ruleClass,
-            Class<? extends Object> type,
-            Object object,
-            NLPEngine nlpEngine,
-            LinkingEngine linkEng
-    ) throws ProfilerException {
-        Constructor<? extends ObjectProfilingRule> constructor;
-        try {
-            constructor = ruleClass.getConstructor(
-                    type,
-                    NLPEngine.class,
-                    LinkingEngine.class
-            );
-        } catch (NoSuchMethodException e) {
-            throw new ProfilerException();
-        }
-        try {
-            return constructor.newInstance(object, nlpEngine, linkEng);
-        } catch (InstantiationException e) {
-            throw new ProfilerException();
-        } catch (IllegalAccessException e) {
-            throw new ProfilerException();
-        } catch (InvocationTargetException e) {
-            throw new ProfilerException();
-        }
     }
 
     private UserProfile getProfile(UUID userId) throws ProfilesException {
@@ -277,37 +236,32 @@ public class DefaultProfilerImpl implements Profiler {
         return linkEng;
     }
 
-    private class ModifiedInterest implements Comparable<ModifiedInterest> {
-
-        private Interest i;
-        private double rawWeight;
-        private boolean modified;
-
-        public ModifiedInterest(Interest i, double rawWeight, boolean modified) {
-            this.i = i;
-            this.rawWeight = rawWeight;
-            this.modified = modified;
+    private ObjectProfilingRule build(
+            Class<? extends ObjectProfilingRule> ruleClass,
+            Class<? extends Object> type,
+            Object object,
+            NLPEngine nlpEngine,
+            LinkingEngine linkEng
+    ) throws ProfilerException {
+        Constructor<? extends ObjectProfilingRule> constructor;
+        try {
+            constructor = ruleClass.getConstructor(
+                    type,
+                    NLPEngine.class,
+                    LinkingEngine.class
+            );
+        } catch (NoSuchMethodException e) {
+            throw new ProfilerException("", e);
         }
-
-        public Interest getInterest() {
-            return i;
-        }
-
-        public double getRawWeight() {
-            return rawWeight;
-        }
-
-        public boolean isModified() {
-            return modified;
-        }
-
-        public int compareTo(ModifiedInterest modifiedInterest) {
-            if(this.rawWeight > modifiedInterest.getRawWeight()) {
-                return 1;
-            } else if(this.rawWeight < modifiedInterest.getRawWeight()) {
-                return -1;
-            }
-            return 0;
+        try {
+            return constructor.newInstance(object, nlpEngine, linkEng);
+        } catch (InstantiationException e) {
+            throw new ProfilerException("", e);
+        } catch (IllegalAccessException e) {
+            throw new ProfilerException("", e);
+        } catch (InvocationTargetException e) {
+            throw new ProfilerException("", e);
         }
     }
+
 }

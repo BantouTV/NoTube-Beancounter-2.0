@@ -84,7 +84,7 @@ public class IndexerRoute extends RouteBuilder {
                         System.out.println();
                         System.out.println("========================================================");
                         for (Interest i : profile.getInterests()) {
-                            System.out.println(i.getReference() + " | " + i.getWeight());
+                            System.out.println(i.getResource() + " | " + i.getWeight());
                         }
                         System.out.println("========================================================");
                         System.out.println();

@@ -48,7 +48,6 @@ public class UserManagerTestCase {
         user.setName("Libby");
         user.setSurname("Miller");
         user.setForcedProfiling(false);
-        user.setReference(new URI("http://notube.tv/user/" + userId));
         user.setProfiledAt(new DateTime());
         user.setUsername("lmiller");
 
@@ -74,7 +73,6 @@ public class UserManagerTestCase {
         user.setName("Libby");
         user.setSurname("Miller");
         user.setForcedProfiling(false);
-        user.setReference(new URI("http://notube.tv/user/" + userId));
         user.setProfiledAt(new DateTime());
         user.setUsername("lmiller");
 
@@ -111,7 +109,6 @@ public class UserManagerTestCase {
         user.setName("Davide");
         user.setSurname("Palmisano");
         user.setForcedProfiling(false);
-        user.setReference(new URI("http://notube.tv/user/" + userId));
         user.setProfiledAt(new DateTime());
         user.setUsername("dpalmisano");
 

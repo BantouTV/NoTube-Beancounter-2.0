@@ -11,6 +11,12 @@ import java.util.UUID;
  */
 public interface Profiles {
 
+    /**
+     * it always update regardless what's already there
+     *
+     * @param up
+     * @throws ProfilesException
+     */
     public void store(UserProfile up) throws ProfilesException;
 
     public UserProfile lookup(UUID userId) throws ProfilesException;

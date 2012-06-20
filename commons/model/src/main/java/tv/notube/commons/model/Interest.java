@@ -1,27 +1,36 @@
 package tv.notube.commons.model;
 
-import tv.notube.commons.model.activity.Activity;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.UUID;
 
 /**
  * It represents a {@link User} interest.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class Interest extends Referenceable {
+public class Interest implements Comparable {
+
+    private URI resource;
 
     private boolean visible;
 
     private double weight;
 
-    private Collection<Activity> activities = new ArrayList<Activity>();
+    private Collection<UUID> activitiesUUIDs = new ArrayList<UUID>();
+
+    public Interest(URI resource) {
+        super();
+        this.resource = resource;
+    }
 
     public void setResource(URI resource) {
-        this.reference = resource;
+        this.resource = resource;
+    }
+
+    public URI getResource() {
+        return resource;
     }
 
     public double getWeight() {
@@ -40,16 +49,36 @@ public class Interest extends Referenceable {
         this.visible = visible;
     }
 
-    public Collection<Activity> getActivities() {
-        return activities;
+    public Collection<UUID> getActivities() {
+        return activitiesUUIDs;
     }
 
-    public void setActivities(List<Activity> activities) {
-        this.activities = activities;
+    public void setActivities(Collection<UUID> activitiesUUIDs) {
+        this.activitiesUUIDs = activitiesUUIDs;
     }
 
-    public boolean addActivity(Activity activity) {
-        return this.activities.add(activity);
+    public boolean addActivity(UUID activityUUID) {
+        return this.activitiesUUIDs.add(activityUUID);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Interest interest = (Interest) o;
+
+        if (resource != null ? !resource.equals(interest.resource) : interest.resource != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (resource != null ? resource.hashCode() : 0);
+        return result;
     }
 
     @Override
@@ -57,7 +86,19 @@ public class Interest extends Referenceable {
         return "Interest{" +
                 "visible=" + visible +
                 ", weight=" + weight +
-                ", activities=" + activities +
+                ", activities=" + activitiesUUIDs +
                 "} " + super.toString();
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        Interest that = (Interest) o;
+        if(this.weight > that.weight) {
+            return 1;
+        }
+        if(this.weight < that.weight) {
+            return -1;
+        }
+        return 0;
     }
 }

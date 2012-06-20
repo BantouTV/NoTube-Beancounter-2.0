@@ -5,10 +5,7 @@ import tv.notube.commons.model.auth.Auth;
 import tv.notube.commons.tests.annotations.Random;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Models the main <a href="http://notube.tv">NoTube</a> user
@@ -16,9 +13,11 @@ import java.util.Map;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class User extends Referenceable implements Serializable {
+public class User implements Serializable {
 
     private static final long serialVersionUID = 324345235L;
+
+    private UUID id;
 
     private String name;
 
@@ -35,12 +34,20 @@ public class User extends Referenceable implements Serializable {
     private String username;
 
     public User() {
-        super();
+        id = UUID.randomUUID();
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     @Random(names = {"name", "surname", "username", "password"})
     public User(String name, String surname, String username, String password) {
-        super();
+        this();
         this.name = name;
         this.surname = surname;
         this.username = username;

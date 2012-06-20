@@ -76,11 +76,6 @@ public class MockUserManager implements UserManager {
 
     private User getTestUser(String username) {
         User user = new User();
-        try {
-            user.setReference(new URI("http://notube.tv/" + user.getId()));
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
         user.setId(userUUIDs.get(0));
         user.setUsername(username);
         user.setForcedProfiling(false);
