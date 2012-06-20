@@ -1,10 +1,8 @@
 package tv.notube.indexer;
 
-import com.google.inject.Inject;
 import tv.notube.activities.ActivityStore;
 import tv.notube.activities.ActivityStoreException;
 import tv.notube.commons.model.activity.Activity;
-import tv.notube.commons.model.activity.Verb;
 
 import java.util.UUID;
 
@@ -26,6 +24,6 @@ public class ActivityServiceImpl implements ActivityService {
 
     private UUID getUserUUID() {
         // TODO (hardcoded)
-        return UUID.fromString(String.valueOf("12345678-1234-1234-1234-123456789ab"));
+        return UUID.fromString("12345678-1234-1234-1234-123456789ab");
     }
 }

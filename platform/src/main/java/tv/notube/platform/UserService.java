@@ -87,8 +87,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new UserProfilePlatformResponse(
-                    UserProfilePlatformResponse.Status.NOK,
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
                     "Your application is not authorized.Sorry.")
             );
             return rb.build();
@@ -97,8 +97,8 @@ public class UserService extends JsonService {
             if (userManager.getUser(username) != null) {
                 final String errMsg = "username '" + username + "' is already taken";
                 Response.ResponseBuilder rb = Response.serverError();
-                rb.entity(new UserProfilePlatformResponse(
-                        UserProfilePlatformResponse.Status.NOK,
+                rb.entity(new StringPlatformResponse(
+                        StringPlatformResponse.Status.NOK,
                         errMsg)
                 );
                 return rb.build();
@@ -127,8 +127,8 @@ public class UserService extends JsonService {
         }
         if (application == null) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new UserProfilePlatformResponse(
-                    UserProfilePlatformResponse.Status.NOK,
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
                     "Application not found")
             );
             return rb.build();
@@ -182,8 +182,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new UserProfilePlatformResponse(
-                    UserProfilePlatformResponse.Status.NOK,
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
@@ -199,8 +199,8 @@ public class UserService extends JsonService {
         if (user == null) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(
-                    new UserPlatformResponse(
-                            UserPlatformResponse.Status.NOK,
+                    new StringPlatformResponse(
+                            StringPlatformResponse.Status.NOK,
                             "user '" + username + "' not found"
                     )
             );
@@ -242,8 +242,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new UserProfilePlatformResponse(
-                    UserProfilePlatformResponse.Status.NOK,
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();

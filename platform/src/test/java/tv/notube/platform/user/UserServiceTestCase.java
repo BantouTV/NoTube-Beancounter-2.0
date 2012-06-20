@@ -13,12 +13,9 @@ import tv.notube.commons.tests.Tests;
 import tv.notube.commons.tests.TestsBuilder;
 import tv.notube.commons.tests.TestsException;
 import tv.notube.platform.AbstractJerseyTestCase;
-import tv.notube.platform.responses.UserPlatformResponse;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.util.LinkedHashMap;
 
 /**
@@ -393,7 +390,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         // Assert.assertEquals(responseBody, "{\"object\":{\"submittedProcesses\":1,\"startedAt\":1338226509813,\"endedAt\":1338226509813},\"message\":\"activities updated for [test-user]\",\"status\":\"OK\"}");
     }
 
-    @Test
+    @Test( enabled = false )
     public void testForceUserProfiling() throws IOException {
         final String baseQuery = "user/%s/profile/update?apikey=%s";
         final String username = "test-user";
@@ -413,7 +410,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         Assert.assertEquals(responseBody, "{\"message\":\"profile updated for [test-user]\",\"status\":\"OK\"}");
     }
 
-    @Test
+    @Test( enabled = false )
     public void testGetProfilingStatus() throws IOException {
         final String baseQuery = "user/%s/profile/status?apikey=%s";
         final String username = "test-user";
@@ -434,8 +431,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
     }
 
 
-
-    @Test
+    @Test( enabled = false )
     public void testGetProfilingStatusEmptyUsername() throws IOException {
         final String baseQuery = "user/%s/profile/status?apikey=%s";
         final String username = "";
@@ -454,16 +450,4 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         Assert.assertEquals(responseBody, "");
     }
 
-    @Test
-    public void testJersyPathParam() throws IOException {
-        final String baseQuery = "user/fake/foo";
-        GetMethod getMethod = new GetMethod(base_uri + baseQuery);
-        HttpClient client = new HttpClient();
-        int result = client.executeMethod(getMethod);
-        String responseBody = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
-        Assert.assertNotEquals(responseBody, "");
-        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-    }
 }
