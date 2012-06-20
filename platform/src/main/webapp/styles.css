@@ -79,10 +79,6 @@ h3 {
 p {
 	padding-bottom: 20px;
 	}
-	
-.centered {
-	text-align:center;
-}
 
 /* nav */
 
@@ -92,8 +88,8 @@ nav {
 	background: url("images/navbg.png");
 	
 	/* curved border radius */
-	-moz-border-radius: 10px;
-	-webkit-border-radius: 10px;
+	-moz-border-radius: 0px 0px 10px 10px;
+	-webkit-border-radius: 0px 0px 10px 10px;
 	}
 
 nav ul {
@@ -286,7 +282,7 @@ footer section a:hover {
 
 #innercontent {
 	float: left; 
-	margin:50px 5px 10px 0; 
+	margin:50px 0px 10px 0;
 	padding:5px 20px 5px 20px;
 	background-color: #d6a965;
 	
@@ -354,5 +350,39 @@ aside section ul li a:hover {
 	text-decoration: underline;
 	color: #fff;
 	}
-	
 
+
+.centered {
+	text-align:center;
+	font-size: 34px;
+	margin-bottom: 5px;
+}
+
+/* code style */
+pre {
+	margin-top: 20px;
+	margin-bottom: 20px;
+	background: rgba(255, 252, 221, 0.8);
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	}
+
+/* top title */
+.topTitle {
+	background: #FFFFED;
+    margin: 0;
+    -moz-border-radius: 10px 10px 0px 0px;
+    -webkit-border-radius: 10px 10px 0px 0px;
+    margin-top: 5px;
+    text-align: center;
+}
+
+hr {
+    border: 0;
+    height: 2px;
+    background-image: -webkit-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0));
+    background-image:    -moz-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0));
+    background-image:     -ms-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0));
+    background-image:      -o-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0));
+    margin-bottom: 15px;
+}
