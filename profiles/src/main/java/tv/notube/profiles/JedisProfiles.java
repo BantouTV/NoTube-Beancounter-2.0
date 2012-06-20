@@ -28,10 +28,10 @@ public class JedisProfiles implements Profiles {
         try {
             String userProfile = mapper.writeValueAsString(up);
             jedis = pool.getResource();
-            jedis.set(up.getId().toString(),userProfile);
+            jedis.set(up.getUserId().toString(),userProfile);
         } catch (Exception e) {
             throw new ProfilesException(
-                    "Error while storing the profile for user: " + up.getId().toString(),
+                    "Error while storing the profile for user: " + up.getUserId().toString(),
                     e);
         } finally {
             if(jedis!=null)

@@ -28,14 +28,14 @@ public class JedisProfilesIntegrationTest {
         Profiles underTest = new JedisProfiles(factory);
         underTest.store(testProfile);
 
-        UserProfile profileRetrieved = underTest.lookup(testProfile.getId());
+        UserProfile profileRetrieved = underTest.lookup(testProfile.getUserId());
         Assert.assertEquals(testProfile, profileRetrieved);
     }
 
     private UserProfile getTestUserProfile() {
-        UserProfile profile = new UserProfile();
         UUID id = UUID.fromString("12345678-1234-1234-1234-123456789ab");
-        profile.setId(id);
+        UserProfile profile = new UserProfile(id);
+        profile.setUserId(id);
         profile.setUsername("TEST-USERNAME");
         return profile;
     }
