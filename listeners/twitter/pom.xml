@@ -30,9 +30,9 @@
             <version>2.10-SNAPSHOT</version>
         </dependency>
         <dependency>
-           <groupId>org.apache.camel</groupId>
-           <artifactId>camel-guice</artifactId>
-           <version>2.11-SNAPSHOT</version>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-guice</artifactId>
+            <version>2.11-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
@@ -58,6 +58,18 @@
                         <argument>-jndiProperties</argument>
                         <argument>/guicejndi.properties</argument>
                     </arguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>org.apache.camel.guice.Main</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
         </plugins>

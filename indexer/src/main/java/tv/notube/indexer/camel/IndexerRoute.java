@@ -104,15 +104,13 @@ public class IndexerRoute extends RouteBuilder {
                     public <T> T convertTo(Class<T> tClass, Exchange exchange, Object o)
                             throws TypeConversionException {
 
-                        TwitterTweet tweet = (TwitterTweet) o;
+                        TwitterTweet tweet = (TwitterTweet)o;
 
-                        Activity activity = null;
                         try {
-                            activity = new TwitterTweetConverter().convert(tweet);
+                            return (T)new TwitterTweetConverter().convert(tweet);
                         } catch (ServiceResponseException e) {
                             throw new TypeConversionException(TwitterTweet.class, Activity.class, e);
                         }
-                        return (T) activity;
                     }
                 });
     }
