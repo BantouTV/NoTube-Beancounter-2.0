@@ -11,6 +11,7 @@ import twitter4j.Status;
 public class TwitterRoute extends RouteBuilder {
 
     public void configure() {
+        //errorHandler(deadLetterChannel("file:logs/error"));
 
         from("twitter://streaming/filter?type=event&keywords=London&consumerKey={{consumer.key}}&consumerSecret={{consumer.secret}}&accessToken={{access.token}}&accessTokenSecret={{access.token.secret}}")
 
