@@ -56,7 +56,10 @@ public class IndexerRoute extends RouteBuilder {
 
                 .convertBodyTo(Activity.class)
 
+                .multicast().parallelProcessing().to("direct:es", "direct:profiler");
 
+
+        from("direct:es")
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
@@ -64,6 +67,10 @@ public class IndexerRoute extends RouteBuilder {
                         activityService.store(exchange.getIn().getBody(Activity.class));
                     }
                 })
+
+        ;
+
+        from("direct:profiler")
 
                 .process(new Processor() {
                     @Override
@@ -74,10 +81,12 @@ public class IndexerRoute extends RouteBuilder {
                         UserProfile profile = profiler.profile(
                                 UUID.fromString(String.valueOf("12345678-1234-1234-1234-123456789ab")),
                                 exchange.getIn().getBody(Activity.class));
-
+                        System.out.println();
+                        System.out.println("========================================================");
                         for (Interest i : profile.getInterests()) {
                             System.out.println(i.getReference() + " | " + i.getWeight());
                         }
+                        System.out.println("========================================================");
                         System.out.println();
                     }
                 })
@@ -85,6 +94,7 @@ public class IndexerRoute extends RouteBuilder {
 
         ;
     }
+
 
     private void registerActivityConverter() {
         getContext().getTypeConverterRegistry()
@@ -94,7 +104,7 @@ public class IndexerRoute extends RouteBuilder {
                     public <T> T convertTo(Class<T> tClass, Exchange exchange, Object o)
                             throws TypeConversionException {
 
-                        TwitterTweet tweet = (TwitterTweet)o;
+                        TwitterTweet tweet = (TwitterTweet) o;
 
                         Activity activity = null;
                         try {
@@ -102,7 +112,7 @@ public class IndexerRoute extends RouteBuilder {
                         } catch (ServiceResponseException e) {
                             throw new TypeConversionException(TwitterTweet.class, Activity.class, e);
                         }
-                        return (T)activity;
+                        return (T) activity;
                     }
                 });
     }
@@ -113,9 +123,9 @@ public class IndexerRoute extends RouteBuilder {
         // look into hashtags definition
         properties.setProperty("tagdef.enable", "true");
         // tweets are more important than other
-        properties.setProperty("verb.multiplier.TWEET", "10");
+        properties.setProperty("verb.multiplier.TWEET", "100");
         // profiles are made only of top 5 interests
-        properties.setProperty("interest.limit", String.valueOf(5));
+        properties.setProperty("interest.limit", String.valueOf(500));
         Profiler profiler = new DefaultProfilerImpl(
                 new InMemoryProfileStore(),
                 new LUpediaNLPEngineImpl(),

@@ -12,7 +12,7 @@ public class TwitterRoute extends RouteBuilder {
 
     public void configure() {
 
-        from("twitter://streaming/filter?type=event&keywords=test&consumerKey={{consumer.key}}&consumerSecret={{consumer.secret}}&accessToken={{access.token}}&accessTokenSecret={{access.token.secret}}")
+        from("twitter://streaming/filter?type=event&keywords=London&consumerKey={{consumer.key}}&consumerSecret={{consumer.secret}}&accessToken={{access.token}}&accessTokenSecret={{access.token.secret}}")
 
                 .process(new Processor() {
                     @Override

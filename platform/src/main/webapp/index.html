@@ -10,7 +10,7 @@
 <body>
 
 	<header>
-		<h1>NoTube Beancounter 2.0 Platform REST API Documentation</h1>
+		<h1 class="topTitle">NoTube Beancounter 2.0 Platform REST API Documentation</h1>
 	</header>
 	<nav>
 		<ul>
@@ -489,22 +489,22 @@
 					as you can see from the response:<br>
 		
 		<pre><code>
-{
-	"status": "OK",
-	"message": "analysis description",
-	"object":
-	{
-		"name": "timeframe-analysis",
-		"description": "this analysis summarizes the user activities over time",
-		"methodDescriptions":
-		[
-			{
-				"name": "getStatistics",
-				"description": "this method returns activity statistics day by day of the last month"
-			}
-		]
-	}
-}
+    {
+	    "status": "OK",
+	    "message": "analysis description",
+	    "object":
+	    {
+		    "name": "timeframe-analysis",
+		    "description": "this analysis summarizes the user activities over time",
+		    "methodDescriptions":
+		    [
+		    {
+		    	"name": "getStatistics",
+		    	"description": "this method returns activity statistics day by day of the last month"
+		    }
+		    ]
+	    }
+    }
         </code></pre>
 
 					the analysis foresees a <i>getStatistics</i> method which returns
