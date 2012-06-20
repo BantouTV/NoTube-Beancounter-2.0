@@ -6,7 +6,7 @@ import tv.notube.commons.model.activity.*;
 import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.profiler.rules.ObjectProfilingRule;
 import tv.notube.profiler.rules.ProfilingRule;
-import tv.notube.profiler.store.ProfileStore;
+import tv.notube.profiles.Profiles;
 
 import java.util.UUID;
 
@@ -29,7 +29,7 @@ public interface Profiler {
 
     public UserProfile profile(UUID userId, Activity activity) throws ProfilerException;
 
-    public ProfileStore getProfileStore();
+    public Profiles getProfileStore();
 
     public NLPEngine getNLPEngine();
 

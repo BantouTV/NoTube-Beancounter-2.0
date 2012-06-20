@@ -25,7 +25,7 @@ import tv.notube.profiler.DefaultProfilerImpl;
 import tv.notube.profiler.Profiler;
 import tv.notube.profiler.ProfilerException;
 import tv.notube.profiler.rules.custom.TweetProfilingRule;
-import tv.notube.profiler.store.InMemoryProfileStore;
+import tv.notube.profiles.InMemoryProfilesImpl;
 
 public class IndexerRoute extends RouteBuilder {
 
@@ -127,7 +127,7 @@ public class IndexerRoute extends RouteBuilder {
         // profiles are made only of top 5 interests
         properties.setProperty("interest.limit", String.valueOf(500));
         Profiler profiler = new DefaultProfilerImpl(
-                new InMemoryProfileStore(),
+                new InMemoryProfilesImpl(),
                 new LUpediaNLPEngineImpl(),
                 null,
                 properties

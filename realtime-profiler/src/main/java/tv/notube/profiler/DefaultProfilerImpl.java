@@ -9,8 +9,8 @@ import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.profiler.rules.ObjectProfilingRule;
 import tv.notube.profiler.rules.ProfilingRule;
 import tv.notube.profiler.rules.ProfilingRuleException;
-import tv.notube.profiler.store.ProfileStore;
-import tv.notube.profiler.store.ProfileStoreException;
+import tv.notube.profiles.Profiles;
+import tv.notube.profiles.ProfilesException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -27,7 +27,7 @@ public class DefaultProfilerImpl implements Profiler {
     private Map<Class<? extends tv.notube.commons.model.activity.Object>,Class<? extends ObjectProfilingRule>>
             objectRules = new HashMap<Class<? extends Object>, Class<? extends ObjectProfilingRule>>();
 
-    private ProfileStore ps;
+    private Profiles ps;
 
     private NLPEngine nlpEng;
 
@@ -35,7 +35,7 @@ public class DefaultProfilerImpl implements Profiler {
 
     private Properties properties;
 
-    public DefaultProfilerImpl(ProfileStore ps, NLPEngine nlpEng, LinkingEngine linkEng, Properties properties) {
+    public DefaultProfilerImpl(Profiles ps, NLPEngine nlpEng, LinkingEngine linkEng, Properties properties) {
         this.ps = ps;
         this.nlpEng = nlpEng;
         this.linkEng = linkEng;
@@ -56,7 +56,7 @@ public class DefaultProfilerImpl implements Profiler {
         UserProfile old;
         try {
             old = getProfile(userId);
-        } catch (ProfileStoreException e) {
+        } catch (ProfilesException e) {
             throw new ProfilerException();
         }
         Class<? extends Object> type = activity.getObject().getClass();
@@ -78,7 +78,7 @@ public class DefaultProfilerImpl implements Profiler {
             newProfile = computeNewProfile(activity, activityInterests, old, userId);
             try {
                 ps.store(newProfile);
-            } catch (ProfileStoreException e) {
+            } catch (ProfilesException e) {
                 throw new ProfilerException();
             }
             return newProfile;
@@ -261,11 +261,11 @@ public class DefaultProfilerImpl implements Profiler {
         }
     }
 
-    private UserProfile getProfile(UUID userId) throws ProfileStoreException {
+    private UserProfile getProfile(UUID userId) throws ProfilesException {
         return ps.lookup(userId);
     }
 
-    public ProfileStore getProfileStore() {
+    public Profiles getProfileStore() {
         return ps;
     }
 

@@ -60,8 +60,9 @@
         <module>activities</module>
         <module>listeners</module>
         <module>indexer</module> 
-        <module>realtime-profiler</module>   
-    </modules>
+        <module>realtime-profiler</module>
+    <module>profiles</module>
+  </modules>
 
     <distributionManagement>
         <repository>
