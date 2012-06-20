@@ -53,15 +53,12 @@
         <module>crawler</module>
         <module>platform</module>
         <module>user-manager</module>
-        <module>profile-manager</module>
-        <module>extensions</module>
-        <module>analytics</module>
         <module>applications</module>
         <module>activities</module>
         <module>listeners</module>
         <module>indexer</module> 
         <module>realtime-profiler</module>
-    <module>profiles</module>
+        <module>profiles</module>
   </modules>
 
     <distributionManagement>

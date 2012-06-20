@@ -23,22 +23,6 @@
             <groupId>tv.notube.commons</groupId>
             <artifactId>configuration</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>tv.notube.commons.storage</groupId>
-                    <artifactId>model</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>tv.notube.commons.storage</groupId>
-            <artifactId>kvs</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>tv.notube.commons.alog</groupId>
-            <artifactId>core</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>

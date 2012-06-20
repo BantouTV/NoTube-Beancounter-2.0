@@ -11,7 +11,7 @@ import java.util.UUID;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public final class InMemoryProfilesImpl implements Profiles {
+public final class MockProfiles implements Profiles {
 
     private Set<UserProfile> profiles = new HashSet<UserProfile>();
 

@@ -13,10 +13,8 @@ import tv.notube.crawler.Crawler;
 import tv.notube.crawler.CrawlerException;
 import tv.notube.crawler.Report;
 import tv.notube.platform.responses.*;
-import tv.notube.profiler.Profiler;
-import tv.notube.profiler.ProfilerException;
-import tv.notube.profiler.storage.ProfileStore;
-import tv.notube.profiler.storage.ProfileStoreException;
+import tv.notube.profiles.Profiles;
+import tv.notube.profiles.ProfilesException;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.UserManagerException;
 
@@ -29,6 +27,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
@@ -41,25 +40,21 @@ public class UserService extends JsonService {
 
     private UserManager userManager;
 
-    private ProfileStore profileStore;
+    private Profiles profiles;
 
     private Crawler crawler;
-
-    private Profiler profiler;
 
     @Inject
     public UserService(
             final ApplicationsManager am,
             final UserManager um,
-            final ProfileStore ps,
-            final Crawler cr,
-            final Profiler pr
+            final Profiles ps,
+            final Crawler cr
     ) {
         this.applicationsManager = am;
         this.userManager = um;
-        this.profileStore = ps;
         this.crawler = cr;
-        this.profiler = pr;
+        this.profiles = ps;
     }
 
     @POST
@@ -92,8 +87,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new AnalysesPlatformResponse(
-                    AnalysesPlatformResponse.Status.NOK,
+            rb.entity(new UserProfilePlatformResponse(
+                    UserProfilePlatformResponse.Status.NOK,
                     "Your application is not authorized.Sorry.")
             );
             return rb.build();
@@ -102,8 +97,8 @@ public class UserService extends JsonService {
             if (userManager.getUser(username) != null) {
                 final String errMsg = "username '" + username + "' is already taken";
                 Response.ResponseBuilder rb = Response.serverError();
-                rb.entity(new AnalysesPlatformResponse(
-                        AnalysesPlatformResponse.Status.NOK,
+                rb.entity(new UserProfilePlatformResponse(
+                        UserProfilePlatformResponse.Status.NOK,
                         errMsg)
                 );
                 return rb.build();
@@ -132,8 +127,8 @@ public class UserService extends JsonService {
         }
         if (application == null) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new AnalysesPlatformResponse(
-                    AnalysesPlatformResponse.Status.NOK,
+            rb.entity(new UserProfilePlatformResponse(
+                    UserProfilePlatformResponse.Status.NOK,
                     "Application not found")
             );
             return rb.build();
@@ -187,8 +182,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new AnalysesPlatformResponse(
-                    AnalysesPlatformResponse.Status.NOK,
+            rb.entity(new UserProfilePlatformResponse(
+                    UserProfilePlatformResponse.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
@@ -247,8 +242,8 @@ public class UserService extends JsonService {
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new AnalysesPlatformResponse(
-                    AnalysesPlatformResponse.Status.NOK,
+            rb.entity(new UserProfilePlatformResponse(
+                    UserProfilePlatformResponse.Status.NOK,
                     "Sorry. You're not allowed to do that.")
             );
             return rb.build();
@@ -340,11 +335,6 @@ public class UserService extends JsonService {
         } catch (UserManagerException e) {
             throw new RuntimeException("Error while deleting user '" + username
                     + "'", e);
-        }
-        try {
-            profileStore.deleteUserProfile(username);
-        } catch (ProfileStoreException e) {
-            return error(e, "Error while deleting user '" + username + "'");
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new StringPlatformResponse(
@@ -632,8 +622,9 @@ public class UserService extends JsonService {
         }
         UserProfile up;
         try {
-            up = profileStore.getUserProfile(username);
-        } catch (ProfileStoreException e) {
+            // TODO (high) fix this.
+            up = profiles.lookup(UUID.randomUUID());
+        } catch (ProfilesException e) {
             return error(e, "Error while retrieving profile for user '" + username + "'");
         }
         Response.ResponseBuilder rb = Response.ok();
@@ -698,6 +689,7 @@ public class UserService extends JsonService {
         return rb.build();
     }
 
+    /**
     @GET
     @Path("/{username}/profile/update")
     public Response forceUserProfiling(
@@ -755,8 +747,9 @@ public class UserService extends JsonService {
                 )
         );
         return rb.build();
-    }
+    }  **/
 
+    /**
     @GET
     @Path("/{username}/profile/status")
     public Response getProfilingStatus(
@@ -811,36 +804,6 @@ public class UserService extends JsonService {
         );
         return rb.build();
     }
+            */
 
-
-
-    /*
-     * testing methods
-     */
-
-    @GET
-    @Path("fake/{test}")
-    public Response test(@PathParam("test") String test) {
-        Response.ResponseBuilder rb = Response.ok();
-        rb.entity(
-                new StringPlatformResponse(
-                        StringPlatformResponse.Status.OK,
-                        "Method-with-PathParam(" + test + ")"
-                )
-        );
-        return rb.build();
-    }
-
-    @GET
-    @Path("fake/foo")
-    public Response test() {
-        Response.ResponseBuilder rb = Response.ok();
-        rb.entity(
-                new StringPlatformResponse(
-                        StringPlatformResponse.Status.OK,
-                        "Method-without-PathParam"
-                )
-        );
-        return rb.build();
-    }
 }

@@ -31,7 +31,7 @@ public class UserManagerTestCase {
 
     @BeforeTest(enabled = false)
     public void setUp() throws UserManagerFactoryException {
-        userManager = DefaultUserManagerFactory.getInstance().build();
+        userManager = new MockUserManager();
         userId = UUID.randomUUID();
     }
 

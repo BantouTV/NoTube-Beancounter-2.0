@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<skos>
-    <host>localhost</host>
-    <port>3306</port>
-    <db>beancounter</db>
-    <username>notube</username>
-    <password>notubepass</password>
-</skos>

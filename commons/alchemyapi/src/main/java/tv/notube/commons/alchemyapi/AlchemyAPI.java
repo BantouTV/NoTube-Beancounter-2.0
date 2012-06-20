@@ -8,11 +8,16 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import tv.notube.commons.alchemyapi.handlers.AlchemyAPIResponseHandler;
+import tv.notube.commons.nlp.NLPEngine;
+import tv.notube.commons.nlp.NLPEngineException;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -21,7 +26,7 @@ import java.util.List;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class AlchemyAPI {
+public class AlchemyAPI implements NLPEngine {
 
     private final static String CONCEPTS = "http://access.alchemyapi.com/calls/text/TextGetRankedConcepts?apikey=%s&outputMode=json";
 
@@ -40,7 +45,7 @@ public class AlchemyAPI {
         this.apikey = apikey;
     }
 
-    public AlchemyAPIResponse getRankedConcept(String text) throws
+    private AlchemyAPIResponse getRankedConcept(String text) throws
             AlchemyAPIException {
         if (text == null) {
             throw new IllegalArgumentException("Parameter text cannot be " +
@@ -72,7 +77,8 @@ public class AlchemyAPI {
         }
     }
 
-    public AlchemyAPIResponse getNamedEntities(String text) throws AlchemyAPIException {
+    private AlchemyAPIResponse getNamedEntities(String text) throws
+            AlchemyAPIException {
         if (text == null) {
             throw new IllegalArgumentException("Parameter text cannot be " +
                     "null");
@@ -103,7 +109,8 @@ public class AlchemyAPI {
         }
     }
 
-    public AlchemyAPIResponse getRankedConcept(URL url) throws AlchemyAPIException {
+    private AlchemyAPIResponse getRankedConcept(URL url) throws
+            AlchemyAPIException {
         if (url == null) {
             throw new IllegalArgumentException("Parameter text cannot be " +
                     "null");
@@ -134,7 +141,8 @@ public class AlchemyAPI {
         }
     }
 
-    public AlchemyAPIResponse getNamedEntities(URL url) throws AlchemyAPIException {
+    private AlchemyAPIResponse getNamedEntities(URL url) throws
+            AlchemyAPIException {
         if (url == null) {
             throw new IllegalArgumentException("Parameter text cannot be " +
                     "null");
@@ -162,5 +170,35 @@ public class AlchemyAPI {
         } finally {
             httpClient.getConnectionManager().closeExpiredConnections();
         }
+    }
+
+    @Override
+    public Collection<URI> enrich(String text) throws NLPEngineException {
+        AlchemyAPIResponse response;
+        try {
+            response = getNamedEntities(text);
+        } catch (AlchemyAPIException e) {
+            throw new NLPEngineException("Error while calling AlchemyAPI", e);
+        }
+        Collection<URI> result = new HashSet<URI>();
+        for(Identified identified : response.getIdentified()) {
+            result.add(identified.getIdentifier());
+        }
+        return result;
+    }
+
+    @Override
+    public Collection<URI> enrich(URL url) throws NLPEngineException {
+        AlchemyAPIResponse response;
+        try {
+            response = getNamedEntities(url);
+        } catch (AlchemyAPIException e) {
+            throw new NLPEngineException("Error while calling AlchemyAPI", e);
+        }
+        Collection<URI> result = new HashSet<URI>();
+        for(Identified identified : response.getIdentified()) {
+            result.add(identified.getIdentifier());
+        }
+        return result;
     }
 }

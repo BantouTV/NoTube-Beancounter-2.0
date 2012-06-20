@@ -20,16 +20,5 @@
             <artifactId>model</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>tv.notube.commons.storage</groupId>
-            <artifactId>kvs</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>joda-time</groupId>
-                    <artifactId>joda-time</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 </project>

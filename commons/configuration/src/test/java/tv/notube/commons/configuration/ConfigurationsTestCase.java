@@ -2,7 +2,6 @@ package tv.notube.commons.configuration;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import tv.notube.commons.configuration.analytics.AnalyticsConfiguration;
 import tv.notube.commons.configuration.auth.ServiceAuthorizationManagerConfiguration;
 import tv.notube.commons.configuration.profiler.ProfilerConfiguration;
 import tv.notube.commons.configuration.storage.StorageConfiguration;
@@ -23,15 +22,6 @@ public class ConfigurationsTestCase {
         );
         Assert.assertNotNull(userManagerConfiguration);
         Assert.assertEquals(userManagerConfiguration.getProfilingRate(), 10);
-    }
-
-    @Test(enabled = false)
-    public void testAnalyticsConfiguration() throws ConfigurationsException {
-        AnalyticsConfiguration analyticsConfiguration = Configurations.getConfiguration(
-                "analytics-configuration.xml",
-                AnalyticsConfiguration.class
-        );
-        Assert.assertNotNull(analyticsConfiguration);
     }
 
     @Test(enabled = false)
