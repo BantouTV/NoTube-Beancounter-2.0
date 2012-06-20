@@ -10,12 +10,8 @@ import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.Context;
 import tv.notube.commons.model.activity.Tweet;
 import tv.notube.commons.model.activity.Verb;
-import tv.notube.profiler.DefaultProfilerImpl;
-import tv.notube.profiler.ProfilerException;
 import tv.notube.profiler.rules.custom.TweetProfilingRule;
-import tv.notube.profiler.store.InMemoryProfileStore;
-import tv.notube.profiler.store.ProfileStore;
-import tv.notube.profiler.Profiler;
+import tv.notube.profiles.InMemoryProfilesImpl;
 
 import java.io.PrintStream;
 import java.net.MalformedURLException;
@@ -46,7 +42,7 @@ public class DefaultProfilerImplTestCase {
         // profiles are made only of top 5 interests
         properties.setProperty("interest.limit", String.valueOf(LIMIT));
         profiler = new DefaultProfilerImpl(
-                new InMemoryProfileStore(),
+                new InMemoryProfilesImpl(),
                 new LUpediaNLPEngineImpl(),
                 null,
                 properties
