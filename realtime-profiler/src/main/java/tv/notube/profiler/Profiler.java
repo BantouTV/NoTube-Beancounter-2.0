@@ -1,14 +1,15 @@
 package tv.notube.profiler;
 
+import java.util.UUID;
+
 import tv.notube.commons.linking.LinkingEngine;
 import tv.notube.commons.model.UserProfile;
-import tv.notube.commons.model.activity.*;
+import tv.notube.commons.model.activity.Activity;
+import tv.notube.commons.model.activity.Verb;
 import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.profiler.rules.ObjectProfilingRule;
 import tv.notube.profiler.rules.ProfilingRule;
 import tv.notube.profiles.Profiles;
-
-import java.util.UUID;
 
 /**
  * put class description here
