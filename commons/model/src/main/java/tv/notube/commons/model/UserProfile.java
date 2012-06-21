@@ -23,6 +23,8 @@ public class UserProfile {
 
     private Set<Interest> interests = new HashSet<Interest>();
 
+    public UserProfile() {}
+
     public UserProfile(UUID userId) {
         this.userId = userId;
     }

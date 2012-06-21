@@ -26,33 +26,35 @@ public class JedisProfiles implements Profiles {
     public void store(UserProfile up) throws ProfilesException {
         Jedis jedis = null;
         try {
+            System.out.println("==================================================");
+            System.out.print(up);
+            System.out.println("==================================================");
             String userProfile = mapper.writeValueAsString(up);
             jedis = pool.getResource();
-            jedis.set(up.getUserId().toString(),userProfile);
+            jedis.set(up.getUserId().toString(), userProfile);
         } catch (Exception e) {
             throw new ProfilesException(
                     "Error while storing the profile for user: " + up.getUserId().toString(),
                     e);
         } finally {
-            if(jedis!=null)
+            if (jedis != null)
                 pool.returnResource(jedis);
         }
     }
 
     @Override
     public UserProfile lookup(UUID userId) throws ProfilesException {
-        UserProfile profile;
+        UserProfile profile = null;
         Jedis jedis = null;
         try {
             jedis = pool.getResource();
             String stringProfile = jedis.get(userId.toString());
-            profile = mapper.readValue(stringProfile, UserProfile.class);
+            if (stringProfile != null)
+                profile = mapper.readValue(stringProfile, UserProfile.class);
         } catch (Exception e) {
-            throw new ProfilesException(
-                    "Error while retrieving the profile for user: " + userId.toString(),
-                    e);
+            throw new ProfilesException("Error while retrieving the profile for user: " + userId.toString(), e);
         } finally {
-            if(jedis!=null)
+            if (jedis != null)
                 pool.returnResource(jedis);
         }
         return profile;

@@ -10,7 +10,7 @@ import java.util.UUID;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class Interest implements Comparable {
+public class Interest implements Comparable<Interest> {
 
     private URI resource;
 
@@ -19,6 +19,8 @@ public class Interest implements Comparable {
     private double weight;
 
     private Collection<UUID> activitiesUUIDs = new ArrayList<UUID>();
+
+    public Interest() {}
 
     public Interest(URI resource) {
         super();
@@ -91,14 +93,7 @@ public class Interest implements Comparable {
     }
 
     @Override
-    public int compareTo(Object o) {
-        Interest that = (Interest) o;
-        if(this.weight > that.weight) {
-            return 1;
-        }
-        if(this.weight < that.weight) {
-            return -1;
-        }
-        return 0;
+    public int compareTo(Interest that) {
+        return Double.valueOf(that.weight).compareTo(Double.valueOf(weight));
     }
 }

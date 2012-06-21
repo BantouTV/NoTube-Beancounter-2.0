@@ -3,7 +3,6 @@ package tv.notube.profiler;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import tv.notube.commons.lupedia.LUpediaNLPEngineImpl;
 import tv.notube.commons.model.Interest;
 import tv.notube.commons.model.UserProfile;
 import tv.notube.commons.model.activity.Activity;
@@ -48,7 +47,7 @@ public class DefaultProfilerImplTestCase {
         ps = new MockProfiles();
         profiler = new DefaultProfilerImpl(
                 ps,
-                new LUpediaNLPEngineImpl(),
+                new MockNLPEngine(),
                 null,
                 properties
         );

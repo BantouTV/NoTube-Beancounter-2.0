@@ -25,7 +25,9 @@ import tv.notube.profiler.DefaultProfilerImpl;
 import tv.notube.profiler.Profiler;
 import tv.notube.profiler.ProfilerException;
 import tv.notube.profiler.rules.custom.TweetProfilingRule;
-import tv.notube.profiles.MockProfiles;
+import tv.notube.profiles.JedisProfiles;
+import tv.notube.profiles.jedis.DefaultJedisPoolFactory;
+import tv.notube.profiles.jedis.JedisPoolFactory;
 
 public class IndexerRoute extends RouteBuilder {
 
@@ -123,9 +125,10 @@ public class IndexerRoute extends RouteBuilder {
         // tweets are more important than other
         properties.setProperty("verb.multiplier.TWEET", "100");
         // profiles are made only of top 5 interests
-        properties.setProperty("interest.limit", String.valueOf(500));
+        properties.setProperty("interest.limit", String.valueOf(30));
+        JedisPoolFactory factory = DefaultJedisPoolFactory.getInstance();
         Profiler profiler = new DefaultProfilerImpl(
-                new MockProfiles(),
+                new JedisProfiles(factory),
                 new LUpediaNLPEngineImpl(),
                 null,
                 properties

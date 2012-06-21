@@ -210,7 +210,7 @@ public class DefaultProfilerImpl implements Profiler {
             Interest i = new Interest(reference);
             i.addActivity(activity.getId());
             i.setVisible(true);
-            i.setWeight(multiplier / numOfRefs);
+            i.setWeight((7.5/multiplier) / numOfRefs);
             interests.add(i);
         }
         return interests;
