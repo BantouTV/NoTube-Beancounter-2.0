@@ -33,14 +33,14 @@ public class TestServiceConfig extends GuiceServletContextListener {
             @Override
             protected void configureServlets() {
                 Map<String, String> initParams = new HashMap<String, String>();
-                // add REST services
-                bind(ApplicationService.class);
-                bind(UserService.class);
                 // add bindings to mockups
                 bind(ApplicationsManager.class).to(MockApplicationsManager.class);
                 bind(UserManager.class).to(MockUserManager.class);
                 bind(Profiles.class).to(MockProfiles.class);
                 bind(Crawler.class).to(MockCrawler.class);
+                // add REST services
+                bind(ApplicationService.class);
+                bind(UserService.class);
                 // add bindings for Jackson
                 bind(JacksonJaxbJsonProvider.class).asEagerSingleton();
                 bind(MessageBodyReader.class).to(JacksonJsonProvider.class);

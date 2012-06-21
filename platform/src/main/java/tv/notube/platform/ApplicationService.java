@@ -15,7 +15,7 @@ import java.net.URL;
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-@Path("/application")
+@Path("rest/application")
 @Produces(MediaType.APPLICATION_JSON)
 public class ApplicationService {
 

@@ -32,7 +32,7 @@ import java.util.UUID;
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-@Path("/user")
+@Path("rest/user")
 @Produces(MediaType.APPLICATION_JSON)
 public class UserService extends JsonService {
 
