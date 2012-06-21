@@ -45,6 +45,21 @@ public class MockActivityStore implements ActivityStore {
         throw new UnsupportedOperationException("NIY");
     }
 
+    @Override
+    public Collection<Activity> getByUser(UUID userId) throws ActivityStoreException {
+        throw new UnsupportedOperationException("NIY");
+    }
+
+    @Override
+    public Activity getByUser(UUID userId, UUID activityId) throws ActivityStoreException {
+        throw new UnsupportedOperationException("NIY");
+    }
+
+    @Override
+    public Collection<Activity> getByUser(UUID userId, Collection<UUID> activityIds) throws ActivityStoreException {
+        throw new UnsupportedOperationException("NIY");
+    }
+
     public Activity getLastActivity() {
         return lastActivity;
     }

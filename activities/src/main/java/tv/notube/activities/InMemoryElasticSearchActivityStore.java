@@ -37,4 +37,19 @@ public class InMemoryElasticSearchActivityStore implements ActivityStore {
     public Map<UUID, Collection<Activity>> getByDateRange(DateTime from, DateTime to) throws ActivityStoreException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
+
+    @Override
+    public Collection<Activity> getByUser(UUID userId) throws ActivityStoreException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public Activity getByUser(UUID userId, UUID activityId) throws ActivityStoreException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public Collection<Activity> getByUser(UUID userId, Collection<UUID> activityIds) throws ActivityStoreException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 }

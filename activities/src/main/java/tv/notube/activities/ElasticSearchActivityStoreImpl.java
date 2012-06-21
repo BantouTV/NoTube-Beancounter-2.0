@@ -10,8 +10,6 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.node.Node;
-import org.elasticsearch.node.NodeBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortOrder;
 import org.joda.time.DateTime;
@@ -124,6 +122,35 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
         }
 
         return activitiesMap;
+    }
+
+    @Override
+    public Collection<Activity> getByUser(UUID userId) throws ActivityStoreException {
+        return getByUserAndDateRange(userId, new DateTime(1), new DateTime());
+    }
+
+    @Override
+    public Activity getByUser(UUID userId, UUID activityId) throws ActivityStoreException {
+        Collection<Activity> activities = getByUser(userId);
+        Activity activity = null;
+        for(Activity a : activities)
+            if(a.getId().compareTo(activityId)==0)
+                activity = a;
+        return activity;
+    }
+
+    @Override
+    public Collection<Activity> getByUser(UUID userId, Collection<UUID> activityIds) throws ActivityStoreException {
+        Collection<Activity> selectedActivities = null;
+        Collection<Activity> allActivities = getByUser(userId);
+        for(Activity a : allActivities) {
+            if(activityIds.contains(a.getId())) {
+                if(selectedActivities==null)
+                    selectedActivities = new ArrayList<Activity>();
+                selectedActivities.add(a);
+            }
+        }
+        return selectedActivities;
     }
 
     public void closeClient() {

@@ -303,6 +303,69 @@ public class ElasticSearchActivityStoreImplTestCase {
         }
     }
 
+    @Test
+    public void getAllTweetsOfSpecifiedUser() throws Exception {
+        clearIndex();
+
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        List<Activity> activitiesStored = (List<Activity>) createTweetActivities(userId, dateTime, 10);
+        as.store(userId, activitiesStored);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved = (List<Activity>) as.getByUser(userId);
+        assertEquals(activitiesRetrieved.size(), 10);
+
+        for (int i = 0; i < activitiesRetrieved.size(); i++) {
+            assertEquals(activitiesStored.get(i), activitiesRetrieved.get(i));
+        }
+    }
+
+    @Test
+    public void getTweetOfSpecifiedUserAndSpecifiedTweet() throws Exception {
+        clearIndex();
+
+        UUID userId = UUID.randomUUID();
+        UUID activityId = UUID.randomUUID();
+
+        Activity activityStored = createTweetActivity(1, userId, new DateTime());
+        activityStored.setId(activityId);
+        as.store(userId, activityStored);
+
+        refreshIndex();
+
+        Activity activityRetrieved = as.getByUser(userId, activityId);
+        assertEquals(activityRetrieved, activityStored);
+    }
+
+    @Test
+    public void getTweetsOfSpecifiedUserAndSpecifiedTweets() throws Exception {
+        clearIndex();
+
+        UUID userId = UUID.randomUUID();
+        Collection<UUID> activitiesIds = new ArrayList<UUID>();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        List<Activity> activitiesStored = (List<Activity>) createTweetActivities(userId, dateTime, 10);
+        for(Activity a : activitiesStored) {
+            UUID id = UUID.randomUUID();
+            a.setId(id);
+            activitiesIds.add(id);
+        }
+        as.store(userId, activitiesStored);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved = (List<Activity>) as.getByUser(userId, activitiesIds);
+        assertEquals(activitiesRetrieved.size(), 10);
+
+        for (int i = 0; i < activitiesRetrieved.size(); i++) {
+            assertEquals(activitiesStored.get(i), activitiesRetrieved.get(i));
+        }
+    }
+
     private void refreshIndex() {
         // Refresh so we're looking at the latest version of the index.
         client.admin().indices().refresh(new RefreshRequest(INDEX_NAME)).actionGet();

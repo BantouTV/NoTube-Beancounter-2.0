@@ -68,4 +68,38 @@ public interface ActivityStore {
             final DateTime to
     ) throws ActivityStoreException;
 
+    /**
+     *
+     * @param userId
+     * @return
+     * @throws ActivityStoreException
+     */
+    public Collection<Activity> getByUser(
+            final UUID userId
+    ) throws ActivityStoreException;
+
+    /**
+     *
+     * @param userId
+     * @param activityId
+     * @return
+     * @throws ActivityStoreException
+     */
+    public Activity getByUser(
+            final UUID userId,
+            final UUID activityId
+    ) throws ActivityStoreException;
+
+    /**
+     *
+     * @param userId
+     * @param activityIds
+     * @return
+     * @throws ActivityStoreException
+     */
+    public Collection<Activity> getByUser(
+            final UUID userId,
+            final Collection<UUID> activityIds
+    ) throws ActivityStoreException;
+
 }
