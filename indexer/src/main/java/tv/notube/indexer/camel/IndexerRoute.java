@@ -9,6 +9,8 @@ import org.apache.camel.TypeConversionException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.camel.support.TypeConverterSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import tv.notube.activities.ActivityStore;
 import tv.notube.activities.ElasticSearchActivityStoreFactory;
@@ -30,7 +32,7 @@ import tv.notube.profiles.jedis.DefaultJedisPoolFactory;
 import tv.notube.profiles.jedis.JedisPoolFactory;
 
 public class IndexerRoute extends RouteBuilder {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(IndexerRoute.class);
 
     private final ActivityServiceImpl activityService;
     private final Profiler profiler;
@@ -48,11 +50,16 @@ public class IndexerRoute extends RouteBuilder {
 
 
     public void configure() {
-
         registerActivityConverter();
 
-
         from("kestrel://{{kestrel.queue.url}}?concurrentConsumers=10&waitTimeMs=500")
+
+                .process(new Processor() {
+                    @Override
+                    public void process(Exchange exchange) throws Exception {
+                        LOGGER.debug("Got a tweet from queue.", exchange.getIn().getBody());
+                    }
+                })
 
                 .unmarshal().json(JsonLibrary.Jackson, TwitterTweet.class)
 
@@ -65,24 +72,22 @@ public class IndexerRoute extends RouteBuilder {
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
-                        System.out.println("indexing activity " + exchange.getIn().getBody());
+                        LOGGER.debug("Storing activity {} to ES.", exchange.getIn().getBody(Activity.class));
+
                         activityService.store(exchange.getIn().getBody(Activity.class));
                     }
-                })
-
-        ;
+                });
 
         from("direct:profiler")
 
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
+                        Activity activity = exchange.getIn().getBody(Activity.class);
 
-                        System.out.println("profiling activity " + exchange.getIn().getBody());
+                        LOGGER.debug("Profiling activity {}.", activity);
 
-                        UserProfile profile = profiler.profile(
-                                UUID.fromString(String.valueOf("12345678-1234-1234-1234-123456789ab")),
-                                exchange.getIn().getBody(Activity.class));
+                        UserProfile profile = profiler.profile(UUID.fromString(String.valueOf("12345678-1234-1234-1234-123456789ab")), activity);
                         System.out.println();
                         System.out.println("========================================================");
                         for (Interest i : profile.getInterests()) {
@@ -91,32 +96,31 @@ public class IndexerRoute extends RouteBuilder {
                         System.out.println("========================================================");
                         System.out.println();
                     }
-                })
-
-
-        ;
+                });
     }
 
 
     private void registerActivityConverter() {
         getContext().getTypeConverterRegistry()
-                .addTypeConverter(Activity.class, TwitterTweet.class, new TypeConverterSupport() {
+                .addTypeConverter(
+                        Activity.class,
+                        TwitterTweet.class,
+                        new TypeConverterSupport() {
 
-                    @Override
-                    public <T> T convertTo(Class<T> tClass, Exchange exchange, Object o)
-                            throws TypeConversionException {
+                            @Override
+                            public <T> T convertTo(Class<T> tClass, Exchange exchange, Object o)
+                                    throws TypeConversionException {
 
-                        TwitterTweet tweet = (TwitterTweet)o;
+                                TwitterTweet tweet = (TwitterTweet)o;
 
-                        try {
-                            return (T)new TwitterTweetConverter().convert(tweet);
-                        } catch (ServiceResponseException e) {
-                            throw new TypeConversionException(TwitterTweet.class, Activity.class, e);
-                        }
-                    }
-                });
+                                try {
+                                    return (T)new TwitterTweetConverter().convert(tweet);
+                                } catch (ServiceResponseException e) {
+                                    throw new TypeConversionException(TwitterTweet.class, Activity.class, e);
+                                }
+                            }
+                        });
     }
-
 
     private Profiler createProfiler() throws ProfilerException {
         Properties properties = new Properties();

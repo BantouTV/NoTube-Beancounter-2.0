@@ -4,11 +4,14 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import tv.notube.crawler.requester.request.twitter.TwitterTweet;
 import twitter4j.Status;
 
 public class TwitterRoute extends RouteBuilder {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TwitterRoute.class);
 
     public void configure() {
         //errorHandler(deadLetterChannel("file:logs/error"));
@@ -18,6 +21,8 @@ public class TwitterRoute extends RouteBuilder {
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
+                        LOGGER.debug("Got a tweet for processing: {}", exchange.getIn().getBody());
+
                         Status status = exchange.getIn().getBody(Status.class);
                         TwitterTweet twitterTweet = new TweetConverter().convert(status);
                         exchange.getIn().setBody(twitterTweet);
@@ -31,9 +36,7 @@ public class TwitterRoute extends RouteBuilder {
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
-                        System.out.println("sending " + exchange.getIn().getBody());
-
-
+                        LOGGER.debug("Sending twitterTweet to the queue. {} ", exchange.getIn().getBody());
                     }
                 })
 
