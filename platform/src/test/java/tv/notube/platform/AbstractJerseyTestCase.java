@@ -15,7 +15,7 @@ public abstract class AbstractJerseyTestCase {
 
     protected static final Logger logger = Logger.getLogger(AbstractJerseyTestCase.class);
 
-    private static final String base_uri_str = "http://localhost:%d/";
+    private static final String base_uri_str = "http://localhost:%d/rest/";
 
     protected final URI base_uri;
 
