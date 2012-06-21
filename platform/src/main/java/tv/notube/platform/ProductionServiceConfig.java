@@ -4,7 +4,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.sun.jersey.api.core.ClasspathResourceConfig;
-import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
@@ -16,7 +15,7 @@ import tv.notube.crawler.Crawler;
 import tv.notube.crawler.ParallelCrawlerImpl;
 import tv.notube.crawler.requester.MockRequester;
 import tv.notube.crawler.requester.Requester;
-import tv.notube.profiles.MockProfiles;
+import tv.notube.profiles.JedisProfilesImpl;
 import tv.notube.profiles.Profiles;
 import tv.notube.usermanager.MockUserManager;
 import tv.notube.usermanager.UserManager;
@@ -46,9 +45,11 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(ApplicationService.class);
                 bind(UserService.class);
                 // bind Production Implementations
+                // TODO (really high) provide a real implementation
                 bind(ApplicationsManager.class).to(MockApplicationsManager.class);
+                // TODO (really high) provide a real implementation
                 bind(UserManager.class).to(MockUserManager.class);
-                bind(Profiles.class).to(MockProfiles.class);
+                bind(Profiles.class).to(JedisProfilesImpl.class);
                 bind(Crawler.class).to(ParallelCrawlerImpl.class);
                 bind(Requester.class).to(MockRequester.class);
                 // add bindings for Jackson

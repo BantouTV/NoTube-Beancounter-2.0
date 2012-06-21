@@ -1,5 +1,7 @@
 package tv.notube.profiles;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import junit.framework.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -14,26 +16,24 @@ import java.util.UUID;
  */
 public class JedisProfilesIntegrationTest {
 
-    private JedisPoolFactory factory;
+    private Profiles profiles;
 
     @BeforeClass
     public void setUp() {
-        factory = DefaultJedisPoolFactory.getInstance();
+        Injector injector = Guice.createInjector(new ProfilesModule());
+        profiles = injector.getInstance(Profiles.class);
     }
 
     @Test
     public void testStoreUserProfile() throws ProfilesException {
         UserProfile testProfile = getTestUserProfile();
-
-        Profiles underTest = new JedisProfiles(factory);
-        underTest.store(testProfile);
-
-        UserProfile profileRetrieved = underTest.lookup(testProfile.getUserId());
+        profiles.store(testProfile);
+        UserProfile profileRetrieved = profiles.lookup(testProfile.getUserId());
         Assert.assertEquals(testProfile, profileRetrieved);
     }
 
     private UserProfile getTestUserProfile() {
-        UUID id = UUID.fromString("12345678-1234-1234-1234-123456789ab");
+        UUID id = UUID.fromString("22345678-1234-1234-1234-123456789ab");
         UserProfile profile = new UserProfile(id);
         profile.setUserId(id);
         profile.setUsername("TEST-USERNAME");
