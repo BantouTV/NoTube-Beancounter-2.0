@@ -1,10 +1,8 @@
 package tv.notube.platform;
 
 import com.google.inject.Inject;
-import tv.notube.applications.Application;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
-import tv.notube.applications.Permissions;
 import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.UserProfile;

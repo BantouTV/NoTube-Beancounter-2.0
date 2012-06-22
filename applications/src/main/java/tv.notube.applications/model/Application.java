@@ -1,4 +1,9 @@
-package tv.notube.applications;
+package tv.notube.applications.model;
+
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
+import tv.notube.applications.ApplicationsManager;
+import tv.notube.applications.Permissions;
 
 import java.io.Serializable;
 import java.net.URL;
@@ -26,7 +31,13 @@ public class Application implements Serializable {
 
     private Permissions permissions;
 
-    public Application(String name, String description, String email, URL callback) {
+    @JsonCreator
+    public Application(
+            @JsonProperty("name") String name,
+            @JsonProperty("description") String description,
+            @JsonProperty("email") String email,
+            @JsonProperty("callback") URL callback
+    ) {
         apiKey = UUID.randomUUID();
         this.name = name;
         this.description = description;
@@ -47,12 +58,24 @@ public class Application implements Serializable {
         return email;
     }
 
+    protected Permissions getPermissions() {
+        return permissions;
+    }
+
+    protected void setPermissions(Permissions permissions) {
+        this.permissions = permissions;
+    }
+
     public void setOAuthCallback(URL callback) {
         this.callback = callback;
     }
 
     public URL getCallback() {
         return callback;
+    }
+
+    public void setApiKey(UUID apiKey) {
+        this.apiKey = apiKey;
     }
 
     public UUID getApiKey() {

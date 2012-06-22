@@ -1,5 +1,7 @@
 package tv.notube.applications;
 
+import tv.notube.applications.model.Application;
+
 import java.net.URL;
 import java.util.UUID;
 
