@@ -2,12 +2,11 @@ package tv.notube.applications;
 
 import java.io.Serializable;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 /**
- * put class description here
+ * This class models an application able to consume data from the
+ * beancounter.io platform.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
@@ -23,17 +22,17 @@ public class Application implements Serializable {
 
     private URL callback;
 
-    private URL website;
+    private UUID apiKey;
 
-    private String apiKey;
+    private Permissions permissions;
 
-    private Map<UUID, Permission> permissions =
-            new HashMap<UUID, Permission>();
-
-    public Application(String name, String description, String email) {
+    public Application(String name, String description, String email, URL callback) {
+        apiKey = UUID.randomUUID();
         this.name = name;
         this.description = description;
         this.email = email;
+        this.callback = callback;
+        this.permissions = Permissions.buildDefault();
     }
 
     public String getName() {
@@ -56,28 +55,18 @@ public class Application implements Serializable {
         return callback;
     }
 
-    public URL getWebsite() {
-        return website;
-    }
-
-    public void setWebsite(URL website) {
-        this.website = website;
-    }
-
-    public String getApiKey() {
+    public UUID getApiKey() {
         return apiKey;
     }
 
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
-
-    public void addPermission(Permission permission) {
-        this.permissions.put(permission.getResource(), permission);
-    }
-
-    public Permission getPermission(UUID resource) {
-        return permissions.get(resource);
+    public boolean hasPrivileges(
+            ApplicationsManager.Action action,
+            ApplicationsManager.Object object
+    ) {
+        return permissions.hasPermission(
+                action,
+                object
+        );
     }
 
     @Override
@@ -87,7 +76,7 @@ public class Application implements Serializable {
 
         Application that = (Application) o;
 
-        if (name != null ? !name.equals(that.name) : that.name != null)
+        if (apiKey != null ? !apiKey.equals(that.apiKey) : that.apiKey != null)
             return false;
 
         return true;
@@ -95,9 +84,8 @@ public class Application implements Serializable {
 
     @Override
     public int hashCode() {
-        return name != null ? name.hashCode() : 0;
+        return apiKey != null ? apiKey.hashCode() : 0;
     }
-
 
     @Override
     public String toString() {
@@ -106,9 +94,13 @@ public class Application implements Serializable {
                 ", description='" + description + '\'' +
                 ", email='" + email + '\'' +
                 ", callback=" + callback +
-                ", website=" + website +
-                ", apiKey='" + apiKey + '\'' +
+                ", apiKey=" + apiKey +
+                ", permissions=" + permissions +
                 '}';
+    }
+
+    public static Application build(String name, String description, String email, URL callback) {
+        return new Application(name, description, email, callback);
     }
 
 }

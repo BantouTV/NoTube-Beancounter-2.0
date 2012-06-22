@@ -1,4 +1,4 @@
 This is an application that manages users, harvests information about them from social 
-media sites (with their permission, using Oauth or oauth-like techniques). You can them 
+media sites (with their permissions, using Oauth or oauth-like techniques). You can them
 perform analytics over the top.
 

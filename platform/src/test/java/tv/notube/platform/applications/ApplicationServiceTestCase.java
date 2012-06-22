@@ -6,13 +6,17 @@ import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import tv.notube.platform.APIResponse;
 import tv.notube.platform.AbstractJerseyTestCase;
 
 import java.io.IOException;
+import java.util.UUID;
 
 /**
+ * Reference test class for {@link tv.notube.platform.ApplicationService}.
  *
  * @author Enrico Candino ( enrico.candino@gmail.com )
+ * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
 
@@ -21,9 +25,10 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    public void testRegister() throws IOException {
-        final String baseQuery = "application/register";
-        final String name = "Fake_Name";
+    public void testRegisterAndDeregister() throws IOException {
+        // register application
+        String baseQuery = "application/register";
+        final String name = "fake_application_name";
         final String description = "This is a test registration!";
         final String email = "fake_mail@test.com";
         final String oauth = "http://fakeUrlOAUTH";
@@ -38,20 +43,30 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"object\":\"APIKEY\",\"message\":\"Application 'Fake_Name' successfully registered\",\"status\":\"OK\"}");
-    }
-
-    @Test
-    public void testDeregister() throws IOException {
-        final String baseQuery = "application/test-user";
+        APIResponse actual = fromJson(responseBody, APIResponse.class);
+        Assert.assertNotNull(actual);
+        APIResponse expected = new APIResponse(
+                actual.getObject(),
+                "Application '" + name + "' successfully registered",
+                "OK"
+        );
+        Assert.assertEquals(actual, expected);
+        final UUID applicationKey = UUID.fromString(actual.getObject());
+        baseQuery = "application/" + applicationKey;
         DeleteMethod deleteMethod = new DeleteMethod(base_uri + baseQuery);
-        HttpClient client = new HttpClient();
-        int result = client.executeMethod(deleteMethod);
-        String responseBody = new String(deleteMethod.getResponseBody());
+        result = client.executeMethod(deleteMethod);
+        responseBody = new String(deleteMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"Application 'test-user' successfully removed\",\"status\":\"OK\"}");
+        actual = fromJson(responseBody, APIResponse.class);
+        Assert.assertNotNull(actual);
+        expected = new APIResponse(
+                null,
+                "Application with api key'" + applicationKey + "' successfully removed",
+                "OK"
+        );
+        Assert.assertEquals(actual, expected);
     }
 
 }
