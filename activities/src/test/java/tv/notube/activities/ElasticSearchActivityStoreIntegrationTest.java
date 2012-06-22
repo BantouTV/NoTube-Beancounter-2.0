@@ -44,7 +44,7 @@ import static tv.notube.activities.ElasticSearchActivityStoreImpl.INDEX_TYPE;
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  * @author Alex Cowell ( alxcwll@gmail.com )
  */
-public class ElasticSearchActivityStoreImplTestCase {
+public class ElasticSearchActivityStoreIntegrationTest {
 
     private ActivityStore as;
 
