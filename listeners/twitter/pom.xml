@@ -48,6 +48,7 @@
     <build>
         <plugins>
             <!-- Allows to be run via 'mvn compile exec:java' -->
+            <!-- java -jar twitter-1.0-SNAPSHOT-jar-with-dependencies.jar -jndiProperties /guicejndi.properties -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -59,6 +60,29 @@
                         <argument>/guicejndi.properties</argument>
                     </arguments>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>org.apache.camel.guice.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
