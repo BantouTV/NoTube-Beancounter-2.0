@@ -1,63 +1,62 @@
 package tv.notube.applications;
 
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
  * Mockup class for {@link ApplicationsManager}.
  *
  * @author Enrico Candino (enrico.candino@gmail.com)
+ * @author Davide Palmisano (dpalmisano@gmail.com)
  */
 public class MockApplicationsManager implements ApplicationsManager {
 
-    private static final String APIKEY = "APIKEY";
+    private Set<Application> applications = new HashSet<Application>();
 
     @Override
-    public String registerApplication(Application application)
-            throws ApplicationsManagerException {
-        return APIKEY;
-    }
-
-    @Override
-    public Application getApplication(String name)
-            throws ApplicationsManagerException {
-        throw new UnsupportedOperationException("NIY");
-    }
-
-    @Override
-    public Application getApplicationByApiKey(String name)
-            throws ApplicationsManagerException {
-        return new Application(
+    public UUID registerApplication(
+            String name,
+            String description,
+            String email,
+            URL callback
+    ) throws ApplicationsManagerException {
+        Application application = Application.build(
                 name,
-                "This is a Fake Application",
-                "fake_mail@test.com"
+                description,
+                email,
+                callback
         );
+        applications.add(application);
+        return application.getApiKey();
     }
 
     @Override
-    public void grantPermission(String name, Permission permission)
-            throws ApplicationsManagerException {
-        throw new UnsupportedOperationException("NIY");
-    }
-
-    @Override
-    public void grantPermission(String name, UUID resource, Permission.Action action)
-            throws ApplicationsManagerException { }
-
-    @Override
-    public void deregisterApplication(String name) throws ApplicationsManagerException {
-        if(name == null) {
-            throw new ApplicationsManagerException("parameter name cannot be null");
+    public void deregisterApplication(UUID key) throws ApplicationsManagerException {
+        for(Application application : applications) {
+            if(application.getApiKey().equals(key)) {
+                applications.remove(application);
+            }
         }
     }
 
     @Override
-    public boolean isAuthorized(String apiKey, UUID resource, Permission.Action action)
-            throws ApplicationsManagerException {
-        return true;
+    public Application getApplicationByApiKey(UUID key) throws ApplicationsManagerException {
+        for(Application application : applications) {
+            if(application.getApiKey().equals(key)) {
+                return application;
+            }
+        }
+        throw new ApplicationsManagerException("application with key [" + key + "] not found");
     }
 
     @Override
-    public boolean isAuthorized(String apiKey) throws ApplicationsManagerException {
-        return apiKey.equals(APIKEY);
+    public boolean isAuthorized(UUID key, Action action, Object object) throws ApplicationsManagerException {
+        Application application = getApplicationByApiKey(key);
+        if(application.getApiKey().equals(key)) {
+            return true;
+        }
+        return false;
     }
 }

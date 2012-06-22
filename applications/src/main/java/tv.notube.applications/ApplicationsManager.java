@@ -1,42 +1,77 @@
 package tv.notube.applications;
 
+import java.net.URL;
 import java.util.UUID;
 
 /**
- * put class description here
+ * This interface models the minimum behavior of a class
+ * responsible to manage all the permissions of an application that
+ * would be able to interact with the <i>beancounter.io</i> APIs.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 public interface ApplicationsManager {
 
-    public String registerApplication(
-            Application application
-    ) throws ApplicationsManagerException;
+    /**
+     * This enumerates all the possible object types an {@link Action} could
+     * be done on it.
+     */
+    public enum Object {
+        PROFILE,
+        ACTIVITIES,
+        USER
+    }
 
-    public Application getApplication(String name)
-            throws ApplicationsManagerException;
+    /**
+     * This represents the ownership of an object. The ownership is granted if
+     * an application creates an object.
+     */
+    public enum Ownership {
+        OWN,
+        OTHER
+    }
 
-    public Application getApplicationByApiKey(String name)
-            throws ApplicationsManagerException;
+    /**
+     * A possible action to be done on a {@link Object}
+     */
+    public enum Action {
+        CREATE,
+        RETRIEVE,
+        UPDATE,
+        DELETE
+    }
 
-    public void grantPermission(String name, Permission permission)
-        throws ApplicationsManagerException;
-
-    public void grantPermission(
+    public UUID registerApplication(
             String name,
-            UUID resource,
-            Permission.Action action
+            String description,
+            String email,
+            URL callback
     ) throws ApplicationsManagerException;
 
-    public void deregisterApplication(String name)
-            throws ApplicationsManagerException;
+    public void deregisterApplication(UUID key) throws ApplicationsManagerException;
 
+    /**
+     * Returns an {@link Application} by its key.
+     *
+     * @param key
+     * @return
+     * @throws ApplicationsManagerException
+     */
+    public Application getApplicationByApiKey(UUID key) throws ApplicationsManagerException;
+
+    /**
+     * Returns <code>true</code> if an application identified with the key
+     * parameter, could perform the input action on that object type.
+     *
+     * @param key
+     * @param action
+     * @param object
+     * @return
+     * @throws ApplicationsManagerException
+     */
     public boolean isAuthorized(
-            String apiKey,
-            UUID resource,
-            Permission.Action action
+            UUID key,
+            Action action,
+            Object object
     ) throws ApplicationsManagerException;
-
-    public boolean isAuthorized(String apiKey)
-            throws ApplicationsManagerException;
 }

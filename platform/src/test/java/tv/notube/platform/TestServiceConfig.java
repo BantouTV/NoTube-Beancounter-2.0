@@ -34,7 +34,7 @@ public class TestServiceConfig extends GuiceServletContextListener {
             protected void configureServlets() {
                 Map<String, String> initParams = new HashMap<String, String>();
                 // add bindings to mockups
-                bind(ApplicationsManager.class).to(MockApplicationsManager.class);
+                bind(ApplicationsManager.class).to(MockApplicationsManager.class).asEagerSingleton();
                 bind(UserManager.class).to(MockUserManager.class);
                 bind(Profiles.class).to(MockProfiles.class);
                 bind(Crawler.class).to(MockCrawler.class);

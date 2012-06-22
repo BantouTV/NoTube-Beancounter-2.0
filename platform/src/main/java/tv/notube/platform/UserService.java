@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import tv.notube.applications.Application;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
-import tv.notube.applications.Permission;
+import tv.notube.applications.Permissions;
 import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.UserProfile;
@@ -81,7 +81,11 @@ public class UserService extends JsonService {
         }
         boolean isAuth;
         try {
-            isAuth = applicationsManager.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.CREATE,
+                    ApplicationsManager.Object.USER
+            );
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authorizing your application");
         }
@@ -119,35 +123,6 @@ public class UserService extends JsonService {
             final String errMsg = "Error while storing user '" + user + "'.";
             return error(e, errMsg);
         }
-        Application application;
-        try {
-            application = applicationsManager.getApplicationByApiKey(apiKey);
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while getting application with key '" + apiKey + "'");
-        }
-        if (application == null) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Application not found")
-            );
-            return rb.build();
-        }
-
-        try {
-            applicationsManager.grantPermission(
-                    application.getName(),
-                    user.getId(),
-                    Permission.Action.DELETE
-            );
-            applicationsManager.grantPermission(
-                    application.getName(),
-                    user.getId(),
-                    Permission.Action.UPDATE
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while granting permissions on user " +  user.getId());
-        }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new UUIDPlatformResponse(
                 UUIDPlatformResponse.Status.OK,
@@ -176,7 +151,11 @@ public class UserService extends JsonService {
         }
         boolean isAuth;
         try {
-            isAuth = applicationsManager.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.RETRIEVE,
+                    ApplicationsManager.Object.USER
+            );
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authenticating your application");
         }
@@ -236,7 +215,11 @@ public class UserService extends JsonService {
 
         boolean isAuth;
         try {
-            isAuth = applicationsManager.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.RETRIEVE,
+                    ApplicationsManager.Object.USER
+            );
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authenticating you application");
         }
@@ -314,9 +297,9 @@ public class UserService extends JsonService {
         boolean isAuth;
         try {
             isAuth = applicationsManager.isAuthorized(
-                    apiKey,
-                    user.getId(),
-                    Permission.Action.DELETE
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.DELETE,
+                    ApplicationsManager.Object.USER
             );
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authorizing your application");
@@ -365,7 +348,11 @@ public class UserService extends JsonService {
         }
         boolean isAuth;
         try {
-            isAuth = applicationsManager.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.RETRIEVE,
+                    ApplicationsManager.Object.USER
+            );
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authenticating your application");
         }
@@ -560,9 +547,9 @@ public class UserService extends JsonService {
         boolean isAuth;
         try {
             isAuth = applicationsManager.isAuthorized(
-                    apiKey,
-                    userObj.getId(),
-                    Permission.Action.UPDATE
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.UPDATE,
+                    ApplicationsManager.Object.USER
             );
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while asking for permissions");
@@ -608,7 +595,11 @@ public class UserService extends JsonService {
         }
         boolean isAuth;
         try {
-            isAuth = applicationsManager.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.RETRIEVE,
+                    ApplicationsManager.Object.PROFILE
+            );
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authenticating you application");
         }
@@ -655,7 +646,11 @@ public class UserService extends JsonService {
         }
         boolean isAuth;
         try {
-            isAuth = applicationsManager.isAuthorized(apiKey);
+            isAuth = applicationsManager.isAuthorized(
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.UPDATE,
+                    ApplicationsManager.Object.PROFILE
+            );
         } catch (ApplicationsManagerException e) {
             return error(e, "Error while authenticating your application");
         }
