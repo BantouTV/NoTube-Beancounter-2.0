@@ -1,4 +1,6 @@
-package tv.notube.applications;
+package tv.notube.applications.model;
+
+import tv.notube.applications.ApplicationsManager;
 
 import java.io.Serializable;
 import java.util.HashSet;

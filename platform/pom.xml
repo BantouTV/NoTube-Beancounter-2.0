@@ -58,6 +58,11 @@
         </dependency>
         <dependency>
             <groupId>tv.notube</groupId>
+            <artifactId>activities</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube</groupId>
             <artifactId>crawler</artifactId>
             <version>1.0-SNAPSHOT</version>
             <exclusions>
@@ -155,12 +160,11 @@
                     <configuration>
                         <type>runtime</type>
                         <properties>
-                            <cargo.hostname>192.168.0.147</cargo.hostname>
+                            <cargo.hostname>46.4.89.183</cargo.hostname>
                             <cargo.protocol>http</cargo.protocol>
                             <cargo.servlet.port>8080</cargo.servlet.port>
                             <cargo.remote.username>admin</cargo.remote.username>
-                            <cargo.remote.password>password
-                            </cargo.remote.password>
+                            <cargo.remote.password>4dm1n</cargo.remote.password>
                         </properties>
                     </configuration>
                 </configuration>

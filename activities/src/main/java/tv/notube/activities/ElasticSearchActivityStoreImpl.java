@@ -40,10 +40,13 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 public class ElasticSearchActivityStoreImpl implements ActivityStore {
 
     public static final String INDEX_NAME = "beancounter";
+
     public static final String INDEX_TYPE = "activity";
 
     private ObjectMapper mapper;
+
     private ElasticSearchConfiguration configuration;
+
     private Client client;
 
     public ElasticSearchActivityStoreImpl(ElasticSearchConfiguration configuration) {

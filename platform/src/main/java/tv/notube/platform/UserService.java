@@ -1,6 +1,9 @@
 package tv.notube.platform;
 
 import com.google.inject.Inject;
+import org.joda.time.DateTime;
+import tv.notube.activities.ActivityStore;
+import tv.notube.activities.ActivityStoreException;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
 import tv.notube.commons.model.OAuthToken;
@@ -24,7 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.List;
+import java.util.Collection;
 import java.util.UUID;
 
 /**
@@ -38,6 +41,8 @@ public class UserService extends JsonService {
 
     private UserManager userManager;
 
+    private ActivityStore activities;
+
     private Profiles profiles;
 
     private Crawler crawler;
@@ -46,11 +51,13 @@ public class UserService extends JsonService {
     public UserService(
             final ApplicationsManager am,
             final UserManager um,
+            final ActivityStore activities,
             final Profiles ps,
             final Crawler cr
     ) {
         this.applicationsManager = am;
         this.userManager = um;
+        this.activities = activities;
         this.crawler = cr;
         this.profiles = ps;
     }
@@ -91,13 +98,13 @@ public class UserService extends JsonService {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(new StringPlatformResponse(
                     StringPlatformResponse.Status.NOK,
-                    "Your application is not authorized.Sorry.")
+                    "application with key [" + apiKey + "] is not authorized")
             );
             return rb.build();
         }
         try {
             if (userManager.getUser(username) != null) {
-                final String errMsg = "username '" + username + "' is already taken";
+                final String errMsg = "username [" + username + "] is already taken";
                 Response.ResponseBuilder rb = Response.serverError();
                 rb.entity(new StringPlatformResponse(
                         StringPlatformResponse.Status.NOK,
@@ -109,7 +116,6 @@ public class UserService extends JsonService {
             final String errMsg = "Error while calling the UserManager";
             return error(e, errMsg);
         }
-
         User user = new User();
         user.setName(name);
         user.setSurname(surname);
@@ -118,7 +124,7 @@ public class UserService extends JsonService {
         try {
             userManager.storeUser(user);
         } catch (UserManagerException e) {
-            final String errMsg = "Error while storing user '" + user + "'.";
+            final String errMsg = "Error while storing user [" + user + "]";
             return error(e, errMsg);
         }
         Response.ResponseBuilder rb = Response.ok();
@@ -129,7 +135,6 @@ public class UserService extends JsonService {
         );
         return rb.build();
     }
-
 
     @GET
     @Path("/{username}")
@@ -165,12 +170,11 @@ public class UserService extends JsonService {
             );
             return rb.build();
         }
-
         User user;
         try {
             user = userManager.getUser(username);
         } catch (UserManagerException e) {
-            final String errMsg = "Error while getting user '" + username + "'.";
+            final String errMsg = "Error while getting user [" + username + "]";
             return error(e, errMsg);
         }
         if (user == null) {
@@ -178,7 +182,7 @@ public class UserService extends JsonService {
             rb.entity(
                     new StringPlatformResponse(
                             StringPlatformResponse.Status.NOK,
-                            "user '" + username + "' not found"
+                            "user [" + username + "] not found"
                     )
             );
             return rb.build();
@@ -187,12 +191,11 @@ public class UserService extends JsonService {
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new UserPlatformResponse(
                 UserPlatformResponse.Status.OK,
-                "user '" + username + "' found",
+                "user [" + username + "] found",
                 user)
         );
         return rb.build();
     }
-
 
     @GET
     @Path("/{username}/activities")
@@ -210,7 +213,6 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
-
         boolean isAuth;
         try {
             isAuth = applicationsManager.isAuthorized(
@@ -233,28 +235,42 @@ public class UserService extends JsonService {
         try {
             user = userManager.getUser(username);
         } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user '" + username + "'");
+            return error(e, "Error while retrieving user [" + username + "]");
         }
         if (user == null) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(
                     new StringPlatformResponse(
                             StringPlatformResponse.Status.NOK,
-                            "user with username '" + username + "' not found"
+                            "user with username [" + username + "] not found"
                     )
             );
             return rb.build();
         }
-        List<Activity> activities;
+        // TODO (med) only the activities done today but should be
+        // configurable as a query parameter
+        DateTime today = org.joda.time.DateTime.now();
+        DateTime yesterday = today.minusDays(1);
+        Collection<Activity> userActivities;
         try {
-            activities = userManager.getUserActivities(user.getId());
-        } catch (UserManagerException e) {
-            return error(e, "Error while getting user '" + username + "' activities");
+            userActivities = activities.getByUserAndDateRange(
+                    user.getId(),
+                    yesterday,
+                    today
+            );
+        } catch (ActivityStoreException e) {
+            return error(
+                    e,
+                    "Error while getting user [" + username + "] activities"
+            );
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new ActivitiesPlatformResponse(
-                ActivitiesPlatformResponse.Status.OK,
-                "user '" + username + "' activities found", activities)
+        rb.entity(
+                new ActivitiesPlatformResponse(
+                        ActivitiesPlatformResponse.Status.OK,
+                        "user '" + username + "' activities found",
+                        userActivities
+                )
         );
         return rb.build();
     }
@@ -280,18 +296,17 @@ public class UserService extends JsonService {
         try {
             user = userManager.getUser(username);
         } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user '" + username + "'");
+            return error(e, "Error while retrieving user [" + username + "]");
         }
         if (user == null) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(
                     new StringPlatformResponse(
                             StringPlatformResponse.Status.NOK,
-                            "user with username '" + username + "' not found")
+                            "user with username [" + username + "] not found")
             );
             return rb.build();
         }
-
         boolean isAuth;
         try {
             isAuth = applicationsManager.isAuthorized(
@@ -310,17 +325,18 @@ public class UserService extends JsonService {
             );
             return rb.build();
         }
-
         try {
-            userManager.deleteUser(user.getId());
+            userManager.deleteUser(user.getUsername());
         } catch (UserManagerException e) {
-            throw new RuntimeException("Error while deleting user '" + username
-                    + "'", e);
+            throw new RuntimeException(
+                    "Error while deleting user [" + username + "]",
+                    e
+            );
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new StringPlatformResponse(
                 StringPlatformResponse.Status.OK,
-                "user with username '" + username + "' deleted")
+                "user with username [" + username + "] deleted")
         );
         return rb.build();
     }
@@ -366,13 +382,13 @@ public class UserService extends JsonService {
         try {
             user = userManager.getUser(username);
         } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user '" + username + "'");
+            return error(e, "Error while retrieving user [" + username + "]");
         }
         if (user == null) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(new StringPlatformResponse(
                     StringPlatformResponse.Status.NOK,
-                    "user with username '" + username + "' not found")
+                    "user with username [" + username + "] not found")
             );
             return rb.build();
         }
@@ -380,14 +396,14 @@ public class UserService extends JsonService {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(new StringPlatformResponse(
                     StringPlatformResponse.Status.NOK,
-                    "password for '" + username + "' incorrect")
+                    "password for [" + username + "] incorrect")
             );
             return rb.build();
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new StringPlatformResponse(
                 StringPlatformResponse.Status.OK,
-                "user '" + username + "' authenticated")
+                "user [" + username + "] authenticated")
         );
         return rb.build();
     }
@@ -404,27 +420,33 @@ public class UserService extends JsonService {
         try {
             userObj = userManager.getUser(username);
         } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user '" + username + "'");
+            return error(e, "Error while retrieving user [" + username + "]");
         }
         OAuthToken oAuthToken;
         try {
             oAuthToken = userManager.getOAuthToken(service, userObj.getUsername());
         } catch (UserManagerException e) {
-            return error(e, "Error while getting token for user '" + username + "' " +
-                            "on service '" + service + "'");
+            return error(
+                    e,
+                    "Error while getting token for user [" + username + "] on service [" + service + "]"
+            );
         }
         URL finalRedirectUrl;
         try {
             finalRedirectUrl = new URL(finalRedirect);
         } catch (MalformedURLException e) {
-            return error(e, "Error while getting token for user '" + username + "' " +
-                            "on service '" + service + "'");
+            return error(
+                    e,
+                    "Error while getting token for user [" + username + "] on service '" + service + "'"
+            );
         }
         try {
             userManager.setUserFinalRedirect(userObj.getUsername(), finalRedirectUrl);
         } catch (UserManagerException e) {
-            return error(e, "Error while setting temporary final redirect URL " +
-                            "for user '" + username + "' " + "on service '" + service + "'");
+            return error(
+                    e,
+                    "Error while setting temporary final redirect URL for user '" + username + "' " + "on service '" + service + "'"
+            );
         }
         URL redirect = oAuthToken.getRedirectPage();
         try {
@@ -478,7 +500,6 @@ public class UserService extends JsonService {
         }
     }
 
-
     @GET
     @Path("/auth/callback/{service}/{username}/{redirect}")
     public Response handleAuthCallback(
@@ -491,12 +512,15 @@ public class UserService extends JsonService {
         try {
             userObj = userManager.getUser(username);
         } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user '" + username + "'");
+            return error(e, "Error while retrieving user [" + username + "]");
         }
         try {
             userManager.registerService(service, userObj, token);
         } catch (UserManagerException e) {
-            return error(e, "Error while OAuth-like exchange for service: '" + service + "'");
+            return error(
+                    e,
+                    "Error while OAuth-like exchange for service: [" + service + "]"
+            );
         }
         URL finalRedirectUrl;
         try {
@@ -504,11 +528,15 @@ public class UserService extends JsonService {
                     "http://" + URLDecoder.decode(redirect, "UTF-8")
             );
         } catch (MalformedURLException e) {
-            return error(e, "Error while getting token for user '" + username + "' " +
-                            "on service '" + service + "'");
+            return error(
+                    e,
+                    "Error while getting token for user [" + username + " ] on service [" + service + "]"
+            );
         } catch (UnsupportedEncodingException e) {
-            return error(e, "Error while getting token for user '" + username + "' " +
-                            "on service '" + service + "'");
+            return error(
+                    e,
+                    "Error while getting token for user [" + username + "] on service [" + service + "]"
+            );
         }
         try {
             return Response.temporaryRedirect(finalRedirectUrl.toURI()).build();
@@ -564,12 +592,12 @@ public class UserService extends JsonService {
         try {
             userManager.deregisterService(service, userObj);
         } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user '" + username + "'");
+            return error(e, "Error while retrieving user [" + username + "]");
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new StringPlatformResponse(
                 StringPlatformResponse.Status.OK,
-                "service '" + service + "' removed from user '" + username + "'")
+                "service [" + service + "] removed from user [" + username + "]")
         );
         return rb.build();
     }
@@ -612,14 +640,14 @@ public class UserService extends JsonService {
         UserProfile up;
         try {
             // TODO (high) fix this.
-            up = profiles.lookup(UUID.randomUUID());
+            up = profiles.lookup(UUID.fromString("12345678-1234-1234-1234-123456789ab"));
         } catch (ProfilesException e) {
-            return error(e, "Error while retrieving profile for user '" + username + "'");
+            return error(e, "Error while retrieving profile for user [" + username + "]");
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new UserProfilePlatformResponse(
                 UserProfilePlatformResponse.Status.OK,
-                "profile for user '" + username + "' found",
+                "profile for user [" + username + "] found",
                 up
         )
         );
@@ -668,7 +696,7 @@ public class UserService extends JsonService {
         }
         Report report;
         try {
-            report = crawler.crawl(user.getId());
+            report = crawler.crawl(user.getUsername());
         } catch (CrawlerException e) {
             return error(e, "Error while getting activities for user [" + username + "]");
         }

@@ -2,21 +2,17 @@ package tv.notube.usermanager;
 
 import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
-import tv.notube.commons.model.activity.Activity;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
 
 import java.net.URL;
-import java.util.List;
-import java.util.UUID;
 
 /**
- * Defines main UserManager methods.
+ * Defines main responsabilities of a class handling users in
+ * the <i>beancounter.io</i> ecosystem.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 public interface UserManager {
-
-    public static final String COMPONENT = "user-manager";
 
     /**
      * Store a {@link User} on the Beancounter.
@@ -29,15 +25,6 @@ public interface UserManager {
     /**
      * Retrieve a {@link User} from the Beancounter.
      *
-     * @param userId
-     * @return
-     * @throws UserManagerException
-     */
-    public User getUser(UUID userId) throws UserManagerException;
-
-    /**
-     * Retrieve a {@link User} from the Beancounter.
-     *
      * @param username
      * @return
      * @throws UserManagerException
@@ -45,60 +32,12 @@ public interface UserManager {
     public User getUser(String username) throws UserManagerException;
 
     /**
-     * Store a list of {@link Activity} for a specific user.
-     *
-     * @param userId
-     * @param activities
-     * @throws UserManagerException
-     */
-    public void storeUserActivities(UUID userId, List<Activity> activities)
-            throws UserManagerException;
-
-    /**
-     * Retrieve all the stored {@link Activity} of a {@link User} using
-     * its <i>identifier</i>.
-     *
-     * @param userId
-     * @return
-     * @throws UserManagerException
-     */
-    public List<Activity> getUserActivities(UUID userId)
-            throws UserManagerException;
-
-    /**
-     * Retrieve all the stored {@link Activity} of a {@link User} using
-     * its <i>username</i>.
-     *
-     * @param username
-     * @return
-     * @throws UserManagerException
-     */
-    public List<Activity> getUserActivities(String username)
-            throws UserManagerException;
-
-    /**
      * Completely flushes out all the {@link User} data.
      *
-     * @param userId
+     * @param username
      * @throws UserManagerException
      */
-    public void deleteUser(UUID userId) throws UserManagerException;
-
-    /**
-     * Returns a list of {@link User} identifiers to be profiled.
-     *
-     * @return
-     * @throws UserManagerException
-     */
-    public List<UUID> getUsersToBeProfiled() throws UserManagerException;
-
-    /**
-     * Return a list of {@link User} identifiers to be crawled.
-     *
-     * @return
-     * @throws UserManagerException
-     */
-    public List<UUID> getUsersToCrawled() throws UserManagerException;
+    public void deleteUser(String username) throws UserManagerException;
 
     /**
      * Get the user <a href="http://oauth.net">OAuth</> token.
@@ -169,7 +108,7 @@ public interface UserManager {
     ) throws UserManagerException;
 
     /**
-     * get the user temporary final url where the user will be redirected
+     * Get the user temporary final url where the user will be redirected
      * at the end of all the authorization exchange process. Once the url has
      * been consumed he needs to be set again.
      *

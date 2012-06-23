@@ -11,7 +11,7 @@ public interface Crawler {
 
     public Report crawl() throws CrawlerException;
 
-    public Report crawl(UUID userId) throws CrawlerException;
+    public Report crawl(String username) throws CrawlerException;
 
     public UserManager getUserManager();
 

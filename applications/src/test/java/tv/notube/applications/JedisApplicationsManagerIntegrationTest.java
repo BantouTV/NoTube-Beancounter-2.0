@@ -57,5 +57,4 @@ public class JedisApplicationsManagerIntegrationTest {
         actual = applicationsManager.getApplicationByApiKey(key);
         Assert.assertNull(actual);
     }
-
 }

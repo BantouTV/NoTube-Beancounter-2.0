@@ -1,6 +1,5 @@
 package tv.notube.commons.model;
 
-import org.joda.time.DateTime;
 import tv.notube.commons.model.auth.Auth;
 import tv.notube.commons.tests.annotations.Random;
 
@@ -22,10 +21,6 @@ public class User implements Serializable {
     private String name;
 
     private String surname;
-
-    private DateTime profiledAt;
-
-    private boolean forcedProfiling;
 
     private Map<String, Auth> services = new HashMap<String, Auth>();
 
@@ -66,24 +61,8 @@ public class User implements Serializable {
         return surname;
     }
 
-    public DateTime getProfiledAt() {
-        return profiledAt;
-    }
-
-    public void setProfiledAt(DateTime profiledAt) {
-        this.profiledAt = profiledAt;
-    }
-
     public void setSurname(String surname) {
         this.surname = surname;
-    }
-
-    public boolean isForcedProfiling() {
-        return forcedProfiling;
-    }
-
-    public void setForcedProfiling(boolean forcedProfiling) {
-        this.forcedProfiling = forcedProfiling;
     }
 
     public List<String> getServices() {
@@ -119,12 +98,28 @@ public class User implements Serializable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        if (username != null ? !username.equals(user.username) : user.username != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return username != null ? username.hashCode() : 0;
+    }
+
+    @Override
     public String toString() {
         return "User{" +
                 "name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
-                ", profiledAt=" + profiledAt +
-                ", forcedProfiling=" + forcedProfiling +
                 ", services=" + services +
                 ", password='" + password + '\'' +
                 ", username='" + username + '\'' +

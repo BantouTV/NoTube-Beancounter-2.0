@@ -3,7 +3,6 @@ package tv.notube.applications.model;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 import tv.notube.applications.ApplicationsManager;
-import tv.notube.applications.Permissions;
 
 import java.io.Serializable;
 import java.net.URL;

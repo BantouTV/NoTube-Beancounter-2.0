@@ -16,7 +16,8 @@ public class DefaultServiceAuthorizationManager
         try {
             return ah.auth(user, token);
         } catch (AuthHandlerException e) {
-            throw new ServiceAuthorizationManagerException("", e);
+            final String errMsg = "Error while authorizing user [" + user.getId() + "] to service [" + service + "]";
+            throw new ServiceAuthorizationManagerException(errMsg, e);
         }
     }
 
