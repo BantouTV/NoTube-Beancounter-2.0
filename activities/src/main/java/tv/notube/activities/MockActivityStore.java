@@ -1,8 +1,6 @@
-package tv.notube.indexer;
+package tv.notube.activities;
 
 import org.joda.time.DateTime;
-import tv.notube.activities.ActivityStore;
-import tv.notube.activities.ActivityStoreException;
 import tv.notube.commons.model.activity.Activity;
 
 import java.util.ArrayList;
@@ -36,7 +34,8 @@ public class MockActivityStore implements ActivityStore {
     @Override
     public Collection<Activity> getByUserAndDateRange(UUID uuid, DateTime from, DateTime to)
             throws ActivityStoreException {
-        throw new UnsupportedOperationException("NIY");
+        // missing the VerbRandomiser -> cannot create Random activities
+        return new ArrayList<Activity>();
     }
 
     @Override

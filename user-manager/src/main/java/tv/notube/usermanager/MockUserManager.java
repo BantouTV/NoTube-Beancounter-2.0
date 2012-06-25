@@ -36,30 +36,33 @@ public class MockUserManager implements UserManager {
 
     @Override
     public synchronized User getUser(String username) throws UserManagerException {
-        User user;
-        try {
-            user = tests.build(User.class).getObject();
-        } catch (TestsException e) {
-            throw new UserManagerException("Error while building random user with username [" + username + "]");
-        }
-        user.setId(UUID.randomUUID());
-        user.addService("fake-oauth-service", new OAuthAuth("fake-session", "fake-secret"));
-        user.addService("fake-simple-service", new SimpleAuth("fake-session", "fake-username"));
-        Collection<Service> services = new ArrayList<Service>();
-        try {
-            Collection<RandomBean<Service>> randomBeansServices = tests.build(Service.class, 3);
-            for (RandomBean<Service> bean : randomBeansServices) {
-                services.add(bean.getObject());
-                user.addService(
-                        bean.getObject().getName(),
-                        new SimpleAuth(
-                                bean.getObject().getDescription(),
-                                bean.getObject().getSecret()
-                        )
-                );
+        User user = null;
+        if (!username.equals("missing-user")) {
+            try {
+                user = tests.build(User.class).getObject();
+            } catch (TestsException e) {
+                throw new UserManagerException("Error while building random user with username [" + username + "]");
             }
-        } catch (TestsException e) {
-            throw new UserManagerException("Error while building random services for user with username [" + username + "]");
+            user.setId(UUID.randomUUID());
+            user.addService("fake-oauth-service", new OAuthAuth("fake-session", "fake-secret"));
+            user.addService("fake-simple-service", new SimpleAuth("fake-session", "fake-username"));
+            Collection<Service> services = new ArrayList<Service>();
+            try {
+                Collection<RandomBean<Service>> randomBeansServices = tests.build(Service.class, 3);
+                for (RandomBean<Service> bean : randomBeansServices) {
+                    services.add(bean.getObject());
+                    user.addService(
+                            bean.getObject().getName(),
+                            new SimpleAuth(
+                                    bean.getObject().getDescription(),
+                                    bean.getObject().getSecret()
+                            )
+                    );
+                }
+            } catch (TestsException e) {
+                throw new UserManagerException("Error while building random services for user with username [" + username + "]");
+            }
+            user.setPassword("abc");
         }
         return user;
     }

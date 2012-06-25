@@ -7,6 +7,8 @@ import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
+import tv.notube.activities.ActivityStore;
+import tv.notube.activities.MockActivityStore;
 import tv.notube.applications.MockApplicationsManager;
 import tv.notube.crawler.Crawler;
 import tv.notube.applications.ApplicationsManager;
@@ -38,6 +40,7 @@ public class TestServiceConfig extends GuiceServletContextListener {
                 bind(UserManager.class).to(MockUserManager.class);
                 bind(Profiles.class).to(MockProfiles.class);
                 bind(Crawler.class).to(MockCrawler.class);
+                bind(ActivityStore.class).to(MockActivityStore.class);
                 // add REST services
                 bind(ApplicationService.class);
                 bind(UserService.class);

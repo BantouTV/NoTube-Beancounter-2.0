@@ -3,6 +3,7 @@ package tv.notube.indexer;
 import junit.framework.Assert;
 import org.testng.annotations.Test;
 import tv.notube.activities.ActivityStoreException;
+import tv.notube.activities.MockActivityStore;
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.tests.TestsException;
 

@@ -98,7 +98,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String baseQuery = "user/register?apikey=%s";
         String name = user.getName();
         String surname = user.getSurname();
-        String username = user.getUsername();
+        String username = "missing-user";
         String password = user.getPassword();
         String query = String.format(
                 baseQuery,
@@ -146,7 +146,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"username 'test-user' is already taken\",\"status\":\"NOK\"}");
+        Assert.assertEquals(responseBody, "{\"message\":\"username [test-user] is already taken\",\"status\":\"NOK\"}");
         deregisterTestApplication();
     }
 
@@ -194,7 +194,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"user 'missing-user' not found\",\"status\":\"NOK\"}");
+        Assert.assertEquals(responseBody, "{\"message\":\"user [missing-user] not found\",\"status\":\"NOK\"}");
         deregisterTestApplication();
     }
 
@@ -238,7 +238,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"user with username 'missing-user' not found\",\"status\":\"NOK\"}");
+        Assert.assertEquals(responseBody, "{\"message\":\"user with username [missing-user] not found\",\"status\":\"NOK\"}");
         deregisterTestApplication();
     }
 
@@ -261,7 +261,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"user with username 'test-user' deleted\",\"status\":\"OK\"}");
+        Assert.assertEquals(responseBody, "{\"message\":\"user with username [test-user] deleted\",\"status\":\"OK\"}");
         deregisterTestApplication();
     }
 
@@ -286,11 +286,11 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"user 'test-user' authenticated\",\"status\":\"OK\"}");
+        Assert.assertEquals(responseBody, "{\"message\":\"user [test-user] authenticated\",\"status\":\"OK\"}");
         APIResponse actual = fromJson(responseBody, APIResponse.class);
         APIResponse expected = new APIResponse(
                 null,
-                "user '" + username + "' authenticated",
+                "user [" + username + "] authenticated",
                 "OK"
         );
         Assert.assertEquals(actual, expected);
@@ -420,7 +420,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"service 'fake-service-1' removed from user 'test-user'\",\"status\":\"OK\"}");
+        Assert.assertEquals(responseBody, "{\"message\":\"service [fake-service-1] removed from user [test-user]\",\"status\":\"OK\"}");
         deregisterTestApplication();
     }
 
