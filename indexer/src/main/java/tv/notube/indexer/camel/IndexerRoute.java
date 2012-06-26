@@ -56,7 +56,7 @@ public class IndexerRoute extends RouteBuilder {
     }
 
     public void configure() {
-        registerActivityConverter();
+        //registerActivityConverter();
         from("kestrel://{{kestrel.queue.url}}?concurrentConsumers=10&waitTimeMs=500")
 
                 .process(new Processor() {
@@ -65,8 +65,9 @@ public class IndexerRoute extends RouteBuilder {
                         LOGGER.debug("Got a tweet from queue.", exchange.getIn().getBody());
                     }
                 })
-                .unmarshal().json(JsonLibrary.Jackson, TwitterTweet.class)
-                .convertBodyTo(Activity.class)
+                //.unmarshal().json(JsonLibrary.Jackson, TwitterTweet.class)
+                .unmarshal().json(JsonLibrary.Jackson, Activity.class)
+                //.convertBodyTo(Activity.class)
                 .multicast().parallelProcessing().to("direct:es", "direct:profiler");
 
         from("direct:es")
@@ -94,7 +95,9 @@ public class IndexerRoute extends RouteBuilder {
                 });
     }
 
+    /*
     private void registerActivityConverter() {
+
         getContext()
                 .getTypeConverterRegistry()
                 .addTypeConverter(Activity.class, TwitterTweet.class, new TypeConverterSupport() {
@@ -129,6 +132,7 @@ public class IndexerRoute extends RouteBuilder {
                             }
                         });
     }
+    */
 
     private Profiler createProfiler() throws ProfilerException {
         Properties properties = new Properties();

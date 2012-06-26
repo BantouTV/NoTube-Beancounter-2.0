@@ -117,6 +117,12 @@
             <artifactId>commons-httpclient</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>spy</groupId>
+            <artifactId>spymemcached</artifactId>
+        </dependency>
+
+
     </dependencies>
 
     <build>

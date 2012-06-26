@@ -1,6 +1,8 @@
 package tv.notube.platform;
 
 import com.google.inject.Inject;
+import net.spy.memcached.MemcachedClient;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
 import tv.notube.activities.ActivityStore;
 import tv.notube.activities.ActivityStoreException;
@@ -22,11 +24,9 @@ import tv.notube.usermanager.UserManagerException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
+import java.net.*;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -706,6 +706,85 @@ public class UserService extends JsonService {
                 "activities updated for [" + username + "]",
                 report
         )
+        );
+        return rb.build();
+    }
+
+
+    @POST
+    @Path("/{username}/activity/add")
+    public Response addActivity(
+            @PathParam("username") String username,
+            @FormParam("activity") String activity,
+            @QueryParam("apikey") String apiKey
+    ) {
+        try {
+            check(
+                    this.getClass(),
+                    "addActivity",
+                    username,
+                    activity,
+                    apiKey
+            );
+        } catch (ServiceException e) {
+            return error(e, "Error while checking parameters");
+        }
+        boolean isAuth;
+        try {
+            isAuth = applicationsManager.isAuthorized(
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.CREATE,
+                    ApplicationsManager.Object.ACTIVITIES
+            );
+        } catch (ApplicationsManagerException e) {
+            return error(e, "Error while authorizing your application");
+        }
+        if (!isAuth) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    "application with key [" + apiKey + "] is not authorized")
+            );
+            return rb.build();
+        }
+        try {
+            if (userManager.getUser(username) == null) {
+                final String errMsg = "user with username [" + username + "] not found";
+                Response.ResponseBuilder rb = Response.serverError();
+                rb.entity(new StringPlatformResponse(
+                        StringPlatformResponse.Status.NOK,
+                        errMsg)
+                );
+                return rb.build();
+            }
+        } catch (UserManagerException e) {
+            final String errMsg = "Error while calling the UserManager";
+            return error(e, errMsg);
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        Activity a;
+        String jsonActivity;
+        try {
+            a = mapper.readValue(activity, Activity.class);
+            jsonActivity = mapper.writeValueAsString(a);
+        } catch (IOException e) {
+            final String errMsg = "Error while parsing the Activity";
+            return error(e, errMsg);
+        }
+        MemcachedClient c = null;
+        try {
+            // TODO (mid) hardcoded properties
+            c = new MemcachedClient(new InetSocketAddress("localhost",22133));
+            c.set("activities",3600, jsonActivity);
+        } catch (IOException e) {
+            final String errMsg = "Error while sending the activity to the Queue";
+            return error(e, errMsg);
+        }
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(new UUIDPlatformResponse(
+                UUIDPlatformResponse.Status.OK,
+                "activity successfully registered",
+                a.getId())
         );
         return rb.build();
     }

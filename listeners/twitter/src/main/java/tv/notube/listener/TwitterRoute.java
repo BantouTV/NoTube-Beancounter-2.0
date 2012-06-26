@@ -7,6 +7,7 @@ import org.apache.camel.model.dataformat.JsonLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tv.notube.commons.model.activity.Activity;
 import tv.notube.crawler.requester.request.twitter.TwitterTweet;
 import twitter4j.Status;
 
@@ -25,7 +26,8 @@ public class TwitterRoute extends RouteBuilder {
 
                         Status status = exchange.getIn().getBody(Status.class);
                         TwitterTweet twitterTweet = new TweetConverter().convert(status);
-                        exchange.getIn().setBody(twitterTweet);
+                        Activity activity = new TwitterTweetConverter().convert(twitterTweet);
+                        exchange.getIn().setBody(activity);
                     }
                 })
 
