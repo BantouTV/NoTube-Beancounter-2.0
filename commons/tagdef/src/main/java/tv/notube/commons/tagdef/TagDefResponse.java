@@ -1,5 +1,9 @@
 package tv.notube.commons.tagdef;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import tv.notube.commons.tagdef.handler.TagDefResponseDeserializer;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +12,7 @@ import java.util.List;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
+@JsonDeserialize(using = TagDefResponseDeserializer.class)
 public class TagDefResponse {
 
     public enum Status {
@@ -19,7 +24,10 @@ public class TagDefResponse {
 
     private Status status;
 
+    @JsonProperty(value = "num_defs")
     private int amount;
+
+    public  TagDefResponse() {}
 
     public TagDefResponse(Status status) {
         this.status = status;
@@ -39,6 +47,10 @@ public class TagDefResponse {
 
     public void addDef(Def def) {
         this.defs.add(def);
+    }
+
+    public Status getStatus() {
+        return this.status;
     }
 
 }

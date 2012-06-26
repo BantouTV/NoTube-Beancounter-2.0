@@ -22,8 +22,8 @@
             <artifactId>httpclient</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-xc</artifactId>
         </dependency>
     </dependencies>
 
