@@ -178,7 +178,7 @@
             <dependency>
                 <groupId>spy</groupId>
                 <artifactId>spymemcached</artifactId>
-                <version>2.8.0</version>
+                <version>2.8.1</version>
             </dependency>
         </dependencies>
 
@@ -245,6 +245,7 @@
         <module>indexer</module> 
         <module>realtime-profiler</module>
         <module>profiles</module>
+        <module>queues</module>
   </modules>
 
     <distributionManagement>

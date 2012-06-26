@@ -20,6 +20,8 @@ import tv.notube.crawler.requester.MockRequester;
 import tv.notube.crawler.requester.Requester;
 import tv.notube.profiles.JedisProfilesImpl;
 import tv.notube.profiles.Profiles;
+import tv.notube.queues.KestrelQueues;
+import tv.notube.queues.Queues;
 import tv.notube.usermanager.JedisUserManagerImpl;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.services.auth.DefaultServiceAuthorizationManager;
@@ -34,6 +36,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  *
@@ -54,6 +57,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 // add REST services
                 bind(ApplicationService.class);
                 bind(UserService.class);
+                bind(ActivitiesService.class);
                 // bind Production Implementations
                 bind(tv.notube.applications.jedis.JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
                 bind(tv.notube.profiles.jedis.JedisPoolFactory.class).to(tv.notube.profiles.jedis.DefaultJedisPoolFactory.class).asEagerSingleton();
@@ -65,6 +69,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(Crawler.class).to(ParallelCrawlerImpl.class);
                 bind(Requester.class).to(MockRequester.class);
                 bind(ActivityStore.class).toInstance(getElasticSearch());
+                bind(Queues.class).toInstance(getKestrelQueue());
                 // add bindings for Jackson
                 bind(JacksonJaxbJsonProvider.class).asEagerSingleton();
                 bind(MessageBodyReader.class).to(JacksonJsonProvider.class);
@@ -76,6 +81,14 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
 
             private ActivityStore getElasticSearch() {
                 return ElasticSearchActivityStoreFactory.getInstance().build();
+            }
+
+            private Queues getKestrelQueue() {
+                Properties properties = new Properties();
+                properties.setProperty("host", "localhost");
+                properties.setProperty("port", "22133");
+                properties.setProperty("queue", "activities");
+                return new KestrelQueues(properties);
             }
 
             private ServiceAuthorizationManager getServiceAuthorizationManager() {
@@ -115,7 +128,8 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 facebook.setSecret("cc040c3b120491bcec98498dd81fc2a5");
                 try {
                     // TODO (high) this mess needs to be configured
-                    facebook.setOAuthCallback(new URL("http://46.4.89.183:8080/notube-platform/rest/user/oauth/callback/facebook/"));
+                    facebook.setOAuthCallback(new URL
+                            ("http://api.beancounter.io/notube-platform/rest/user/oauth/callback/facebook/"));
                 } catch (MalformedURLException e) {
                     // com'on.
                 }
