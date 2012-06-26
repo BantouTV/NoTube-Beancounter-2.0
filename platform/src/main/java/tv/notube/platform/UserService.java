@@ -437,7 +437,7 @@ public class UserService extends JsonService {
         } catch (MalformedURLException e) {
             return error(
                     e,
-                    "Error while getting token for user [" + username + "] on service '" + service + "'"
+                    "Final redirect URL [" + finalRedirect + "] is ill-formed"
             );
         }
         try {

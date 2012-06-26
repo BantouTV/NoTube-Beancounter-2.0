@@ -64,7 +64,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(tv.notube.usermanager.jedis.JedisPoolFactory.class).to(tv.notube.usermanager.jedis.DefaultJedisPoolFactory.class).asEagerSingleton();
                 bind(ServiceAuthorizationManager.class).toInstance(getServiceAuthorizationManager());
                 bind(ApplicationsManager.class).to(JedisApplicationsManagerImpl.class);
-                bind(UserManager.class).to(JedisUserManagerImpl.class);
+                bind(UserManager.class).to(JedisUserManagerImpl.class).asEagerSingleton();
                 bind(Profiles.class).to(JedisProfilesImpl.class);
                 bind(Crawler.class).to(ParallelCrawlerImpl.class);
                 bind(Requester.class).to(MockRequester.class);
@@ -129,7 +129,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 try {
                     // TODO (high) this mess needs to be configured
                     facebook.setOAuthCallback(new URL
-                            ("http://api.beancounter.io/notube-platform/rest/user/oauth/callback/facebook/"));
+                            ("http://api.beancounter.io/rest/user/oauth/callback/facebook/"));
                 } catch (MalformedURLException e) {
                     // com'on.
                 }
