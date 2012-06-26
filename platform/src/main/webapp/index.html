@@ -92,7 +92,7 @@
 					Description: it registers a new application to the Beancounter<br>
 					Example: with curl<br> <br>
 
-					curl -d "name=test-app&description=testing&email=dpalmisano@gmail.com&oauthCallback=http://google.com" http://moth.notube.tv:9090/notube-platform/rest/application/register <br>
+					curl -d "name=test-app&description=testing&email=dpalmisano@gmail.com&oauthCallback=http://google.com" http://api.beancounter.io/rest/application/register <br>
 
 					response:
 
@@ -126,7 +126,7 @@
 					its privilegies.<br>
 					Example: with curl<br> <br>
 
-					curl -X DELETE http://moth.notube.tv:9090/notube-platform/rest/application/test-app
+					curl -X DELETE http://api.beancounter.io/rest/application/test-app
 					<br><br><br>
 	
 				</article>
@@ -156,7 +156,7 @@
 					Description: it registers a new user to the Beancounter with username, password, name and surname.<br>
 					Example: with curl<br> <br>
 
-					curl -d "name=Davide&surname=Palmisano&username=dpalmisano&password=abracadabra" http://moth.notube.tv:9090/notube-platform/rest/user/register?apikey=your-app-key<br>
+					curl -d "name=Davide&surname=Palmisano&username=dpalmisano&password=abracadabra" http://api.beancounter.io/rest/user/register?apikey=your-app-key<br>
 					with parameter body (application/x-www-form-urlencoded). <br>
 
 					response:
@@ -197,7 +197,7 @@
 					Description: it returns the user data but not the profile.<br>
 					Example:<br><br>
 
-					GET http://moth.notube.tv:9090/notube-platform/rest/user/dpalmisano?apikey=your-app-key<br><br>
+					GET http://api.beancounter.io/rest/user/dpalmisano?apikey=your-app-key<br><br>
 
 					response:
         <pre><code>
@@ -235,7 +235,7 @@
 					subscribed to.<br>
 					Example:<br><br>
 
-					GET http://moth.notube.tv:9090/notube-platform/rest/user/dpalmisano/activities?apikey=your-api-key<br><br>	
+					GET http://api.beancounter.io/rest/user/dpalmisano/activities?apikey=your-api-key<br><br>
 					
 				</article>
 				
@@ -255,7 +255,7 @@
 					actitivies from the sources he is registered to.<br>
 					Example:<br><br>
 
-					GET http://moth.notube.tv:9090/notube-platform/rest/user/dpalmisano/activities/update?apikey=your-api-key<br><br>
+					GET http://api.beancounter.io/rest/user/dpalmisano/activities/update?apikey=your-api-key<br><br>
 
 					
 				</article>
@@ -275,7 +275,7 @@
 					Description: it deletes all the user data and activities.<br>
 					Example: with curl<br><br>
 
-					curl -X DELETE http://moth.notube.tv:9090/notube-platform/rest/user/merlin?apikey=your-api-key<br><br>
+					curl -X DELETE http://api.beancounter.io/rest/user/merlin?apikey=your-api-key<br><br>
 
 					
 				</article>
@@ -296,7 +296,7 @@
 					Description: it authenticates or not a user.<br>
 					Example: with curl<br><br>
 
-					curl -d "password=abracadabra" http://moth.notube.tv:9090/notube-platform/rest/user/dpalmisano/authenticate?apikey=your-api-key<br><br>
+					curl -d "password=abracadabra" http://api.beancounter.io/rest/user/dpalmisano/authenticate?apikey=your-api-key<br><br>
 	
 				</article>
 				
@@ -315,7 +315,7 @@
 					Description: it returns a weighted interests profile in JSON.<br>
 					Example: with curl<br><br>
 
-					curl http://moth.notube.tv:9090/notube-platform/rest/user/dpalmisano/profile?apikey=your-app-key<br><br>
+					curl http://api.beancounter.io/rest/user/dpalmisano/profile?apikey=your-app-key<br><br>
 
 				</article>
 				
@@ -335,7 +335,7 @@
 					<h4> Twitter </h4>
 					
 					1) Send your Beancounter user with {username} to this url:<br>
-					http://moth.notube.tv:9090/notube-platform/rest/user/oauth/token/twitter/{username}?redirect={redirect} where:<br>
+					http://api.beancounter.io/rest/user/oauth/token/twitter/{username}?redirect={redirect} where:<br>
 					- {redirect} is the URL of the user final landing page destination. <br>
 					2) Then, the user will be redirected to his Twitter account home
 					page to authorize the Beancounter application.<br>
@@ -347,7 +347,7 @@
 					<h4> Facebook </h4>
 					
 					1) Send your Beancounter user with {username} to this url:<br>
-					http://moth.notube.tv:9090/notube-platform/rest/user/oauth/token/facebook/dpalmisano?redirect={redirect} where:<br>
+					http://api.beancounter.io/rest/user/oauth/token/facebook/dpalmisano?redirect={redirect} where:<br>
 					- {redirect} is the URL of the user final landing page destination. <br>
 					2) Then, the user will be redirected to his Facebook account home
 					page to authorize the Beancounter application.
@@ -357,8 +357,7 @@
 					
 					It's a bit different since it uses an OAuth-like exchange mechanism.<br>
 					1)  Send your user here: http://www.last
-					.fm/api/auth/?api_key=9f57b916d7ab90a7bf562b9e6f2385f0&cb=http://moth
-					.notube.tv:9090/notube-platform/rest/user/auth/callback/lastfm/{username}/{redirect}   <br>
+					.fm/api/auth/?api_key=9f57b916d7ab90a7bf562b9e6f2385f0&cb=http://api.beancounter.io/rest/user/auth/callback/lastfm/{username}/{redirect}   <br>
 					where:<br>
 					- {username} is the Beancounter username, and<br>
 					- {redirect} is the url of a page your user will be redirected. It
@@ -370,7 +369,7 @@
 					
 					To verify please call:<br>
 
-					GET http://moth.notube.tv:9090/notube-platform/rest/user/dpalmisano<br>
+					GET http://api.beancounter.io/rest/user/dpalmisano<br>
 
 					to see 'lastfm' or 'twitter' as a service added on the user services list.
 					<br><br>
@@ -397,7 +396,7 @@
 					<br>
 					Example: with curl<br><br>
 
-					curl -X DELETE http://moth.notube.tv:9090/notube-platform/rest/user/source/merlin/lastfm?apikey=your-app-key
+					curl -X DELETE http://api.beancounter.io/rest/user/source/merlin/lastfm?apikey=your-app-key
 					<br><br><br>
 				
 				</article>
@@ -436,7 +435,7 @@
 					Parameters: apikey<br>
 					Description: it returns all the user analysis the Beancounter is able
 					to perform.<br>
-					Example: http://moth.notube.tv:9090/notube-platform/rest/analytics/analysis?apikey=your-app-key<br><br>
+					Example: http://api.beancounter.io/rest/analytics/analysis?apikey=your-app-key<br><br>
 
 					
 				</article>
@@ -454,7 +453,7 @@
 					- {name} the name identifiyng the analysis<br>
 					- apikey<br>
 					Description: it returns a description of the specified analysis.<br>
-					Example: http://moth.notube.tv:9090/notube-platform/rest/analytics/analysis/timeframe-analysis?apikey=your-app-key
+					Example: http://api.beancounter.io/rest/analytics/analysis/timeframe-analysis?apikey=your-app-key
 					<br><br>
 							
 				</article>
@@ -476,15 +475,13 @@
 					- apikey <br>
 					Description: it returns some statistics as speficied by the analysis
 					and its method descriptions.<br>
-					Example: http://moth.notube
-					.tv:9090/notube-platform/rest/analytics/analysis/timeframe-analysis
+					Example: http://api.beancounter.io/rest/analytics/analysis/timeframe-analysis
 					/8c33b0e6-d3cf-4909-b04c-df93056e64a8/getStatistics?param=4&apikey=your-app-key<br><br>
 
 					Let's go through and example.<br>
 					1) Firstly, retrieve some information on the
 					<i>timeframe-analysis</i>:<br>
-					curl http://moth.notube
-					.tv:9090/notube-platform/rest/analytics/analysis/timeframe-analysis?apikey=your-app-key
+					curl http://api.beancounter.io/rest/analytics/analysis/timeframe-analysis?apikey=your-app-key
 					<br>
 
 					as you can see from the response:<br>
@@ -513,7 +510,7 @@
 					how many tweets, songs listened or shares the user did on the 4th
 					day of the last month you can simply call:<br><br>
 
-					http://moth.notube.tv:9090/notube-platform/rest/analytics/analysis
+					http://api.beancounter.io/rest/analytics/analysis
 					/timeframe-analysis/8c33b0e6-d3cf-4909-b04c-df93056e64a8/getStatistics?param=4&apikey=your-app-key<br>
 
 					<br>
