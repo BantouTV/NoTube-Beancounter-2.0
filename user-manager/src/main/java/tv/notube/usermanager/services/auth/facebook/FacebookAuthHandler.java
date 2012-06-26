@@ -21,8 +21,6 @@ import java.net.URL;
  */
 public class FacebookAuthHandler extends DefaultAuthHandler {
 
-    private static final String CALLBACK = "http://moth.notube.tv:9090/notube-platform/rest/user/oauth/callback/facebook/";
-
     public FacebookAuthHandler(Service service) {
         super(service);
     }
@@ -45,7 +43,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                            .apiKey(service.getApikey())
                            .apiSecret(service.getSecret())
                            .scope("offline_access,user_likes")
-                           .callback(CALLBACK + user.getUsername())
+                           .callback(service.getOAuthCallback() + user.getUsername())
                            .build();
         Token requestToken = null;
         Token accessToken = facebookOAuth.getAccessToken(requestToken, v);
@@ -62,7 +60,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                            .apiKey(service.getApikey())
                            .apiSecret(service.getSecret())
                            .scope("offline_access,user_likes")
-                           .callback(CALLBACK + username)
+                           .callback(service.getOAuthCallback() + username)
                            .build();
         Token token = null;
         String redirectUrl = facebookOAuth.getAuthorizationUrl(token);

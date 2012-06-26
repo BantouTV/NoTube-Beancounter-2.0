@@ -25,6 +25,7 @@ import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.services.auth.DefaultServiceAuthorizationManager;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManagerException;
+import tv.notube.usermanager.services.auth.facebook.FacebookAuthHandler;
 import tv.notube.usermanager.services.auth.twitter.TwitterAuthHandler;
 
 import javax.ws.rs.ext.MessageBodyReader;
@@ -99,6 +100,31 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                     );
                 } catch (ServiceAuthorizationManagerException e) {
                     final String errMsg = "error while adding twitter to this stuff";
+                    throw new RuntimeException(errMsg, e);
+                }
+
+                tv.notube.commons.model.Service facebook =
+                        new tv.notube.commons.model.Service("facebook");
+                facebook.setDescription("Facebook Service");
+                try {
+                    facebook.setEndpoint(new URL("https://graph.facebook.com/me/likes&amp;limit=15"));
+                } catch (MalformedURLException e) {
+                    // com'on.
+                }
+                facebook.setApikey("313412168683100");
+                facebook.setSecret("cc040c3b120491bcec98498dd81fc2a5");
+                try {
+                    // TODO (high) this mess needs to be configured
+                    facebook.setOAuthCallback(new URL("http://46.4.89.183:8080/notube-platform/rest/user/oauth/callback/facebook/"));
+                } catch (MalformedURLException e) {
+                    // com'on.
+                }
+                try {
+                    sam.addHandler(
+                            facebook,new FacebookAuthHandler(facebook)
+                    );
+                } catch (ServiceAuthorizationManagerException e) {
+                    final String errMsg = "error while adding facebook to this stuff";
                     throw new RuntimeException(errMsg, e);
                 }
                 return sam;

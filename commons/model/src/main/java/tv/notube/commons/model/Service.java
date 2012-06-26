@@ -27,6 +27,8 @@ public class Service implements Serializable {
 
     private URL sessionEndpoint;
 
+    private URL OAuthCallback;
+
     @Random(names = {"name", "description", "secret", "authRequest"})
     public Service(String name, String description, String secret, String authRequest) {
         this.name = name;
@@ -99,6 +101,14 @@ public class Service implements Serializable {
         return sessionEndpoint;
     }
 
+    public URL getOAuthCallback() {
+        return OAuthCallback;
+    }
+
+    public void setOAuthCallback(URL OAuthCallback) {
+        this.OAuthCallback = OAuthCallback;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -117,4 +127,17 @@ public class Service implements Serializable {
         return name != null ? name.hashCode() : 0;
     }
 
+    @Override
+    public String toString() {
+        return "Service{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", endpoint=" + endpoint +
+                ", apikey='" + apikey + '\'' +
+                ", secret='" + secret + '\'' +
+                ", authRequest='" + authRequest + '\'' +
+                ", sessionEndpoint=" + sessionEndpoint +
+                ", OAuthCallback=" + OAuthCallback +
+                '}';
+    }
 }
