@@ -2,6 +2,7 @@ package tv.notube.usermanager;
 
 import com.google.inject.Inject;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -51,6 +52,7 @@ public class JedisUserManagerImpl implements UserManager {
         Jedis jedis;
         String userJson;
         try {
+            mapper.getSerializationConfig().disable(SerializationConfig.Feature.USE_ANNOTATIONS);
             userJson = mapper.writeValueAsString(user);
         } catch (IOException e) {
             final String errMsg = "Error while getting json for user [" + user.getId() + "]";

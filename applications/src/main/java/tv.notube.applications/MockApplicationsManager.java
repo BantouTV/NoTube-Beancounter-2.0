@@ -4,6 +4,7 @@ import tv.notube.applications.model.Application;
 
 import java.net.URL;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
@@ -36,9 +37,11 @@ public class MockApplicationsManager implements ApplicationsManager {
 
     @Override
     public void deregisterApplication(UUID key) throws ApplicationsManagerException {
-        for(Application application : applications) {
-            if(application.getApiKey().equals(key)) {
-                applications.remove(application);
+        Iterator it = applications.iterator();
+        while(it.hasNext()) {
+            Application app = (Application) it.next();
+            if(app.getApiKey().equals(key)) {
+               it.remove();
             }
         }
     }

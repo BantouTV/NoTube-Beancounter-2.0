@@ -62,6 +62,11 @@ public class ActivitiesService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
+        }
         boolean isAuth;
         try {
             isAuth = applicationsManager.isAuthorized(

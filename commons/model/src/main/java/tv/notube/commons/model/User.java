@@ -1,5 +1,7 @@
 package tv.notube.commons.model;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.map.annotate.JsonView;
 import tv.notube.commons.model.auth.Auth;
 import tv.notube.commons.tests.annotations.Random;
 
@@ -65,8 +67,12 @@ public class User implements Serializable {
         this.surname = surname;
     }
 
-    public List<String> getServices() {
-        return new ArrayList<String>(services.keySet());
+    public Map<String, Auth> getServices() {
+        return services;
+    }
+
+    public void setServices(Map<String, Auth> services) {
+        this.services = services;
     }
 
     public Auth getAuth(String service) {
@@ -85,6 +91,8 @@ public class User implements Serializable {
         this.password = password;
     }
 
+    @JsonIgnore
+    @JsonView(Views.Internal.class)
     public String getPassword() {
         return password;
     }
@@ -126,4 +134,9 @@ public class User implements Serializable {
                 "} " + super.toString();
     }
 
+}
+
+class Views {
+    static class Public{}
+    static class Internal extends Public{}
 }

@@ -18,7 +18,7 @@ import java.util.UUID;
  */
 @Path("rest/application")
 @Produces(MediaType.APPLICATION_JSON)
-public class ApplicationService {
+public class ApplicationService extends JsonService {
 
     private ApplicationsManager applicationsManager;
 
@@ -67,6 +67,11 @@ public class ApplicationService {
     public Response deregisterApplication(
             @PathParam("apiKey") String apiKey
     ) {
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
+        }
         try {
             applicationsManager.deregisterApplication(
                     UUID.fromString(apiKey)

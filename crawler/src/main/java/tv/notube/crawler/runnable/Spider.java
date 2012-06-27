@@ -52,7 +52,7 @@ public class Spider implements Runnable {
             logger.error(errMsg, e);
             throw new RuntimeException(errMsg, e);
         }
-        for (String serviceName : user.getServices()) {
+        for (String serviceName : user.getServices().keySet()) {
             Service service;
             try {
                 service = sam.getService(serviceName);
