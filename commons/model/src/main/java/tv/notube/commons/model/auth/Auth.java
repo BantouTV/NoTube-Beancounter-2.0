@@ -1,9 +1,7 @@
 package tv.notube.commons.model.auth;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
-import tv.notube.commons.model.activity.*;
 
 import java.io.Serializable;
 
@@ -23,11 +21,12 @@ public abstract class Auth implements Serializable {
 
     private String session;
 
+    public Auth() {}
+
     public Auth(String session) {
         this.session = session;
     }
 
-    @JsonIgnore
     public String getSession() {
         return session;
     }

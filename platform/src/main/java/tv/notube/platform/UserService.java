@@ -605,6 +605,9 @@ public class UserService extends JsonService {
         User userObj;
         try {
             userObj = userManager.getUser(username);
+            if(userObj == null) {
+                return error(new NullPointerException(),"User [" + username + "] not found!");
+            }
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }

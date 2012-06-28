@@ -425,6 +425,31 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
+    public void testRemoveSourceWithNotExistingUser() throws IOException {
+        APIKEY = registerTestApplication().toString();
+
+        final String baseQuery = "user/source/%s/%s?apikey=%s";
+        final String username = "missing-user";
+        final String service = "fake-service-1";
+        final String query = String.format(
+                baseQuery,
+                username,
+                service,
+                APIKEY
+        );
+        DeleteMethod deleteMethod = new DeleteMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(deleteMethod);
+        String responseBody = new String(deleteMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
+        Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
+        Assert.assertEquals(responseBody, "{\"message\":\"User [missing-user] not found!\",\"status\":\"NOK\"}");
+        deregisterTestApplication();
+    }
+
+    @Test
     public void testGetProfile() throws IOException {
         APIKEY = registerTestApplication().toString();
 

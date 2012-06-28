@@ -7,8 +7,14 @@ public class SimpleAuth extends Auth {
 
     private String username;
 
+    public SimpleAuth() {}
+
     public SimpleAuth(String session, String username) {
         super(session);
+        this.username = username;
+    }
+
+    public void setUsername(String username) {
         this.username = username;
     }
 
