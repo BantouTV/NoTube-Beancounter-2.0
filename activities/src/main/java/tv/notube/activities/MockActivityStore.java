@@ -70,6 +70,9 @@ public class MockActivityStore implements ActivityStore {
         throw new UnsupportedOperationException("NIY");
     }
 
+    @Override
+    public void shutDown() throws ActivityStoreException {}
+
     public Activity getLastActivity() {
         return lastActivity;
     }

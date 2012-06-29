@@ -11,6 +11,6 @@ public class TestActivityStoreModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(ActivityStore.class).to(InMemoryElasticSearchActivityStore.class);
+        bind(ActivityStore.class).to(MockActivityStore.class);
     }
 }

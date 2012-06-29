@@ -102,4 +102,11 @@ public interface ActivityStore {
             final Collection<UUID> activityIds
     ) throws ActivityStoreException;
 
+    /**
+     * Releases any used resourcese.
+     *
+     * @throws ActivityStoreException
+     */
+    public void shutDown() throws ActivityStoreException;
+
 }

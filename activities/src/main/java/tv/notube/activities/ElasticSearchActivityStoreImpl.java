@@ -168,8 +168,18 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
         return selectedActivities;
     }
 
-    public void closeClient() {
+    @Override
+    public void shutDown() throws ActivityStoreException {
+        closeClient();
+    }
+
+    public void closeClient() throws ActivityStoreException {
+        try {
         client.close();
+        } catch (Exception e) {
+            final String errMsg = "Error while closing the client";
+            throw new ActivityStoreException(errMsg, e);
+        }
     }
 
     private void indexActivity(UUID userId, Activity activity, Client client)

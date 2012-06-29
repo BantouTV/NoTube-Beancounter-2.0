@@ -10,6 +10,7 @@ import com.sun.jersey.spi.container.servlet.ServletContainer;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import tv.notube.activities.ActivityStore;
+import tv.notube.activities.ActivityStoreException;
 import tv.notube.activities.ElasticSearchActivityStoreFactory;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.JedisApplicationsManagerImpl;
@@ -30,6 +31,7 @@ import tv.notube.usermanager.services.auth.ServiceAuthorizationManagerException;
 import tv.notube.usermanager.services.auth.facebook.FacebookAuthHandler;
 import tv.notube.usermanager.services.auth.twitter.TwitterAuthHandler;
 
+import javax.servlet.ServletContextEvent;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import java.net.MalformedURLException;
@@ -43,6 +45,20 @@ import java.util.Properties;
  * @author Enrico Candino (enrico.candino@gmail.com)
  */
 public class ProductionServiceConfig extends GuiceServletContextListener {
+
+    @Override
+    public void contextInitialized(ServletContextEvent servletContextEvent) {}
+
+    @Override
+    public void contextDestroyed(ServletContextEvent servletContextEvent) {
+        try {
+            ElasticSearchActivityStoreFactory.getInstance().build().shutDown();
+        } catch (ActivityStoreException e) {
+            final String errMsg = "Error while closing clint to Elastic Search";
+            throw new RuntimeException(errMsg, e);
+        }
+    }
+
 
     @Override
     protected Injector getInjector() {
@@ -136,7 +152,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 }
                 try {
                     sam.addHandler(
-                            facebook,new FacebookAuthHandler(facebook)
+                            facebook, new FacebookAuthHandler(facebook)
                     );
                 } catch (ServiceAuthorizationManagerException e) {
                     final String errMsg = "error while adding facebook to this stuff";
