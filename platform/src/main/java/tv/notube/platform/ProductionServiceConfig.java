@@ -72,6 +72,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(Queues.class).toInstance(getKestrelQueue());
                 // add bindings for Jackson
                 bind(JacksonJaxbJsonProvider.class).asEagerSingleton();
+                bind(JacksonMixInProvider.class).asEagerSingleton();
                 bind(MessageBodyReader.class).to(JacksonJsonProvider.class);
                 bind(MessageBodyWriter.class).to(JacksonJsonProvider.class);
                 // Route all requests through GuiceContainer

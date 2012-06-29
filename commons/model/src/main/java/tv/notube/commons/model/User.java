@@ -65,8 +65,12 @@ public class User implements Serializable {
         this.surname = surname;
     }
 
-    public List<String> getServices() {
-        return new ArrayList<String>(services.keySet());
+    public Map<String, Auth> getServices() {
+        return services;
+    }
+
+    public void setServices(Map<String, Auth> services) {
+        this.services = services;
     }
 
     public Auth getAuth(String service) {

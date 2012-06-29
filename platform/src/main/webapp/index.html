@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-	<title>NoTube 2.0 Beancounter Platform REST API Documentation</title>
+	<title>Beancounter.io REST API Documentation</title>
 	<link rel="stylesheet" href="styles.css" type="text/css" media="screen" />
 <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script> 
 <script type="text/javascript" src="js/equalcolumns.js"></script> 
@@ -10,14 +10,13 @@
 <body>
 
 	<header>
-		<h1 class="topTitle">NoTube Beancounter 2.0 Platform REST API Documentation</h1>
+		<h1 class="topTitle">Beancounter.io REST API Documentation</h1>
 	</header>
 	<nav>
 		<ul>
 			<li class="selected"><a href="#">Home</a></li>
 			<li><a href="#Authentication API">Authentication API</a></li>
             <li><a href="#User API">User API</a></li>
-            <li><a href="#Analytics APIs">Analytics APIs</a></li>
             <li><a href="#">Support</a></li>
 		</ul>
 	</nav>
@@ -30,14 +29,12 @@
 						<h2 class="centered">Overview</h2>
 					</header>
 						<p>
-						This page describes the new Beancounter REST APIs that will quicky replace
-    					those described <a href="https://notube.sti2.org/wiki/index.php/Asemantics_Beancounter_REST">here</a>.</p>
-						<p>
-    					The API root URL is http://moth.notube.tv:9090/notube-platform/rest/
-    					<strong>[note: 9090 port is subjected to change in the future]</strong>. All the subsequent
+    					The API root URL is <strong>http://api.beancounter.io/rest/</strong>
+    					<p>
+                        All the subsequent
     					methods are to be intended as relative to that URL. Responses are available
    						in JSON format only and are all in this format:</p>
-						<p>
+
 			<pre><code>
 	{
 		"status": OK | NOK ,
@@ -80,21 +77,25 @@
 						<h2>1) Register a new application</h2>
 					</header>
 					
-					Path: /application/register <br>
-					Method: POST         <br>
+					Path: /application/register<br/><br/>
+					Method: <strong>POST</strong>         <br>
 					Parameters:            <br>
-					- name, the application uniquely identifying name.        <br>
-					- description, a human readable short text describing what you do
+					- <strong>name</strong>, the application uniquely identifying name.        <br>
+					- <strong>description</strong>, a human readable short text describing what you do
 					with the Beancounter<br>
-					- email, contact email - must be a human behind it :) <br>
-					- oauthCallback, the URL if I need to redirect you when the
+					- <strong>email</strong>, contact email - must be a human behind it :) <br>
+					- <strong>oauthCallback</strong>, the URL if I need to redirect you when the
 					OAuth process completes.<br>
-					Description: it registers a new application to the Beancounter<br>
-					Example: with curl<br> <br>
+                    <strong>Description:</strong> it registers a new application to the Beancounter<br>
+					<p>
+                    <br/>
+                    Example: with curl
+                    <br/>
 
-					curl -d "name=test-app&description=testing&email=dpalmisano@gmail.com&oauthCallback=http://google.com" http://moth.notube.tv:9090/notube-platform/rest/application/register <br>
-
-					response:
+                    <p>
+					curl -d "name=test-app&description=testing&email=dpalmisano@gmail.com&oauthCallback=http://google.com" http://api.beancounter.io/rest/application/register <br>
+                    </p>
+					Response:
 
         	<pre><code>
 	{
@@ -118,17 +119,18 @@
 						<h2>2) Deregister an application</h2>
 					</header>
 					
-					Path: /application/{application-name} <br>
+					Path: /application/{apikey} <br>
 					Method: DELETE         <br>
 					Parameters:            <br>
-					- {application-name}, the application uniquely identifying name. <br>
+					- {apikey}, the apikey uniquely identifying you application. <br>
 					Description: it removes the application from the Beancounter and all
 					its privilegies.<br>
-					Example: with curl<br> <br>
+                    <br/>
+                    Example: with curl<br>
+                    <br/>
+					curl -X DELETE http://api.beancounter.io/rest/application/288301728d2b446c890b5094317e775a
+                    <br/><br/>
 
-					curl -X DELETE http://moth.notube.tv:9090/notube-platform/rest/application/test-app
-					<br><br><br>
-	
 				</article>
 	
 				<hr>		
@@ -154,9 +156,10 @@
 					- surname          <br>
 					- apikey <br>
 					Description: it registers a new user to the Beancounter with username, password, name and surname.<br>
-					Example: with curl<br> <br>
-
-					curl -d "name=Davide&surname=Palmisano&username=dpalmisano&password=abracadabra" http://moth.notube.tv:9090/notube-platform/rest/user/register?apikey=your-app-key<br>
+                    <br/>
+                    Example: with curl
+                    <br/>
+					curl -d "name=Davide&surname=Palmisano&username=dpalmisano&password=abracadabra" http://api.beancounter.io/rest/user/register?apikey=your-app-key<br>
 					with parameter body (application/x-www-form-urlencoded). <br>
 
 					response:
@@ -197,7 +200,7 @@
 					Description: it returns the user data but not the profile.<br>
 					Example:<br><br>
 
-					GET http://moth.notube.tv:9090/notube-platform/rest/user/dpalmisano?apikey=your-app-key<br><br>
+					GET http://api.beancounter.io/rest/user/dpalmisano?apikey=your-app-key<br><br>
 
 					response:
         <pre><code>
@@ -235,32 +238,93 @@
 					subscribed to.<br>
 					Example:<br><br>
 
-					GET http://moth.notube.tv:9090/notube-platform/rest/user/dpalmisano/activities?apikey=your-api-key<br><br>	
+					GET http://api.beancounter.io/rest/user/dpalmisano/activities?apikey=your-api-key<br><br>
 					
 				</article>
-				
-				
+
+
 				<article class="articlecontent">
-					
+
 					<header>
-						<h2>6) Force user activities update</h2>
+						<h2>6) Push activity</h2>
 					</header>
-					
-					Path: /user/{username}/activities/update<br>
-					Method: GET<br>
+
+					Path: /activity/add/{username}<br>
+					Method: POST<br>
 					Parameters: <br>
 					- {username} the Beancounter username<br>
+                    - activity, the activity in JSON format<br/>
 					- apikey <br>
-					Description: It forces the Beancounter to crawl all the user
-					actitivies from the sources he is registered to.<br>
-					Example:<br><br>
+					Description: It pushes the activity to the User.<br>
+					Example with curl:<br><br>
 
-					GET http://moth.notube.tv:9090/notube-platform/rest/user/dpalmisano/activities/update?apikey=your-api-key<br><br>
+                    curl -d "activity={\"verb\":\"TWEET\",\"object\":{\"type\":\"TWEET\",\"url\":\"http://twitter.com/username/my_tweeet\",\"name\":null,\"description\":null,\"text\":\"A fake text\",\"hashTags\":["testingBeancounter"],\"urls\":[]},\"context\":{\"date\":1340702105000,\"service\":\"http://twitter.com\",\"mood\":null}}" http://api.beancounter.io/rest/activities/add/dpalmisanoapikey=your-api-key<br><br>
 
-					
+                    A "basic" JSON activity is made from an "object", a "context" and a "verb".
+                    <br/>
+
+                    <pre><code>
+        {
+                "object":
+                {
+                        "type":         <i>the type of the activity,</i>
+                        "name":         <i>the username of the user for the service,</i>
+                        "description":  <i>a simple description of the activity,</i>
+                        "url":          <i>the url for the activity</i>
+                },
+                "context":
+                {
+                         "date":        <i>the date of the activity,</i>
+                         "service":     <i>the service of the activity,</i>
+                         "mood":        <i>the mood of the user</i>
+                },
+                "verb":                  <i>the kind of activity</i>
+        }
+
+                    </code></pre>
+
+                    At the moment the possible "type" is "TWEET".
+                    <br/>
+                    The available verb are "TWEET", "FOLLOWING" and "FAVORITED".
+                    <br/><br/>
+
+                    <h4> TWEET </h4>
+                    A TWEET has additional fields, as "text", "hashTags" and "urls".<br/>
+                    The "text" is for text of the tweet.<br/>
+                    "hashTags" is a list of strings of the tags in the tweet.<br/>
+                    "urls" is a list of strings of the urls in the tweet.<br/>
+                    <br/>
+                    <strong>TWEET Example</strong>
+
+
+                    <pre><code>
+        {
+                "object":
+                {
+                        "type":"TWEET",
+                        "text":"Just a fake tweet!",
+                        "hashTags":["testingBeancounter"],
+                        "urls":["http://fakeUrl.io"],
+                        "name":"tweet_name",
+                        "description":"A fake description",
+                        "url":"http://twitter.com"
+                },
+                "context":
+                {
+                        "date":null,
+                        "service":null,
+                        "mood":null
+                },
+                "verb":"TWEET"
+        }
+                    </code></pre>
+
+                    <br><br>
+
+
 				</article>
-				
-				
+
+
 				<article class="articlecontent">
 					
 					<header>
@@ -275,7 +339,7 @@
 					Description: it deletes all the user data and activities.<br>
 					Example: with curl<br><br>
 
-					curl -X DELETE http://moth.notube.tv:9090/notube-platform/rest/user/merlin?apikey=your-api-key<br><br>
+					curl -X DELETE http://api.beancounter.io/rest/user/merlin?apikey=your-api-key<br><br>
 
 					
 				</article>
@@ -296,7 +360,7 @@
 					Description: it authenticates or not a user.<br>
 					Example: with curl<br><br>
 
-					curl -d "password=abracadabra" http://moth.notube.tv:9090/notube-platform/rest/user/dpalmisano/authenticate?apikey=your-api-key<br><br>
+					curl -d "password=abracadabra" http://api.beancounter.io/rest/user/dpalmisano/authenticate?apikey=your-api-key<br><br>
 	
 				</article>
 				
@@ -315,7 +379,7 @@
 					Description: it returns a weighted interests profile in JSON.<br>
 					Example: with curl<br><br>
 
-					curl http://moth.notube.tv:9090/notube-platform/rest/user/dpalmisano/profile?apikey=your-app-key<br><br>
+					curl http://api.beancounter.io/rest/user/dpalmisano/profile?apikey=your-app-key<br><br>
 
 				</article>
 				
@@ -335,7 +399,7 @@
 					<h4> Twitter </h4>
 					
 					1) Send your Beancounter user with {username} to this url:<br>
-					http://moth.notube.tv:9090/notube-platform/rest/user/oauth/token/twitter/{username}?redirect={redirect} where:<br>
+					http://api.beancounter.io/rest/user/oauth/token/twitter/{username}?redirect={redirect} where:<br>
 					- {redirect} is the URL of the user final landing page destination. <br>
 					2) Then, the user will be redirected to his Twitter account home
 					page to authorize the Beancounter application.<br>
@@ -347,7 +411,7 @@
 					<h4> Facebook </h4>
 					
 					1) Send your Beancounter user with {username} to this url:<br>
-					http://moth.notube.tv:9090/notube-platform/rest/user/oauth/token/facebook/dpalmisano?redirect={redirect} where:<br>
+					http://api.beancounter.io/rest/user/oauth/token/facebook/dpalmisano?redirect={redirect} where:<br>
 					- {redirect} is the URL of the user final landing page destination. <br>
 					2) Then, the user will be redirected to his Facebook account home
 					page to authorize the Beancounter application.
@@ -357,8 +421,7 @@
 					
 					It's a bit different since it uses an OAuth-like exchange mechanism.<br>
 					1)  Send your user here: http://www.last
-					.fm/api/auth/?api_key=9f57b916d7ab90a7bf562b9e6f2385f0&cb=http://moth
-					.notube.tv:9090/notube-platform/rest/user/auth/callback/lastfm/{username}/{redirect}   <br>
+					.fm/api/auth/?api_key=9f57b916d7ab90a7bf562b9e6f2385f0&cb=http://api.beancounter.io/rest/user/auth/callback/lastfm/{username}/{redirect}   <br>
 					where:<br>
 					- {username} is the Beancounter username, and<br>
 					- {redirect} is the url of a page your user will be redirected. It
@@ -370,7 +433,7 @@
 					
 					To verify please call:<br>
 
-					GET http://moth.notube.tv:9090/notube-platform/rest/user/dpalmisano<br>
+					GET http://api.beancounter.io/rest/user/dpalmisano<br>
 
 					to see 'lastfm' or 'twitter' as a service added on the user services list.
 					<br><br>
@@ -397,154 +460,12 @@
 					<br>
 					Example: with curl<br><br>
 
-					curl -X DELETE http://moth.notube.tv:9090/notube-platform/rest/user/source/merlin/lastfm?apikey=your-app-key
-					<br><br><br>
-				
-				</article>
-				
-				<hr>
-				
-				<article class="articlecontent">					
-	
-					<header id="Analytics APIs">
-                        <h2 style="text-align:center;color:#990000;">The following services are currently not available!</h2>
-                        <h2 class="centered">Analytics APIs</h2>
-					</header>
-										
-					The Beancounter foresees a set APIs to access statistical data about
-					activities and interests of a user. Just to introduce some
-					terminology and definition.<br><br>
-
-					1) an <b>analysis</b> is a set of statistical data grouped under an
-					identifying name and with a timestamp of its latest execution. <br>
-
-					2) each <b>analysis</b> could be accessed using some <b>method</b>s
-					it declares. A <b>method</b> has an identifying name and could
-					eventually accept parameters. See examples of invocation below.<br><br>
-										
-				</article>
-
-
-				<article class="articlecontent">					
-	
-					<header>
-						<h2>Get available analysis</h2>
-					</header>
-										
-					Path: /analytics/analysis<br>
-					Method: GET<br>
-					Parameters: apikey<br>
-					Description: it returns all the user analysis the Beancounter is able
-					to perform.<br>
-					Example: http://moth.notube.tv:9090/notube-platform/rest/analytics/analysis?apikey=your-app-key<br><br>
-
-					
-				</article>
-				
-				
-				<article class="articlecontent">					
-	
-					<header>
-						<h2>Get a description of a specific analysis</h2>
-					</header>
-
-					Path: /analytics/analysis/{name}<br>
-					Method: GET<br>
-					Parameters: <br>
-					- {name} the name identifiyng the analysis<br>
-					- apikey<br>
-					Description: it returns a description of the specified analysis.<br>
-					Example: http://moth.notube.tv:9090/notube-platform/rest/analytics/analysis/timeframe-analysis?apikey=your-app-key
+					curl -X DELETE http://api.beancounter.io/rest/user/source/merlin/lastfm?apikey=your-app-key
 					<br><br>
-							
+				
 				</article>
-				
-				
-				<article class="articlecontent">					
-	
-					<header>
-						<h2>Calling a method of an analysis for a specific user</h2>
-					</header>
-					
-					Path: /analytics/analysis/{name}/{user}/{method}?param={param}<br>
-					Method: GET<br>
-					Parameters: <br>
-					- {name} the name identifiyng the analysis<br>
-					- {user} the user id on which the analysis has been performed<br>
-					- {method} the analysis specific <b>method</b> <br>
-					- {param} the method parameter, could be omitted for some methods<br>
-					- apikey <br>
-					Description: it returns some statistics as speficied by the analysis
-					and its method descriptions.<br>
-					Example: http://moth.notube
-					.tv:9090/notube-platform/rest/analytics/analysis/timeframe-analysis
-					/8c33b0e6-d3cf-4909-b04c-df93056e64a8/getStatistics?param=4&apikey=your-app-key<br><br>
 
-					Let's go through and example.<br>
-					1) Firstly, retrieve some information on the
-					<i>timeframe-analysis</i>:<br>
-					curl http://moth.notube
-					.tv:9090/notube-platform/rest/analytics/analysis/timeframe-analysis?apikey=your-app-key
-					<br>
 
-					as you can see from the response:<br>
-		
-		<pre><code>
-    {
-	    "status": "OK",
-	    "message": "analysis description",
-	    "object":
-	    {
-		    "name": "timeframe-analysis",
-		    "description": "this analysis summarizes the user activities over time",
-		    "methodDescriptions":
-		    [
-		    {
-		    	"name": "getStatistics",
-		    	"description": "this method returns activity statistics day by day of the last month"
-		    }
-		    ]
-	    }
-    }
-        </code></pre>
-
-					the analysis foresees a <i>getStatistics</i> method which returns
-					some statistics about a day of the last month. If you want to know
-					how many tweets, songs listened or shares the user did on the 4th
-					day of the last month you can simply call:<br><br>
-
-					http://moth.notube.tv:9090/notube-platform/rest/analytics/analysis
-					/timeframe-analysis/8c33b0e6-d3cf-4909-b04c-df93056e64a8/getStatistics?param=4&apikey=your-app-key<br>
-
-					<br>
-					obtaining a result looking like:<br>
-
-		<pre><code>
-	{
-		"status": "OK",
-		"message": "analysis result",
-		"object":
-		{
-			"activities":
-			{
-				"TWEET": 8,
-				"LISTEN": 10
-			},
-			"services":
-			{
-				"http://twitter.com": 8,
-				"http://last.fm": 10
-			},
-		"executedAt": "2011-12-06T16:48:30.287Z"
-		}
-	}
-    </code></pre>
-					
-					which means that on that day, the user performed that number of
-					activities, grouped by services and verb.
-					<br><br><br>					
-				
-				</article>								
 				
 				
 		</div>

@@ -425,6 +425,31 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
+    public void testRemoveSourceWithNotExistingUser() throws IOException {
+        APIKEY = registerTestApplication().toString();
+
+        final String baseQuery = "user/source/%s/%s?apikey=%s";
+        final String username = "missing-user";
+        final String service = "fake-service-1";
+        final String query = String.format(
+                baseQuery,
+                username,
+                service,
+                APIKEY
+        );
+        DeleteMethod deleteMethod = new DeleteMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(deleteMethod);
+        String responseBody = new String(deleteMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
+        Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
+        Assert.assertEquals(responseBody, "{\"message\":\"User [missing-user] not found!\",\"status\":\"NOK\"}");
+        deregisterTestApplication();
+    }
+
+    @Test
     public void testGetProfile() throws IOException {
         APIKEY = registerTestApplication().toString();
 
@@ -536,53 +561,6 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_NOT_FOUND, "\"Unexpected result: [" + result + "]");
         Assert.assertEquals(responseBody, "");
-        deregisterTestApplication();
-    }
-
-
-    @Test
-    public void testAddActivity() throws IOException {
-        APIKEY = registerTestApplication().toString();
-
-        final String baseQuery = "user/%s/activity/add?apikey=%s";
-        final String username = "test-user";
-        final String activity = "{\"object\":" +
-                "{\"type\":\"TWEET\"," +
-                "\"text\":\"Just a fake tweet!\"," +
-                "\"hashTags\":[\"testingBeancounter\"]," +
-                "\"urls\":[\"http://fakeUrlToTest.io\"]," +
-                "\"name\":\"tweet_name\"," +
-                "\"description\":null," +
-                "\"url\":\"http://twitter.com\"}," +
-                "\"context\":" +
-                "{\"date\":null," +
-                "\"service\":null," +
-                "\"mood\":null}," +
-                "\"verb\":\"TWEET\"}";
-        final String query = String.format(
-                baseQuery,
-                username,
-                APIKEY
-        );
-        PostMethod postMethod = new PostMethod(base_uri + query);
-        HttpClient client = new HttpClient();
-        postMethod.addParameter("activity", activity);
-        int result = client.executeMethod(postMethod);
-        String responseBody = new String(postMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
-        Assert.assertNotEquals(responseBody, "");
-        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody.substring(0, 11), "{\"object\":\"");
-        Assert.assertEquals(responseBody.substring(47), "\",\"message\":\"activity successfully registered\",\"status\":\"OK\"}");
-        APIResponse actual = fromJson(responseBody, APIResponse.class);
-        APIResponse expected = new APIResponse(
-                null,
-                "activity successfully registered",
-                "OK"
-        );
-        Assert.assertEquals(actual.getMessage(), expected.getMessage());
-        Assert.assertEquals(actual.getStatus(), expected.getStatus());
         deregisterTestApplication();
     }
 

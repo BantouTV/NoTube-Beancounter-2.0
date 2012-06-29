@@ -50,7 +50,7 @@ public class JedisProfilesImpl implements Profiles {
         UserProfile profile;
         Jedis jedis = pool.getResource();
         String stringProfile = jedis.get(userId.toString());
-        if(stringProfile == null) {
+        if(stringProfile==null) {
             return null;
         }
         try {

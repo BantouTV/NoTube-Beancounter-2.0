@@ -82,7 +82,7 @@ public class IndexerRoute extends RouteBuilder {
                         LOGGER.debug("Profiling activity {}.", activity);
                         UserProfile profile = profiler.profile(
                                 // TODO (high) this should be replaced with real
-                                UUID.fromString(String.valueOf("12345678-1234-1234-1234-123456789ab")),
+                                UUID.fromString("12345678-1234-1234-1234-123456789ab"),
                                 exchange.getIn().getBody(Activity.class)
                         );
 

@@ -1,8 +1,6 @@
 package tv.notube.platform;
 
 import com.google.inject.Inject;
-import net.spy.memcached.MemcachedClient;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
 import tv.notube.activities.ActivityStore;
 import tv.notube.activities.ActivityStoreException;
@@ -24,7 +22,6 @@ import tv.notube.usermanager.UserManagerException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.util.Collection;
@@ -83,6 +80,11 @@ public class UserService extends JsonService {
             );
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
+        }
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
         }
         boolean isAuth;
         try {
@@ -152,6 +154,11 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
+        }
         boolean isAuth;
         try {
             isAuth = applicationsManager.isAuthorized(
@@ -213,6 +220,11 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
+        }
         boolean isAuth;
         try {
             isAuth = applicationsManager.isAuthorized(
@@ -265,13 +277,23 @@ public class UserService extends JsonService {
             );
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(
-                new ActivitiesPlatformResponse(
-                        ActivitiesPlatformResponse.Status.OK,
-                        "user '" + username + "' activities found",
-                        userActivities
-                )
-        );
+        if(userActivities.size() == 0) {
+            rb.entity(
+                    new ActivitiesPlatformResponse(
+                            ActivitiesPlatformResponse.Status.OK,
+                            "user '" + username + "' has no activities",
+                            userActivities
+                    )
+            );
+        } else {
+            rb.entity(
+                    new ActivitiesPlatformResponse(
+                            ActivitiesPlatformResponse.Status.OK,
+                            "user '" + username + "' activities found",
+                            userActivities
+                    )
+            );
+        }
         return rb.build();
     }
 
@@ -291,7 +313,11 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
-
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
+        }
         User user;
         try {
             user = userManager.getUser(username);
@@ -360,6 +386,11 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
+        }
         boolean isAuth;
         try {
             isAuth = applicationsManager.isAuthorized(
@@ -419,6 +450,9 @@ public class UserService extends JsonService {
         User userObj;
         try {
             userObj = userManager.getUser(username);
+            if(userObj == null) {
+                return error(new NullPointerException(),"User [" + username + "] not found!");
+            }
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user [" + username + "]");
         }
@@ -563,9 +597,17 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
+        }
         User userObj;
         try {
             userObj = userManager.getUser(username);
+            if(userObj == null) {
+                return error(new NullPointerException(),"User [" + username + "] not found!");
+            }
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
@@ -617,6 +659,11 @@ public class UserService extends JsonService {
             );
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
+        }
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
         }
         boolean isAuth;
         try {
@@ -674,6 +721,11 @@ public class UserService extends JsonService {
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
         }
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
+        }
         boolean isAuth;
         try {
             isAuth = applicationsManager.isAuthorized(
@@ -730,6 +782,11 @@ public class UserService extends JsonService {
             );
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
+        }
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
         }
         boolean isAuth;
         try {
@@ -790,6 +847,11 @@ public class UserService extends JsonService {
             );
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
+        }
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
         }
         boolean isAuth;
         try {
