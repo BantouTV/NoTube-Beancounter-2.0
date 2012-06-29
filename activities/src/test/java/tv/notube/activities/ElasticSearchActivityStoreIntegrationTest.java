@@ -435,7 +435,7 @@ public class ElasticSearchActivityStoreIntegrationTest {
         assertEquals(object.get("hashTags"), new ArrayList<String>(tweet.getHashTags()));
         assertEquals(object.get("urls"), tweet.getUrls());
         assertEquals(object.get("name"), "Test");
-        assertEquals(object.get("@class"), Tweet.class.getName());
+        assertEquals(object.get("type"), Verb.TWEET.name());
         assertNull(object.get("description"));
 
         Map<String, Object> context = (Map<String, Object>) esActivity.get("context");

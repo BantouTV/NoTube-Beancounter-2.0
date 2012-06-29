@@ -2,7 +2,6 @@ package tv.notube.usermanager;
 
 import junit.framework.Assert;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import tv.notube.commons.model.User;

@@ -1,8 +1,14 @@
 package tv.notube.activities;
 
 /**
- * put class description here
+ * Raised if something goes wrong with {@link ActivityStore}.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class ActivityStoreException extends Exception {}
+public class ActivityStoreException extends Exception {
+
+    public ActivityStoreException(String message, Exception e) {
+        super(message, e);
+    }
+
+}
