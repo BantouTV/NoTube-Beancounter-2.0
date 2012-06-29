@@ -52,7 +52,6 @@ public class JedisUserManagerImpl implements UserManager {
         Jedis jedis;
         String userJson;
         try {
-            mapper.getSerializationConfig().disable(SerializationConfig.Feature.USE_ANNOTATIONS);
             userJson = mapper.writeValueAsString(user);
         } catch (IOException e) {
             final String errMsg = "Error while getting json for user [" + user.getId() + "]";

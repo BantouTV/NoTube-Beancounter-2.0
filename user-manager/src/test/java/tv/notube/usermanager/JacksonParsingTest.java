@@ -2,6 +2,7 @@ package tv.notube.usermanager;
 
 import junit.framework.Assert;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import tv.notube.commons.model.User;
@@ -36,11 +37,15 @@ public class JacksonParsingTest {
         User expected = mapper.readValue(json, User.class);
         Assert.assertNotNull(expected);
         Assert.assertEquals(actual, expected);
+        expected.setServices(getServices());
+        String jsonWithService = mapper.writeValueAsString(expected);
+        Assert.assertNotNull(jsonWithService);
+        User withServices = mapper.readValue(jsonWithService, User.class);
+        Assert.assertEquals(expected, withServices);
     }
 
     private User getUser() throws TestsException {
         User user = tests.build(User.class).getObject();
-        user.setServices(getServices());
         return user;
     }
 

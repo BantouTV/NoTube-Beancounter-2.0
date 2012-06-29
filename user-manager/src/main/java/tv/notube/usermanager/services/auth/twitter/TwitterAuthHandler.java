@@ -22,7 +22,7 @@ import java.net.URL;
 public class TwitterAuthHandler extends DefaultAuthHandler {
 
     // TODO (high) what's this? fix it urgently
-    private static final String CALLBACK = "http://moth.notube.tv:9090/notube-platform/rest/user/oauth/callback/twitter/";
+    private static final String CALLBACK = "http://api.beancounter.io/rest/user/oauth/callback/twitter/";
 
     public TwitterAuthHandler(Service service) {
         super(service);
