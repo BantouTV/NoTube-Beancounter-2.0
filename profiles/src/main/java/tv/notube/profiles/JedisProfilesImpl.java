@@ -50,6 +50,9 @@ public class JedisProfilesImpl implements Profiles {
         UserProfile profile;
         Jedis jedis = pool.getResource();
         String stringProfile = jedis.get(userId.toString());
+        if(stringProfile == null) {
+            return null;
+        }
         try {
             profile = mapper.readValue(stringProfile, UserProfile.class);
         } catch (IOException e) {

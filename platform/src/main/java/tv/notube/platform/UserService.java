@@ -569,7 +569,6 @@ public class UserService extends JsonService {
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
-
         boolean isAuth;
         try {
             isAuth = applicationsManager.isAuthorized(
@@ -637,10 +636,15 @@ public class UserService extends JsonService {
             );
             return rb.build();
         }
+        User userObj;
+        try {
+            userObj = userManager.getUser(username);
+        } catch (UserManagerException e) {
+            return error(e, "Error while retrieving user '" + username + "'");
+        }
         UserProfile up;
         try {
-            // TODO (high) fix this.
-            up = profiles.lookup(UUID.fromString("12345678-1234-1234-1234-123456789ab"));
+            up = profiles.lookup(userObj.getId());
         } catch (ProfilesException e) {
             return error(e, "Error while retrieving profile for user [" + username + "]");
         }
