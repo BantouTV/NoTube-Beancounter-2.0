@@ -2,17 +2,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>tv.notube</groupId>
-    <artifactId>platform</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>war</packaging>
-    <name>NoTube 2.0 Web REST API</name>
-
     <parent>
-	    <groupId>tv.notube</groupId>
+        <groupId>tv.notube</groupId>
         <artifactId>parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
+
+    <artifactId>platform</artifactId>
+    <packaging>war</packaging>
+    <name>NoTube 2.0 Web REST API</name>
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
@@ -39,32 +37,8 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>tv.notube.profiler</groupId>
-            <artifactId>storage</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>tv.notube.profiler</groupId>
-            <artifactId>runner</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>tv.notube.profiler</groupId>
-                    <artifactId>storage</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>tv.notube.commons</groupId>
-                    <artifactId>configuration</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>tv.notube.synch</groupId>
-                    <artifactId>client</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>tv.notube</groupId>
-            <artifactId>analytics</artifactId>
+            <artifactId>profiles</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -84,6 +58,11 @@
         </dependency>
         <dependency>
             <groupId>tv.notube</groupId>
+            <artifactId>activities</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube</groupId>
             <artifactId>crawler</artifactId>
             <version>1.0-SNAPSHOT</version>
             <exclusions>
@@ -95,68 +74,63 @@
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
-            <version>1.6</version>
             <artifactId>jersey-bundle</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>
-            <version>1.6</version>
         </dependency>
         <dependency>
             <groupId>asm</groupId>
             <artifactId>asm</artifactId>
-            <version>3.1</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
-            <version>2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey.contribs</groupId>
             <artifactId>jersey-guice</artifactId>
-            <version>1.6</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-jaxrs</artifactId>
-            <version>1.8.4</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-xc</artifactId>
-            <version>1.8.4</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube</groupId>
+            <artifactId>queues</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.sun.grizzly</groupId>
             <artifactId>grizzly-servlet-webserver</artifactId>
-            <version>1.9.8</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>commons-httpclient</groupId>
             <artifactId>commons-httpclient</artifactId>
-            <version>3.1</version>
             <scope>test</scope>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>tv.notube.extensions</groupId>
-            <artifactId>skos-profiling-line</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
-        -->
+
     </dependencies>
+
     <build>
+        <finalName>notube-platform</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.1</version>
                 <configuration>
                     <failOnMissingWebXml>true</failOnMissingWebXml>
                 </configuration>
@@ -164,7 +138,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.2</version>
                 <configuration>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
@@ -172,24 +145,24 @@
             <plugin>
                 <groupId>org.codehaus.cargo</groupId>
                 <artifactId>cargo-maven2-plugin</artifactId>
-                <version>1.0.5</version>
                 <configuration>
                     <container>
-                        <containerId>tomcat6x</containerId>
+                        <containerId>tomcat7x</containerId>
                         <type>remote</type>
                     </container>
                     <configuration>
                         <type>runtime</type>
                         <properties>
-                            <cargo.tomcat.manager.url>http://moth.notube.tv:9090/manager</cargo.tomcat.manager.url>
-                            <cargo.remote.username>davide</cargo.remote.username>
-                            <cargo.remote.password>alchemyindex</cargo.remote.password>
+                            <cargo.hostname>46.4.89.183</cargo.hostname>
+                            <cargo.protocol>http</cargo.protocol>
+                            <cargo.servlet.port>8080</cargo.servlet.port>
+                            <cargo.remote.username>admin</cargo.remote.username>
+                            <cargo.remote.password>4dm1n</cargo.remote.password>
                         </properties>
                     </configuration>
                 </configuration>
             </plugin>
         </plugins>
-        <finalName>notube-platform</finalName>
     </build>
 
 </project>

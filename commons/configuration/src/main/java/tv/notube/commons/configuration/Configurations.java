@@ -5,17 +5,12 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import tv.notube.commons.configuration.activities.ElasticSearchConfiguration;
 import tv.notube.commons.configuration.activities.NodeInfo;
-import tv.notube.commons.configuration.analytics.AnalysisDescription;
-import tv.notube.commons.configuration.analytics.AnalyticsConfiguration;
-import tv.notube.commons.configuration.analytics.MethodDescription;
 import tv.notube.commons.configuration.auth.ServiceAuthorizationManagerConfiguration;
 import tv.notube.commons.configuration.profiler.*;
 import tv.notube.commons.configuration.storage.StorageConfiguration;
 import tv.notube.commons.configuration.usermanager.UserManagerConfiguration;
 import tv.notube.commons.model.auth.AuthHandler;
 import tv.notube.commons.model.Service;
-import tv.notube.commons.storage.model.Query;
-import tv.notube.commons.storage.model.QueryException;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -56,9 +51,6 @@ public class Configurations {
     ) throws ConfigurationsException {
         if (serviceClass.equals(UserManagerConfiguration.class)) {
             return userManagerConfiguration(xmlConfiguration);
-        }
-        if (serviceClass.equals(AnalyticsConfiguration.class)) {
-            return analyticsConfiguration(xmlConfiguration);
         }
         if (serviceClass.equals(ProfilerConfiguration.class)) {
             return profilerConfiguration(xmlConfiguration);
@@ -281,58 +273,6 @@ public class Configurations {
             }
         }
         profilerConfiguration.setDataManagerConfiguration(dataManagerConfiguration);
-    }
-
-    private static <T extends Configuration> T analyticsConfiguration(XMLConfiguration xmlConfiguration) {
-        List<HierarchicalConfiguration> analyses =
-                xmlConfiguration.configurationsAt("analyses.analysis");
-        Set<AnalysisDescription> analysisDescriptions =
-            new HashSet<AnalysisDescription>();
-        for(HierarchicalConfiguration analysis : analyses) {
-            String name = analysis.getString("[@name]");
-            String classStr = analysis.getString("[@class]");
-            String description = analysis.getString("description");
-            String queryStr = analysis.getString("query");
-            String resultClass = analysis.getString("result");
-            Query query = new Query();
-            try {
-                Query.decompile(queryStr, query);
-            } catch (QueryException e) {
-                final String errMsg = "Query for analysis [" + name + "] has " +
-                        "syntax errors";
-                throw new RuntimeException(errMsg, e);
-            }
-            Set<MethodDescription> mds = new HashSet<MethodDescription>();
-            List<HierarchicalConfiguration> methods = analysis.configurationsAt("methods.method");
-            for(HierarchicalConfiguration method : methods) {
-                String methodName = method.getString("[@name]");
-                String methodDescriptionStr = method.getString("description");
-                List<HierarchicalConfiguration> parameterTypes = method
-                        .configurationsAt("parameterTypes");
-                List<String> paramTypesStr = new ArrayList<String>();
-                for(HierarchicalConfiguration parameterType : parameterTypes){
-                    String paramType = parameterType.getString("type");
-                    paramTypesStr.add(paramType);
-                }
-                MethodDescription methodDescription = new MethodDescription(
-                        methodName,
-                        methodDescriptionStr,
-                        paramTypesStr.toArray(new String[paramTypesStr.size()])
-                );
-                mds.add(methodDescription);
-            }
-            AnalysisDescription analysisDescription =
-                    new AnalysisDescription(
-                            name,
-                            description,
-                            query,
-                            classStr,
-                            resultClass,
-                            mds
-                    );
-            analysisDescriptions.add(analysisDescription);
-        }
-        return (T) new AnalyticsConfiguration(analysisDescriptions);
     }
 
     private static <T extends Configuration> T userManagerConfiguration(XMLConfiguration xmlConfiguration) {

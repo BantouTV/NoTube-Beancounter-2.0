@@ -4,6 +4,7 @@ import com.google.inject.servlet.GuiceFilter;
 import com.sun.grizzly.http.embed.GrizzlyWebServer;
 import com.sun.grizzly.http.servlet.ServletAdapter;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 
@@ -15,7 +16,7 @@ public abstract class AbstractJerseyTestCase {
 
     protected static final Logger logger = Logger.getLogger(AbstractJerseyTestCase.class);
 
-    private static final String base_uri_str = "http://localhost:%d/";
+    private static final String base_uri_str = "http://localhost:%d/rest/";
 
     protected final URI base_uri;
 
@@ -48,4 +49,9 @@ public abstract class AbstractJerseyTestCase {
     public void tearDown() throws InterruptedException {
         server.stop();
     }
+
+    protected <T> T fromJson(String responseBody, Class<T> t) throws IOException {
+        return (new ObjectMapper()).readValue(responseBody, t);
+    }
+
 }

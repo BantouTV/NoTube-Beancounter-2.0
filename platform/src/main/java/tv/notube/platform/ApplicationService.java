@@ -1,23 +1,24 @@
 package tv.notube.platform;
 
 import com.google.inject.Inject;
-import tv.notube.applications.Application;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
 import tv.notube.platform.responses.StringPlatformResponse;
+import tv.notube.platform.responses.UUIDPlatformResponse;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.UUID;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-@Path("/application")
+@Path("rest/application")
 @Produces(MediaType.APPLICATION_JSON)
-public class ApplicationService {
+public class ApplicationService extends JsonService {
 
     private ApplicationsManager applicationsManager;
 
@@ -34,18 +35,18 @@ public class ApplicationService {
             @FormParam("email") String email,
             @FormParam("oauthCallback") String oauth
     ) {
-        Application application = new Application(name, description, email);
+        URL oauthUrl;
         try {
-            application.setOAuthCallback(new URL(oauth));
+            oauthUrl = new URL(oauth);
         } catch (MalformedURLException e) {
             throw new RuntimeException(
                     "Provided URL '" + oauth + "' is not well formed",
                     e
             );
         }
-        String apiKey;
+        UUID apiKey;
         try {
-            apiKey = applicationsManager.registerApplication(application);
+            apiKey = applicationsManager.registerApplication(name, description, email, oauthUrl);
         } catch (ApplicationsManagerException e) {
             throw new RuntimeException(
                     "Error while registering application '" + name + "'",
@@ -53,32 +54,38 @@ public class ApplicationService {
             );
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new StringPlatformResponse(
+        rb.entity(new UUIDPlatformResponse(
                 StringPlatformResponse.Status.OK,
                 "Application '" + name + "' successfully registered",
                 apiKey)
         );
         return rb.build();
-
     }
 
     @DELETE
-    @Path("/{name}")
+    @Path("/{apiKey}")
     public Response deregisterApplication(
-            @PathParam("name") String name
+            @PathParam("apiKey") String apiKey
     ) {
         try {
-            applicationsManager.deregisterApplication(name);
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
+        }
+        try {
+            applicationsManager.deregisterApplication(
+                    UUID.fromString(apiKey)
+            );
         } catch (ApplicationsManagerException e) {
             throw new RuntimeException(
-                    "Error while deregistering application '" + name + "'",
+                    "Error while deregistering application with api key [" + apiKey + "]",
                     e
             );
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new StringPlatformResponse(
                 StringPlatformResponse.Status.OK,
-                "Application '" + name + "' successfully removed")
+                "Application with api key'" + apiKey + "' successfully removed")
         );
         return rb.build();
     }

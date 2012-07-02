@@ -1,5 +1,6 @@
 package tv.notube.commons.model.activity;
 
+import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import tv.notube.commons.tests.annotations.Random;
 
@@ -9,7 +10,15 @@ import java.net.URL;
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
+//@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Tweet.class, name = "TWEET"),
+        @JsonSubTypes.Type(value = Event.class, name = "EVENT"),
+        @JsonSubTypes.Type(value = Article.class, name = "ARTICLE"),
+        @JsonSubTypes.Type(value = Place.class, name = "PLACE"),
+        @JsonSubTypes.Type(value = Song.class, name = "SONG")
+})
 public class Object implements Serializable {
 
     private static final long serialVersionUID = 399673611235L;

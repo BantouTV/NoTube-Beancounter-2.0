@@ -1,7 +1,6 @@
 package tv.notube.crawler.runnable;
 
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
 import tv.notube.commons.model.Service;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.Activity;
@@ -14,7 +13,6 @@ import tv.notube.usermanager.services.auth.ServiceAuthorizationManagerException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
@@ -31,14 +29,14 @@ public class Spider implements Runnable {
 
     private User user;
 
-    public Spider(String name, UserManager um, UUID id, Requester req) throws SpiderException {
+    public Spider(String name, UserManager um, String username, Requester req) throws SpiderException {
         this.name = name;
         this.um = um;
         this.requester = req;
         try {
-            this.user = getUser(id);
+            this.user = getUser(username);
         } catch (UserManagerException e) {
-            final String errMsg = "Error while getting user with id '" + id + "'";
+            final String errMsg = "Error while getting user with username [" + username + "]";
             logger.error(errMsg, e);
             throw new SpiderException(errMsg, e);
         }
@@ -54,7 +52,7 @@ public class Spider implements Runnable {
             logger.error(errMsg, e);
             throw new RuntimeException(errMsg, e);
         }
-        for (String serviceName : user.getServices()) {
+        for (String serviceName : user.getServices().keySet()) {
             Service service;
             try {
                 service = sam.getService(serviceName);
@@ -72,7 +70,6 @@ public class Spider implements Runnable {
                 logger.error(errMsg, e);
                 throw new RuntimeException(errMsg, e);
             }
-            user.setProfiledAt(new DateTime());
         }
         try {
             um.storeUser(user);
@@ -82,6 +79,8 @@ public class Spider implements Runnable {
             logger.error(errMsg, e);
             throw new RuntimeException(errMsg, e);
         }
+        // TODO (high) fix this
+        /**
         try {
             um.storeUserActivities(user.getId(), activities);
         } catch (UserManagerException e) {
@@ -89,11 +88,11 @@ public class Spider implements Runnable {
                     "user '" + user.getId() + "'";
             logger.error(errMsg, e);
             throw new RuntimeException(errMsg, e);
-        }
+        }     **/
     }
 
-    private User getUser(UUID id) throws UserManagerException {
-        return um.getUser(id);
+    private User getUser(String username) throws UserManagerException {
+        return um.getUser(username);
     }
 
     public String getName() {

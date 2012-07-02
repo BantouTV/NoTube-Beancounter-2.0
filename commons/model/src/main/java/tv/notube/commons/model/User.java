@@ -1,14 +1,10 @@
 package tv.notube.commons.model;
 
-import org.joda.time.DateTime;
 import tv.notube.commons.model.auth.Auth;
 import tv.notube.commons.tests.annotations.Random;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Models the main <a href="http://notube.tv">NoTube</a> user
@@ -16,17 +12,15 @@ import java.util.Map;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class User extends Referenceable implements Serializable {
+public class User implements Serializable {
 
     private static final long serialVersionUID = 324345235L;
+
+    private UUID id;
 
     private String name;
 
     private String surname;
-
-    private DateTime profiledAt;
-
-    private boolean forcedProfiling;
 
     private Map<String, Auth> services = new HashMap<String, Auth>();
 
@@ -35,12 +29,20 @@ public class User extends Referenceable implements Serializable {
     private String username;
 
     public User() {
-        super();
+        id = UUID.randomUUID();
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     @Random(names = {"name", "surname", "username", "password"})
     public User(String name, String surname, String username, String password) {
-        super();
+        this();
         this.name = name;
         this.surname = surname;
         this.username = username;
@@ -59,28 +61,16 @@ public class User extends Referenceable implements Serializable {
         return surname;
     }
 
-    public DateTime getProfiledAt() {
-        return profiledAt;
-    }
-
-    public void setProfiledAt(DateTime profiledAt) {
-        this.profiledAt = profiledAt;
-    }
-
     public void setSurname(String surname) {
         this.surname = surname;
     }
 
-    public boolean isForcedProfiling() {
-        return forcedProfiling;
+    public Map<String, Auth> getServices() {
+        return services;
     }
 
-    public void setForcedProfiling(boolean forcedProfiling) {
-        this.forcedProfiling = forcedProfiling;
-    }
-
-    public List<String> getServices() {
-        return new ArrayList<String>(services.keySet());
+    public void setServices(Map<String, Auth> services) {
+        this.services = services;
     }
 
     public Auth getAuth(String service) {
@@ -112,12 +102,28 @@ public class User extends Referenceable implements Serializable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        if (username != null ? !username.equals(user.username) : user.username != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return username != null ? username.hashCode() : 0;
+    }
+
+    @Override
     public String toString() {
         return "User{" +
                 "name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
-                ", profiledAt=" + profiledAt +
-                ", forcedProfiling=" + forcedProfiling +
                 ", services=" + services +
                 ", password='" + password + '\'' +
                 ", username='" + username + '\'' +

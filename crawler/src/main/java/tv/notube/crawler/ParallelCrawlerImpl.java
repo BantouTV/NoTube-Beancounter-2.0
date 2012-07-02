@@ -2,7 +2,6 @@ package tv.notube.crawler;
 
 import com.google.inject.Inject;
 import org.apache.log4j.Logger;
-import tv.notube.crawler.requester.DefaultRequester;
 import tv.notube.crawler.requester.Requester;
 import tv.notube.crawler.runnable.Spider;
 import tv.notube.crawler.runnable.SpiderException;
@@ -35,6 +34,8 @@ public class ParallelCrawlerImpl extends AbstractCrawler {
     }
 
     public Report crawl() throws CrawlerException {
+        // TODO (high) this is an high technical debt
+        /**
         long start = System.currentTimeMillis();
         List<UUID> ids;
         try {
@@ -65,20 +66,22 @@ public class ParallelCrawlerImpl extends AbstractCrawler {
         executor.shutdown();
         long end = System.currentTimeMillis();
         return new Report(count, start, end);
+         **/
+        throw new UnsupportedOperationException("to be refactored");
     }
 
-    public Report crawl(UUID userId) throws CrawlerException {
+    public Report crawl(String username) throws CrawlerException {
         Spider spider;
         try {
             spider = new Spider(
-                    "runnable-single-" + userId.toString(),
+                    "runnable-single-" + username,
                     getUserManager(),
-                    userId,
+                    username,
                     requester
             );
         } catch (SpiderException e) {
             throw new CrawlerException(
-                    "Error while crawling data for [" + userId.toString() + "]",
+                    "Error while crawling data for [" + username + "]",
                     e
             );
         }

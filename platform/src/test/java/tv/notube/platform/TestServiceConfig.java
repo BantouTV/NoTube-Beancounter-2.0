@@ -7,16 +7,16 @@ import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
-import tv.notube.analytics.Analyzer;
-import tv.notube.analytics.MockAnalyzer;
+import tv.notube.activities.ActivityStore;
+import tv.notube.activities.MockActivityStore;
 import tv.notube.applications.MockApplicationsManager;
 import tv.notube.crawler.Crawler;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.crawler.MockCrawler;
-import tv.notube.profiler.MockProfiler;
-import tv.notube.profiler.Profiler;
-import tv.notube.profiler.storage.MockProfileStore;
-import tv.notube.profiler.storage.ProfileStore;
+import tv.notube.profiles.MockProfiles;
+import tv.notube.profiles.Profiles;
+import tv.notube.queues.MockQueues;
+import tv.notube.queues.Queues;
 import tv.notube.usermanager.MockUserManager;
 import tv.notube.usermanager.UserManager;
 
@@ -37,19 +37,20 @@ public class TestServiceConfig extends GuiceServletContextListener {
             @Override
             protected void configureServlets() {
                 Map<String, String> initParams = new HashMap<String, String>();
+                // add bindings to mockups
+                bind(ApplicationsManager.class).to(MockApplicationsManager.class).asEagerSingleton();
+                bind(UserManager.class).to(MockUserManager.class);
+                bind(Profiles.class).to(MockProfiles.class);
+                bind(Crawler.class).to(MockCrawler.class);
+                bind(ActivityStore.class).to(MockActivityStore.class);
+                bind(Queues.class).to(MockQueues.class);
                 // add REST services
-                bind(AnalyticsService.class);
                 bind(ApplicationService.class);
                 bind(UserService.class);
-                // add bindings to mockups
-                bind(ApplicationsManager.class).to(MockApplicationsManager.class);
-                bind(Analyzer.class).to(MockAnalyzer.class);
-                bind(UserManager.class).to(MockUserManager.class);
-                bind(ProfileStore.class).to(MockProfileStore.class);
-                bind(Crawler.class).to(MockCrawler.class);
-                bind(Profiler.class).to(MockProfiler.class);
+                bind(ActivitiesService.class);
                 // add bindings for Jackson
                 bind(JacksonJaxbJsonProvider.class).asEagerSingleton();
+                bind(JacksonMixInProvider.class).asEagerSingleton();
                 bind(MessageBodyReader.class).to(JacksonJsonProvider.class);
                 bind(MessageBodyWriter.class).to(JacksonJsonProvider.class);
                 // Route all requests through GuiceContainer

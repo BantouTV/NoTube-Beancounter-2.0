@@ -10,8 +10,6 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.node.Node;
-import org.elasticsearch.node.NodeBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortOrder;
 import org.joda.time.DateTime;
@@ -33,8 +31,8 @@ import static org.elasticsearch.index.query.FilterBuilders.*;
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
- * <a href="http://www.elasticsearch.org">ElasticSearch</a> based implementation
- * of {@link ActivityStore}.
+ * <a href="http://www.elasticsearch.org">ElasticSearch</a>
+ * based implementation of {@link ActivityStore}.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  * @author Alex Cowell ( alxcwll@gmail.com )
@@ -42,10 +40,13 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 public class ElasticSearchActivityStoreImpl implements ActivityStore {
 
     public static final String INDEX_NAME = "beancounter";
+
     public static final String INDEX_TYPE = "activity";
 
     private ObjectMapper mapper;
+
     private ElasticSearchConfiguration configuration;
+
     private Client client;
 
     public ElasticSearchActivityStoreImpl(ElasticSearchConfiguration configuration) {
@@ -107,39 +108,93 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
         // TODO: Use facets or some type of grouping to avoid populating the map
         // manually.
         for (SearchHit hit : searchResponse.getHits()) {
-            try {
-                UUID userId = UUID.fromString((String) hit.getSource().get("userId"));
-                @SuppressWarnings("unchecked")
-                Map<String, Object> activity =
-                        (Map<String, Object>) hit.getSource().get("activity");
-
-                if (activitiesMap.get(userId) == null) {
-                    activitiesMap.put(userId, new ArrayList<Activity>());
-                }
-                List<Activity> activities = (List<Activity>) activitiesMap.get(userId);
-                activities.add(mapper.readValue(mapper.writeValueAsBytes(activity), Activity.class));
-            } catch (IOException ioe) {
-                // TODO
+            UUID userId = UUID.fromString((String) hit.getSource().get("userId"));
+            @SuppressWarnings("unchecked")
+            Map<String, Object> activity =
+                    (Map<String, Object>) hit.getSource().get("activity");
+            if (activitiesMap.get(userId) == null) {
+                activitiesMap.put(userId, new ArrayList<Activity>());
             }
+            List<Activity> activities = (List<Activity>) activitiesMap.get(userId);
+            byte[] bytes;
+            try {
+                bytes = mapper.writeValueAsBytes(activity);
+            } catch (IOException e) {
+                final String errMsg = "Error while serializing as bytes [" + activity + "]";
+                throw new ActivityStoreException(errMsg, e);
+            }
+            Activity activityObj;
+            try {
+                activityObj = mapper.readValue(bytes, Activity.class);
+            } catch (IOException ioe) {
+                final String errMsg = "Error while deserializing [" + activity + "]";
+                throw new ActivityStoreException(errMsg, ioe);
+            }
+            activities.add(activityObj);
         }
-
         return activitiesMap;
     }
 
-    public void closeClient() {
-        client.close();
+    @Override
+    public Collection<Activity> getByUser(UUID userId) throws ActivityStoreException {
+        return getByUserAndDateRange(userId, new DateTime(1), new DateTime());
     }
 
-    private void indexActivity(UUID userId, Activity activity, Client client) {
-        ElasticSearchActivity esa = new ElasticSearchActivity(userId, activity);
-
-        try {
-            client.prepareIndex(INDEX_NAME, INDEX_TYPE)
-                    .setSource(createActivityJson(esa))
-                    .execute().actionGet();
-        } catch (IOException ioe) {
-            // TODO.
+    @Override
+    public Activity getByUser(UUID userId, UUID activityId) throws ActivityStoreException {
+        Collection<Activity> activities = getByUser(userId);
+        Activity activity = null;
+        for (Activity a : activities) {
+            if (a.getId().compareTo(activityId) == 0) {
+                activity = a;
+            }
         }
+        return activity;
+    }
+
+    @Override
+    public Collection<Activity> getByUser(UUID userId, Collection<UUID> activityIds)
+            throws ActivityStoreException {
+        Collection<Activity> selectedActivities = null;
+        Collection<Activity> allActivities = getByUser(userId);
+        for (Activity a : allActivities) {
+            if (activityIds.contains(a.getId())) {
+                if (selectedActivities == null) {
+                    selectedActivities = new ArrayList<Activity>();
+                }
+                selectedActivities.add(a);
+            }
+        }
+        return selectedActivities;
+    }
+
+    @Override
+    public void shutDown() throws ActivityStoreException {
+        closeClient();
+    }
+
+    public void closeClient() throws ActivityStoreException {
+        try {
+        client.close();
+        } catch (Exception e) {
+            final String errMsg = "Error while closing the client";
+            throw new ActivityStoreException(errMsg, e);
+        }
+    }
+
+    private void indexActivity(UUID userId, Activity activity, Client client)
+            throws ActivityStoreException {
+        ElasticSearchActivity esa = new ElasticSearchActivity(userId, activity);
+        byte[] jsonActivity;
+        try {
+            jsonActivity = createActivityJson(esa);
+        } catch (IOException e) {
+            final String errMsg = "Error while serializing to json [" + esa + "]";
+            throw new ActivityStoreException(errMsg, e);
+        }
+        client.prepareIndex(INDEX_NAME, INDEX_TYPE)
+                .setSource(jsonActivity)
+                .execute().actionGet();
     }
 
     private byte[] createActivityJson(ElasticSearchActivity esa) throws IOException {
@@ -148,24 +203,31 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
 
     private Collection<Activity> retrieveActivitiesFromSearchResponse(
             SearchResponse searchResponse
-    ) {
+    ) throws ActivityStoreException {
         Collection<Activity> activities = new ArrayList<Activity>();
-
         for (SearchHit hit : searchResponse.getHits()) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> activity =
+                    (Map<String, Object>) hit.getSource().get("activity");
+            byte[] jsonActivity;
             try {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> activity =
-                        (Map<String, Object>) hit.getSource().get("activity");
-
-                activities.add(mapper.readValue(
-                        mapper.writeValueAsBytes(activity),
-                        Activity.class
-                ));
-            } catch (IOException ioe) {
-                // TODO
+                jsonActivity = mapper.writeValueAsBytes(activity);
+            } catch (IOException e) {
+                final String errMsg = "Error while serializing to json [" + activity + "]";
+                throw new ActivityStoreException(errMsg, e);
             }
+            Activity activityObj;
+            try {
+                activityObj = mapper.readValue(
+                        jsonActivity,
+                        Activity.class
+                );
+            } catch (IOException e) {
+                final String errMsg = "Error while serializing to json [" + activity + "]";
+                throw new ActivityStoreException(errMsg, e);
+            }
+            activities.add(activityObj);
         }
-
         return activities;
     }
 
@@ -174,20 +236,17 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
                 .put("client.transport.sniff", true)
                 .build();
         TransportClient client = new TransportClient(settings);
-
         for (NodeInfo node : configuration.getNodes()) {
             client.addTransportAddress(
                     new InetSocketTransportAddress(node.getHost(), node.getPort())
             );
         }
-
         ImmutableList<DiscoveryNode> nodes = client.connectedNodes();
         if (nodes.isEmpty()) {
             client.close();
             throw new RuntimeException("Could not connect to elasticsearch cluster."
                     + " Please check the elasticsearch-configuration.xml file.");
         }
-
         return client;
     }
 }

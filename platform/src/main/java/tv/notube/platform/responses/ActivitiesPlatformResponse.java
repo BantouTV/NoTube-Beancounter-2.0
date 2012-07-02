@@ -3,14 +3,14 @@ package tv.notube.platform.responses;
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.platform.PlatformResponse;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-public class ActivitiesPlatformResponse extends PlatformResponse<List<Activity>> {
+public class ActivitiesPlatformResponse extends PlatformResponse<Collection<Activity>> {
 
-    private List<Activity> activities;
+    private Collection<Activity> activities;
 
     public ActivitiesPlatformResponse(){}
 
@@ -18,17 +18,16 @@ public class ActivitiesPlatformResponse extends PlatformResponse<List<Activity>>
         super(s, m);
     }
 
-    public ActivitiesPlatformResponse(Status s, String m, List<Activity> act) {
+    public ActivitiesPlatformResponse(Status s, String m, Collection<Activity> act) {
         super(s, m);
         activities = act;
     }
 
-    //@JsonProperty("activities")
-    public List<Activity> getObject() {
+    public Collection<Activity> getObject() {
         return activities;
     }
 
-    public void setObject(List<Activity> act) {
+    public void setObject(Collection<Activity> act) {
         this.activities = act;
     }
 }

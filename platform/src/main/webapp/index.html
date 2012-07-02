@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Beancounter.io REST API Documentation</title>
+	<link rel="stylesheet" href="styles.css" type="text/css" media="screen" />
+<script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script> 
+<script type="text/javascript" src="js/equalcolumns.js"></script> 
+	<!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+</head>
+<body>
+
+	<header>
+		<h1 class="topTitle">Beancounter.io REST API Documentation</h1>
+	</header>
+	<nav>
+		<ul>
+			<li class="selected"><a href="#">Home</a></li>
+			<li><a href="#Authentication API">Authentication API</a></li>
+            <li><a href="#User API">User API</a></li>
+            <li><a href="#">Support</a></li>
+		</ul>
+	</nav>
+	
+	<div id="innercontent">
+					
+				<article class="articlecontent">
+				
+					<header>
+						<h2 class="centered">Overview</h2>
+					</header>
+						<p>
+    					The API root URL is <strong>http://api.beancounter.io/rest/</strong>
+    					<p>
+                        All the subsequent
+    					methods are to be intended as relative to that URL. Responses are available
+   						in JSON format only and are all in this format:</p>
+
+			<pre><code>
+	{
+		"status": OK | NOK ,
+		"message": <i>a success of error message</i>,
+		"object": <i>an optional object that may be returned</i>
+	}
+			</code></pre>
+						</p>
+						<p>
+    						<strong>DISCLAIMER: responses are going to change frequently. Be aware and ofter refer to this page</strong>
+						</p><br>
+
+				</article>
+				
+				<hr>
+
+				<article class="articlecontent">
+					
+					<header id="Authentication API">
+						<h2 class="centered">Authentication API</h2>
+					</header>
+					
+					<p>
+    				The Beancounter is a centralized hub where data about users
+    				activities and some processing on them - such as profiling or
+    				analytics - are performed. The Beancounter is intended to be used by
+    				third-party applications on top of its APIs. This means that all the applications
+    				will share the same user base and the same analytics or profiling
+    				results among them.
+					<p>
+   					Every application using the Beancounter API needs to be registered in advance
+    				and sign every HTTP call with the URL Query parameter.
+					<p>
+				
+				</article>
+				
+				<article class="articlecontent">
+					
+					<header>
+						<h2>1) Register a new application</h2>
+					</header>
+					
+					Path: /application/register<br/><br/>
+					Method: <strong>POST</strong>         <br>
+					Parameters:            <br>
+					- <strong>name</strong>, the application uniquely identifying name.        <br>
+					- <strong>description</strong>, a human readable short text describing what you do
+					with the Beancounter<br>
+					- <strong>email</strong>, contact email - must be a human behind it :) <br>
+					- <strong>oauthCallback</strong>, the URL if I need to redirect you when the
+					OAuth process completes.<br>
+                    <strong>Description:</strong> it registers a new application to the Beancounter<br>
+					<p>
+                    <br/>
+                    Example: with curl
+                    <br/>
+
+                    <p>
+					curl -d "name=test-app&description=testing&email=dpalmisano@gmail.com&oauthCallback=http://google.com" http://api.beancounter.io/rest/application/register <br>
+                    </p>
+					Response:
+
+        	<pre><code>
+	{
+		"status": "OK",
+		"message": "Application 'test-app' successfully registered",
+		"object": "288301728d2b446c890b5094317e775a"
+	}
+       		 </code></pre>
+
+					the returned object <b>value is your apikey</b>. Beware: write it down and
+					keep it - if you misplace it, <a href="mailto:dpalmisano@gmail.com">contact me</a>.
+					</br><br>
+
+				</article>
+				
+				
+				
+				<article class="articlecontent">
+					
+					<header>
+						<h2>2) Deregister an application</h2>
+					</header>
+					
+					Path: /application/{apikey} <br>
+					Method: DELETE         <br>
+					Parameters:            <br>
+					- {apikey}, the apikey uniquely identifying you application. <br>
+					Description: it removes the application from the Beancounter and all
+					its privilegies.<br>
+                    <br/>
+                    Example: with curl<br>
+                    <br/>
+					curl -X DELETE http://api.beancounter.io/rest/application/288301728d2b446c890b5094317e775a
+                    <br/><br/>
+
+				</article>
+	
+				<hr>		
+				
+				<article class="articlecontent">					
+					<header id="User API">
+						<h2 class="centered">User API</h2>
+					</header>					
+				</article>
+				
+
+				<article class="articlecontent">
+					
+					<header>
+						<h2>3) Register a new user</h2>
+					</header>
+					Path: /user/register <br>
+					Method: POST         <br>
+					Parameters:            <br>
+					- username        <br>
+					- password         <br>
+					- name               <br>
+					- surname          <br>
+					- apikey <br>
+					Description: it registers a new user to the Beancounter with username, password, name and surname.<br>
+                    <br/>
+                    Example: with curl
+                    <br/>
+					curl -d "name=Davide&surname=Palmisano&username=dpalmisano&password=abracadabra" http://api.beancounter.io/rest/user/register?apikey=your-app-key<br>
+					with parameter body (application/x-www-form-urlencoded). <br>
+
+					response:
+        <pre><code>
+	{
+		"status":"OK",
+		"message":"user successfully registered",
+		"object":"5fe903d3-c6ef-49ba-a9af-44d91f028138"
+	}
+        </code></pre>
+
+				The value in the 'object' fields is the unique user identifier in the
+				Beancounte plaform. Could be considered equivalent to the user name. <br>
+				If the username is already taken, the service replies: <br>
+
+        <pre><code>
+	{
+		"status":"NOK",
+		"message":"username 'dpalmisano' is already taken"
+	}
+        </code></pre>
+	
+					
+				</article>
+				
+				
+				<article class="articlecontent">
+					
+					<header>
+						<h2>4) Get user data</h2>
+					</header>
+					
+					Path: /user/{username}<br>
+					Method: GET<br>
+					Parameters: <br>
+					- {username} the Beancounter username<br>
+					- apikey <br>
+					Description: it returns the user data but not the profile.<br>
+					Example:<br><br>
+
+					GET http://api.beancounter.io/rest/user/dpalmisano?apikey=your-app-key<br><br>
+
+					response:
+        <pre><code>
+	{
+		"status":"OK",
+		"message":"user 'dpalmisano' found",
+		"object":
+		{
+			"name":"Davide",
+			"surname":"Palmisano",
+			"forcedProfiling":false,
+			"activities":[],
+			"services":{},
+			"username":"dpalmisano",
+			"id":"5fe903d3-c6ef-49ba-a9af-44d91f028138"
+		}
+	}
+        </code></pre>
+				
+				</article>
+				
+				
+				<article class="articlecontent">
+					
+					<header>
+						<h2>5) Get user activities</h2>
+					</header>
+					
+					Path: /user/{username}/activities<br>
+					Method: GET<br>
+					Parameters: <br>
+					- {username} the Beancounter username<br>
+					- apikey <br>
+					Description: it returns all the user activites on the sources he's
+					subscribed to.<br>
+					Example:<br><br>
+
+					GET http://api.beancounter.io/rest/user/dpalmisano/activities?apikey=your-api-key<br><br>
+					
+				</article>
+
+
+				<article class="articlecontent">
+
+					<header>
+						<h2>6) Push activity</h2>
+					</header>
+
+					Path: /activity/add/{username}<br>
+					Method: POST<br>
+					Parameters: <br>
+					- {username} the Beancounter username<br>
+                    - activity, the activity in JSON format<br/>
+					- apikey <br>
+					Description: It pushes the activity to the User.<br>
+					Example with curl:<br><br>
+
+                    curl -d "activity={\"verb\":\"TWEET\",\"object\":{\"type\":\"TWEET\",\"url\":\"http://twitter.com/username/my_tweeet\",\"name\":null,\"description\":null,\"text\":\"A fake text\",\"hashTags\":["testingBeancounter"],\"urls\":[]},\"context\":{\"date\":1340702105000,\"service\":\"http://twitter.com\",\"mood\":null}}" http://api.beancounter.io/rest/activities/add/dpalmisanoapikey=your-api-key<br><br>
+
+                    A "basic" JSON activity is made from an "object", a "context" and a "verb".
+                    <br/>
+
+                    <pre><code>
+        {
+                "object":
+                {
+                        "type":         <i>the type of the activity,</i>
+                        "name":         <i>the username of the user for the service,</i>
+                        "description":  <i>a simple description of the activity,</i>
+                        "url":          <i>the url for the activity</i>
+                },
+                "context":
+                {
+                         "date":        <i>the date of the activity,</i>
+                         "service":     <i>the service of the activity,</i>
+                         "mood":        <i>the mood of the user</i>
+                },
+                "verb":                  <i>the kind of activity</i>
+        }
+
+                    </code></pre>
+
+                    At the moment the possible "type" is "TWEET".
+                    <br/>
+                    The available verb are "TWEET", "FOLLOWING" and "FAVORITED".
+                    <br/><br/>
+
+                    <h4> TWEET </h4>
+                    A TWEET has additional fields, as "text", "hashTags" and "urls".<br/>
+                    The "text" is for text of the tweet.<br/>
+                    "hashTags" is a list of strings of the tags in the tweet.<br/>
+                    "urls" is a list of strings of the urls in the tweet.<br/>
+                    <br/>
+                    <strong>TWEET Example</strong>
+
+
+                    <pre><code>
+        {
+                "object":
+                {
+                        "type":"TWEET",
+                        "text":"Just a fake tweet!",
+                        "hashTags":["testingBeancounter"],
+                        "urls":["http://fakeUrl.io"],
+                        "name":"tweet_name",
+                        "description":"A fake description",
+                        "url":"http://twitter.com"
+                },
+                "context":
+                {
+                        "date":null,
+                        "service":null,
+                        "mood":null
+                },
+                "verb":"TWEET"
+        }
+                    </code></pre>
+
+                    <br><br>
+
+
+				</article>
+
+
+				<article class="articlecontent">
+					
+					<header>
+						<h2>7) Delete a user</h2>
+					</header>
+					
+					Path: /user/{username}<br>
+					Method: DELETE<br>
+					Parameters: <br>
+					- {username} the Beancounter username<br>
+					- apikey <>br
+					Description: it deletes all the user data and activities.<br>
+					Example: with curl<br><br>
+
+					curl -X DELETE http://api.beancounter.io/rest/user/merlin?apikey=your-api-key<br><br>
+
+					
+				</article>
+				
+				
+				<article class="articlecontent">
+					
+					<header>
+						<h2>8) Authenticate a user</h2>
+					</header>
+					
+					Path: /user/{username}/authenticate<br>
+					Method: POST<br>
+					Parameters:<br>
+					- {username} the Beancounter username<br>
+					- {password} the user password <br>
+					- apikey <br>
+					Description: it authenticates or not a user.<br>
+					Example: with curl<br><br>
+
+					curl -d "password=abracadabra" http://api.beancounter.io/rest/user/dpalmisano/authenticate?apikey=your-api-key<br><br>
+	
+				</article>
+				
+				
+				<article class="articlecontent">
+					
+					<header>
+						<h2>9) Get a user profile</h2>
+					</header>
+					
+					Path: /user/{username}/profile<br>
+					Method: GET<br>
+					Parameters:                               <br>
+					- {username} the Beancounter username<br>
+					- apikey <br>
+					Description: it returns a weighted interests profile in JSON.<br>
+					Example: with curl<br><br>
+
+					curl http://api.beancounter.io/rest/user/dpalmisano/profile?apikey=your-app-key<br><br>
+
+				</article>
+				
+				
+				
+				<article class="articlecontent">
+					
+					<header>
+						<h2>10) Add a source (lastfm, gomiso.com, twitter, facebook, n-screen) to a user</h2>
+					</header>
+					
+					NoTube 2.0 Beancounter APIs support only those services which are
+					OAuth-compliant or OAuth-like compliant. Twitter (OAuth-compliant)
+					and Last.fm (OAuth-like) examples follow:
+
+					<br><br>
+					<h4> Twitter </h4>
+					
+					1) Send your Beancounter user with {username} to this url:<br>
+					http://api.beancounter.io/rest/user/oauth/token/twitter/{username}?redirect={redirect} where:<br>
+					- {redirect} is the URL of the user final landing page destination. <br>
+					2) Then, the user will be redirected to his Twitter account home
+					page to authorize the Beancounter application.<br>
+
+					<b>BBC iPlayer tweets</b>: Tweets from the BBC iPlayer are now represented
+					as <i>WATCHED</i> actions in the activity stream.
+
+					<br><br>
+					<h4> Facebook </h4>
+					
+					1) Send your Beancounter user with {username} to this url:<br>
+					http://api.beancounter.io/rest/user/oauth/token/facebook/dpalmisano?redirect={redirect} where:<br>
+					- {redirect} is the URL of the user final landing page destination. <br>
+					2) Then, the user will be redirected to his Facebook account home
+					page to authorize the Beancounter application.
+
+					<br><br>
+					<h4> Last.fm </h4>
+					
+					It's a bit different since it uses an OAuth-like exchange mechanism.<br>
+					1)  Send your user here: http://www.last
+					.fm/api/auth/?api_key=9f57b916d7ab90a7bf562b9e6f2385f0&cb=http://api.beancounter.io/rest/user/auth/callback/lastfm/{username}/{redirect}   <br>
+					where:<br>
+					- {username} is the Beancounter username, and<br>
+					- {redirect} is the url of a page your user will be redirected. It
+					must be without the 'http://' prefix and UTF-8 url-encoded. <br>
+					2) then your user will be asked to grant permission to NoTube on his
+					last.fm profile page. If successful the user will be redirected to
+					the url you provided at step 1.
+					<br>
+					
+					To verify please call:<br>
+
+					GET http://api.beancounter.io/rest/user/dpalmisano<br>
+
+					to see 'lastfm' or 'twitter' as a service added on the user services list.
+					<br><br>
+
+					
+				</article>
+				
+				
+				
+				<article class="articlecontent">
+					
+					<header>
+						<h2>11) Remove a source (lastfm, gomiso.com, twitter, facebook, n-screen) to a user</h2>
+					</header>
+					
+					Path: /user/source/{username}/{service}<br>
+					Method: DELETE<br>
+					Parameters: <br>
+					- {username} the Beancounter username<br>
+					- {service} the service you want to remove from the user <br>
+					- apikey <br>
+					Description: it deletes a service from a user. That service will be
+					not used anymore until you don't add it again.
+					<br>
+					Example: with curl<br><br>
+
+					curl -X DELETE http://api.beancounter.io/rest/user/source/merlin/lastfm?apikey=your-app-key
+					<br><br>
+				
+				</article>
+
+
+				
+				
+		</div>
+		
+
+	<footer>
+    <section>
+    <h3>Left Stuff</h3>
+    <p>Left aligned text here. Proin metus odio, ultricies eu pharetra dictum, laoreet id odio. Curabitur in odio augue. Morbi congue auctor interdum. Phasellus sit amet metus justo.</p>
+    <p>Next line here</p>
+    </section>
+    
+    <section>
+    <h3>Center Stuff</h3>
+    <p>Center Text here. Proin metus odio, ultricies eu pharetra dictum, laoreet id odio. Curabitur in odio augue. Morbi congue auctor interdum. Phasellus sit amet metus justo.</p>
+    <p>Next line here</p>
+    </section>
+    
+    <section>
+    <h3>Right Stuff</h3>
+    <p>&copy; 2010 <a href="#" title="your site name">yoursite.com</a> All rights reserved.</p>
+    <p>Center Text here. Proin metus odio, ultricies eu pharetra dictum, laoreet id odio. Curabitur in odio augue. Morbi congue auctor interdum. Phasellus sit amet metus justo.</p>
+    </section>
+
+	</footer>
+<!-- Free template created by http://freehtml5templates.com -->
+</body>
+</html>

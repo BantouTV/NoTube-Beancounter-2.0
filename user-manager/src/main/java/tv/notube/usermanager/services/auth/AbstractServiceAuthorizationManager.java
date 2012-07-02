@@ -45,5 +45,4 @@ public abstract class AbstractServiceAuthorizationManager
         }
         return null;
     }
-
 }

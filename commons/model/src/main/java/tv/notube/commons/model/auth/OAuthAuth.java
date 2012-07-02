@@ -9,8 +9,14 @@ public class OAuthAuth extends Auth {
 
     private String secret;
 
+    public OAuthAuth() {}
+
     public OAuthAuth(String session, String secret) {
         super(session);
+        this.secret = secret;
+    }
+
+    public void setSecret(String secret) {
         this.secret = secret;
     }
 

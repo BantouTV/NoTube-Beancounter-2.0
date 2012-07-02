@@ -3,6 +3,7 @@ package tv.notube.commons.model.activity;
 import tv.notube.commons.tests.annotations.Random;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
@@ -11,13 +12,25 @@ public class Activity implements Serializable {
 
     private static final long serialVersionUID = 68843445235L;
 
+    private UUID id;
+
     private Verb verb;
 
     private tv.notube.commons.model.activity.Object object;
 
     private Context context;
 
-    public Activity() {}
+    public Activity() {
+        id = UUID.randomUUID();
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     @Random(names = { "v", "obj", "c"} )
     public Activity(Verb v, Object obj, Context c) {
@@ -53,7 +66,8 @@ public class Activity implements Serializable {
     @Override
     public String toString() {
         return "Activity{" +
-                "verb=" + verb +
+                "id=" + id +
+                ", verb=" + verb +
                 ", object=" + object +
                 ", context=" + context +
                 '}';
