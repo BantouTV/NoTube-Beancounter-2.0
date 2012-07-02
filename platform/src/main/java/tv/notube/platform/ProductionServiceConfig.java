@@ -47,9 +47,6 @@ import java.util.Properties;
 public class ProductionServiceConfig extends GuiceServletContextListener {
 
     @Override
-    public void contextInitialized(ServletContextEvent servletContextEvent) {}
-
-    @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         try {
             ElasticSearchActivityStoreFactory.getInstance().build().shutDown();
@@ -58,7 +55,6 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
             throw new RuntimeException(errMsg, e);
         }
     }
-
 
     @Override
     protected Injector getInjector() {
