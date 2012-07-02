@@ -47,7 +47,7 @@ public class TwitterResponse implements ServiceResponse<List<Activity>> {
                 ab.setObject(
                         Tweet.class,
                         twitterTweet.getUrl(),
-                        twitterTweet.getName(),
+                        twitterTweet.getUsername(),
                         fields
                 );
                 for (String hashTag : twitterTweet.getHashTags()) {

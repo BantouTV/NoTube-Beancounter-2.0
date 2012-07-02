@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import junit.framework.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import redis.clients.jedis.JedisPool;
 import tv.notube.commons.model.UserProfile;
 import tv.notube.profiles.jedis.DefaultJedisPoolFactory;
 import tv.notube.profiles.jedis.JedisPoolFactory;
@@ -22,6 +23,8 @@ public class JedisProfilesIntegrationTest {
     public void setUp() {
         Injector injector = Guice.createInjector(new ProfilesModule());
         profiles = injector.getInstance(Profiles.class);
+        JedisPool pool = injector.getInstance(JedisPoolFactory.class).build();
+        pool.getResource().flushAll();
     }
 
     @Test

@@ -2,6 +2,7 @@ package tv.notube.platform;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.name.Names;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.sun.jersey.api.core.ClasspathResourceConfig;
 import com.sun.jersey.guice.JerseyServletModule;
@@ -34,6 +35,7 @@ import tv.notube.usermanager.services.auth.twitter.TwitterAuthHandler;
 import javax.servlet.ServletContextEvent;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -79,6 +81,8 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(tv.notube.profiles.jedis.JedisPoolFactory.class).to(tv.notube.profiles.jedis.DefaultJedisPoolFactory.class).asEagerSingleton();
                 bind(tv.notube.usermanager.jedis.JedisPoolFactory.class).to(tv.notube.usermanager.jedis.DefaultJedisPoolFactory.class).asEagerSingleton();
                 bind(ServiceAuthorizationManager.class).toInstance(getServiceAuthorizationManager());
+                // loading Redis properties from redis.properties file
+                Names.bindProperties(binder(), getRedisProperties());
                 bind(ApplicationsManager.class).to(JedisApplicationsManagerImpl.class);
                 bind(UserManager.class).to(JedisUserManagerImpl.class).asEagerSingleton();
                 bind(Profiles.class).to(JedisProfilesImpl.class);
@@ -96,15 +100,27 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 filter("/rest/*").through(GuiceContainer.class, initParams);
             }
 
+            private Properties getRedisProperties() {
+                Properties properties = new Properties();
+                try {
+                    properties.load(getClass().getResourceAsStream("/redis.properties"));
+                } catch (IOException e) {
+                    final String errMsg = "Error while reading Redis configuration";
+                    throw new RuntimeException(errMsg, e);
+                }
+                return properties;
+            }
+
             private ActivityStore getElasticSearch() {
                 return ElasticSearchActivityStoreFactory.getInstance().build();
             }
 
+            //TODO (hardcoded)
             private Queues getKestrelQueue() {
                 Properties properties = new Properties();
                 properties.setProperty("host", "localhost");
                 properties.setProperty("port", "22133");
-                properties.setProperty("queue", "activities");
+                properties.setProperty("queue", "internal-activities");
                 return new KestrelQueues(properties);
             }
 
