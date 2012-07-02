@@ -23,6 +23,7 @@ import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.ActivityBuilder;
 import tv.notube.commons.model.activity.Context;
 import tv.notube.commons.model.activity.DefaultActivityBuilder;
+import tv.notube.commons.model.activity.Song;
 import tv.notube.commons.model.activity.Tweet;
 import tv.notube.commons.model.activity.Verb;
 
@@ -50,7 +51,8 @@ public class ElasticSearchActivityStoreImplTestCase {
 
     private Node node;
     private Client client;
-    private String tweetServiceUrl = "http://twitter.com";
+    private final String tweetServiceUrl = "http://twitter.com";
+    private final String lastFmServiceUrl = "http://last.fm";
 
     @BeforeSuite
     public void beforeSuite() throws Exception {
@@ -112,6 +114,29 @@ public class ElasticSearchActivityStoreImplTestCase {
     }
 
     @Test
+    public void storeASingleListenForAUser() throws Exception {
+        clearIndex();
+
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime();
+        Activity lastFmActivity = createLastFmActivity(0, userId, dateTime);
+
+        as.store(userId, lastFmActivity);
+
+        refreshIndex();
+
+        SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
+                .setQuery(QueryBuilders.matchAllQuery())
+                .execute().actionGet();
+
+        SearchHits hits = searchResponse.getHits();
+        assertEquals(hits.getTotalHits(), 1);
+
+        SearchHit hit = hits.getAt(0);
+        assertHitEqualsLastFmActivity(hit, userId, lastFmActivity);
+    }
+
+    @Test
     public void storeMultipleTweetsForAUser() throws Exception {
         clearIndex();
 
@@ -133,6 +158,31 @@ public class ElasticSearchActivityStoreImplTestCase {
         assertEquals(hits.getTotalHits(), numTweets);
 
         assertHitsEqualTweetActivities(hits, userId, tweetActivities);
+    }
+
+    @Test
+    public void storeMultipleListensForAUser() throws Exception {
+        clearIndex();
+
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime();
+        int numListens = 5;
+
+        Collection<Activity> lastFmActivities
+                = createLastFmActivities(userId, dateTime, numListens);
+        as.store(userId, lastFmActivities);
+
+        refreshIndex();
+
+        SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
+                .setQuery(QueryBuilders.matchAllQuery())
+                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
+                .execute().actionGet();
+
+        SearchHits hits = searchResponse.getHits();
+        assertEquals(hits.getTotalHits(), numListens);
+
+        assertHitsEqualLastFmActivities(hits, userId, lastFmActivities);
     }
 
     @Test
@@ -353,6 +403,39 @@ public class ElasticSearchActivityStoreImplTestCase {
         return activities;
     }
 
+    private Activity createLastFmActivity(int trackId, UUID userId,
+                                          DateTime dateTime) throws Exception {
+        ActivityBuilder ab = new DefaultActivityBuilder();
+
+        ab.push();
+        ab.setVerb(Verb.LISTEN);
+        Map<String, Object> fields = new HashMap<String, Object>();
+        fields.put("setMbid", UUID.randomUUID().toString());
+        ab.setObject(
+                Song.class,
+                new URL("http://last.fm/" + userId + "/profile/listen/" + trackId),
+                "My Song",
+                fields);
+        ab.setContext(
+                dateTime.withZone(DateTimeZone.UTC).minusDays(trackId),
+                new URL(lastFmServiceUrl)
+        );
+
+        return ab.pop();
+    }
+
+    private Collection<Activity> createLastFmActivities(
+            UUID userId, DateTime dateTime, int numListens
+    ) throws Exception {
+        Collection<Activity> activities = new ArrayList<Activity>(numListens);
+
+        for (int i = 0; i < numListens; i++) {
+            activities.add(createLastFmActivity(i, userId, dateTime));
+        }
+
+        return activities;
+    }
+
     @SuppressWarnings("unchecked")
     private void assertHitEqualsTweetActivity(SearchHit hit, UUID userId, Activity activity) {
         assertEquals(hit.getType(), INDEX_TYPE);
@@ -390,6 +473,45 @@ public class ElasticSearchActivityStoreImplTestCase {
         for (int i = 0; i < numTweets; i++) {
             SearchHit hit = hits.getAt(i);
             assertHitEqualsTweetActivity(hit, userId, activities.get(i));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void assertHitEqualsLastFmActivity(SearchHit hit, UUID userId, Activity activity) {
+        assertEquals(hit.getType(), INDEX_TYPE);
+
+        Map<String, Object> source = hit.getSource();
+        assertEquals(source.get("userId"), userId.toString());
+
+        Map<String, Object> esActivity = (Map<String, Object>) source.get("activity");
+        assertEquals(esActivity.get("verb"), String.valueOf(Verb.LISTEN));
+
+        Map<String, Object> object = (Map<String, Object>) esActivity.get("object");
+        Song song = (Song) activity.getObject();
+        assertEquals(object.size(), 5);
+        assertEquals(object.get("mbid"), song.getMbid());
+        assertEquals(object.get("url"), song.getUrl().toString());
+        assertEquals(object.get("name"), "My Song");
+        assertEquals(object.get("@class"), Song.class.getName());
+        assertNull(object.get("description"));
+
+        Map<String, Object> context = (Map<String, Object>) esActivity.get("context");
+        Context songContext = activity.getContext();
+        assertEquals(context.size(), 3);
+        assertEquals(context.get("date"), songContext.getDate().getMillis());
+        assertEquals(context.get("service"), lastFmServiceUrl);
+        assertNull(context.get("mood"));
+    }
+
+    private void assertHitsEqualLastFmActivities(SearchHits hits, UUID userId,
+                                                 Collection<Activity> lastFmActivities) {
+        List<Activity> activities = new ArrayList<Activity>(lastFmActivities);
+        int numListens = activities.size();
+        assertEquals(hits.getTotalHits(), numListens);
+
+        for (int i = 0; i < numListens; i++) {
+            SearchHit hit = hits.getAt(i);
+            assertHitEqualsLastFmActivity(hit, userId, activities.get(i));
         }
     }
 }
