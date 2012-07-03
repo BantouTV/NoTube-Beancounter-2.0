@@ -7,6 +7,8 @@ import tv.notube.commons.helper.jedis.JedisPoolFactory;
 
 import java.util.Properties;
 
+import com.google.inject.name.Names;
+
 /**
  * put class description here
  *
@@ -16,9 +18,9 @@ public class ProfilesModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        Properties properties = PropertiesHelper.readFromClasspath("profiler.properties");
-        JedisPoolFactory jpf = new DefaultJedisPoolFactory(properties);
-        bind(JedisPoolFactory.class).toInstance(jpf);
+        Properties properties = PropertiesHelper.readFromClasspath("/redis.properties");
+        Names.bindProperties(binder(), properties);
+        bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
         bind(Profiles.class).to(JedisProfilesImpl.class);
     }
 }

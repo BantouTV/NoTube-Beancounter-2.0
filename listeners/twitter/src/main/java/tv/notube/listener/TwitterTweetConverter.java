@@ -5,6 +5,8 @@ import tv.notube.crawler.requester.ServiceResponseException;
 import tv.notube.crawler.requester.request.twitter.TwitterResponse;
 import tv.notube.crawler.requester.request.twitter.TwitterTweet;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
 /**
@@ -17,9 +19,15 @@ public class TwitterTweetConverter {
         ArrayList<TwitterTweet> tweets = new ArrayList<TwitterTweet>();
         tweets.add(tweet);
         TwitterResponse response = new TwitterResponse(tweets);
-        return response.getResponse().get(0);
-
+        Activity result = response.getResponse().get(0);
+        // TODO (med) this is a workaround to bypass the resolver in our
+        // sally demo.
+        try {
+            result.getContext().setService(new URL("http://sally.beancounter.io"));
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Surprisingly this [http://sally.beancounter.io] is not well-formed", e);
+        }
+        return result;
     }
-
 
 }

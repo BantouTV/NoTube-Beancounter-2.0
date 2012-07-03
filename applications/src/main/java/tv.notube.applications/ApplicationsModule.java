@@ -1,9 +1,12 @@
 package tv.notube.applications;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
+import tv.notube.commons.helper.PropertiesHelper;
 import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
 import tv.notube.commons.helper.jedis.JedisPoolFactory;
+import com.google.inject.name.Names;
+
+import java.util.Properties;
 
 /**
  * put class description here
@@ -14,7 +17,9 @@ public class ApplicationsModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).in(Singleton.class);;
+        Properties properties = PropertiesHelper.readFromClasspath("/redis.properties");
+        Names.bindProperties(binder(), properties);
+        bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
         bind(ApplicationsManager.class).to(JedisApplicationsManagerImpl.class);
     }
 }

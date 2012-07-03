@@ -5,6 +5,8 @@ import com.google.inject.Injector;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import redis.clients.jedis.JedisPool;
+import tv.notube.commons.helper.jedis.JedisPoolFactory;
 import tv.notube.commons.model.User;
 import tv.notube.commons.tests.Tests;
 import tv.notube.commons.tests.TestsBuilder;
@@ -23,8 +25,11 @@ public class JedisUserManagerIntegrationTest {
 
     @BeforeClass
     public void setUp() {
+
         Injector injector = Guice.createInjector(new UserManagerModule());
         userManager = injector.getInstance(UserManager.class);
+        JedisPool pool = injector.getInstance(JedisPoolFactory.class).build();
+        pool.getResource().flushAll();
         tests = TestsBuilder.getInstance().build();
     }
 
@@ -36,7 +41,6 @@ public class JedisUserManagerIntegrationTest {
         User actual = userManager.getUser(expected.getUsername());
         Assert.assertNotNull(actual);
         Assert.assertEquals(actual, expected);
-
         userManager.deleteUser(actual.getUsername());
         actual = userManager.getUser(expected.getUsername());
         Assert.assertNull(actual);

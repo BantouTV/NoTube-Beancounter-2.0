@@ -2,6 +2,7 @@ package tv.notube.platform;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.name.Names;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.sun.jersey.api.core.ClasspathResourceConfig;
 import com.sun.jersey.guice.JerseyServletModule;
@@ -14,6 +15,7 @@ import tv.notube.activities.ActivityStoreException;
 import tv.notube.activities.ElasticSearchActivityStoreFactory;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.JedisApplicationsManagerImpl;
+import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
 import tv.notube.crawler.Crawler;
 import tv.notube.crawler.ParallelCrawlerImpl;
 import tv.notube.crawler.requester.MockRequester;
@@ -37,7 +39,6 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- *
  * @author Enrico Candino (enrico.candino@gmail.com)
  */
 public class ProductionServiceConfig extends GuiceServletContextListener {
@@ -67,13 +68,15 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(UserService.class);
                 bind(ActivitiesService.class);
                 // bind Production Implementations
-                Properties redisProperties = PropertiesHelper.readFromClasspath("redis.properties");
-                JedisPoolFactory jpf = new tv.notube.commons.helper.jedis.DefaultJedisPoolFactory(redisProperties);
-                bind(JedisPoolFactory.class).toInstance(jpf);
 
-                Properties samProperties = PropertiesHelper.readFromClasspath("sam.properties");
+                Properties redisProperties = PropertiesHelper.readFromClasspath("/redis.properties");
+                Names.bindProperties(binder(), redisProperties);
+                bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
+
+                Properties samProperties = PropertiesHelper.readFromClasspath("/sam.properties");
                 ServiceAuthorizationManager sam = DefaultServiceAuthorizationManager.build(samProperties);
                 bind(ServiceAuthorizationManager.class).toInstance(sam);
+
                 bind(ApplicationsManager.class).to(JedisApplicationsManagerImpl.class);
                 bind(UserManager.class).to(JedisUserManagerImpl.class).asEagerSingleton();
                 bind(Profiles.class).to(JedisProfilesImpl.class);
@@ -96,7 +99,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
             }
 
             private Queues getKestrelQueue() {
-                Properties properties = PropertiesHelper.readFromClasspath("kestrel.properties");
+                Properties properties = PropertiesHelper.readFromClasspath("/kestrel.properties");
                 return new KestrelQueues(properties);
             }
         });

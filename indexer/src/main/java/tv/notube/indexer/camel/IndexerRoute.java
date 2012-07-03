@@ -52,7 +52,7 @@ public class IndexerRoute extends RouteBuilder {
 
     public void configure() {
         //registerActivityConverter();
-        from("kestrel://{{kestrel.queue.url}}?concurrentConsumers=10&waitTimeMs=500")
+        from("kestrel://{{kestrel.queue.internal.url}}?concurrentConsumers=10&waitTimeMs=500")
 
                 .process(new Processor() {
                     @Override
@@ -60,9 +60,7 @@ public class IndexerRoute extends RouteBuilder {
                         LOGGER.debug("Got a tweet from queue.", exchange.getIn().getBody());
                     }
                 })
-                //.unmarshal().json(JsonLibrary.Jackson, TwitterTweet.class)
                 .unmarshal().json(JsonLibrary.Jackson, Activity.class)
-                //.convertBodyTo(Activity.class)
                 .multicast().parallelProcessing().to("direct:es", "direct:profiler");
 
         from("direct:es")

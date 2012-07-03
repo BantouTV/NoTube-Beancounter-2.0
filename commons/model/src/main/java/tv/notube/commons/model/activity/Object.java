@@ -10,7 +10,6 @@ import java.net.URL;
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-//@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Tweet.class, name = "TWEET"),

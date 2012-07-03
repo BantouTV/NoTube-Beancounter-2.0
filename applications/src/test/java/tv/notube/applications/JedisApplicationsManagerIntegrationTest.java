@@ -5,7 +5,9 @@ import com.google.inject.Injector;
 import junit.framework.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import redis.clients.jedis.JedisPool;
 import tv.notube.applications.model.Application;
+import tv.notube.commons.helper.jedis.JedisPoolFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -24,6 +26,8 @@ public class JedisApplicationsManagerIntegrationTest {
     public void setUp() {
         Injector injector = Guice.createInjector(new ApplicationsModule());
         applicationsManager = injector.getInstance(ApplicationsManager.class);
+        JedisPool pool = injector.getInstance(JedisPoolFactory.class).build();
+        pool.getResource().flushAll();
     }
 
     @Test

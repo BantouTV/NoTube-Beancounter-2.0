@@ -1,6 +1,7 @@
 package tv.notube.applications;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,9 @@ import java.util.UUID;
 public class JedisApplicationsManagerImpl implements ApplicationsManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JedisApplicationsManagerImpl.class);
+
+    @Inject
+    @Named("redis.db.application") int database;
 
     private JedisPool pool;
 
@@ -59,6 +63,7 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
         }
         jedis = pool.getResource();
         try {
+            jedis.select(database);
             jedis.set(application.getApiKey().toString(), applicationJson);
         } finally {
             pool.returnResource(jedis);
@@ -70,6 +75,7 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
     public void deregisterApplication(UUID key) throws ApplicationsManagerException {
         Jedis jedis = pool.getResource();
         try {
+            jedis.select(database);
             jedis.del(key.toString());
         } finally {
             pool.returnResource(jedis);
@@ -82,6 +88,7 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
         String applicationJson;
         jedis = pool.getResource();
         try {
+            jedis.select(database);
             applicationJson = jedis.get(key.toString());
         } finally {
             pool.returnResource(jedis);

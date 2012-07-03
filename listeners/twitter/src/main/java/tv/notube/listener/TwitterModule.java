@@ -13,7 +13,6 @@ public class TwitterModule extends CamelModuleWithMatchingRoutes {
     protected void configure() {
         super.configure();
         bind(TwitterRoute.class);
-
     }
 
     @Provides

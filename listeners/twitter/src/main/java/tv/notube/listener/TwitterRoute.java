@@ -12,6 +12,7 @@ import tv.notube.crawler.requester.request.twitter.TwitterTweet;
 import twitter4j.Status;
 
 public class TwitterRoute extends RouteBuilder {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TwitterRoute.class);
 
     public void configure() {

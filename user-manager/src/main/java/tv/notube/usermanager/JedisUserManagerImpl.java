@@ -1,6 +1,7 @@
 package tv.notube.usermanager;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,9 @@ public class JedisUserManagerImpl implements UserManager {
     private ServiceAuthorizationManager sam;
 
     @Inject
+    @Named("redis.db.users") private int database;
+
+    @Inject
     public JedisUserManagerImpl(
             JedisPoolFactory factory,
             ServiceAuthorizationManager sam
@@ -61,6 +65,7 @@ public class JedisUserManagerImpl implements UserManager {
             );
         }
         jedis = pool.getResource();
+        jedis.select(database);
         try {
             jedis.set(user.getUsername(), userJson);
         } finally {
@@ -73,6 +78,7 @@ public class JedisUserManagerImpl implements UserManager {
         Jedis jedis;
         String userJson;
         jedis = pool.getResource();
+        jedis.select(database);
         try {
             userJson = jedis.get(username);
         } finally {
@@ -96,6 +102,7 @@ public class JedisUserManagerImpl implements UserManager {
     @Override
     public synchronized void deleteUser(String username) throws UserManagerException {
         Jedis jedis = pool.getResource();
+        jedis.select(database);
         try {
             jedis.del(username);
         } finally {

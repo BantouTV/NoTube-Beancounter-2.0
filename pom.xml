@@ -63,12 +63,12 @@
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-xc</artifactId>
-                <version>1.8.4</version>
+                <version>1.9.7</version>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-jaxrs</artifactId>
-                <version>1.8.4</version>
+                <version>1.9.7</version>
             </dependency>
             <dependency>
                 <groupId>de.l3s.boilerpipe</groupId>
@@ -246,6 +246,7 @@
         <module>realtime-profiler</module>
         <module>profiles</module>
         <module>queues</module>
+        <module>resolver</module>
     </modules>
 
     <distributionManagement>
