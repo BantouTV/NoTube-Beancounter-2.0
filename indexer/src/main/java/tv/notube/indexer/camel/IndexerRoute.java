@@ -52,7 +52,7 @@ public class IndexerRoute extends RouteBuilder {
 
     public void configure() {
         //registerActivityConverter();
-        from("kestrel://{{kestrel.queue.url}}?concurrentConsumers=10&waitTimeMs=500")
+        from("kestrel://{{kestrel.queue.internal.url}}?concurrentConsumers=10&waitTimeMs=500")
 
                 .process(new Processor() {
                     @Override

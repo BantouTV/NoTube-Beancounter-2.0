@@ -246,7 +246,8 @@
         <module>realtime-profiler</module>
         <module>profiles</module>
         <module>queues</module>
-  </modules>
+        <module>resolver</module>
+    </modules>
 
     <distributionManagement>
         <repository>

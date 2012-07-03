@@ -1,6 +1,7 @@
 package tv.notube.profiles;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.codehaus.jackson.map.ObjectMapper;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -18,6 +19,9 @@ public class JedisProfilesImpl implements Profiles {
     private JedisPool pool;
 
     private ObjectMapper mapper;
+
+    @Inject
+    @Named("redis.db.profiles") private int database;
 
     @Inject
     public JedisProfilesImpl(JedisPoolFactory factory) {
@@ -38,6 +42,7 @@ public class JedisProfilesImpl implements Profiles {
             );
         }
         jedis = pool.getResource();
+        jedis.select(database);
         try {
             jedis.set(up.getUserId().toString(), userProfile);
         } finally {
@@ -49,6 +54,7 @@ public class JedisProfilesImpl implements Profiles {
     public UserProfile lookup(UUID userId) throws ProfilesException {
         UserProfile profile;
         Jedis jedis = pool.getResource();
+        jedis.select(database);
         String stringProfile = jedis.get(userId.toString());
         if(stringProfile==null) {
             return null;
