@@ -14,7 +14,6 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortOrder;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeSuite;
@@ -46,7 +45,7 @@ import static tv.notube.activities.ElasticSearchActivityStoreImpl.INDEX_TYPE;
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  * @author Alex Cowell ( alxcwll@gmail.com )
  */
-public class ElasticSearchActivityStoreIntegrationTest {
+public class ElasticSearchActivityStoreTest {
 
     private ActivityStore as;
 
