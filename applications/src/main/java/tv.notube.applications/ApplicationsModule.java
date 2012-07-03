@@ -2,8 +2,8 @@ package tv.notube.applications;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
-import tv.notube.applications.jedis.DefaultJedisPoolFactory;
-import tv.notube.applications.jedis.JedisPoolFactory;
+import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
+import tv.notube.commons.helper.jedis.JedisPoolFactory;
 
 /**
  * put class description here

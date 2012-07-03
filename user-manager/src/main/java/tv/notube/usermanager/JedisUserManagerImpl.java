@@ -2,7 +2,6 @@ package tv.notube.usermanager;
 
 import com.google.inject.Inject;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -11,7 +10,7 @@ import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.auth.AuthHandler;
 import tv.notube.commons.model.auth.AuthHandlerException;
-import tv.notube.usermanager.jedis.JedisPoolFactory;
+import tv.notube.commons.helper.jedis.JedisPoolFactory;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManagerException;
 

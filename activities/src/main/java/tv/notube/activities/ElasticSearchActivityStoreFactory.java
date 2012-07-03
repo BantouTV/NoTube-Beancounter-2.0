@@ -1,15 +1,16 @@
 package tv.notube.activities;
 
-import tv.notube.commons.configuration.Configurations;
-import tv.notube.commons.configuration.ConfigurationsException;
-import tv.notube.commons.configuration.activities.ElasticSearchConfiguration;
+import tv.notube.commons.helper.PropertiesHelper;
+import tv.notube.commons.helper.es.ElasticSearchConfiguration;
+
+import java.util.Properties;
 
 /**
  * @author Alex Cowell ( alxcwll@gmail.com )
  */
 public class ElasticSearchActivityStoreFactory implements ActivityStoreFactory {
 
-    private static final String ELASTICSEARCH_CONF = "elasticsearch-configuration.xml";
+    private static final String ELASTICSEARCH_CONF = "/es.properties";
 
     private static ActivityStoreFactory instance;
 
@@ -24,17 +25,8 @@ public class ElasticSearchActivityStoreFactory implements ActivityStoreFactory {
     }
 
     public ElasticSearchActivityStoreFactory() {
-        ElasticSearchConfiguration configuration;
-        try {
-            configuration = Configurations.getConfiguration(
-                    ELASTICSEARCH_CONF,
-                    ElasticSearchConfiguration.class
-            );
-        } catch (ConfigurationsException cex) {
-            final String message = "Error while loading configuration from " +
-                    "[" + ELASTICSEARCH_CONF + "]";
-            throw new RuntimeException(message, cex);
-        }
+        Properties properties = PropertiesHelper.readFromClasspath(ELASTICSEARCH_CONF);
+        ElasticSearchConfiguration configuration = ElasticSearchConfiguration.build(properties);
         activityStore = new ElasticSearchActivityStoreImpl(configuration);
     }
 

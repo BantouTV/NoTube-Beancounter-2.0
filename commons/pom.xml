@@ -16,11 +16,11 @@
 
     <modules>
         <module>model</module>
-        <module>configuration</module>
         <module>tests</module>
         <module>tagdef</module>
         <module>nlp</module>
         <module>lupedia</module>
+        <module>helper</module>
     </modules>
 
 </project>

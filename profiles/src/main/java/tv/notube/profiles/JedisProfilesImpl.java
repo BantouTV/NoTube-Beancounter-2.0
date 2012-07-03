@@ -5,7 +5,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import tv.notube.commons.model.UserProfile;
-import tv.notube.profiles.jedis.JedisPoolFactory;
+import tv.notube.commons.helper.jedis.JedisPoolFactory;
 
 import java.io.IOException;
 import java.util.UUID;

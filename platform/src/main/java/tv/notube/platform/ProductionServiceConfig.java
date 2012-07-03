@@ -14,11 +14,12 @@ import tv.notube.activities.ActivityStoreException;
 import tv.notube.activities.ElasticSearchActivityStoreFactory;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.JedisApplicationsManagerImpl;
-import tv.notube.applications.jedis.DefaultJedisPoolFactory;
 import tv.notube.crawler.Crawler;
 import tv.notube.crawler.ParallelCrawlerImpl;
 import tv.notube.crawler.requester.MockRequester;
 import tv.notube.crawler.requester.Requester;
+import tv.notube.commons.helper.PropertiesHelper;
+import tv.notube.commons.helper.jedis.JedisPoolFactory;
 import tv.notube.profiles.JedisProfilesImpl;
 import tv.notube.profiles.Profiles;
 import tv.notube.queues.KestrelQueues;
@@ -27,15 +28,10 @@ import tv.notube.usermanager.JedisUserManagerImpl;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.services.auth.DefaultServiceAuthorizationManager;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
-import tv.notube.usermanager.services.auth.ServiceAuthorizationManagerException;
-import tv.notube.usermanager.services.auth.facebook.FacebookAuthHandler;
-import tv.notube.usermanager.services.auth.twitter.TwitterAuthHandler;
 
 import javax.servlet.ServletContextEvent;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -71,10 +67,13 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(UserService.class);
                 bind(ActivitiesService.class);
                 // bind Production Implementations
-                bind(tv.notube.applications.jedis.JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
-                bind(tv.notube.profiles.jedis.JedisPoolFactory.class).to(tv.notube.profiles.jedis.DefaultJedisPoolFactory.class).asEagerSingleton();
-                bind(tv.notube.usermanager.jedis.JedisPoolFactory.class).to(tv.notube.usermanager.jedis.DefaultJedisPoolFactory.class).asEagerSingleton();
-                bind(ServiceAuthorizationManager.class).toInstance(getServiceAuthorizationManager());
+                Properties redisProperties = PropertiesHelper.readFromClasspath("redis.properties");
+                JedisPoolFactory jpf = new tv.notube.commons.helper.jedis.DefaultJedisPoolFactory(redisProperties);
+                bind(JedisPoolFactory.class).toInstance(jpf);
+
+                Properties samProperties = PropertiesHelper.readFromClasspath("sam.properties");
+                ServiceAuthorizationManager sam = DefaultServiceAuthorizationManager.build(samProperties);
+                bind(ServiceAuthorizationManager.class).toInstance(sam);
                 bind(ApplicationsManager.class).to(JedisApplicationsManagerImpl.class);
                 bind(UserManager.class).to(JedisUserManagerImpl.class).asEagerSingleton();
                 bind(Profiles.class).to(JedisProfilesImpl.class);
@@ -97,64 +96,8 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
             }
 
             private Queues getKestrelQueue() {
-                Properties properties = new Properties();
-                properties.setProperty("host", "localhost");
-                properties.setProperty("port", "22133");
-                properties.setProperty("queue", "activities");
+                Properties properties = PropertiesHelper.readFromClasspath("kestrel.properties");
                 return new KestrelQueues(properties);
-            }
-
-            private ServiceAuthorizationManager getServiceAuthorizationManager() {
-                ServiceAuthorizationManager sam = new DefaultServiceAuthorizationManager();
-                tv.notube.commons.model.Service twitter = new tv.notube.commons.model.Service("twitter");
-                twitter.setDescription("Twitter service");
-                try {
-                    twitter.setEndpoint(
-                            new URL("https://api.twitter.com/1/statuses/user_timeline.json")
-                    );
-                    twitter.setSessionEndpoint(new URL("https://api.twitter.com/oauth/request_token"));
-                } catch (MalformedURLException e) {
-                    // com'on.
-                }
-                // TODO (really high) this must be configurable
-                twitter.setApikey("Vs9UkC1ZhE3pT9P4JwbA");
-                twitter.setSecret("BRDzw6MFJB3whzmm1rWlzjsD5LoXJmlmYT40lhravRs");
-                try {
-                    sam.addHandler(
-                            twitter,
-                            new TwitterAuthHandler(twitter)
-                    );
-                } catch (ServiceAuthorizationManagerException e) {
-                    final String errMsg = "error while adding twitter to this stuff";
-                    throw new RuntimeException(errMsg, e);
-                }
-
-                tv.notube.commons.model.Service facebook =
-                        new tv.notube.commons.model.Service("facebook");
-                facebook.setDescription("Facebook Service");
-                try {
-                    facebook.setEndpoint(new URL("https://graph.facebook.com/me/likes&amp;limit=15"));
-                } catch (MalformedURLException e) {
-                    // com'on.
-                }
-                facebook.setApikey("313412168683100");
-                facebook.setSecret("cc040c3b120491bcec98498dd81fc2a5");
-                try {
-                    // TODO (high) this mess needs to be configured
-                    facebook.setOAuthCallback(new URL
-                            ("http://api.beancounter.io/rest/user/oauth/callback/facebook/"));
-                } catch (MalformedURLException e) {
-                    // com'on.
-                }
-                try {
-                    sam.addHandler(
-                            facebook, new FacebookAuthHandler(facebook)
-                    );
-                } catch (ServiceAuthorizationManagerException e) {
-                    final String errMsg = "error while adding facebook to this stuff";
-                    throw new RuntimeException(errMsg, e);
-                }
-                return sam;
             }
         });
     }

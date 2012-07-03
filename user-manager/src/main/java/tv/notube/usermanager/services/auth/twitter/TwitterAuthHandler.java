@@ -21,9 +21,6 @@ import java.net.URL;
  */
 public class TwitterAuthHandler extends DefaultAuthHandler {
 
-    // TODO (high) what's this? fix it urgently
-    private static final String CALLBACK = "http://api.beancounter.io/rest/user/oauth/callback/twitter/";
-
     public TwitterAuthHandler(Service service) {
         super(service);
     }
@@ -60,7 +57,7 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
                            .provider(TwitterApi.class)
                            .apiKey(service.getApikey())
                            .apiSecret(service.getSecret())
-                           .callback(CALLBACK + username)
+                           .callback(service.getOAuthCallback() + username)
                            .build();
         Token token = twitterOAuth.getRequestToken();
         String redirectUrl = twitterOAuth.getAuthorizationUrl(token);

@@ -14,8 +14,8 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortOrder;
 import org.joda.time.DateTime;
 import tv.notube.activities.model.activity.ElasticSearchActivity;
-import tv.notube.commons.configuration.activities.ElasticSearchConfiguration;
-import tv.notube.commons.configuration.activities.NodeInfo;
+import tv.notube.commons.helper.es.ElasticSearchConfiguration;
+import tv.notube.commons.helper.es.NodeInfo;
 import tv.notube.commons.model.activity.*;
 
 import java.io.IOException;

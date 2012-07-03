@@ -1,9 +1,11 @@
 package tv.notube.profiles;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import tv.notube.profiles.jedis.DefaultJedisPoolFactory;
-import tv.notube.profiles.jedis.JedisPoolFactory;
+import tv.notube.commons.helper.PropertiesHelper;
+import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
+import tv.notube.commons.helper.jedis.JedisPoolFactory;
+
+import java.util.Properties;
 
 /**
  * put class description here
@@ -14,7 +16,9 @@ public class ProfilesModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).in(Singleton.class);;
+        Properties properties = PropertiesHelper.readFromClasspath("profiler.properties");
+        JedisPoolFactory jpf = new DefaultJedisPoolFactory(properties);
+        bind(JedisPoolFactory.class).toInstance(jpf);
         bind(Profiles.class).to(JedisProfilesImpl.class);
     }
 }

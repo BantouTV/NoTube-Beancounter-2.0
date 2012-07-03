@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<elasticsearch>
-    <node>
-        <host>localhost</host>
-        <port>9300</port>
-    </node>
-</elasticsearch>

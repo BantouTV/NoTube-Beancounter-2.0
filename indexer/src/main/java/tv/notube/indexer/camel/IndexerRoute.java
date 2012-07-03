@@ -37,11 +37,11 @@ public class IndexerRoute extends RouteBuilder {
 
     private final Profiler profiler;
 
-    public IndexerRoute() {
+    public IndexerRoute(Properties properties) {
         ActivityStore activityStore = ElasticSearchActivityStoreFactory.getInstance().build();
         activityService = new ActivityServiceImpl(activityStore);
         try {
-            profiler = createProfiler();
+            profiler = createProfiler(properties);
         } catch (ProfilerException e) {
             throw new RuntimeException(
                     "Error while creating the Profiler",
@@ -129,14 +129,7 @@ public class IndexerRoute extends RouteBuilder {
     }
     */
 
-    private Profiler createProfiler() throws ProfilerException {
-        Properties properties = new Properties();
-        // look into hashtags definition
-        properties.setProperty("tagdef.enable", "true");
-        // tweets are more important than other
-        properties.setProperty("verb.multiplier.TWEET", "100");
-        // profiles are made only of top 5 interests
-        properties.setProperty("interest.limit", String.valueOf(30));
+    private Profiler createProfiler(Properties properties) throws ProfilerException {
         Injector injector = Guice.createInjector(new ProfilesModule());
         Profiles profiles = injector.getInstance(Profiles.class);
         Profiler profiler = new DefaultProfilerImpl(

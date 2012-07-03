@@ -6,8 +6,6 @@ import junit.framework.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import tv.notube.commons.model.UserProfile;
-import tv.notube.profiles.jedis.DefaultJedisPoolFactory;
-import tv.notube.profiles.jedis.JedisPoolFactory;
 
 import java.util.UUID;
 
