@@ -643,7 +643,6 @@ public class UserService extends JsonService {
         return rb.build();
     }
 
-
     @GET
     @Path("/{username}/profile")
     public Response getProfile(

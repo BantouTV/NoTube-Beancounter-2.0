@@ -20,6 +20,7 @@ import java.util.*;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
+// TODO (med) make POST requests to handle long texts
 public final class LUpediaNLPEngineImpl implements NLPEngine {
 
     public final static String QUERY_PATTERN = "http://lupedia.ontotext.com/lookup/text2json?lookupText=%s&threshold=%s";

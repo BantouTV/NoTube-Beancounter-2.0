@@ -35,6 +35,8 @@ public class DefaultProfilerImplTestCase {
 
     private static final int LIMIT = 5;
 
+    private static final int ACTIVITIES_PER_INTEREST = 2;
+
     @BeforeTest
     public void setUp() throws ProfilerException {
         properties = new Properties();
@@ -44,6 +46,8 @@ public class DefaultProfilerImplTestCase {
         properties.setProperty("verb.multiplier.TWEET", "10");
         // profiles are made only of top 5 interests
         properties.setProperty("interest.limit", String.valueOf(LIMIT));
+        // activities per interest limit
+        properties.setProperty("interest.activities.limit", String.valueOf(ACTIVITIES_PER_INTEREST));
         ps = new MockProfiles();
         profiler = new DefaultProfilerImpl(
                 ps,
