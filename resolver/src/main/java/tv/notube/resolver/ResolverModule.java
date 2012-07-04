@@ -23,7 +23,7 @@ public class ResolverModule extends CamelModuleWithMatchingRoutes {
         Names.bindProperties(binder(), properties);
         bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
         bindInstance("redisProperties", properties);
-        bind(JedisUsernameResolver.class);
+        bind(JedisUsernameResolver.class).asEagerSingleton();
         bind(ResolverRoute.class);
     }
 
