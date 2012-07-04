@@ -47,7 +47,7 @@ public class TwitterResponse implements ServiceResponse<List<Activity>> {
                 ab.setObject(
                         Tweet.class,
                         twitterTweet.getUrl(),
-                        twitterTweet.getUsername(),
+                        twitterTweet.getName(),
                         fields
                 );
                 for (String hashTag : twitterTweet.getHashTags()) {
@@ -56,7 +56,11 @@ public class TwitterResponse implements ServiceResponse<List<Activity>> {
                 for (URL url : twitterTweet.getMentionedUrls()) {
                     ab.objectSetField("addUrl", url, URL.class);
                 }
-                ab.setContext(twitterTweet.getCreatedAt(), new URL(twitter));
+                ab.setContext(
+                        twitterTweet.getCreatedAt(),
+                        new URL(twitter),
+                        twitterTweet.getUsername()
+                );
                 activities.add(ab.pop());
             } catch (ActivityBuilderException e) {
                 throw new ServiceResponseException("Error while building activity", e);
@@ -88,7 +92,7 @@ public class TwitterResponse implements ServiceResponse<List<Activity>> {
                         for (String genre : bbcProgramme.getActors()) {
                             ab.objectSetField("addActor", genre, String.class);
                         }
-                        ab.setContext(twitterTweet.getCreatedAt(), new URL(iplayer));
+                        ab.setContext(twitterTweet.getCreatedAt(), new URL(iplayer), twitterTweet.getUsername());
                         activities.add(ab.pop());
                     } catch (ActivityBuilderException e) {
                         throw new ServiceResponseException("Error while building activity", e);

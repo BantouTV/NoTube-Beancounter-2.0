@@ -24,7 +24,7 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(JedisApplicationsManagerImpl.class);
 
     @Inject
-    @Named("redis.db.application") int database;
+    @Named("redis.db.applications") int database;
 
     private JedisPool pool;
 

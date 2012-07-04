@@ -450,7 +450,8 @@ public class ElasticSearchActivityStoreTest {
         );
         ab.setContext(
                 dateTime.withZone(DateTimeZone.UTC).minusDays(tweetId),
-                new URL(tweetServiceUrl)
+                new URL(tweetServiceUrl),
+                "twitter-username"
         );
 
         return ab.pop();
@@ -483,7 +484,8 @@ public class ElasticSearchActivityStoreTest {
                 fields);
         ab.setContext(
                 dateTime.withZone(DateTimeZone.UTC).minusDays(trackId),
-                new URL(lastFmServiceUrl)
+                new URL(lastFmServiceUrl),
+                "twitter-username"
         );
 
         return ab.pop();
@@ -524,7 +526,7 @@ public class ElasticSearchActivityStoreTest {
 
         Map<String, Object> context = (Map<String, Object>) esActivity.get("context");
         Context tweetContext = activity.getContext();
-        assertEquals(context.size(), 3);
+        assertEquals(context.size(), 4);
         assertEquals(context.get("date"), tweetContext.getDate().getMillis());
         assertEquals(context.get("service"), tweetServiceUrl);
         assertNull(context.get("mood"));

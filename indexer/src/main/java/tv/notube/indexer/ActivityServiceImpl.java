@@ -18,12 +18,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public void store(Activity activity) throws ActivityStoreException {
-        activityStore.store(getUserUUID(), activity);
-    }
-
-    private UUID getUserUUID() {
-        // TODO (hardcoded)
-        return UUID.fromString("12345678-1234-1234-1234-123456789ab");
+    public void store(UUID userId, Activity activity) throws ActivityStoreException {
+        activityStore.store(userId, activity);
     }
 }

@@ -7,6 +7,8 @@ import tv.notube.activities.MockActivityStore;
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.tests.TestsException;
 
+import java.util.UUID;
+
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
@@ -18,7 +20,8 @@ public class ActivityServiceTestCase {
         ActivityService underTest = new ActivityServiceImpl(activityStore);
         Activity activity = new Activity();
 
-        underTest.store(activity);
+        UUID testUserId = UUID.randomUUID();
+        underTest.store(testUserId, activity);
 
         Activity activityStored = activityStore.getLastActivity();
         Assert.assertEquals(activity, activityStored);

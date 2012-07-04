@@ -44,7 +44,9 @@ public class LastFmTrackServiceResponse
                     fields.put("setMbid", track.getArtist().getMbid());
                 }
                 ab.setObject(Song.class, track.getUrl(), track.getName(), fields);
-                ab.setContext(track.getDate(), new URL(lastfm));
+                // TODO (low) this is crap. understand where grab the lastfm
+                // user identifier or username and push it correctly
+                ab.setContext(track.getDate(), new URL(lastfm), "fake");
                 activities.add(ab.pop());
             } catch (ActivityBuilderException e) {
                 throw new ServiceResponseException("Error while building activity", e);

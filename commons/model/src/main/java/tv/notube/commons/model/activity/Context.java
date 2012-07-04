@@ -25,6 +25,8 @@ public class Context implements Serializable {
 
     private String mood;
 
+    private String username;
+
     public Context() {}
 
     @Random( names = { "d" } )
@@ -57,12 +59,21 @@ public class Context implements Serializable {
         this.mood = mood;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     @Override
     public String toString() {
         return "Context{" +
                 "date=" + date +
                 ", service=" + service +
                 ", mood='" + mood + '\'' +
+                ", username='" + username + '\'' +
                 '}';
     }
 

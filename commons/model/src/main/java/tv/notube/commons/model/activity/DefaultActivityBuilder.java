@@ -92,11 +92,13 @@ public class DefaultActivityBuilder implements ActivityBuilder {
         activity.setObject(obj);
     }
 
-    public void setContext(DateTime dateTime, URL service) throws ActivityBuilderException {
+    public void setContext(DateTime dateTime, URL service, String username)
+            throws ActivityBuilderException {
         if (activity != null) {
             Context c = new Context();
             c.setDate(dateTime);
             c.setService(service);
+            c.setUsername(username);
             activity.setContext(c);
             return;
         }

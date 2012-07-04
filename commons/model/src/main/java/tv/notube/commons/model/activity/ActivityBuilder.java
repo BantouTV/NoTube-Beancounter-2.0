@@ -24,7 +24,7 @@ public interface ActivityBuilder {
             java.util.Map<String, java.lang.Object> fields
     )  throws ActivityBuilderException;
 
-    public void setContext(DateTime dateTime, URL service)
+    public void setContext(DateTime dateTime, URL service, String username)
             throws ActivityBuilderException;
 
     public void objectSetField(

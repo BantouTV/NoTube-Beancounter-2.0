@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )
@@ -38,7 +39,7 @@ public class JedisUsernameResolver {
         verbs.put(Verb.LIKE, Integer.parseInt((String) properties.get("redis.db.facebook"), 10));
     }
 
-    public Activity resolve(Activity activity) {
+    public UUID resolveUsername(Activity activity) {
         // TODO (med) this is a workaround to by pass the resolver
         // for our sally demo app.
         final URL service;
@@ -47,9 +48,10 @@ public class JedisUsernameResolver {
         } catch (MalformedURLException e) {
             throw new RuntimeException("http://sally.beancounter.io is ill formed", e);
         }
-        if(activity.getContext().getService().equals(service)) {
+        if (activity.getContext().getService().equals(service)) {
             activity.getObject().setName("sally-beancounter");
-            return activity;
+            // TODO (med) this is another workaround for the sally demo
+            return UUID.fromString("363edc3d-1629-454a-b1b6-1c4de4537a6f");
         }
         Verb verb = activity.getVerb();
         int database;
@@ -61,16 +63,23 @@ public class JedisUsernameResolver {
         }
         Jedis jedis = pool.getResource();
         jedis.select(database);
-        String serviceUsername = activity.getObject().getName();
-        String beancounterUsername = jedis.get(serviceUsername);
-        if (beancounterUsername == null) {
+        String serviceUsername = activity.getContext().getUsername();
+        String userIdStr = jedis.get(serviceUsername);
+        UUID userId;
+        try {
+            userId = UUID.fromString(userIdStr);
+        } catch (IllegalArgumentException e) {
+            LOGGER.error(
+                    "User [{}] has a wrong userId in the database",
+                    serviceUsername
+            );
+            return null;
+        }
+        if (userId == null) {
             LOGGER.error("User [{}] not found for [{}]", serviceUsername, verb);
             return null;
         }
-        // TODO (immediate) this is a deep architecture debt, internal usernames
-        // must passed through other channels/fields. refactor needed?
-        activity.getObject().setName(beancounterUsername);
-        return activity;
+        return userId;
     }
 
 }

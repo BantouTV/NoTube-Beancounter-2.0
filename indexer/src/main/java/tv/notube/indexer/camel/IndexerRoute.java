@@ -1,7 +1,6 @@
 package tv.notube.indexer.camel;
 
 import java.util.Properties;
-import java.util.UUID;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -16,7 +15,7 @@ import tv.notube.activities.ActivityStore;
 import tv.notube.activities.ElasticSearchActivityStoreFactory;
 import tv.notube.commons.lupedia.LUpediaNLPEngineImpl;
 import tv.notube.commons.model.UserProfile;
-import tv.notube.commons.model.activity.Activity;
+import tv.notube.commons.model.activity.ResolvedActivity;
 import tv.notube.commons.model.activity.Tweet;
 import tv.notube.indexer.ActivityServiceImpl;
 import tv.notube.profiler.DefaultProfilerImpl;
@@ -51,81 +50,34 @@ public class IndexerRoute extends RouteBuilder {
     }
 
     public void configure() {
-        //registerActivityConverter();
         from("kestrel://{{kestrel.queue.internal.url}}?concurrentConsumers=10&waitTimeMs=500")
-
-                .process(new Processor() {
-                    @Override
-                    public void process(Exchange exchange) throws Exception {
-                        LOGGER.debug("Got a tweet from queue.", exchange.getIn().getBody());
-                    }
-                })
-                .unmarshal().json(JsonLibrary.Jackson, Activity.class)
+                .unmarshal().json(JsonLibrary.Jackson, ResolvedActivity.class)
                 .multicast().parallelProcessing().to("direct:es", "direct:profiler");
-
         from("direct:es")
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
-                        LOGGER.debug("Storing activity {} to ES.", exchange.getIn().getBody(Activity.class));
-                        activityService.store(exchange.getIn().getBody(Activity.class));
+                        ResolvedActivity resolvedActivity = exchange.getIn()
+                                .getBody(ResolvedActivity.class);
+                        activityService.store(
+                                resolvedActivity.getUserId(),
+                                resolvedActivity.getActivity()
+                        );
                     }
                 });
-
         from("direct:profiler")
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
-                        Activity activity = exchange.getIn().getBody(Activity.class);
-                        LOGGER.debug("Profiling activity {}.", activity);
+                        ResolvedActivity resolvedActivity = exchange.getIn().getBody(ResolvedActivity.class);
+                        LOGGER.debug("Profiling activity {}.", resolvedActivity);
                         UserProfile profile = profiler.profile(
-                                // TODO (high) this should be replaced with real
-                                UUID.fromString("12345678-1234-1234-1234-123456789ab"),
-                                exchange.getIn().getBody(Activity.class)
+                                resolvedActivity.getUserId(),
+                                resolvedActivity.getActivity()
                         );
-
                     }
                 });
     }
-
-    /*
-    private void registerActivityConverter() {
-
-        getContext()
-                .getTypeConverterRegistry()
-                .addTypeConverter(Activity.class, TwitterTweet.class, new TypeConverterSupport() {
-                    @Override
-                    public <T> T convertTo(Class<T> tClass, Exchange exchange, Object o)
-                            throws TypeConversionException {
-                        TwitterTweet tweet = (TwitterTweet) o;
-                        try {
-                            return (T) new TwitterTweetConverter().convert(tweet);
-                        } catch (ServiceResponseException e) {
-                            throw new TypeConversionException(TwitterTweet.class, Activity.class, e);
-                        }
-                    }
-                });
-        getContext().getTypeConverterRegistry()
-                .addTypeConverter(
-                        Activity.class,
-                        TwitterTweet.class,
-                        new TypeConverterSupport() {
-
-                            @Override
-                            public <T> T convertTo(Class<T> tClass, Exchange exchange, Object o)
-                                    throws TypeConversionException {
-
-                                TwitterTweet tweet = (TwitterTweet)o;
-
-                                try {
-                                    return (T)new TwitterTweetConverter().convert(tweet);
-                                } catch (ServiceResponseException e) {
-                                    throw new TypeConversionException(TwitterTweet.class, Activity.class, e);
-                                }
-                            }
-                        });
-    }
-    */
 
     private Profiler createProfiler(Properties properties) throws ProfilerException {
         Injector injector = Guice.createInjector(new ProfilesModule());

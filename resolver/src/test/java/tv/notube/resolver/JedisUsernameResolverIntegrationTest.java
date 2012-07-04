@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )
@@ -43,28 +44,28 @@ public class JedisUsernameResolverIntegrationTest {
     @Test
     public void testResolveTweet() throws Exception {
         jedis.select(3);
-        jedis.set("twitter_username","beancounter");
+        jedis.set("twitter_username","beancounter-uuid");
         Activity tweet = getTweetActivity();
-        Activity resolved = resolver.resolve(tweet);
-        Assert.assertEquals(resolved.getObject().getName(), "beancounter");
+        UUID resolvedUserId = resolver.resolveUsername(tweet);
+        Assert.assertEquals(resolvedUserId, "beancounter-uuid");
     }
 
     @Test
     public void testResolveFacebookEvent() throws Exception {
         jedis.select(4);
-        jedis.set("facebook_username","beancounter");
-        Activity tweet = getEventActivity();
-        Activity resolved = resolver.resolve(tweet);
-        Assert.assertEquals(resolved.getObject().getName(), "beancounter");
+        jedis.set("facebook_username","beancounter-uuid");
+        Activity event = getEventActivity();
+        UUID resolvedUserId = resolver.resolveUsername(event);
+        Assert.assertEquals(resolvedUserId, "beancounter-uuid");
     }
 
     @Test
     public void testResolveFacebookEventNotStoredUser() throws Exception {
         jedis.select(4);
-        jedis.set("facebook_username","beancounter");
+        jedis.set("facebook_username","beancounter-uuid");
         Activity event = getEventActivity();
         event.getObject().setName("not-existing-user");
-        Activity resolved = resolver.resolve(event);
+        UUID resolved = resolver.resolveUsername(event);
         Assert.assertNull(resolved);
     }
 
@@ -72,9 +73,9 @@ public class JedisUsernameResolverIntegrationTest {
     public void testResolveNotSupportedActivity() throws Exception {
         jedis.select(3);
         jedis.set("something_username","beancounter");
-        Activity tweet = getEventActivity();
-        tweet.setVerb(Verb.CHECKIN);
-        Activity resolved = resolver.resolve(tweet);
+        Activity unsupportedActivity = getEventActivity();
+        unsupportedActivity.setVerb(Verb.CHECKIN);
+        UUID resolved = resolver.resolveUsername(unsupportedActivity);
         Assert.assertNull(resolved);
     }
 
@@ -84,8 +85,8 @@ public class JedisUsernameResolverIntegrationTest {
         builder.setVerb(Verb.TWEET);
         Map<String, Object> fields = new HashMap<String, Object>();
         fields.put("setText", "Some fake text");
-        builder.setObject(Tweet.class, new URL("http://test.com"), "twitter_username", fields);
-        builder.setContext(new DateTime(), new URL("http://service.com"));
+        builder.setObject(Tweet.class, new URL("http://test.com"), "Tweet Name", fields);
+        builder.setContext(new DateTime(), new URL("http://service.com"), "twitter_username");
         return builder.pop();
     }
 
@@ -94,8 +95,8 @@ public class JedisUsernameResolverIntegrationTest {
         builder.push();
         builder.setVerb(Verb.LIKE);
         Map<String, Object> fields = new HashMap<String, Object>();
-        builder.setObject(Event.class, new URL("http://test.com"), "facebook_username", fields);
-        builder.setContext(new DateTime(), new URL("http://service.com"));
+        builder.setObject(Event.class, new URL("http://test.com"), "Event Name", fields);
+        builder.setContext(new DateTime(), new URL("http://service.com"), "facebook_username");
         return builder.pop();
     }
 
