@@ -1,6 +1,7 @@
 package tv.notube.resolver;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +21,10 @@ import java.util.UUID;
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
+@Singleton
 public class JedisUsernameResolver {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResolverRoute.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JedisUsernameResolver.class);
 
     private JedisPool pool;
 
@@ -40,21 +42,6 @@ public class JedisUsernameResolver {
     }
 
     public UUID resolveUsername(Activity activity) {
-        // TODO (med) this is a workaround to by pass the resolver
-        // for our sally demo app.
-        /*
-        final URL service;
-        try {
-            service = new URL("http://sally.beancounter.io");
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("http://sally.beancounter.io is ill formed", e);
-        }
-        if (activity.getContext().getService().equals(service)) {
-            activity.getObject().setName("sally-beancounter");
-            // TODO (med) this is another workaround for the sally demo
-            return UUID.fromString("363edc3d-1629-454a-b1b6-1c4de4537a6f");
-        }
-        */
         Verb verb = activity.getVerb();
         int database;
         try {
@@ -66,7 +53,12 @@ public class JedisUsernameResolver {
         Jedis jedis = pool.getResource();
         jedis.select(database);
         String serviceUsername = activity.getContext().getUsername();
-        String userIdStr = jedis.get(serviceUsername);
+        String userIdStr;
+        try {
+            userIdStr = jedis.get(serviceUsername);
+        } finally {
+            pool.returnResource(jedis);
+        }
         UUID userId;
         try {
             userId = UUID.fromString(userIdStr);

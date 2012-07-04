@@ -70,6 +70,7 @@ public class DefaultProfilerImpl implements Profiler {
     }
 
     public UserProfile profile(UUID userId, Activity activity) throws ProfilerException {
+        LOGGER.info("profiling started for user [" + userId + "]");
         // grab the old profile
         UserProfile old;
         try {
@@ -139,6 +140,7 @@ public class DefaultProfilerImpl implements Profiler {
                     "Error while storing profile for user [" + userId + "]", e
             );
         }
+        LOGGER.info("profiling ended for user [" + userId + "]");
         return up;
     }
 

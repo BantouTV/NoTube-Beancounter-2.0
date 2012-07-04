@@ -42,15 +42,12 @@ public class ResolverRoute extends RouteBuilder {
                                     new ResolvedActivity(userId, activity)
                             );
                         }
-                        LOGGER.debug("Resolved username [{}-{}].", activity.getContext().getUsername(), userId);
+                        LOGGER.debug("resolved username [{}-{}].", activity.getContext().getUsername(), userId);
                     }
                 })
                 .filter(body().isNotNull())
-                .log("AFTER FILTER")
                 .marshal().json(JsonLibrary.Jackson)
                 .convertBodyTo(String.class)
-                .log("AFTER MARSHALLED")
-                .to("kestrel://{{kestrel.queue.internal.url}}")
-                .log("***************** SENT!!! YEEEEEH! *********************");
+                .to("kestrel://{{kestrel.queue.internal.url}}");
     }
 }
