@@ -1,4 +1,4 @@
-package tv.notube.indexer.camel;
+package tv.notube.indexer;
 
 import com.google.inject.Inject;
 import org.apache.camel.Exchange;
