@@ -23,8 +23,8 @@ public class ResolverRoute extends RouteBuilder {
     private JedisUsernameResolver resolver;
 
     public void configure() {
-        from("kestrel://{{kestrel.queue.social.url}}?concurrentConsumers=10&waitTimeMs=500")
-
+        from("kestrel://{{kestrel.queue.social.url}}")
+                // ?concurrentConsumers=10&waitTimeMs=500
                 .convertBodyTo(String.class)
                 .unmarshal().json(JsonLibrary.Jackson, Activity.class)
                 .process(new Processor() {
@@ -34,19 +34,23 @@ public class ResolverRoute extends RouteBuilder {
                         LOGGER.debug("Resolving username {}.", activity);
                         UUID userId = resolver.resolveUsername(activity);
                         if(userId == null) {
-                            exchange.getOut().setBody(
+                            exchange.getIn().setBody(
                                     null
                             );
                         } else {
-                            exchange.getOut().setBody(
+                            exchange.getIn().setBody(
                                     new ResolvedActivity(userId, activity)
                             );
                         }
+                        LOGGER.debug("Resolved username [{}-{}].", activity.getContext().getUsername(), userId);
                     }
                 })
                 .filter(body().isNotNull())
+                .log("AFTER FILTER")
                 .marshal().json(JsonLibrary.Jackson)
                 .convertBodyTo(String.class)
-                .to("kestrel://{{kestrel.queue.internal.url}}");
+                .log("AFTER MARSHALLED")
+                .to("kestrel://{{kestrel.queue.internal.url}}")
+                .log("***************** SENT!!! YEEEEEH! *********************");
     }
 }

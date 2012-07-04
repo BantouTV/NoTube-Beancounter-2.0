@@ -12,6 +12,7 @@ import java.util.Map;
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class ResolverMain {
+    /*
     public static void main(String[] args) throws Exception {
 
         final PropertiesComponent pc = new PropertiesComponent();
@@ -39,6 +40,7 @@ public class ResolverMain {
         // and run, which keeps blocking until we terminate the JVM (or stop CamelContext)
         main.run();
     }
+    */
 
 }
 

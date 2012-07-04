@@ -42,6 +42,7 @@ public class JedisUsernameResolver {
     public UUID resolveUsername(Activity activity) {
         // TODO (med) this is a workaround to by pass the resolver
         // for our sally demo app.
+        /*
         final URL service;
         try {
             service = new URL("http://sally.beancounter.io");
@@ -53,6 +54,7 @@ public class JedisUsernameResolver {
             // TODO (med) this is another workaround for the sally demo
             return UUID.fromString("363edc3d-1629-454a-b1b6-1c4de4537a6f");
         }
+        */
         Verb verb = activity.getVerb();
         int database;
         try {

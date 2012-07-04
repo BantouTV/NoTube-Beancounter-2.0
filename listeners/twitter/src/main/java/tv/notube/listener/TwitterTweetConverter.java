@@ -24,6 +24,7 @@ public class TwitterTweetConverter {
         // sally demo.
         try {
             result.getContext().setService(new URL("http://sally.beancounter.io"));
+            result.getContext().setUsername("sally-beancounter");
         } catch (MalformedURLException e) {
             throw new RuntimeException("Surprisingly this [http://sally.beancounter.io] is not well-formed", e);
         }

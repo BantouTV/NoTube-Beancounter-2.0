@@ -695,6 +695,9 @@ public class UserService extends JsonService {
         } catch (ProfilesException e) {
             return error(e, "Error while retrieving profile for user [" + username + "]");
         }
+        if(up==null){
+            return error(new RuntimeException(), "Profile for user [" + username + "] not found");
+        }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new UserProfilePlatformResponse(
                 UserProfilePlatformResponse.Status.OK,

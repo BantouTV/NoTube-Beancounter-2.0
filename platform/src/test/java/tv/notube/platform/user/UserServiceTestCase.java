@@ -467,7 +467,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
-        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
         deregisterTestApplication();
     }
 
