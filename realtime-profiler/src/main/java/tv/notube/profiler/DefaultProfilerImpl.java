@@ -1,5 +1,7 @@
 package tv.notube.profiler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tv.notube.commons.linking.LinkingEngine;
 import tv.notube.commons.model.Interest;
 import tv.notube.commons.model.UserProfile;
@@ -24,6 +26,8 @@ import java.util.*;
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 public class DefaultProfilerImpl implements Profiler {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(DefaultProfilerImpl.class);
 
     private Map<Class<? extends tv.notube.commons.model.activity.Object>, Class<? extends ObjectProfilingRule>>
             objectRules = new HashMap<Class<? extends Object>, Class<? extends ObjectProfilingRule>>();
@@ -77,7 +81,9 @@ public class DefaultProfilerImpl implements Profiler {
         try {
             opr.run(properties);
         } catch (ProfilingRuleException e) {
-            throw new ProfilerException("", e);
+            final String errMsg = "Error while running rule for activity [" + activity + "]";
+            LOGGER.error(errMsg, e);
+            throw new ProfilerException(errMsg, e);
         }
         double multiplier = getMultiplier(activity.getVerb());
         Collection<URI> activityReferences;
