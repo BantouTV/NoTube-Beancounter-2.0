@@ -45,7 +45,7 @@
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jackson</artifactId>
         </dependency>
-        <!-- TODO (low) move deps to parent -->
+        <!-- TODO (low) move deps to parent or switch to a non SNAPSHOT one -->
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-guice</artifactId>

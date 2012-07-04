@@ -1,5 +1,8 @@
 package tv.notube.commons.helper.es;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;

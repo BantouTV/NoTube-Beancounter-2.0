@@ -5,6 +5,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <artifactId>parent</artifactId>
         <groupId>tv.notube</groupId>
@@ -33,10 +34,6 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-core</artifactId>
         </dependency>
@@ -47,6 +44,12 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jackson</artifactId>
+        </dependency>
+        <!-- TODO (low) move deps to parent or switch to a non SNAPSHOT one -->
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-guice</artifactId>
+            <version>2.10-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>
@@ -69,7 +72,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>tv.notube.indexer.camel.IndexerMain</mainClass>
+                            <mainClass>org.apache.camel.guice.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

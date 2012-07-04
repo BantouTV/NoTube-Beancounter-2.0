@@ -1,5 +1,7 @@
 package tv.notube.activities;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -49,7 +51,10 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
 
     private Client client;
 
-    public ElasticSearchActivityStoreImpl(ElasticSearchConfiguration configuration) {
+    @Inject
+    public ElasticSearchActivityStoreImpl(
+            @Named("esConfiguration") ElasticSearchConfiguration configuration
+    ) {
         this.configuration = configuration;
         client = getClient();
         mapper = new ObjectMapper();
