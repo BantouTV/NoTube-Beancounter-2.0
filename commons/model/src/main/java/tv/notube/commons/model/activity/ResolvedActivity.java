@@ -15,6 +15,8 @@ public class ResolvedActivity {
 
     private Activity activity;
 
+    public ResolvedActivity() {}
+
     public ResolvedActivity(UUID userId, Activity activity) {
         this.userId = userId;
         this.activity = activity;
