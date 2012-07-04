@@ -18,7 +18,7 @@ public class TwitterRoute extends RouteBuilder {
     public void configure() {
         //errorHandler(deadLetterChannel("file:logs/error"));
 
-        from("twitter://streaming/filter?type=event&keywords=London&consumerKey={{consumer.key}}&consumerSecret={{consumer.secret}}&accessToken={{access.token}}&accessTokenSecret={{access.token.secret}}")
+        from("twitter://streaming/filter?type=event&locations=-0.10,51.53,-0.03,51.50&consumerKey={{consumer.key}}&consumerSecret={{consumer.secret}}&accessToken={{access.token}}&accessTokenSecret={{access.token.secret}}")
 
                 .process(new Processor() {
                     @Override
