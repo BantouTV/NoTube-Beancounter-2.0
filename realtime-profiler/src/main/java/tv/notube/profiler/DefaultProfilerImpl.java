@@ -75,7 +75,7 @@ public class DefaultProfilerImpl implements Profiler {
         try {
             old = getProfile(userId);
         } catch (ProfilesException e) {
-            throw new ProfilerException("", e);
+            throw new ProfilerException("Error while looking up the old profile for user with id [" + userId + "]", e);
         }
         ObjectProfilingRule opr = getRule(activity);
         try {
@@ -90,7 +90,7 @@ public class DefaultProfilerImpl implements Profiler {
         try {
             activityReferences = opr.getResult();
         } catch (ProfilingRuleException e) {
-            throw new ProfilerException("", e);
+            throw new ProfilerException("Error while getting rule result", e);
         }
         if (activityReferences.size() == 0) {
             if (old != null) {
@@ -150,8 +150,9 @@ public class DefaultProfilerImpl implements Profiler {
             if(Utils.contains(interest, oldInterests)) {
                 URI resource = interest.getResource();
                 Interest oldInterest = Utils.retrieve(resource, oldInterests);
+                int threshold = Integer.parseInt(properties.getProperty("interest.activities.limit"), 10);
                 merged.add(
-                        Utils.merge(interest, oldInterest)
+                        Utils.merge(interest, oldInterest, threshold)
                 );
                 // remove it from the old ones
                 oldInterests.remove(oldInterest);

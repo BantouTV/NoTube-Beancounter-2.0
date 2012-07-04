@@ -1,6 +1,7 @@
 package tv.notube.profiler.utils;
 
 import tv.notube.commons.model.Interest;
+import tv.notube.commons.model.activity.Activity;
 
 import java.net.URI;
 import java.util.*;
@@ -28,7 +29,15 @@ public class Utils {
         return null;
     }
 
-    public static Interest merge(Interest nu, Interest old) {
+    public static Interest merge(Interest nu, Interest old, int threshold) {
+        // if the activities of the old one are above the threshold, drop the exceeding ones
+        if(old.getActivities().size() > threshold) {
+            List<UUID> oldActivities = new ArrayList<UUID>(old.getActivities());
+            for(int i = 0; i < oldActivities.size() - threshold; i++) {
+                oldActivities.remove(i);
+            }
+            old.setActivities(oldActivities);
+        }
         for(UUID activityId : nu.getActivities()) {
             old.addActivity(activityId);
         }
@@ -52,5 +61,20 @@ public class Utils {
             result.add(union.get(i));
         }
         return result;
+    }
+
+    public static void sortByDate(List<Activity> activities) {
+        Collections.sort(activities, new ActivityContextDateComparator());
+        Collections.reverse(activities);
+    }
+
+
+    private static class ActivityContextDateComparator implements Comparator<Activity> {
+        @Override
+        public int compare(Activity object, Activity object1) {
+            return object.getContext().getDate().compareTo(
+                    object1.getContext().getDate()
+            );
+        }
     }
 }

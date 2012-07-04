@@ -46,4 +46,16 @@ public class LUpediaNLPEngineImplTestCase {
         Assert.assertTrue(uris.contains(new URI("http://dbpedia.org/resource/Barnsley")));
     }
 
+    // TODO (med) enable me
+    @Test(enabled = false)
+    public void test() throws NLPEngineException, URISyntaxException, MalformedURLException {
+        final URL url = new URL("http://www.teamgb.com/news/eighteen-gymnasts-selected-team-gb-london-2012");
+        Collection<URI> uris = nlpEngine.enrich(url);
+        Assert.assertEquals(uris.size(), 5);
+        Assert.assertTrue(uris.contains(new URI("http://dbpedia.org/resource/London")));
+        Assert.assertTrue(uris.contains(new URI("http://dbpedia.org/resource/BBC")));
+        Assert.assertTrue(uris.contains(new URI("http://dbpedia.org/resource/Cardiff")));
+        Assert.assertTrue(uris.contains(new URI("http://dbpedia.org/resource/Barnsley")));
+    }
+
 }
