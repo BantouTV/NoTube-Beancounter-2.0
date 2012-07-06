@@ -6,6 +6,7 @@ import tv.notube.activities.ActivityStore;
 import tv.notube.activities.ActivityStoreException;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
+import tv.notube.commons.model.Interest;
 import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.UserProfile;
@@ -24,8 +25,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
-import java.util.Collection;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
@@ -688,6 +688,14 @@ public class UserService extends JsonService {
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
+        if(userObj == null) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    "Sorry. User [" + username + "] has not been found")
+            );
+            return rb.build();
+        }
         UserProfile up;
         try {
             up = profiles.lookup(userObj.getId());
@@ -764,6 +772,88 @@ public class UserService extends JsonService {
                 "activities updated for [" + username + "]",
                 report
         )
+        );
+        return rb.build();
+    }
+
+
+    @GET
+    @Path("/{username}/profile/pie")
+    public Response getProfilePie(
+            @PathParam("username") String username,
+            @QueryParam("apikey") String apiKey
+    ) {
+        try {
+            check(
+                    this.getClass(),
+                    "getProfile",
+                    username,
+                    apiKey
+            );
+        } catch (ServiceException e) {
+            return error(e, "Error while checking parameters");
+        }
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
+        }
+        boolean isAuth;
+        try {
+            isAuth = applicationsManager.isAuthorized(
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.RETRIEVE,
+                    ApplicationsManager.Object.PROFILE
+            );
+        } catch (ApplicationsManagerException e) {
+            return error(e, "Error while authenticating you application");
+
+        }
+        if (!isAuth) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.OK,
+                    "Sorry. You're not allowed to do that.")
+            );
+            return rb.build();
+
+        }
+        User userObj;
+        try {
+            userObj = userManager.getUser(username);
+        } catch (UserManagerException e) {
+            return error(e, "Your apikey is not well formed");
+
+        }
+        UserProfile up;
+        try {
+            up = profiles.lookup(userObj.getId());
+        } catch (ProfilesException e) {
+            return error(e, "Your apikey is not well formed");
+
+        }
+        if(up==null){
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    "Profile for user [" + username + "] not found")
+            );
+            return rb.build();
+        }
+        List<List<Object>> array = new ArrayList<List<Object>>();
+        for(Interest i : up.getInterests()) {
+            List<Object> interestAndWeight = new ArrayList<Object>();
+            interestAndWeight.add(i.getResource());
+            interestAndWeight.add(i.getWeight());
+            array.add(interestAndWeight);
+        }
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(
+                new PiePlatformResponse(
+                        PiePlatformResponse.Status.OK,
+                        "Data loaded",
+                        array
+                )
         );
         return rb.build();
     }

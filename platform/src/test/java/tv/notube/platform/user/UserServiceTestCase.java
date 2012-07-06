@@ -9,6 +9,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import tv.notube.commons.model.User;
+import tv.notube.commons.model.UserProfile;
 import tv.notube.commons.tests.Tests;
 import tv.notube.commons.tests.TestsBuilder;
 import tv.notube.commons.tests.TestsException;
@@ -449,6 +450,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         deregisterTestApplication();
     }
 
+    // TODO (mid) review this test, we need to store the profile first
     @Test
     public void testGetProfile() throws IOException {
         APIKEY = registerTestApplication().toString();
@@ -562,6 +564,47 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         Assert.assertEquals(result, HttpStatus.SC_NOT_FOUND, "\"Unexpected result: [" + result + "]");
         Assert.assertEquals(responseBody, "");
         deregisterTestApplication();
+    }
+
+    @Test( enabled = false )
+    public void testGetProfilePie() throws IOException {
+
+        String json = "{\"visibility\":\"PUBLIC\",\"username\":null,\"userId\":\"c5e1d997-a9fb-4488-8764-6e08269409c6\",\"interests\":[{\"resource\":\"http://dbpedia.org/resource/Lauren_London\",\"visible\":true,\"weight\":0.09459727806562604,\"activities\":[\"cb2addc4-950c-4e28-8c19-57fc53879383\",\"0bd89978-2415-4ea1-b3b0-da285a20128c\"]},{\"resource\":\"http://dbpedia.org/resource/Hey_%28band%29\",\"visible\":true,\"weight\":0.03575612534852659,\"activities\":[\"0f09ce34-2da6-4d0c-b312-8b74de1699a3\"]},{\"resource\":\"http://dbpedia.org/resource/South_East_%28London_sub_region%29\",\"visible\":true,\"weight\":0.034977805118625395,\"activities\":[\"8867d82e-9788-4fdf-8a3e-d3210eae54bb\"]},{\"resource\":\"http://dbpedia.org/resource/Hugh_Laurie\",\"visible\":true,\"weight\":0.024602610189249773,\"activities\":[\"a1b03cbf-cd03-40d8-ac77-1224c93bb082\"]},{\"resource\":\"http://dbpedia.org/resource/Forged_%28film%29\",\"visible\":true,\"weight\":0.04522886991318023,\"activities\":[\"d25ae31b-7da3-429c-a4e2-50592b13b920\"]},{\"resource\":\"http://dbpedia.org/resource/London\",\"visible\":true,\"weight\":0.6429545770402437,\"activities\":[\"5c741225-4fc2-4545-bdfc-ba023d7683ad\",\"59712d61-d336-4a03-b360-2d3e540b4695\",\"c7cb42b5-39e5-47b0-bd31-e94216b7bfb0\",\"cdbcea67-294c-4919-9b2e-bca7a53e6f99\",\"a15ab456-433e-4241-968f-f957e8133246\",\"8bb55ee0-6e0a-43e2-a3ab-1c0dae485699\",\"23ba40ce-cc42-4ef1-a86f-52c54e8b1e84\",\"4d7195c7-0448-4fa0-a591-8e1d28cb5e00\",\"d47047e5-854c-46e4-8160-169534fb0152\",\"e1efde7b-8ce4-488b-8838-08776f801275\",\"8867d82e-9788-4fdf-8a3e-d3210eae54bb\"]},{\"resource\":\"http://dbpedia.org/resource/Partner_%282008_film%29\",\"visible\":true,\"weight\":0.024602610189249773,\"activities\":[\"a1b03cbf-cd03-40d8-ac77-1224c93bb082\"]},{\"resource\":\"http://dbpedia.org/resource/Survival_%28Doctor_Who%29\",\"visible\":true,\"weight\":0.05135236018564906,\"activities\":[\"cde637e3-5630-4ea8-aa70-7757ea30e19d\"]},{\"resource\":\"http://dbpedia.org/resource/Partner_%282007_film%29\",\"visible\":true,\"weight\":0.024602610189249773,\"activities\":[\"a1b03cbf-cd03-40d8-ac77-1224c93bb082\"]},{\"resource\":\"http://dbpedia.org/resource/Sweeney_Todd_%28band%29\",\"visible\":true,\"weight\":0.021325153760399763,\"activities\":[\"8bb55ee0-6e0a-43e2-a3ab-1c0dae485699\"]}]}";
+        ObjectMapper mapper = new ObjectMapper();
+        UserProfile up = mapper.readValue(json, UserProfile.class);
+
+        APIKEY = registerTestApplication().toString();
+
+        final String baseQuery = "user/%s/profile/pie?apikey=%s";
+        final String username = "test-user";
+        final String query = String.format(
+                baseQuery,
+                username,
+                APIKEY
+        );
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        System.out.println(responseBody);
+
+    }
+
+    @Test(enabled = false)
+    public void test() throws IOException {
+        APIKEY = registerTestApplication().toString();
+        final String baseQuery = "user/%s/profile/pie?apikey=%s";
+        final String username = "test-user";
+        final String query = String.format(
+                baseQuery,
+                username,
+                APIKEY
+        );
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        while(true)
+            System.out.print("");
     }
 
 }
