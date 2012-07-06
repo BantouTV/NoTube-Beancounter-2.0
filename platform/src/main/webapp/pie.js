@@ -60,6 +60,17 @@ $(document).ready(function () {
                     var obj = $.parseJSON(request.responseText)
                     console.log(obj.object);
                     var data = obj.object;
+                    data = data.sort( function(a, b) {
+                        if (a[1] > b[1]) return -1;
+                        if (a[1] < b[1]) return 1;
+                        if (a[0] < b[0]) return 1;
+                    });
+                    for(var val in data) {
+                        data[val][0] = data[val][0].replace("http://dbpedia.org/resource/","");
+                        data[val][0] = data[val][0].replace("_%28"," ");
+                        data[val][0] = data[val][0].replace("%29","");
+                        data[val][0] = data[val][0].replace("_"," ");
+                    }
                     buildGraph(data);
                     firstTime = false;
                 },
