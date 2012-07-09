@@ -16,6 +16,7 @@
 
     <modules>
         <module>twitter</module>
+        <module>facebook</module>
     </modules>
 
     <dependencies>
