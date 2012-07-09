@@ -30,12 +30,11 @@ public class FacebookListener extends RouteBuilder {
     public void configure() throws Exception {
 
         from("jetty:http://0.0.0.0:34567/facebook")
-
                 .choice()
                 .when(header(Exchange.HTTP_METHOD).isEqualTo("GET"))
-                    .to("direct:verification")
+                .to("direct:verification")
                 .when(header(Exchange.HTTP_METHOD).isEqualTo("POST"))
-                    .to("direct:streaming");
+                .to("direct:streaming");
 
         from("direct:verification")
                 .process(new Processor() {
@@ -100,7 +99,6 @@ public class FacebookListener extends RouteBuilder {
                         exchange.getIn().setBody(activities);
                     }
                 })
-
                 .split(body())
                 .marshal().json(JsonLibrary.Jackson)
                 .log(body().toString());

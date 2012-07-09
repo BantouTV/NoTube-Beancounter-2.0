@@ -20,7 +20,7 @@ public class ResolverRoute extends RouteBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResolverRoute.class);
 
     @Inject
-    private JedisUsernameResolver resolver;
+    private JedisResolver resolver;
 
     public void configure() {
         from("kestrel://{{kestrel.queue.social.url}}")
@@ -32,7 +32,7 @@ public class ResolverRoute extends RouteBuilder {
                     public void process(Exchange exchange) throws Exception {
                         Activity activity = exchange.getIn().getBody(Activity.class);
                         LOGGER.debug("Resolving username {}.", activity);
-                        UUID userId = resolver.resolveUsername(activity);
+                        UUID userId = resolver.resolve(activity);
                         if(userId == null) {
                             exchange.getIn().setBody(
                                     null

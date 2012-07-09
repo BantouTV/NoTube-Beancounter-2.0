@@ -19,11 +19,19 @@ public interface AuthHandler {
      * @return
      * @throws AuthHandlerException
      */
-    public User auth(
+    public AuthenticatedUser auth(
             User user,
             String token,
             String verifier
     ) throws AuthHandlerException;
 
     public OAuthToken getToken(String username) throws AuthHandlerException;
+
+    /**
+     * Returns the service url which this auth serves.
+     *
+     * @return
+     */
+    public String getService();
+
 }

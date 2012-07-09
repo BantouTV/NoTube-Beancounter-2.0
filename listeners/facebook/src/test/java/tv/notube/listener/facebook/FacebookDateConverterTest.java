@@ -1,13 +1,9 @@
 package tv.notube.listener.facebook;
 
 import org.joda.time.DateTime;
-import org.junit.Assert;
 import org.testng.annotations.Test;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )

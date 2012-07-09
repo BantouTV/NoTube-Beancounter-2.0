@@ -21,9 +21,9 @@ public class ResolverModule extends CamelModuleWithMatchingRoutes {
         super.configure();
         Properties properties = PropertiesHelper.readFromClasspath("/redis.properties");
         Names.bindProperties(binder(), properties);
-        bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
         bindInstance("redisProperties", properties);
-        bind(JedisUsernameResolver.class).asEagerSingleton();
+        bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
+        bind(JedisResolver.class).asEagerSingleton();
         bind(ResolverRoute.class);
     }
 

@@ -26,6 +26,9 @@ import tv.notube.profiles.JedisProfilesImpl;
 import tv.notube.profiles.Profiles;
 import tv.notube.queues.KestrelQueues;
 import tv.notube.queues.Queues;
+import tv.notube.resolver.JedisResolver;
+import tv.notube.resolver.Resolver;
+import tv.notube.resolver.Services;
 import tv.notube.usermanager.JedisUserManagerImpl;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.services.auth.DefaultServiceAuthorizationManager;
@@ -71,12 +74,15 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
 
                 Properties redisProperties = PropertiesHelper.readFromClasspath("/redis.properties");
                 Names.bindProperties(binder(), redisProperties);
+
                 bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
 
                 Properties samProperties = PropertiesHelper.readFromClasspath("/sam.properties");
                 ServiceAuthorizationManager sam = DefaultServiceAuthorizationManager.build(samProperties);
                 bind(ServiceAuthorizationManager.class).toInstance(sam);
 
+                bind(Services.class).toInstance(JedisResolver.build(redisProperties));
+                bind(Resolver.class).to(JedisResolver.class);
                 bind(ApplicationsManager.class).to(JedisApplicationsManagerImpl.class);
                 bind(UserManager.class).to(JedisUserManagerImpl.class).asEagerSingleton();
                 bind(Profiles.class).to(JedisProfilesImpl.class);
@@ -104,4 +110,6 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
             }
         });
     }
+
+
 }

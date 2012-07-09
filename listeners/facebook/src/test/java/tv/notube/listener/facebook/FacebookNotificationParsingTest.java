@@ -1,7 +1,7 @@
 package tv.notube.listener.facebook;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.Assert;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import tv.notube.listener.facebook.model.FacebookNotification;
 
@@ -19,7 +19,5 @@ public class FacebookNotificationParsingTest {
         FacebookNotification notification = mapper.readValue(json, FacebookNotification.class);
         Assert.assertNotNull(notification);
     }
-
-
 
 }
