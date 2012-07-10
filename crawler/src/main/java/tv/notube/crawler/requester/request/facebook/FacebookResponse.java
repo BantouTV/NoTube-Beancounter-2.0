@@ -49,7 +49,7 @@ public class FacebookResponse implements ServiceResponse<List<Activity>>{
         activity.setObject(object);
 
         Context context = new Context();
-        context.setService(new URL("http://facebook.com"));
+        context.setService("facebook");
         context.setDate(like.getCreatedAt());
         activity.setContext(context);
 

@@ -229,7 +229,8 @@ public class JedisUserManagerImpl implements UserManager {
             resolver.store(
                     auser.getUserId(),
                     authHandler.getService(),
-                    auser.getUser().getId()
+                    auser.getUser().getId(),
+                    auser.getUser().getUsername()
             );
         } catch (ResolverException e) {
             final String errMsg = "Error while storing username for user [" + user.getUsername() + "] on service [" + serviceName + "]";

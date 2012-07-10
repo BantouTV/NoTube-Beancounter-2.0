@@ -12,15 +12,26 @@ public class FacebookChange {
 
     private String uid;
 
+    private String id;
+
     @JsonProperty("changed_fields")
     private List<String> changedFields;
 
     private long time;
 
-    public FacebookChange() {}
+    public FacebookChange() {
+    }
 
     public String getUid() {
         return uid;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setUid(String uid) {
@@ -45,8 +56,9 @@ public class FacebookChange {
 
     @Override
     public String toString() {
-        return "tv.notube.listener.facebook.model.FacebookChange{" +
+        return "FacebookChange{" +
                 "uid='" + uid + '\'' +
+                ", id='" + id + '\'' +
                 ", changedFields=" + changedFields +
                 ", time=" + time +
                 '}';

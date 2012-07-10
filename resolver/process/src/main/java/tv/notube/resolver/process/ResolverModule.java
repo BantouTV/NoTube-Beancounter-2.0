@@ -1,4 +1,4 @@
-package tv.notube.listener.facebook;
+package tv.notube.resolver.process;
 
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
@@ -11,19 +11,16 @@ import tv.notube.commons.helper.jedis.JedisPoolFactory;
 import tv.notube.commons.helper.resolver.Services;
 import tv.notube.resolver.JedisResolver;
 import tv.notube.resolver.Resolver;
-import tv.notube.usermanager.JedisUserManagerImpl;
-import tv.notube.usermanager.UserManager;
-import tv.notube.usermanager.services.auth.DefaultServiceAuthorizationManager;
-import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
 
 import java.util.Properties;
 
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-public class FacebookModule extends CamelModuleWithMatchingRoutes {
+public class ResolverModule extends CamelModuleWithMatchingRoutes {
 
-    public void configure() {
+    @Override
+    protected void configure() {
         super.configure();
         Properties redisProperties = PropertiesHelper.readFromClasspath("/redis.properties");
         Names.bindProperties(binder(), redisProperties);
@@ -35,12 +32,7 @@ public class FacebookModule extends CamelModuleWithMatchingRoutes {
         bind(Services.class).toInstance(services);
         bind(Resolver.class).to(JedisResolver.class);
 
-        Properties samProperties = PropertiesHelper.readFromClasspath("/sam.properties");
-        ServiceAuthorizationManager sam = DefaultServiceAuthorizationManager.build(samProperties);
-
-        bind(ServiceAuthorizationManager.class).toInstance(sam);
-        bind(UserManager.class).to(JedisUserManagerImpl.class);
-        bind(FacebookListener.class);
+        bind(ResolverRoute.class);
     }
 
     @Provides
@@ -50,5 +42,6 @@ public class FacebookModule extends CamelModuleWithMatchingRoutes {
         pc.setLocation("classpath:resolver.properties");
         return pc;
     }
+
 
 }

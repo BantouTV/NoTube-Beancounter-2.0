@@ -2,16 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>listeners</artifactId>
-        <groupId>tv.notube</groupId>
+        <artifactId>resolver</artifactId>
+        <groupId>tv.notube.resolver</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>facebook</artifactId>
-    <name>NoTube 2.0 Facebook</name>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>process</artifactId>
+    <name>NoTube 2.0 Resolver Camel Process</name>
 
     <dependencies>
         <dependency>
@@ -20,9 +21,8 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>tv.notube</groupId>
-            <artifactId>user-manager</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
@@ -30,58 +30,17 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
-            <artifactId>camel-jetty</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
             <artifactId>camel-jackson</artifactId>
         </dependency>
+        <!-- TODO (low) move deps to parent or switch to a non SNAPSHOT one -->
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>tv.notube.commons</groupId>
-            <artifactId>model</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.restfb</groupId>
-            <artifactId>restfb</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-testng</artifactId>
             <version>2.10-SNAPSHOT</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>apache.snapshots</id>
-            <name>Apache Development Snapshot Repository</name>
-            <url>https://repository.apache.org/content/repositories/snapshots/
-            </url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
-    <build>
+     <build>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
