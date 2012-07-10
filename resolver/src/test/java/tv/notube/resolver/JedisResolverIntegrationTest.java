@@ -20,9 +20,9 @@ import java.util.UUID;
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-public class JedisUsernameResolverIntegrationTest {
+public class JedisResolverIntegrationTest {
 
-    private JedisUsernameResolver resolver;
+    private JedisResolver resolver;
 
     private Jedis jedis;
 
@@ -31,7 +31,8 @@ public class JedisUsernameResolverIntegrationTest {
         Injector injector = Guice.createInjector(new ResolverModule());
         Properties properties = new Properties();
         properties.load(getClass().getResourceAsStream("/redis.properties"));
-        resolver = new JedisUsernameResolver(injector.getInstance(JedisPoolFactory.class), properties);
+        Services services = JedisResolver.build(properties);
+        resolver = new JedisResolver(injector.getInstance(JedisPoolFactory.class), services);
         JedisPool pool = injector.getInstance(JedisPoolFactory.class).build();
         jedis = pool.getResource();
     }
@@ -46,7 +47,7 @@ public class JedisUsernameResolverIntegrationTest {
         jedis.select(3);
         jedis.set("twitter_username","beancounter-uuid");
         Activity tweet = getTweetActivity();
-        UUID resolvedUserId = resolver.resolveUsername(tweet);
+        UUID resolvedUserId = resolver.resolve(tweet);
         Assert.assertEquals(resolvedUserId, "beancounter-uuid");
     }
 
@@ -55,7 +56,7 @@ public class JedisUsernameResolverIntegrationTest {
         jedis.select(4);
         jedis.set("facebook_username","beancounter-uuid");
         Activity event = getEventActivity();
-        UUID resolvedUserId = resolver.resolveUsername(event);
+        UUID resolvedUserId = resolver.resolve(event);
         Assert.assertEquals(resolvedUserId, "beancounter-uuid");
     }
 
@@ -65,7 +66,7 @@ public class JedisUsernameResolverIntegrationTest {
         jedis.set("facebook_username","beancounter-uuid");
         Activity event = getEventActivity();
         event.getObject().setName("not-existing-user");
-        UUID resolved = resolver.resolveUsername(event);
+        UUID resolved = resolver.resolve(event);
         Assert.assertNull(resolved);
     }
 
@@ -75,7 +76,7 @@ public class JedisUsernameResolverIntegrationTest {
         jedis.set("something_username","beancounter");
         Activity unsupportedActivity = getEventActivity();
         unsupportedActivity.setVerb(Verb.CHECKIN);
-        UUID resolved = resolver.resolveUsername(unsupportedActivity);
+        UUID resolved = resolver.resolve(unsupportedActivity);
         Assert.assertNull(resolved);
     }
 

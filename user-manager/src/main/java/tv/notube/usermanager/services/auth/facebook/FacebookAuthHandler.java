@@ -1,11 +1,15 @@
 package tv.notube.usermanager.services.auth.facebook;
 
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 import tv.notube.commons.model.*;
+import tv.notube.commons.model.User;
+import tv.notube.commons.model.auth.AuthenticatedUser;
 import tv.notube.commons.model.auth.DefaultAuthHandler;
 import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.auth.AuthHandlerException;
@@ -21,6 +25,8 @@ import java.net.URL;
  */
 public class FacebookAuthHandler extends DefaultAuthHandler {
 
+    final static String SERVICE = "http://facebook.com";
+
     public FacebookAuthHandler(Service service) {
         super(service);
     }
@@ -29,7 +35,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
         throw new AuthHandlerException("Facebook OAuth MUST have a verifier");
     }
 
-    public User auth(
+    public AuthenticatedUser auth(
             User user,
             String token,
             String verifier
@@ -42,7 +48,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                            .provider(FacebookApi.class)
                            .apiKey(service.getApikey())
                            .apiSecret(service.getSecret())
-                           .scope("offline_access,user_likes")
+                           .scope("read_stream,user_likes,user_location,user_interests,user_activities")
                            .callback(service.getOAuthCallback() + user.getUsername())
                            .build();
         Token requestToken = null;
@@ -51,7 +57,14 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                 service.getName(),
                 new OAuthAuth(accessToken.getToken(), accessToken.getSecret())
         );
-        return user;
+        String facebookUserId = getUserId(accessToken.getToken());
+        return new AuthenticatedUser(facebookUserId, user);
+    }
+
+    private String getUserId(String token) {
+        FacebookClient client = new DefaultFacebookClient(token);
+        com.restfb.types.User user = client.fetchObject("me", com.restfb.types.User.class);
+        return user.getId();
     }
 
     public OAuthToken getToken(String username) throws AuthHandlerException {
@@ -59,7 +72,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                            .provider(FacebookApi.class)
                            .apiKey(service.getApikey())
                            .apiSecret(service.getSecret())
-                           .scope("offline_access,user_likes")
+                           .scope("read_stream,user_likes,user_location,user_interests,user_activities")
                            .callback(service.getOAuthCallback() + username)
                            .build();
         Token token = null;
@@ -72,6 +85,11 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                     e
             );
         }
+    }
+
+    @Override
+    public String getService() {
+        return SERVICE;
     }
 
 }

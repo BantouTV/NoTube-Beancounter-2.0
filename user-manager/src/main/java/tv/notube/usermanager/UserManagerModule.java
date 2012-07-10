@@ -5,6 +5,8 @@ import com.google.inject.Singleton;
 import tv.notube.commons.helper.PropertiesHelper;
 import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
 import tv.notube.commons.helper.jedis.JedisPoolFactory;
+import tv.notube.resolver.JedisResolver;
+import tv.notube.resolver.Resolver;
 import tv.notube.usermanager.services.auth.DefaultServiceAuthorizationManager;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
 
@@ -29,6 +31,7 @@ public class UserManagerModule extends AbstractModule {
 
         bind(ServiceAuthorizationManager.class).toInstance(sam);
         bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).in(Singleton.class);
+        bind(Resolver.class).to(JedisResolver.class);
         bind(UserManager.class).to(JedisUserManagerImpl.class);
     }
 }
