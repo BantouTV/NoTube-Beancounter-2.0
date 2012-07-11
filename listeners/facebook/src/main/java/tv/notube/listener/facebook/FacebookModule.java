@@ -40,7 +40,7 @@ public class FacebookModule extends CamelModuleWithMatchingRoutes {
 
         bind(ServiceAuthorizationManager.class).toInstance(sam);
         bind(UserManager.class).to(JedisUserManagerImpl.class);
-        bind(FacebookListener.class);
+        bind(FacebookRoute.class);
     }
 
     @Provides
