@@ -7,6 +7,7 @@ import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 import tv.notube.commons.model.*;
 import tv.notube.commons.model.auth.AuthHandlerException;
+import tv.notube.commons.model.auth.AuthenticatedUser;
 import tv.notube.commons.model.auth.DefaultAuthHandler;
 import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.auth.OAuthAuth;
@@ -21,6 +22,8 @@ import java.net.URL;
  */
 public class TwitterAuthHandler extends DefaultAuthHandler {
 
+    final private static String SERVICE = "http://twitter.com";
+
     public TwitterAuthHandler(Service service) {
         super(service);
     }
@@ -29,7 +32,7 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
         throw new AuthHandlerException("Twitter OAuth MUST have a verifier");
     }
 
-    public User auth(
+    public AuthenticatedUser auth(
             User user,
             String token,
             String verifier
@@ -49,7 +52,8 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
                 service.getName(),
                 new OAuthAuth(accessToken.getToken(), accessToken.getSecret())
         );
-        return user;
+        // TODO (really high) handle twitter usernames
+        return new AuthenticatedUser("", user);
     }
 
     public OAuthToken getToken(String username) throws AuthHandlerException {
@@ -69,6 +73,11 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
                     e
             );
         }
+    }
+
+    @Override
+    public String getService() {
+        return SERVICE;
     }
 
 }

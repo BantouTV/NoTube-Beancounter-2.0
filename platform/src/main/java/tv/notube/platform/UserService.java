@@ -6,7 +6,6 @@ import tv.notube.activities.ActivityStore;
 import tv.notube.activities.ActivityStoreException;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
-import tv.notube.commons.model.Interest;
 import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.UserProfile;
@@ -277,7 +276,7 @@ public class UserService extends JsonService {
             );
         }
         Response.ResponseBuilder rb = Response.ok();
-        if(userActivities.size() == 0) {
+        if (userActivities.size() == 0) {
             rb.entity(
                     new ActivitiesPlatformResponse(
                             ActivitiesPlatformResponse.Status.OK,
@@ -450,8 +449,13 @@ public class UserService extends JsonService {
         User userObj;
         try {
             userObj = userManager.getUser(username);
-            if(userObj == null) {
-                return error(new NullPointerException(),"User [" + username + "] not found!");
+            if (userObj == null) {
+                Response.ResponseBuilder rb = Response.serverError();
+                rb.entity(new StringPlatformResponse(
+                        StringPlatformResponse.Status.NOK,
+                        "user with username [" + username + "] not found")
+                );
+                return rb.build();
             }
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user [" + username + "]");
@@ -605,8 +609,8 @@ public class UserService extends JsonService {
         User userObj;
         try {
             userObj = userManager.getUser(username);
-            if(userObj == null) {
-                return error(new NullPointerException(),"User [" + username + "] not found!");
+            if (userObj == null) {
+                return error(new NullPointerException(), "User [" + username + "] not found!");
             }
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
@@ -688,7 +692,7 @@ public class UserService extends JsonService {
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
-        if(userObj == null) {
+        if (userObj == null) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(new StringPlatformResponse(
                     StringPlatformResponse.Status.NOK,
@@ -702,7 +706,7 @@ public class UserService extends JsonService {
         } catch (ProfilesException e) {
             return error(e, "Error while retrieving profile for user [" + username + "]");
         }
-        if(up==null){
+        if (up == null) {
             return error(new RuntimeException(), "Profile for user [" + username + "] not found");
         }
         Response.ResponseBuilder rb = Response.ok();
@@ -775,214 +779,5 @@ public class UserService extends JsonService {
         );
         return rb.build();
     }
-
-
-    @GET
-    @Path("/{username}/profile/pie")
-    public Response getProfilePie(
-            @PathParam("username") String username,
-            @QueryParam("apikey") String apiKey
-    ) {
-        try {
-            check(
-                    this.getClass(),
-                    "getProfile",
-                    username,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
-        }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.RETRIEVE,
-                    ApplicationsManager.Object.PROFILE
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating you application");
-
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.OK,
-                    "Sorry. You're not allowed to do that.")
-            );
-            return rb.build();
-
-        }
-        User userObj;
-        try {
-            userObj = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            return error(e, "Your apikey is not well formed");
-
-        }
-        UserProfile up;
-        try {
-            up = profiles.lookup(userObj.getId());
-        } catch (ProfilesException e) {
-            return error(e, "Your apikey is not well formed");
-
-        }
-        if(up==null){
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Profile for user [" + username + "] not found")
-            );
-            return rb.build();
-        }
-        List<List<Object>> array = new ArrayList<List<Object>>();
-        for(Interest i : up.getInterests()) {
-            List<Object> interestAndWeight = new ArrayList<Object>();
-            interestAndWeight.add(i.getResource());
-            interestAndWeight.add(i.getWeight());
-            array.add(interestAndWeight);
-        }
-        Response.ResponseBuilder rb = Response.ok();
-        rb.entity(
-                new PiePlatformResponse(
-                        PiePlatformResponse.Status.OK,
-                        "Data loaded",
-                        array
-                )
-        );
-        return rb.build();
-    }
-
-    /**
-    @GET
-    @Path("/{username}/profile/update")
-    public Response forceUserProfiling(
-            @PathParam("username") String username,
-            @QueryParam("apikey") String apiKey
-    ) {
-        try {
-            check(
-                    this.getClass(),
-                    "forceUserProfiling",
-                    username,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
-        }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(apiKey);
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating your application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry. You're not allowed to do that.")
-            );
-            return rb.build();
-        }
-        User user;
-        try {
-            user = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            return error(e, "Error while getting user with username [" + username + "]");
-        }
-        if(user == null) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry. User [" + username + "] has not been found")
-            );
-            return rb.build();
-        }
-        try {
-            profiler.run(user.getId());
-        } catch (ProfilerException e) {
-            return error(e, "Error while forcing profiling for [" + username + "]");
-        }
-        Response.ResponseBuilder rb = Response.ok();
-        rb.entity(
-                new StringPlatformResponse(
-                        StringPlatformResponse.Status.OK,
-                        "profile updated for [" + username + "]"
-                )
-        );
-        return rb.build();
-    }  **/
-
-    /**
-    @GET
-    @Path("/{username}/profile/status")
-    public Response getProfilingStatus(
-            @PathParam("username") String username,
-            @QueryParam("apikey") String apiKey
-    ) {
-        try {
-            check(
-                    this.getClass(),
-                    "getProfilingStatus",
-                    username,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
-        }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(apiKey);
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating your application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry. You're not allowed to do that.")
-            );
-            return rb.build();
-        }
-        User user;
-        try {
-            user = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            return error(e, "Error while getting user with username [" + username + "]");
-        }
-        if(user == null) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry. User [" + username + "] has not been found")
-            );
-            return rb.build();
-        }
-        String status = profiler.profilingStatus(user.getId());
-        Response.ResponseBuilder rb = Response.ok();
-        rb.entity(
-                new StringPlatformResponse(
-                        StringPlatformResponse.Status.OK,
-                        "[" + username + "] " + status
-                )
-        );
-        return rb.build();
-    }
-            */
 
 }

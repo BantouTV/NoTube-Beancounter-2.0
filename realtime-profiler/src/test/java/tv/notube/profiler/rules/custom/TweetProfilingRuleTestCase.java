@@ -70,7 +70,7 @@ public class TweetProfilingRuleTestCase {
         );
         rule.run(properties);
         Collection<URI> actual = rule.getResult();
-        Assert.assertEquals(actual.size(), 7);
+        Assert.assertEquals(actual.size(), 8);
         Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/London")));
         Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/Doctor_Who")));
         Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/BBC")));

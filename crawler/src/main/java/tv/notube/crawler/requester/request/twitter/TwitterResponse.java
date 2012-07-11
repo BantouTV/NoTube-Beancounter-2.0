@@ -58,15 +58,12 @@ public class TwitterResponse implements ServiceResponse<List<Activity>> {
                 }
                 ab.setContext(
                         twitterTweet.getCreatedAt(),
-                        new URL(twitter),
+                        twitter,
                         twitterTweet.getUsername()
                 );
                 activities.add(ab.pop());
             } catch (ActivityBuilderException e) {
                 throw new ServiceResponseException("Error while building activity", e);
-            } catch (MalformedURLException e) {
-                throw new RuntimeException("URL '" + twitter + "' is not " +
-                        "well-formed", e);
             }
             if (containsBBCUrl(twitterTweet.getMentionedUrls())) {
                 List<BBCProgramme> programmes = getBBCPrograms(
@@ -92,13 +89,10 @@ public class TwitterResponse implements ServiceResponse<List<Activity>> {
                         for (String genre : bbcProgramme.getActors()) {
                             ab.objectSetField("addActor", genre, String.class);
                         }
-                        ab.setContext(twitterTweet.getCreatedAt(), new URL(iplayer), twitterTweet.getUsername());
+                        ab.setContext(twitterTweet.getCreatedAt(), iplayer, twitterTweet.getUsername());
                         activities.add(ab.pop());
                     } catch (ActivityBuilderException e) {
                         throw new ServiceResponseException("Error while building activity", e);
-                    } catch (MalformedURLException e) {
-                        throw new RuntimeException(
-                                "URL '" + twitter + "' is not well-formed", e);
                     }
                 }
             }

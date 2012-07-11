@@ -16,6 +16,7 @@ import tv.notube.activities.ElasticSearchActivityStoreFactory;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.JedisApplicationsManagerImpl;
 import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
+import tv.notube.commons.helper.resolver.Services;
 import tv.notube.crawler.Crawler;
 import tv.notube.crawler.ParallelCrawlerImpl;
 import tv.notube.crawler.requester.MockRequester;
@@ -26,6 +27,8 @@ import tv.notube.profiles.JedisProfilesImpl;
 import tv.notube.profiles.Profiles;
 import tv.notube.queues.KestrelQueues;
 import tv.notube.queues.Queues;
+import tv.notube.resolver.JedisResolver;
+import tv.notube.resolver.Resolver;
 import tv.notube.usermanager.JedisUserManagerImpl;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.services.auth.DefaultServiceAuthorizationManager;
@@ -71,12 +74,17 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
 
                 Properties redisProperties = PropertiesHelper.readFromClasspath("/redis.properties");
                 Names.bindProperties(binder(), redisProperties);
+
                 bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
 
                 Properties samProperties = PropertiesHelper.readFromClasspath("/sam.properties");
                 ServiceAuthorizationManager sam = DefaultServiceAuthorizationManager.build(samProperties);
                 bind(ServiceAuthorizationManager.class).toInstance(sam);
 
+                Properties properties = PropertiesHelper.readFromClasspath("/resolver.properties");
+                Services services = Services.build(properties);
+                bind(Services.class).toInstance(services);
+                bind(Resolver.class).to(JedisResolver.class);
                 bind(ApplicationsManager.class).to(JedisApplicationsManagerImpl.class);
                 bind(UserManager.class).to(JedisUserManagerImpl.class).asEagerSingleton();
                 bind(Profiles.class).to(JedisProfilesImpl.class);
@@ -104,4 +112,6 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
             }
         });
     }
+
+
 }

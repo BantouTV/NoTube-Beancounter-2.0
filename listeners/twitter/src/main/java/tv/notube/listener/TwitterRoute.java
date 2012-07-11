@@ -40,9 +40,7 @@ public class TwitterRoute extends RouteBuilder {
                         LOGGER.debug("Sending twitterTweet to the queue. {} ", exchange.getIn().getBody());
                     }
                 })
-
                 .to("kestrel://{{kestrel.queue.url}}");
-
     }
 }
 

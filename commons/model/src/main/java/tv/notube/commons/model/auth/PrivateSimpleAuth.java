@@ -1,10 +1,6 @@
 package tv.notube.commons.model.auth;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-public abstract class PrivateSimpleAuth {
-    //@JsonIgnore abstract String getSession();
-}
+public abstract class PrivateSimpleAuth {}

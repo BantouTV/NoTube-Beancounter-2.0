@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.lang.*;
 import java.lang.Object;
-import java.net.URL;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
@@ -21,7 +20,7 @@ public class Context implements Serializable {
 
     private DateTime date;
 
-    private URL service;
+    private String service;
 
     private String mood;
 
@@ -43,11 +42,11 @@ public class Context implements Serializable {
         this.date = date;
     }
 
-    public URL getService() {
+    public String getService() {
         return service;
     }
 
-    public void setService(URL service) {
+    public void setService(String service) {
         this.service = service;
     }
 

@@ -12,6 +12,9 @@ import tv.notube.commons.model.User;
 import tv.notube.commons.model.auth.AuthHandler;
 import tv.notube.commons.model.auth.AuthHandlerException;
 import tv.notube.commons.helper.jedis.JedisPoolFactory;
+import tv.notube.commons.model.auth.AuthenticatedUser;
+import tv.notube.resolver.Resolver;
+import tv.notube.resolver.ResolverException;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManagerException;
 
@@ -35,6 +38,8 @@ public class JedisUserManagerImpl implements UserManager {
 
     private Map<String, URL> redirects = new HashMap<String, URL>();
 
+    private Resolver resolver;
+
     private ServiceAuthorizationManager sam;
 
     @Inject
@@ -43,10 +48,12 @@ public class JedisUserManagerImpl implements UserManager {
     @Inject
     public JedisUserManagerImpl(
             JedisPoolFactory factory,
+            Resolver resolver,
             ServiceAuthorizationManager sam
     ) {
         pool = factory.build();
         mapper = new ObjectMapper();
+        this.resolver = resolver;
         this.sam = sam;
     }
 
@@ -160,7 +167,7 @@ public class JedisUserManagerImpl implements UserManager {
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         }
-        User authenticatedUser;
+        AuthenticatedUser authenticatedUser;
         try {
             authenticatedUser = sam.getHandler(serviceName).auth(
                     user,
@@ -176,7 +183,7 @@ public class JedisUserManagerImpl implements UserManager {
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         }
-        storeUser(authenticatedUser);
+        storeUser(authenticatedUser.getUser());
     }
 
     @Override
@@ -197,9 +204,18 @@ public class JedisUserManagerImpl implements UserManager {
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         }
-        User authenticatedUser;
+        AuthHandler authHandler;
         try {
-            authenticatedUser = sam.getHandler(serviceName).auth(
+            authHandler = sam.getHandler(serviceName);
+        } catch (ServiceAuthorizationManagerException e) {
+            final String errMsg = "Error while authenticating user '" + user.getUsername() + "' to service '" + serviceName + "'";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        // now that the user grant the permission, we should ask for its username
+        AuthenticatedUser auser;
+        try {
+            auser = authHandler.auth(
                     user,
                     token,
                     verifier
@@ -208,12 +224,20 @@ public class JedisUserManagerImpl implements UserManager {
             final String errMsg = "Error while getting auth manager for service '" + serviceName + "'";
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
-        } catch (ServiceAuthorizationManagerException e) {
-            final String errMsg = "Error while authenticating user '" + user.getUsername() + "' to service '" + serviceName + "'";
+        }
+        try {
+            resolver.store(
+                    auser.getUserId(),
+                    authHandler.getService(),
+                    auser.getUser().getId(),
+                    auser.getUser().getUsername()
+            );
+        } catch (ResolverException e) {
+            final String errMsg = "Error while storing username for user [" + user.getUsername() + "] on service [" + serviceName + "]";
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         }
-        storeUser(authenticatedUser);
+        storeUser(auser.getUser());
     }
 
 

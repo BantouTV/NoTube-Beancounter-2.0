@@ -2,80 +2,31 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <parent>
         <artifactId>parent</artifactId>
         <groupId>tv.notube</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>resolver</artifactId>
+    <groupId>tv.notube.resolver</groupId>
+    <packaging>pom</packaging>
     <name>NoTube 2.0 Resolver</name>
 
+    <modules>
+        <module>core</module>
+        <module>process</module>
+    </modules>
+
     <dependencies>
-        <dependency>
-            <groupId>tv.notube.commons</groupId>
-            <artifactId>model</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jackson-jaxrs</artifactId>
-                    <groupId>org.codehaus.jackson</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jackson-mapper-asl</artifactId>
-                    <groupId>org.codehaus.jackson</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>helper</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-kestrel</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-jackson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-guice</artifactId>
-        </dependency>
     </dependencies>
-
-     <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <mainClass>org.apache.camel.guice.Main</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
