@@ -70,7 +70,11 @@ public class IndexerRoute extends RouteBuilder {
                         // (TODO) (low) profile will be sent in a down stream queue
                         // meant to persist all the profiles of every user
                         // and yes, even to other real-time processes
+                        exchange.getIn().setBody(profile);
                     }
-                });
+                })
+                .marshal().json(JsonLibrary.Jackson)
+                .convertBodyTo(String.class)
+                .to("kestrel://{{kestrel.queue.analytics}}");
     }
 }

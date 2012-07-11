@@ -4,6 +4,8 @@ import de.l3s.boilerpipe.BoilerpipeProcessingException;
 import de.l3s.boilerpipe.document.TextDocument;
 import de.l3s.boilerpipe.extractors.ArticleExtractor;
 import de.l3s.boilerpipe.extractors.DefaultExtractor;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.TypeFactory;
 import tv.notube.commons.nlp.NLPEngine;
@@ -23,7 +25,7 @@ import java.util.*;
 // TODO (med) make POST requests to handle long texts
 public final class LUpediaNLPEngineImpl implements NLPEngine {
 
-    public final static String QUERY_PATTERN = "http://lupedia.ontotext.com/lookup/text2json?lookupText=%s&threshold=%s";
+    public final static String QUERY_PATTERN = "http://lupedia.ontotext.com/lookup/text2json?threshold=%s";
 
     @Override
     public Collection<URI> enrich(String text) throws NLPEngineException {
@@ -34,13 +36,24 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
         }
         URL query;
         // TODO (high) this should be configurable
-        String queryStr = String.format(QUERY_PATTERN, text, 0.85);
+        String queryStr = String.format(QUERY_PATTERN, 0.85);
         try {
             query = new URL(queryStr);
         } catch (MalformedURLException e) {
             throw new NLPEngineException("url [" + queryStr + "] seems to be ill-formed", e);
         }
-        InputStream is = getStream(query);
+
+        PostMethod postMethod = new PostMethod(queryStr);
+        postMethod.setParameter("lookupText", text);
+        HttpClient client = new HttpClient();
+        InputStream is;
+        try {
+            client.executeMethod(postMethod);
+            is = postMethod.getResponseBodyAsStream();
+        } catch (IOException e) {
+            throw new NLPEngineException("error opening the connection for [" + queryStr + "]", e);
+        }
+
         ObjectMapper mapper = new ObjectMapper();
         List<LUpediaEntity> entities;
         try {
@@ -69,24 +82,6 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
             }
         }
         return result;
-    }
-
-    private InputStream getStream(URL query) throws NLPEngineException {
-        URLConnection urlConnection;
-        try {
-            urlConnection = query.openConnection();
-        } catch (IOException e) {
-            throw new NLPEngineException(
-                    "Error while opening connection from [" + query + "]", e
-            );
-        }
-        try {
-            return urlConnection.getInputStream();
-        } catch (IOException e) {
-            throw new NLPEngineException(
-                    "Error getting stream from [" + query + "]", e
-            );
-        }
     }
 
     @Override
