@@ -1,11 +1,15 @@
 package tv.notube.commons.model.auth;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
 /**
  * put class description here
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 public class OAuthAuth extends Auth {
+
+    private boolean expired = false;
 
     private String secret;
 
@@ -22,6 +26,14 @@ public class OAuthAuth extends Auth {
 
     public String getSecret() {
         return secret;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+
+    public boolean isExpired() {
+        return expired;
     }
 
     @Override

@@ -71,6 +71,11 @@ public class MockUserManager implements UserManager {
     public void deleteUser(String username) throws UserManagerException {}
 
     @Override
+    public OAuthToken getOAuthToken(String serviceName, String username, URL url) throws UserManagerException {
+        throw new UnsupportedOperationException("nah, NIY");
+    }
+
+    @Override
     public OAuthToken getOAuthToken(String service, String username)
             throws UserManagerException {
         try {
@@ -114,6 +119,11 @@ public class MockUserManager implements UserManager {
             // it never happens
         }
         return null;
+    }
+
+    @Override
+    public void voidOAuthToken(User user, String service) throws UserManagerException {
+        throw new UnsupportedOperationException("nah, niy");
     }
 
 }

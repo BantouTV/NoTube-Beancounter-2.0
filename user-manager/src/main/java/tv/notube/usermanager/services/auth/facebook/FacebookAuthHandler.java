@@ -15,8 +15,10 @@ import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.auth.AuthHandlerException;
 import tv.notube.commons.model.auth.OAuthAuth;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 
 /**
  * put class description here
@@ -75,6 +77,28 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                            .scope("read_stream,user_likes,user_location,user_interests,user_activities")
                            .callback(service.getOAuthCallback() + username)
                            .build();
+        Token token = null;
+        String redirectUrl = facebookOAuth.getAuthorizationUrl(token);
+        try {
+            return new OAuthToken(new URL(redirectUrl));
+        } catch (MalformedURLException e) {
+            throw new AuthHandlerException(
+                    "The redirect url is not well formed",
+                    e
+            );
+        }
+    }
+
+    @Override
+    public OAuthToken getToken(String username, URL callback) throws AuthHandlerException {
+        OAuthService facebookOAuth;
+        facebookOAuth = new ServiceBuilder()
+                .provider(FacebookApi.class)
+                .apiKey(service.getApikey())
+                .apiSecret(service.getSecret())
+                .scope("read_stream,user_likes,user_location,user_interests,user_activities")
+                .callback(callback + username)
+                .build();
         Token token = null;
         String redirectUrl = facebookOAuth.getAuthorizationUrl(token);
         try {

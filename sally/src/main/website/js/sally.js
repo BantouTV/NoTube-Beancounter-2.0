@@ -59,6 +59,10 @@ Beancounter.getDefaultChartOptions = function () {
                     lineWidth: 1,
                     lineColor: '#ffffff'
                 }
+            },
+            areaspline: {
+                fillOpacity: 0.5,
+                stacking: 'percent'
             }
         }
     };
@@ -420,7 +424,7 @@ Beancounter.Area = function (username, container) {
             cache: false,
             success: function (data) {
                 updateChartData($.parseJSON(data));
-                setTimeout(updateChart, 5000);
+                setTimeout(updateChart, 2000);
             },
             error: function (request, errorText, data) {
                 var obj = $.parseJSON(request.responseText),
@@ -431,7 +435,7 @@ Beancounter.Area = function (username, container) {
     }
 
     options.chart.renderTo = container;
-    options.chart.type = 'area';
+    options.chart.type = 'areaspline';
     options.xAxis = {
         type: 'datetime',
         tickPixelInterval: 150,

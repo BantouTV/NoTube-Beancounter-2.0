@@ -76,6 +76,11 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
     }
 
     @Override
+    public OAuthToken getToken(String username, URL callback) throws AuthHandlerException {
+        throw new UnsupportedOperationException("nah, NIY.");
+    }
+
+    @Override
     public String getService() {
         return SERVICE;
     }

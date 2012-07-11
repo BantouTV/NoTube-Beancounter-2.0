@@ -5,11 +5,13 @@ import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
+import com.restfb.exception.FacebookOAuthException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.joda.time.DateTime;
+import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.*;
 import tv.notube.commons.model.activity.Object;
@@ -25,12 +27,14 @@ import javax.servlet.http.HttpServletRequest;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-public class FacebookListener extends RouteBuilder {
+public class FacebookRoute extends RouteBuilder {
 
     private final static String SERVICE = "facebook";
 
@@ -80,9 +84,15 @@ public class FacebookListener extends RouteBuilder {
 
                     private List<Activity> getActivities(FacebookNotification notification) {
                         List<Activity> activities = new ArrayList<Activity>();
+                        Set<String> excludedUsers = new HashSet<String>();
                         for (FacebookChange change : notification.getEntry()) {
                             String userId = change.getUid();
+                            if(excludedUsers.contains(userId)) {
+                                continue;
+                            }
+                            // getting the user token
                             String token = getAccessToken(userId);
+                            log.debug("token: {}", token);
                             FacebookClient client = new DefaultFacebookClient(token);
                             for (String field : change.getChangedFields()) {
                                 // TODO (low) limit should be configurable
@@ -95,11 +105,28 @@ public class FacebookListener extends RouteBuilder {
                                 // and store it again (this is a responsability
                                 // of the user manager)
                                 // this shows how http://stackoverflow.com/questions/10971218/how-to-handle-expired-token-from-server-side
-                                Connection<FacebookData> entities = client.fetchConnection(
-                                        "me/" + field,
-                                        FacebookData.class,
-                                        Parameter.with("limit", 10)
-                                );
+                                Connection<FacebookData> entities;
+                                try {
+                                    entities = client
+                                            .fetchConnection(
+                                                    "me/" + field,
+                                                    FacebookData.class,
+                                                    Parameter.with("limit", 10)
+                                            );
+                                } catch (FacebookOAuthException e) {
+                                    String username = getUsername(userId);
+                                    log.debug("token expired for user:{}", username);
+                                    User user = getUser(username);
+                                    try {
+                                        userManager.voidOAuthToken(user, SERVICE);
+                                    } catch (UserManagerException e1) {
+                                        final String errMgs = "error while voiding the OAuth token for user [" + user.getUsername() + "] on service [" + SERVICE + "]";
+                                        log.error(errMgs, e1);
+                                        throw new RuntimeException(errMgs, e1);
+                                    }
+                                    excludedUsers.add(userId);
+                                    continue;
+                                }
                                 List<FacebookData> filteredLikes = filter(entities);
                                 log.debug("RECEIVED ENTITIES (already filtered): " + filteredLikes.toString());
                                 activities.addAll(convertToActivities(userId, filteredLikes));
@@ -174,4 +201,27 @@ public class FacebookListener extends RouteBuilder {
         }
         return userObj.getServices().get(SERVICE).getSession();
     }
+
+    private String getUsername(String identifier) {
+        String username;
+        try {
+            username = resolver.resolveUsername(identifier, SERVICE);
+        } catch (ResolverException e) {
+            final String errMsg = "Error while resolving username [" + identifier + "] on facebook";
+            log.error(errMsg, e);
+            throw new RuntimeException(errMsg, e);
+        }
+        return username;
+    }
+
+     private User getUser(String username) {
+         try {
+             return userManager.getUser(username);
+         } catch (UserManagerException e) {
+            final String errMsg = "Error while getting user [" + username + "]";
+            log.error(errMsg, e);
+            throw new RuntimeException(errMsg, e);
+         }
+     }
+
 }
