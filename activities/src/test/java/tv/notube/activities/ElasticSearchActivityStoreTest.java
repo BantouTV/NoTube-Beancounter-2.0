@@ -75,8 +75,7 @@ public class ElasticSearchActivityStoreTest {
     @AfterSuite
     public void afterSuite() throws Exception {
         node.close();
-
-        // TODO: Remove the ES data dir
+        // TODO (mid): Remove the ES data dir
     }
 
     @BeforeTest
@@ -450,7 +449,7 @@ public class ElasticSearchActivityStoreTest {
         );
         ab.setContext(
                 dateTime.withZone(DateTimeZone.UTC).minusDays(tweetId),
-                new URL(tweetServiceUrl),
+                tweetServiceUrl,
                 "twitter-username"
         );
 
@@ -484,7 +483,7 @@ public class ElasticSearchActivityStoreTest {
                 fields);
         ab.setContext(
                 dateTime.withZone(DateTimeZone.UTC).minusDays(trackId),
-                new URL(lastFmServiceUrl),
+                lastFmServiceUrl,
                 "twitter-username"
         );
 

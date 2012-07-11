@@ -1,5 +1,6 @@
 package tv.notube.listener.facebook;
 
+import com.google.inject.Inject;
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
@@ -9,11 +10,16 @@ import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.joda.time.DateTime;
+import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.*;
 import tv.notube.commons.model.activity.Object;
 import tv.notube.listener.facebook.model.FacebookChange;
 import tv.notube.listener.facebook.model.FacebookData;
 import tv.notube.listener.facebook.model.FacebookNotification;
+import tv.notube.resolver.Resolver;
+import tv.notube.resolver.ResolverException;
+import tv.notube.usermanager.UserManager;
+import tv.notube.usermanager.UserManagerException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.MalformedURLException;
@@ -25,6 +31,14 @@ import java.util.List;
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class FacebookListener extends RouteBuilder {
+
+    private final static String SERVICE = "facebook";
+
+    @Inject
+    private Resolver resolver;
+
+    @Inject
+    private UserManager userManager;
 
     @Override
     public void configure() throws Exception {
@@ -50,66 +64,78 @@ public class FacebookListener extends RouteBuilder {
                                 exchange.getOut().setBody(request.getParameter("hub.challenge"));
                             }
                         }
-                        log.debug("hub.mode [" + request.getParameter("hub.mode") +
-                                "] - hub.verify_token [" + request.getParameter("hub.verify_token") + "]");
+                        log.debug("hub.mode [" + request.getParameter("hub.mode") + "] - hub.verify_token [" + request.getParameter("hub.verify_token") + "]");
                     }
                 });
 
         from("direct:streaming")
-                .process(new Processor() {
-                    @Override
-                    public void process(Exchange exchange) throws Exception {
-                        //log.debug("streaming from facebook: " + exchange.getIn().getBody(String.class));
-                    }
-                })
                 .unmarshal().json(JsonLibrary.Jackson, FacebookNotification.class)
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
-                        FacebookNotification notification =
-                                exchange.getIn().getBody(FacebookNotification.class);
-                        log.debug("RECEIVED NOTIFICATION: " + notification.toString());
+                        FacebookNotification notification = exchange.getIn().getBody(FacebookNotification.class);
+                        List<Activity> activities = getActivities(notification);
+                        exchange.getIn().setBody(activities);
+                    }
+
+                    private List<Activity> getActivities(FacebookNotification notification) {
                         List<Activity> activities = new ArrayList<Activity>();
                         for (FacebookChange change : notification.getEntry()) {
                             String userId = change.getUid();
-                            long newTimestamp = change.getTime();
                             String token = getAccessToken(userId);
-                            log.debug("ACCESS TOKEN [ " + token + " ]");
                             FacebookClient client = new DefaultFacebookClient(token);
                             for (String field : change.getChangedFields()) {
-                                long oldTimestamp = getTimestamp(userId, field);
-                                log.debug("OLD TIMESTAMP [ " + oldTimestamp + " ]");
-                                Connection<FacebookData> likes = client.fetchConnection(
-                                        "me/likes",
+                                // TODO (low) limit should be configurable
+                                // to handle expired tokes:
+                                // catch com.restfb.exception.FacebookOAuthException
+                                // get the response error: should be
+                                //      "code": 190, "error_subcode": 460
+                                // during the handling:
+                                // ask to the usermanager to renew the token
+                                // and store it again (this is a responsability
+                                // of the user manager)
+                                // this shows how http://stackoverflow.com/questions/10971218/how-to-handle-expired-token-from-server-side
+                                Connection<FacebookData> entities = client.fetchConnection(
+                                        "me/" + field,
                                         FacebookData.class,
                                         Parameter.with("limit", 10)
                                 );
-                                log.debug("RECEIVED LIKES: " + likes.getData().toString());
-                                List<FacebookData> filteredLikes = new ArrayList<FacebookData>();
-                                for (FacebookData l : likes.getData()) {
-                                    DateTime date = new DateTime(l.getCreatedTime());
-                                    if (date.isAfter(oldTimestamp)) {
-                                        filteredLikes.add(l);
-                                    }
-                                }
-                                log.debug(filteredLikes.toString());
+                                List<FacebookData> filteredLikes = filter(entities);
+                                log.debug("RECEIVED ENTITIES (already filtered): " + filteredLikes.toString());
                                 activities.addAll(convertToActivities(userId, filteredLikes));
                             }
                         }
-                        exchange.getIn().setBody(activities);
+                        return activities;
+                    }
+
+                    private List<FacebookData> filter(Connection<FacebookData> entities) {
+                        List<FacebookData> result = new ArrayList<FacebookData>();
+                        for (FacebookData entity : entities.getData()) {
+                            DateTime date = new DateTime(entity.getCreatedTime());
+                            // TODO (high) persist and retrieve correctly
+                            if (date.isAfter(getOldTimeStamp())) {
+                                result.add(entity);
+                            }
+                        }
+                        return result;
                     }
                 })
                 .split(body())
                 .marshal().json(JsonLibrary.Jackson)
-                .log(body().toString());
+                .log(body().toString())
+                .to("kestrel://{{kestrel.queue.social.url}}");
+    }
 
+    private long getOldTimeStamp() {
+        return 1;
     }
 
     private List<Activity> convertToActivities(String userId, List<FacebookData> likes) {
         List<Activity> activities = new ArrayList<Activity>();
-        for(FacebookData like : likes) {
+        for (FacebookData like : likes) {
             try {
                 Activity activity = new Activity();
+                // TODO (med)
                 activity.setVerb(Verb.LIKE);
                 tv.notube.commons.model.activity.Object object = new Object();
                 object.setName(like.getName());
@@ -119,7 +145,7 @@ public class FacebookListener extends RouteBuilder {
                 Context context = new Context();
                 context.setUsername(userId);
                 context.setDate(new DateTime(like.getCreatedTime()));
-                context.setService(new URL("http://www.facebook.com"));
+                context.setService("facebook");
                 activity.setContext(context);
                 activities.add(activity);
             } catch (MalformedURLException e) {
@@ -129,12 +155,23 @@ public class FacebookListener extends RouteBuilder {
         return activities;
     }
 
-    private String getAccessToken(String userId) {
-        return "AAACEdEose0cBAA5IfZCEItsnzXMNKUIAcZCmtWH6vGYKrSVgXLigrZCYXOEyb12ArHZCA7WdOWGZBK9ZBsQRXsyJ0AwODQPsc1ZCZBeApVm9nAZDZD";
-    }
-
-    private long getTimestamp(String userId, String field) {
-        // TODO some cool stuff with Jedis releasing also the pool if you have time
-        return 1338933600000L;
+    private String getAccessToken(String identifier) {
+        String username;
+        try {
+            username = resolver.resolveUsername(identifier, SERVICE);
+        } catch (ResolverException e) {
+            final String errMsg = "Error while resolving username [" + identifier + "] on facebook";
+            log.error(errMsg, e);
+            throw new RuntimeException(errMsg, e);
+        }
+        User userObj;
+        try {
+            userObj = userManager.getUser(username);
+        } catch (UserManagerException e) {
+            final String errMsg = "Error while getting user with username [" + username + "]";
+            log.error(errMsg, e);
+            throw new RuntimeException(errMsg, e);
+        }
+        return userObj.getServices().get(SERVICE).getSession();
     }
 }

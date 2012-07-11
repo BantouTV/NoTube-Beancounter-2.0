@@ -25,7 +25,7 @@ import java.net.URL;
  */
 public class FacebookAuthHandler extends DefaultAuthHandler {
 
-    final static String SERVICE = "http://facebook.com";
+    final static String SERVICE = "facebook";
 
     public FacebookAuthHandler(Service service) {
         super(service);

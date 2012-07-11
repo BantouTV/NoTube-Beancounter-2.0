@@ -16,6 +16,7 @@ import tv.notube.activities.ElasticSearchActivityStoreFactory;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.JedisApplicationsManagerImpl;
 import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
+import tv.notube.commons.helper.resolver.Services;
 import tv.notube.crawler.Crawler;
 import tv.notube.crawler.ParallelCrawlerImpl;
 import tv.notube.crawler.requester.MockRequester;
@@ -28,7 +29,6 @@ import tv.notube.queues.KestrelQueues;
 import tv.notube.queues.Queues;
 import tv.notube.resolver.JedisResolver;
 import tv.notube.resolver.Resolver;
-import tv.notube.resolver.Services;
 import tv.notube.usermanager.JedisUserManagerImpl;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.services.auth.DefaultServiceAuthorizationManager;
@@ -81,7 +81,9 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 ServiceAuthorizationManager sam = DefaultServiceAuthorizationManager.build(samProperties);
                 bind(ServiceAuthorizationManager.class).toInstance(sam);
 
-                bind(Services.class).toInstance(JedisResolver.build(redisProperties));
+                Properties properties = PropertiesHelper.readFromClasspath("/resolver.properties");
+                Services services = Services.build(properties);
+                bind(Services.class).toInstance(services);
                 bind(Resolver.class).to(JedisResolver.class);
                 bind(ApplicationsManager.class).to(JedisApplicationsManagerImpl.class);
                 bind(UserManager.class).to(JedisUserManagerImpl.class).asEagerSingleton();
