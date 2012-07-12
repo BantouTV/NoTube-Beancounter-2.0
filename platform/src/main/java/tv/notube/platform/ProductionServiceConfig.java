@@ -17,10 +17,6 @@ import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.JedisApplicationsManagerImpl;
 import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
 import tv.notube.commons.helper.resolver.Services;
-import tv.notube.crawler.Crawler;
-import tv.notube.crawler.ParallelCrawlerImpl;
-import tv.notube.crawler.requester.MockRequester;
-import tv.notube.crawler.requester.Requester;
 import tv.notube.commons.helper.PropertiesHelper;
 import tv.notube.commons.helper.jedis.JedisPoolFactory;
 import tv.notube.profiles.JedisProfilesImpl;
@@ -89,8 +85,6 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(ApplicationsManager.class).to(JedisApplicationsManagerImpl.class);
                 bind(UserManager.class).to(JedisUserManagerImpl.class).asEagerSingleton();
                 bind(Profiles.class).to(JedisProfilesImpl.class);
-                bind(Crawler.class).to(ParallelCrawlerImpl.class);
-                bind(Requester.class).to(MockRequester.class);
                 bind(ActivityStore.class).toInstance(getElasticSearch());
                 bind(Queues.class).toInstance(getKestrelQueue());
                 // add bindings for Jackson

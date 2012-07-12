@@ -10,9 +10,7 @@ import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import tv.notube.activities.ActivityStore;
 import tv.notube.activities.MockActivityStore;
 import tv.notube.applications.MockApplicationsManager;
-import tv.notube.crawler.Crawler;
 import tv.notube.applications.ApplicationsManager;
-import tv.notube.crawler.MockCrawler;
 import tv.notube.profiles.MockProfiles;
 import tv.notube.profiles.Profiles;
 import tv.notube.queues.MockQueues;
@@ -41,7 +39,6 @@ public class TestServiceConfig extends GuiceServletContextListener {
                 bind(ApplicationsManager.class).to(MockApplicationsManager.class).asEagerSingleton();
                 bind(UserManager.class).to(MockUserManager.class);
                 bind(Profiles.class).to(MockProfiles.class);
-                bind(Crawler.class).to(MockCrawler.class);
                 bind(ActivityStore.class).to(MockActivityStore.class);
                 bind(Queues.class).to(MockQueues.class);
                 // add REST services

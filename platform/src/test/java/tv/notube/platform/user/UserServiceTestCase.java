@@ -473,30 +473,6 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         deregisterTestApplication();
     }
 
-    @Test
-    public void testForceUserCrawl() throws IOException {
-        APIKEY = registerTestApplication().toString();
-
-        final String baseQuery = "user/%s/activities/update?apikey=%s";
-        final String username = "test-user";
-        final String query = String.format(
-                baseQuery,
-                username,
-                APIKEY
-        );
-        GetMethod getMethod = new GetMethod(base_uri + query);
-        HttpClient client = new HttpClient();
-        int result = client.executeMethod(getMethod);
-        String responseBody = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
-        Assert.assertNotEquals(responseBody, "");
-        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        // TODO this will be automatically solved using random tests
-        // Assert.assertEquals(responseBody, "{\"object\":{\"submittedProcesses\":1,\"startedAt\":1338226509813,\"endedAt\":1338226509813},\"message\":\"activities updated for [test-user]\",\"status\":\"OK\"}");
-        deregisterTestApplication();
-    }
-
     @Test( enabled = false )
     public void testForceUserProfiling() throws IOException {
         APIKEY = registerTestApplication().toString();
@@ -588,23 +564,6 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(getMethod.getResponseBody());
         System.out.println(responseBody);
 
-    }
-
-    @Test(enabled = false)
-    public void test() throws IOException {
-        APIKEY = registerTestApplication().toString();
-        final String baseQuery = "user/%s/profile/pie?apikey=%s";
-        final String username = "test-user";
-        final String query = String.format(
-                baseQuery,
-                username,
-                APIKEY
-        );
-        GetMethod getMethod = new GetMethod(base_uri + query);
-        HttpClient client = new HttpClient();
-        int result = client.executeMethod(getMethod);
-        while(true)
-            System.out.print("");
     }
 
 }
