@@ -36,35 +36,38 @@ public class JedisResolver implements Resolver {
     }
 
     @Override
-    public UUID resolve(Activity activity) {
+    public UUID resolve(Activity activity) throws ResolverException {
         String service = activity.getContext().getService();
         int database;
         try {
             database = services.get(service);
         } catch (NullPointerException e) {
-            LOGGER.error("Service [{}] not supported", service, e);
-            return null;
+            final String errmsg = "Service [" + service + "] not supported";
+            LOGGER.error(errmsg, e);
+            throw new ResolverException(errmsg, e);
         }
         Jedis jedis = pool.getResource();
         jedis.select(database);
         String userIdentifier = activity.getContext().getUsername();
-        String uvStr;
+        String userId;
         try {
-            uvStr = jedis.get(userIdentifier);
+            userId = jedis.hget(userIdentifier, "uuid");
         } finally {
             pool.returnResource(jedis);
         }
-        if(uvStr == null) {
-            LOGGER.error("User [{}] not found for [{}]", userIdentifier, service);
-            return null;
-        }
-        UserValues uvObj = UserValues.parse(uvStr);
-        UUID userId = uvObj.getUserId();
         if (userId == null) {
-            LOGGER.error("User [{}] not found for [{}]", userIdentifier, service);
-            return null;
+            final String errmsg = "User [" + userIdentifier + "] not found for [" + service + "]";
+            LOGGER.error(errmsg);
+            throw new ResolverException(errmsg);
         }
-        return userId;
+        try {
+            return UUID.fromString(userId);
+        } catch (IllegalArgumentException e) {
+            final String errmsg = "Illformed beancounter userId [" + userId +
+                    "] for userIdentifier [" + userIdentifier + "] in service [" + service + "]";
+            LOGGER.error(errmsg, e);
+            throw new ResolverException(errmsg, e);
+        }
     }
 
     @Override
@@ -73,24 +76,31 @@ public class JedisResolver implements Resolver {
         try {
             database = services.get(service);
         } catch (NullPointerException e) {
-            LOGGER.error("Service [{}] not supported", service, e);
-            return null;
+            final String errmsg = "Service [" + service + "] not supported";
+            LOGGER.error(errmsg, e);
+            throw new ResolverException(errmsg, e);
         }
         Jedis jedis = pool.getResource();
         jedis.select(database);
-        String uvStr;
+        String userId;
         try {
-            uvStr = jedis.get(identifier);
+            userId = jedis.hget(identifier, "uuid");
         } finally {
             pool.returnResource(jedis);
         }
-        UserValues uv = UserValues.parse(uvStr);
-        UUID userId = uv.getUserId();
         if (userId == null) {
-            LOGGER.error("User [{}] not found for [{}]", identifier, service);
-            return null;
+            final String errmsg = "User [" + identifier + "] not found for [" + service + "]";
+            LOGGER.error(errmsg);
+            throw new ResolverException(errmsg);
         }
-        return userId;
+        try {
+            return UUID.fromString(userId);
+        } catch (IllegalArgumentException e) {
+            final String errmsg = "Illformed beancounter userId [" + userId +
+                    "] for userIdentifier [" + identifier + "] in service [" + service + "]";
+            LOGGER.error(errmsg, e);
+            throw new ResolverException(errmsg, e);
+        }
     }
 
     @Override
@@ -99,22 +109,22 @@ public class JedisResolver implements Resolver {
         try {
             database = services.get(service);
         } catch (NullPointerException e) {
-            LOGGER.error("Service [{}] not supported", service, e);
-            return null;
+            final String errmsg = "Service [" + service + "] not supported";
+            LOGGER.error(errmsg, e);
+            throw new ResolverException(errmsg, e);
         }
         Jedis jedis = pool.getResource();
         jedis.select(database);
-        String uvStr;
+        String username;
         try {
-            uvStr = jedis.get(identifier);
+            username = jedis.hget(identifier, "username");
         } finally {
             pool.returnResource(jedis);
         }
-        UserValues uv = UserValues.parse(uvStr);
-        String username = uv.getUsername();
         if (username == null) {
-            LOGGER.error("User [{}] not found for [{}]", identifier, service);
-            return null;
+            final String errmsg = "User [" + identifier + "] not found for [" + service + "]";
+            LOGGER.error(errmsg);
+            throw new ResolverException(errmsg);
         }
         return username;
     }
@@ -138,9 +148,9 @@ public class JedisResolver implements Resolver {
         }
         Jedis jedis = pool.getResource();
         jedis.select(database);
-        UserValues uv = new UserValues(userId, username);
         try {
-            jedis.set(identifier, UserValues.unparse(uv));
+            jedis.hset(identifier, "uuid", userId.toString());
+            jedis.hset(identifier, "username", username);
         } finally {
             pool.returnResource(jedis);
         }

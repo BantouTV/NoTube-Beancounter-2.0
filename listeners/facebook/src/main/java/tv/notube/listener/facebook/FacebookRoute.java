@@ -6,12 +6,12 @@ import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
 import com.restfb.exception.FacebookOAuthException;
+import com.restfb.types.Post;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.joda.time.DateTime;
-import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.*;
 import tv.notube.commons.model.activity.Object;
@@ -46,6 +46,15 @@ public class FacebookRoute extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
+
+        onException(ResolverException.class).handled(true).process(
+                new Processor() {
+                    @Override
+                    public void process(Exchange exchange) throws Exception {
+                        log.error("resolver exception detected.");
+                    }
+                }
+        );
 
         from("jetty:http://0.0.0.0:34567/facebook")
                 .choice()
@@ -96,15 +105,12 @@ public class FacebookRoute extends RouteBuilder {
                             FacebookClient client = new DefaultFacebookClient(token);
                             for (String field : change.getChangedFields()) {
                                 log.debug("looking for field {}", field);
-                                // TODO (low) limit should be configurable
-                                Connection<FacebookData> entities;
                                 try {
-                                    entities = client
-                                            .fetchConnection(
-                                                    "me/" + field,
-                                                    FacebookData.class,
-                                                    Parameter.with("limit", 1)
-                                            );
+                                    if(field.compareTo("feed")!=0) {
+                                        activities.addAll(fetchLikes(client, field, userId));
+                                    } else {
+                                        activities.addAll(fetchFeeds(client, field, userId));
+                                    }
                                 } catch (FacebookOAuthException e) {
                                     String username = getUsername(userId);
                                     log.debug("token expired for user:{}", username);
@@ -119,25 +125,11 @@ public class FacebookRoute extends RouteBuilder {
                                     excludedUsers.add(userId);
                                     continue;
                                 }
-                                List<FacebookData> filteredLikes = filter(entities);
-                                log.debug("RECEIVED ENTITIES (already filtered): " + filteredLikes.toString());
-                                activities.addAll(convertToActivities(userId, filteredLikes));
                             }
                         }
                         return activities;
                     }
 
-                    private List<FacebookData> filter(Connection<FacebookData> entities) {
-                        List<FacebookData> result = new ArrayList<FacebookData>();
-                        for (FacebookData entity : entities.getData()) {
-                            DateTime date = new DateTime(entity.getCreatedTime());
-                            // TODO (high) persist and retrieve correctly
-                            if (date.isAfter(getOldTimeStamp())) {
-                                result.add(entity);
-                            }
-                        }
-                        return result;
-                    }
                 })
                 .split(body())
                 .marshal().json(JsonLibrary.Jackson)
@@ -149,7 +141,33 @@ public class FacebookRoute extends RouteBuilder {
         return 1;
     }
 
-    private List<Activity> convertToActivities(String userId, List<FacebookData> likes) {
+    private List<Activity> fetchLikes(FacebookClient client, String field, String userId) throws FacebookOAuthException {
+        // TODO (low) limit should be configurable
+        Connection<FacebookData> entities =
+                client.fetchConnection(
+                        "me/" + field,
+                        FacebookData.class,
+                        Parameter.with("limit", 1)
+                );
+        List<FacebookData> filteredLikes = filterLikes(entities);
+        log.debug("RECEIVED ENTITIES (already filtered): " + filteredLikes.toString());
+        return convertLikesToActivities(userId, filteredLikes);
+    }
+
+
+    private List<FacebookData> filterLikes(Connection<FacebookData> entities) {
+        List<FacebookData> result = new ArrayList<FacebookData>();
+        for (FacebookData entity : entities.getData()) {
+            DateTime date = new DateTime(entity.getCreatedTime());
+            // TODO (high) persist and retrieve correctly
+            if (date.isAfter(getOldTimeStamp())) {
+                result.add(entity);
+            }
+        }
+        return result;
+    }
+
+    private List<Activity> convertLikesToActivities(String userId, List<FacebookData> likes) {
         List<Activity> activities = new ArrayList<Activity>();
         for (FacebookData like : likes) {
             try {
@@ -169,6 +187,59 @@ public class FacebookRoute extends RouteBuilder {
                 activities.add(activity);
             } catch (MalformedURLException e) {
                 log.error("the url is malformed");
+            }
+        }
+        return activities;
+    }
+
+    private List<Activity> fetchFeeds(FacebookClient client, String field, String userId) throws FacebookOAuthException {
+        // TODO (low) limit should be configurable
+        Connection<Post> feeds =
+                client.fetchConnection(
+                        "me/" + field,
+                        Post.class,
+                        Parameter.with("limit", 1)
+                );
+        List<Post> filteredFeeds = filterFeeds(feeds);
+        log.debug("RECEIVED ENTITIES (already filtered): " + filteredFeeds.toString());
+        return convertFeedsToActivities(userId, filteredFeeds);
+    }
+
+    private List<Post> filterFeeds(Connection<Post> feeds) {
+        List<Post> result = new ArrayList<Post>();
+        for (Post feed : feeds.getData()) {
+            DateTime date = new DateTime(feed.getCreatedTime());
+            // TODO (high) persist and retrieve correctly
+            if (date.isAfter(getOldTimeStamp())) {
+                result.add(feed);
+            }
+        }
+        return result;
+    }
+
+    private List<Activity> convertFeedsToActivities(String userId, List<Post> feeds) {
+        List<Activity> activities = new ArrayList<Activity>();
+        for (Post feed : feeds) {
+            if (feed.getFrom().getId().compareTo(userId) == 0 && feed.getType().compareTo("link") == 0) {
+                try {
+                    log.debug("CONVERTING FEED: " + feed.toString());
+                    Activity activity = new Activity();
+                    activity.setVerb(Verb.LIKE);
+                    tv.notube.commons.model.activity.Object object = new Object();
+                    object.setName(feed.getName());
+                    object.setDescription(feed.getDescription());
+                    object.setUrl(new URL(feed.getLink()));
+                    activity.setObject(object);
+                    Context context = new Context();
+                    context.setUsername(userId);
+                    context.setDate(new DateTime(feed.getCreatedTime()));
+                    context.setService("facebook");
+                    activity.setContext(context);
+                    activities.add(activity);
+                    log.debug("FEED CONVERTED: " + activity.toString());
+                } catch (MalformedURLException e) {
+                    log.error("the url is malformed");
+                }
             }
         }
         return activities;

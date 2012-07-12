@@ -11,4 +11,8 @@ public class ResolverException extends Exception {
         super(message, e);
     }
 
+    public ResolverException(String message) {
+        super(message);
+    }
+
 }
