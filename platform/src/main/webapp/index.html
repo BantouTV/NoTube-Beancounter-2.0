@@ -17,7 +17,6 @@
 			<li class="selected"><a href="#">Home</a></li>
 			<li><a href="#Authentication API">Authentication API</a></li>
             <li><a href="#User API">User API</a></li>
-            <li><a href="sally/">Look at Sally!</a></li>
             <li><a href="#">Support</a></li>
 		</ul>
 	</nav>
@@ -160,7 +159,7 @@
                     <br/>
                     Example: with curl
                     <br/>
-					curl -d "name=Davide&surname=Palmisano&username=dpalmisano&password=abracadabra" http://api.beancounter.io/rest/user/register?apikey=your-app-key<br>
+					curl -d "name=Davide&surname=Palmisano&username=dpalmisano&password=abracadabra" http://api.beancounter.io/rest/user/register?apikey=your-api-key<br>
 					with parameter body (application/x-www-form-urlencoded). <br>
 
 					response:
@@ -201,7 +200,7 @@
 					Description: it returns the user data but not the profile.<br>
 					Example:<br><br>
 
-					GET http://api.beancounter.io/rest/user/dpalmisano?apikey=your-app-key<br><br>
+					GET http://api.beancounter.io/rest/user/dpalmisano?apikey=your-api-key<br><br>
 
 					response:
         <pre><code>
@@ -250,7 +249,7 @@
 						<h2>6) Push activity</h2>
 					</header>
 
-					Path: /activity/add/{username}<br>
+					Path: /activities/add/{username}<br>
 					Method: POST<br>
 					Parameters: <br>
 					- {username} the Beancounter username<br>
@@ -259,7 +258,7 @@
 					Description: It pushes the activity to the User.<br>
 					Example with curl:<br><br>
 
-                    curl -d "activity={\"verb\":\"TWEET\",\"object\":{\"type\":\"TWEET\",\"url\":\"http://twitter.com/username/my_tweeet\",\"name\":null,\"description\":null,\"text\":\"A fake text\",\"hashTags\":["testingBeancounter"],\"urls\":[]},\"context\":{\"date\":1340702105000,\"service\":\"http://twitter.com\",\"mood\":null}}" http://api.beancounter.io/rest/activities/add/dpalmisanoapikey=your-api-key<br><br>
+                    curl -d "activity={\"verb\":\"TWEET\",\"object\":{\"type\":\"TWEET\",\"url\":\"http://twitter.com/username/my_tweeet\",\"name\":null,\"description\":null,\"text\":\"A fake text\",\"hashTags\":[\"testingBeancounter\"],\"urls\":[]},\"context\":{\"date\":1340702105000,\"service\":\"http://twitter.com\",\"mood\":null}}" http://api.beancounter.io/rest/activities/add/dpalmisano?apikey=your-api-key<br><br>
 
                     A "basic" JSON activity is made from an "object", a "context" and a "verb".
                     <br/>
@@ -340,7 +339,7 @@
 					Description: it deletes all the user data and activities.<br>
 					Example: with curl<br><br>
 
-					curl -X DELETE http://api.beancounter.io/rest/user/merlin?apikey=your-api-key<br><br>
+					curl -X DELETE http://api.beancounter.io/rest/user/dpalmisano?apikey=your-api-key<br><br>
 
 					
 				</article>
@@ -380,7 +379,7 @@
 					Description: it returns a weighted interests profile in JSON.<br>
 					Example: with curl<br><br>
 
-					curl http://api.beancounter.io/rest/user/dpalmisano/profile?apikey=your-app-key<br><br>
+					curl http://api.beancounter.io/rest/user/dpalmisano/profile?apikey=your-api-key<br><br>
 
 				</article>
 				
@@ -389,10 +388,10 @@
 				<article class="articlecontent">
 					
 					<header>
-						<h2>10) Add a source (lastfm, gomiso.com, twitter, facebook, n-screen) to a user</h2>
+						<h2>10) Add a source (twitter, facebook) to a user</h2>
 					</header>
 					
-					NoTube 2.0 Beancounter APIs support only those services which are
+					Beancounter.io APIs support only those services which are
 					OAuth-compliant or OAuth-like compliant. Twitter (OAuth-compliant)
 					and Last.fm (OAuth-like) examples follow:
 
@@ -405,8 +404,6 @@
 					2) Then, the user will be redirected to his Twitter account home
 					page to authorize the Beancounter application.<br>
 
-					<b>BBC iPlayer tweets</b>: Tweets from the BBC iPlayer are now represented
-					as <i>WATCHED</i> actions in the activity stream.
 
 					<br><br>
 					<h4> Facebook </h4>
@@ -418,36 +415,15 @@
 					page to authorize the Beancounter application.
 
 					<br><br>
-					<h4> Last.fm </h4>
-					
-					It's a bit different since it uses an OAuth-like exchange mechanism.<br>
-					1)  Send your user here: http://www.last
-					.fm/api/auth/?api_key=9f57b916d7ab90a7bf562b9e6f2385f0&cb=http://api.beancounter.io/rest/user/auth/callback/lastfm/{username}/{redirect}   <br>
-					where:<br>
-					- {username} is the Beancounter username, and<br>
-					- {redirect} is the url of a page your user will be redirected. It
-					must be without the 'http://' prefix and UTF-8 url-encoded. <br>
-					2) then your user will be asked to grant permission to NoTube on his
-					last.fm profile page. If successful the user will be redirected to
-					the url you provided at step 1.
-					<br>
-					
-					To verify please call:<br>
-
-					GET http://api.beancounter.io/rest/user/dpalmisano<br>
-
-					to see 'lastfm' or 'twitter' as a service added on the user services list.
-					<br><br>
 
 					
 				</article>
-				
-				
+
 				
 				<article class="articlecontent">
 					
 					<header>
-						<h2>11) Remove a source (lastfm, gomiso.com, twitter, facebook, n-screen) to a user</h2>
+						<h2>11) Remove a source (twitter, facebook) to a user</h2>
 					</header>
 					
 					Path: /user/source/{username}/{service}<br>
@@ -461,10 +437,109 @@
 					<br>
 					Example: with curl<br><br>
 
-					curl -X DELETE http://api.beancounter.io/rest/user/source/merlin/lastfm?apikey=your-app-key
+					curl -X DELETE http://api.beancounter.io/rest/user/source/dpalmisano/facebook?apikey=your-api-key
 					<br><br>
 				
 				</article>
+
+
+                <article class="articlecontent">
+
+                    <header>
+                        <h2>12) Get single activity</h2>
+                    </header>
+
+                    Path: /activities/get/{username}/{activityId}<br>
+                    Method: GET<br>
+                    Parameters: <br>
+                    - {username} the Beancounter username<br>
+                    - {activityId} the activityId of one of the user's activities<br>
+                    - apikey <br>
+                    Description: it retrieves a single specified activity of the specified user
+                    <br>
+                    Example: with curl<br><br>
+
+                    curl http://api.beancounter.io/rest/activities/get/dpalmisano/550e8400-e29b-41d4-a716-446655440000?apikey=your-api-key
+                    <br><br>
+
+                </article>
+
+
+                <article class="articlecontent">
+
+                    <header>
+                        <h2>13) Get multiple activities</h2>
+                    </header>
+
+                    Path: /activities/getall/{username}/<br>
+                    Method: GET<br>
+                    Parameters: <br>
+                    - {username} the Beancounter username<br>
+                    - apikey <br>
+                    Description: it retrieves all the user activities paginated by a limit
+                    <br>
+                    Example: with curl<br><br>
+
+                    curl http://api.beancounter.io/rest/activities/getall/dpalmisano?apikey=your-api-key
+                    <br><br>
+
+                </article>
+
+
+                <article class="articlecontent">
+
+                    <header>
+                        <h2>14) Check token validity</h2>
+                    </header>
+
+                    Path: /user/{username}/{service}/check<br>
+                    Method: GET<br>
+                    Parameters: <br>
+                    - {username} the Beancounter username<br>
+                    - {service} a supported service<br>
+                    - apikey <br>
+                    Description: it checks the token validity stored for the specified user.<br/>
+                    Supported services: facebook and twitter.
+                    <br>
+                    Example: with curl<br><br>
+
+                    curl http://api.beancounter.io/rest/user/dpalmisano/facebook/check?apikey=your-api-key
+                    <br><br>
+
+                <pre><code>
+        {
+                "status":       "OK",
+                "message":      "[facebook] token for [dpalmisano] is valid"
+        }
+                </code></pre>
+
+
+                </article>
+
+
+                <article class="articlecontent">
+
+                    <header>
+                        <h2>13) Check Beancounter.io service</h2>
+                    </header>
+
+                    Path: /alive/check<br>
+                    Description: it checks the status of the Beancounter.io returning the timestamp in ms
+                    <br>
+                    Example: with curl<br><br>
+
+                    curl http://api.beancounter.io/rest/alive/check
+                    <br><br>
+
+                <pre><code>
+        {
+                "status":       "OK",
+                "message":      "system up and running at",
+                "object":       "1342112536581"
+        }
+                </code></pre>
+
+                </article>
 
 
 				
