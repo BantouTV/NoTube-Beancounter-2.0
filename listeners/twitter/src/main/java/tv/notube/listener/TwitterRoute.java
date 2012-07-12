@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tv.notube.commons.model.activity.Activity;
-import tv.notube.crawler.requester.request.twitter.TwitterTweet;
+import tv.notube.listener.model.TwitterTweet;
 import twitter4j.Status;
 
 public class TwitterRoute extends RouteBuilder {
