@@ -8,7 +8,7 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>tv.notube</groupId>
-        <version>1.0</version>
+        <version>1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>applications</artifactId>
@@ -18,12 +18,12 @@
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>model</artifactId>
-            <version>1.0</version>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>helper</artifactId>
-            <version>1.0</version>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

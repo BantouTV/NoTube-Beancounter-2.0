@@ -5,7 +5,7 @@
     <groupId>tv.notube</groupId>
     <artifactId>parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0</version>
+    <version>1.1-SNAPSHOT</version>
     <name>NoTube 2.0 Parent</name>
 
     <dependencyManagement>

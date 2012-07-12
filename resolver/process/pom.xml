@@ -6,7 +6,7 @@
     <parent>
         <artifactId>resolver</artifactId>
         <groupId>tv.notube.resolver</groupId>
-        <version>1.0</version>
+        <version>1.1-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -18,7 +18,7 @@
         <dependency>
             <groupId>tv.notube.resolver</groupId>
             <artifactId>core</artifactId>
-            <version>1.0</version>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
@@ -45,7 +45,7 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <finalName>resolver-1.0-SNAPSHOT</finalName>
+                    <finalName>resolver-1.1-SNAPSHOT</finalName>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
