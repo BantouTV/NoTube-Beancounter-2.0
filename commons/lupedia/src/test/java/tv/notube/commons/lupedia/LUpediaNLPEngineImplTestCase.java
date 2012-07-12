@@ -36,6 +36,14 @@ public class LUpediaNLPEngineImplTestCase {
     }
 
     @Test
+    public void testRealTweetText() throws NLPEngineException, URISyntaxException {
+        final String text = "@Hare_F1 @MagnificentGeof and lets face it, it's more likely to happen than a London GP!";
+        Collection<URI> uris = nlpEngine.enrich(text);
+        Assert.assertEquals(uris.size(), 1);
+        Assert.assertTrue(uris.contains(new URI("http://dbpedia.org/resource/London")));
+    }
+
+    @Test
     public void testUrl() throws NLPEngineException, URISyntaxException, MalformedURLException {
         final URL url = new URL("http://www.bbc.co.uk/news/uk-18494541");
         Collection<URI> uris = nlpEngine.enrich(url);

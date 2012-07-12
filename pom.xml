@@ -272,7 +272,8 @@
         <module>profiles</module>
         <module>queues</module>
         <module>resolver</module>
-        <module>analytics</module>
+        <!-- analytics out of release 1.0 -->
+        <!-- <module>analytics</module> -->
     </modules>
 
     <distributionManagement>

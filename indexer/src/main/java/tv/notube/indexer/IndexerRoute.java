@@ -63,18 +63,21 @@ public class IndexerRoute extends RouteBuilder {
                                     resolvedActivity.getActivity()
                             );
                         } catch (ProfilerException e) {
-                            final String errMsg = "Error while profiling " + "user [" + resolvedActivity.getUserId() + "]";
+                            // log the error but do not raise an exception
+                            final String errMsg = "Error while profiling user [" + resolvedActivity.getUserId() + "]";
                             LOGGER.error(errMsg, e);
-                            throw new ProfilerException(errMsg, e);
                         }
                         // (TODO) (low) profile will be sent in a down stream queue
                         // meant to persist all the profiles of every user
                         // and yes, even to other real-time processes
-                        exchange.getIn().setBody(profile);
+                        // exchange.getIn().setBody(profile);
                     }
-                })
+                });
+        // TODO (out of release 1.0) turn on profiling analytics
+                /**
                 .marshal().json(JsonLibrary.Jackson)
                 .convertBodyTo(String.class)
                 .to("kestrel://{{kestrel.queue.analytics}}");
+                 **/
     }
 }

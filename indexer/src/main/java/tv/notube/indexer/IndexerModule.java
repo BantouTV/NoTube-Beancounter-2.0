@@ -14,10 +14,11 @@ import tv.notube.commons.helper.es.ElasticSearchConfiguration;
 import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
 import tv.notube.commons.helper.jedis.JedisPoolFactory;
 import tv.notube.commons.lupedia.LUpediaNLPEngineImpl;
-import tv.notube.commons.model.activity.Tweet;
+import tv.notube.commons.model.activity.*;
 import tv.notube.profiler.DefaultProfilerImpl;
 import tv.notube.profiler.Profiler;
 import tv.notube.profiler.ProfilerException;
+import tv.notube.profiler.rules.custom.DevNullProfilingRule;
 import tv.notube.profiler.rules.custom.TweetProfilingRule;
 import tv.notube.profiles.Profiles;
 import tv.notube.profiles.ProfilesModule;
@@ -38,7 +39,6 @@ public class IndexerModule extends CamelModuleWithMatchingRoutes {
         Names.bindProperties(binder(), redisProperties);
         bindInstance("redisProperties", redisProperties);
         bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
-
         Properties profilerProperties = PropertiesHelper.readFromClasspath("/profiler.properties");
         try {
             bind(Profiler.class).toInstance(createProfiler(profilerProperties));
@@ -64,6 +64,8 @@ public class IndexerModule extends CamelModuleWithMatchingRoutes {
                 properties
         );
         profiler.registerRule(Tweet.class, TweetProfilingRule.class);
+        // TODO (med) plug the facebook one
+        profiler.registerRule(tv.notube.commons.model.activity.Object.class, DevNullProfilingRule.class);
         return profiler;
     }
 

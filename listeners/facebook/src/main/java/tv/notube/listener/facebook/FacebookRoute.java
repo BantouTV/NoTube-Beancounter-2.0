@@ -95,23 +95,15 @@ public class FacebookRoute extends RouteBuilder {
                             log.debug("token: {}", token);
                             FacebookClient client = new DefaultFacebookClient(token);
                             for (String field : change.getChangedFields()) {
+                                log.debug("looking for field {}", field);
                                 // TODO (low) limit should be configurable
-                                // to handle expired tokes:
-                                // catch com.restfb.exception.FacebookOAuthException
-                                // get the response error: should be
-                                //      "code": 190, "error_subcode": 460
-                                // during the handling:
-                                // ask to the usermanager to renew the token
-                                // and store it again (this is a responsability
-                                // of the user manager)
-                                // this shows how http://stackoverflow.com/questions/10971218/how-to-handle-expired-token-from-server-side
                                 Connection<FacebookData> entities;
                                 try {
                                     entities = client
                                             .fetchConnection(
                                                     "me/" + field,
                                                     FacebookData.class,
-                                                    Parameter.with("limit", 10)
+                                                    Parameter.with("limit", 1)
                                             );
                                 } catch (FacebookOAuthException e) {
                                     String username = getUsername(userId);

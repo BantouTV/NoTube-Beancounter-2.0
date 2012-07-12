@@ -159,7 +159,6 @@ public class ActivitiesService extends JsonService {
         return mapper.readValue(jsonActivity, Activity.class);
     }
 
-
     @GET
     @Path("/get/{username}/{activityId}")
     public Response getActivity(

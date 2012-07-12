@@ -1,9 +1,7 @@
 package tv.notube.commons.lupedia;
 
 import de.l3s.boilerpipe.BoilerpipeProcessingException;
-import de.l3s.boilerpipe.document.TextDocument;
 import de.l3s.boilerpipe.extractors.ArticleExtractor;
-import de.l3s.boilerpipe.extractors.DefaultExtractor;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -22,7 +20,6 @@ import java.util.*;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-// TODO (med) make POST requests to handle long texts
 public final class LUpediaNLPEngineImpl implements NLPEngine {
 
     public final static String QUERY_PATTERN = "http://lupedia.ontotext.com/lookup/text2json?threshold=%s";
@@ -42,7 +39,6 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
         } catch (MalformedURLException e) {
             throw new NLPEngineException("url [" + queryStr + "] seems to be ill-formed", e);
         }
-
         PostMethod postMethod = new PostMethod(queryStr);
         postMethod.setParameter("lookupText", text);
         HttpClient client = new HttpClient();
@@ -53,7 +49,6 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
         } catch (IOException e) {
             throw new NLPEngineException("error opening the connection for [" + queryStr + "]", e);
         }
-
         ObjectMapper mapper = new ObjectMapper();
         List<LUpediaEntity> entities;
         try {
@@ -64,6 +59,7 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
                     e
             );
         } finally {
+            postMethod.releaseConnection();
             try {
                 is.close();
             } catch (IOException e) {

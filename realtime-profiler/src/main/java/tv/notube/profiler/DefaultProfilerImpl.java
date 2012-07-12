@@ -76,7 +76,9 @@ public class DefaultProfilerImpl implements Profiler {
         try {
             old = getProfile(userId);
         } catch (ProfilesException e) {
-            throw new ProfilerException("Error while looking up the old profile for user with id [" + userId + "]", e);
+            final String errMsg = "Error while looking up the old profile for user with id [" + userId + "]";
+            LOGGER.error(errMsg, e);
+            throw new ProfilerException(errMsg, e);
         }
         ObjectProfilingRule opr = getRule(activity);
         try {
@@ -91,7 +93,9 @@ public class DefaultProfilerImpl implements Profiler {
         try {
             activityReferences = opr.getResult();
         } catch (ProfilingRuleException e) {
-            throw new ProfilerException("Error while getting rule result", e);
+            final String errMsg = "Error while getting rule result";
+            LOGGER.error(errMsg, e);
+            throw new ProfilerException(errMsg, e);
         }
         if (activityReferences.size() == 0) {
             if (old != null) {
@@ -102,9 +106,9 @@ public class DefaultProfilerImpl implements Profiler {
                 try {
                     ps.store(up);
                 } catch (ProfilesException e) {
-                    throw new ProfilerException(
-                            "Error while storing profile for user [" + userId + "]", e
-                    );
+                    final String errMsg = "Error while storing profile for user [" + userId + "]";
+                    LOGGER.error(errMsg, e);
+                    throw new ProfilerException(errMsg, e);
                 }
                 return up;
             }
@@ -122,9 +126,9 @@ public class DefaultProfilerImpl implements Profiler {
             try {
                 ps.store(up);
             } catch (ProfilesException e) {
-                throw new ProfilerException(
-                        "Error while storing profile for user [" + userId + "]", e
-                );
+                final String errMsg = "Error while storing profile for user [" + userId + "]";
+                LOGGER.error(errMsg, e);
+                throw new ProfilerException(errMsg, e);
             }
             return up;
         }
@@ -136,11 +140,11 @@ public class DefaultProfilerImpl implements Profiler {
         try {
             ps.store(up);
         } catch (ProfilesException e) {
-            throw new ProfilerException(
-                    "Error while storing profile for user [" + userId + "]", e
-            );
+            final String errMsg = "Error while storing profile for user [" + userId + "]";
+            LOGGER.error(errMsg, e);
+            throw new ProfilerException(errMsg, e);
         }
-        LOGGER.info("profiling ended for user [" + userId + "]");
+        LOGGER.info("profiling ended nicely for user [" + userId + "]");
         return up;
     }
 
@@ -260,16 +264,14 @@ public class DefaultProfilerImpl implements Profiler {
                     LinkingEngine.class
             );
         } catch (NoSuchMethodException e) {
-            throw new ProfilerException("", e);
+            final String errMsg = "cannot find a constructor with type [" + type.getName() + "]";
+            throw new ProfilerException(errMsg, e);
         }
         try {
             return constructor.newInstance(object, nlpEngine, linkEng);
-        } catch (InstantiationException e) {
-            throw new ProfilerException("", e);
-        } catch (IllegalAccessException e) {
-            throw new ProfilerException("", e);
-        } catch (InvocationTargetException e) {
-            throw new ProfilerException("", e);
+        } catch (Exception e) {
+            final String errMsg = "error while instantiating a [" + ruleClass.getName() + "] with type [" + type.getName() + "]";
+            throw new ProfilerException(errMsg, e);
         }
     }
 
