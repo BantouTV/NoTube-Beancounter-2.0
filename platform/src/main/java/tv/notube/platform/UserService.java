@@ -416,6 +416,14 @@ public class UserService extends JsonService {
             return rb.build();
         }
         OAuthAuth auth = (OAuthAuth) user.getAuth(service);
+        if(auth == null) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    "user with username [" + username + "] has not a token for service [" + service + "]")
+            );
+            return rb.build();
+        }
         if (auth.isExpired()) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(new StringPlatformResponse(

@@ -149,11 +149,6 @@ public class ActivitiesService extends JsonService {
         return mapper.writeValueAsString(resolvedActivity);
     }
 
-    private String unparse(Activity activity) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(activity);
-    }
-
     private Activity parse(String jsonActivity) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(jsonActivity, Activity.class);
@@ -352,14 +347,17 @@ public class ActivitiesService extends JsonService {
     }
 
     private Collection<Activity> trimActivities(Collection<Activity> activities, int page) {
+        if(activities.size() < ACTIVITIES_LIMIT) {
+            return activities;
+        }
         List<Activity> list = new ArrayList<Activity>(activities);
         Collections.sort(list, new ActivityComparator());
-
         List<Activity> trimmed = new ArrayList<Activity>();
         if (page < list.size()) {
             int limit = page + ACTIVITIES_LIMIT;
             while (page < limit) {
                 trimmed.add(list.get(page));
+                page++;
             }
         }
         return trimmed;
@@ -369,6 +367,6 @@ public class ActivitiesService extends JsonService {
 class ActivityComparator implements Comparator<Activity> {
     @Override
     public int compare(Activity a1, Activity a2) {
-        return a1.getId().compareTo(a2.getId());
+        return a1.getContext().getDate().compareTo(a2.getContext().getDate());
     }
 }
