@@ -48,6 +48,7 @@ public class TestServiceConfig extends GuiceServletContextListener {
                 bind(ApplicationService.class);
                 bind(UserService.class);
                 bind(ActivitiesService.class);
+                bind(AliveService.class);
                 // add bindings for Jackson
                 bind(JacksonJaxbJsonProvider.class).asEagerSingleton();
                 bind(JacksonMixInProvider.class).asEagerSingleton();

@@ -70,6 +70,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(ApplicationService.class);
                 bind(UserService.class);
                 bind(ActivitiesService.class);
+                bind(AliveService.class);
                 // bind Production Implementations
 
                 Properties redisProperties = PropertiesHelper.readFromClasspath("/redis.properties");
