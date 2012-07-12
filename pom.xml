@@ -261,7 +261,6 @@
 
     <modules>
         <module>commons</module>
-        <module>crawler</module>
         <module>platform</module>
         <module>user-manager</module>
         <module>applications</module>

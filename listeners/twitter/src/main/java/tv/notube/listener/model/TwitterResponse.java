@@ -1,12 +1,13 @@
-package tv.notube.crawler.requester.request.twitter;
+package tv.notube.listener.model;
 
 import tv.notube.commons.model.activity.*;
-import tv.notube.crawler.requester.ServiceResponse;
-import tv.notube.crawler.requester.ServiceResponseException;
 
 import java.lang.Object;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * put class description here

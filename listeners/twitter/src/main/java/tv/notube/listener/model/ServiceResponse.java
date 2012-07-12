@@ -1,4 +1,4 @@
-package tv.notube.crawler.requester;
+package tv.notube.listener.model;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )

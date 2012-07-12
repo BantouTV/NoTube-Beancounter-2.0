@@ -33,7 +33,7 @@ public class IndexerRoute extends RouteBuilder {
                 new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
-                        log.error("exception detected.");
+                        log.error("profiler exception detected.");
                     }
                 }
         );

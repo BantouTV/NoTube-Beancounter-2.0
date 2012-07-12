@@ -1,4 +1,4 @@
-package tv.notube.crawler.requester.request.twitter;
+package tv.notube.listener.model;
 
 import org.joda.time.DateTime;
 
