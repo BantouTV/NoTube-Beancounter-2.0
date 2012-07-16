@@ -474,10 +474,7 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>${basedir}/</directory>
-                            <includes>
-                                <include>**/logs/*.log</include>
-                            </includes>
+                            <directory>logs</directory>
                         </fileset>
                     </filesets>
                 </configuration>
