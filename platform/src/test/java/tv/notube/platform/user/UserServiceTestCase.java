@@ -85,8 +85,8 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody.substring(0, 11), "{\"object\":\"");
-        Assert.assertEquals(responseBody.substring(47), "\",\"message\":\"user successfully registered\",\"status\":\"OK\"}");
+        Assert.assertEquals(responseBody.substring(0, 66), "{\"status\":\"OK\",\"message\":\"user successfully registered\",\"object\":\"");
+        Assert.assertEquals(responseBody.substring(102), "\"}");
         deregisterTestApplication();
     }
 
@@ -117,8 +117,8 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody.substring(0, 11), "{\"object\":\"");
-        Assert.assertEquals(responseBody.substring(47), "\",\"message\":\"user successfully registered\",\"status\":\"OK\"}");
+        Assert.assertEquals(responseBody.substring(0, 66), "{\"status\":\"OK\",\"message\":\"user successfully registered\",\"object\":\"");
+        Assert.assertEquals(responseBody.substring(102), "\"}");
         deregisterTestApplication();
     }
 
@@ -147,7 +147,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"username [test-user] is already taken\",\"status\":\"NOK\"}");
+        Assert.assertEquals(responseBody, "{\"status\":\"NOK\",\"message\":\"username [test-user] is already taken\"}");
         deregisterTestApplication();
     }
 
@@ -195,7 +195,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"user [missing-user] not found\",\"status\":\"NOK\"}");
+        Assert.assertEquals(responseBody, "{\"status\":\"NOK\",\"message\":\"user [missing-user] not found\"}");
         deregisterTestApplication();
     }
 
@@ -239,7 +239,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"user with username [missing-user] not found\",\"status\":\"NOK\"}");
+        Assert.assertEquals(responseBody, "{\"status\":\"NOK\",\"message\":\"user with username [missing-user] not found\"}");
         deregisterTestApplication();
     }
 
@@ -262,7 +262,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"user with username [test-user] deleted\",\"status\":\"OK\"}");
+        Assert.assertEquals(responseBody, "{\"status\":\"OK\",\"message\":\"user with username [test-user] deleted\"}");
         deregisterTestApplication();
     }
 
@@ -287,7 +287,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"user [test-user] authenticated\",\"status\":\"OK\"}");
+        Assert.assertEquals(responseBody, "{\"status\":\"OK\",\"message\":\"user [test-user] authenticated\"}");
         APIResponse actual = fromJson(responseBody, APIResponse.class);
         APIResponse expected = new APIResponse(
                 null,
@@ -421,7 +421,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"service [fake-service-1] removed from user [test-user]\",\"status\":\"OK\"}");
+        Assert.assertEquals(responseBody, "{\"status\":\"OK\",\"message\":\"service [fake-service-1] removed from user [test-user]\"}");
         deregisterTestApplication();
     }
 
@@ -446,7 +446,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody, "{\"message\":\"User [missing-user] not found!\",\"status\":\"NOK\"}");
+        Assert.assertEquals(responseBody, "{\"status\":\"NOK\",\"message\":\"User [missing-user] not found!\"}");
         deregisterTestApplication();
     }
 

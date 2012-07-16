@@ -2,6 +2,9 @@ package tv.notube.activities;
 
 import org.joda.time.DateTime;
 import tv.notube.commons.model.activity.*;
+import tv.notube.commons.tests.Tests;
+import tv.notube.commons.tests.TestsBuilder;
+import tv.notube.commons.tests.TestsException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,12 +16,18 @@ import java.util.UUID;
  */
 public class MockActivityStore implements ActivityStore {
 
+    private Collection<Activity> activities;
+
     private Activity lastActivity;
 
     @Override
     public void store(UUID userId, Activity activity)
             throws ActivityStoreException {
         lastActivity = activity;
+        if(activities==null) {
+            activities = new ArrayList<Activity>();
+        }
+        activities.add(activity);
     }
 
     @Override
@@ -57,7 +66,18 @@ public class MockActivityStore implements ActivityStore {
 
     @Override
     public Collection<Activity> getByUser(UUID userId) throws ActivityStoreException {
-        throw new UnsupportedOperationException("NIY");
+        if (activities == null) {
+            Collection<Activity> allActivites = new ArrayList<Activity>();
+            try {
+                for (int i = 0; i < 50; i++) {
+                    allActivites.add(createFakeActivity(i));
+                }
+            } catch (TestsException e) {
+                throw new ActivityStoreException("Error while creating fakes activities!", e);
+            }
+            activities = allActivites;
+        }
+        return activities;
     }
 
     @Override
@@ -75,6 +95,21 @@ public class MockActivityStore implements ActivityStore {
 
     public Activity getLastActivity() {
         return lastActivity;
+    }
+
+    private Activity createFakeActivity(int i) throws TestsException {
+        Activity activity = new Activity();
+        Tweet tweet = new Tweet();
+        tweet.setText("Fake text #" + i);
+        Context context = new Context();
+        context.setUsername("username");
+        context.setDate(new DateTime());
+        context.setService("twitter");
+        activity.setVerb(Verb.TWEET);
+        activity.setId(UUID.randomUUID());
+        activity.setContext(context);
+        activity.setObject(tweet);
+        return activity;
     }
 
 }

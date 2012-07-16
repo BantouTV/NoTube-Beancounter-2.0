@@ -46,6 +46,13 @@ public class JedisProfilesImpl implements Profiles {
                     errMsg,
                     e
             );
+        } catch (Exception e) {
+            final String errMsg = "Error while getting json for user profile [" + up.getUserId() + "]";
+            LOGGER.error(errMsg, e);
+            throw new ProfilesException(
+                    errMsg,
+                    e
+            );
         }
         jedis = pool.getResource();
         LOGGER.debug("storing profile for user [" + up.getUserId() + "] on database [" + database + "]");

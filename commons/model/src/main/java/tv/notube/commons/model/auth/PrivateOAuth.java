@@ -7,4 +7,5 @@ import org.codehaus.jackson.annotate.JsonIgnore;
  */
 public abstract class PrivateOAuth {
     @JsonIgnore abstract String getSecret();
+    @JsonIgnore abstract String getSession();
 }
