@@ -39,7 +39,7 @@ public class TestServiceConfig extends GuiceServletContextListener {
                 bind(ApplicationsManager.class).to(MockApplicationsManager.class).asEagerSingleton();
                 bind(UserManager.class).to(MockUserManager.class);
                 bind(Profiles.class).to(MockProfiles.class);
-                bind(ActivityStore.class).to(MockActivityStore.class);
+                bind(ActivityStore.class).to(MockActivityStore.class).asEagerSingleton();
                 bind(Queues.class).to(MockQueues.class);
                 // add REST services
                 bind(ApplicationService.class);

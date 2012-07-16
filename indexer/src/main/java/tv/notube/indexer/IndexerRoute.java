@@ -29,14 +29,6 @@ public class IndexerRoute extends RouteBuilder {
     private Profiler profiler;
 
     public void configure() {
-        onException(ProfilerException.class).handled(true).process(
-                new Processor() {
-                    @Override
-                    public void process(Exchange exchange) throws Exception {
-                        log.error("profiler exception detected.");
-                    }
-                }
-        );
         from("kestrel://{{kestrel.queue.internal.url}}?concurrentConsumers=10&waitTimeMs=500")
                 .unmarshal().json(JsonLibrary.Jackson, ResolvedActivity.class)
                 .multicast().parallelProcessing().to("direct:es", "direct:profiler");
@@ -65,18 +57,18 @@ public class IndexerRoute extends RouteBuilder {
                         LOGGER.debug("Profiling activity {}.", resolvedActivity);
                         UserProfile profile;
                         // the profiler automatically stores the profile
-                        //try {
+                        try {
                             profile = profiler.profile(
                                     resolvedActivity.getUserId(),
                                     resolvedActivity.getActivity()
                             );
-                        //} catch (ProfilerException e) {
+                        } catch (ProfilerException e) {
                             // log the error but do not raise an exception
-                            // final String errMsg = "Error while profiling " +
-                            //        "user [" + resolvedActivity.getUserId()
-                            //        + "]";
-                            //LOGGER.error(errMsg, e);
-                        //}
+                            final String errMsg = "Error while profiling " +
+                                    "user [" + resolvedActivity.getUserId()
+                                    + "]";
+                            LOGGER.error(errMsg, e);
+                        }
                         // (TODO) (low) profile will be sent in a down stream queue
                         // meant to persist all the profiles of every user
                         // and yes, even to other real-time processes

@@ -33,6 +33,7 @@ import java.util.*;
 @Produces(MediaType.APPLICATION_JSON)
 public class ActivitiesService extends JsonService {
 
+    // TODO (mid) this should be configurable
     private static final int ACTIVITIES_LIMIT = 20;
 
     private ApplicationsManager applicationsManager;
@@ -274,8 +275,10 @@ public class ActivitiesService extends JsonService {
             return error(e, "Your apikey is not well formed");
         }
         int page;
+        int showedActivities;
         try {
             page = Integer.parseInt(pageString);
+            showedActivities = page * ACTIVITIES_LIMIT;
         } catch (IllegalArgumentException e) {
             return error(e, "Your page number is not well formed");
         }
@@ -332,13 +335,13 @@ public class ActivitiesService extends JsonService {
                     )
             );
         } else {
-            Collection<Activity> trimmedActivities = trimActivities(allActivities, page);
+            Collection<Activity> trimmedActivities = trimActivities(allActivities, showedActivities);
             rb.entity(
                     new ActivitiesPlatformResponse(
                             ActivitiesPlatformResponse.Status.OK,
                             "user '" + username + "' activities found. " +
                                     "Next: 'http://api.beancounter.io/rest/activities/getall/" +
-                                    username + "?page=" + (page+ACTIVITIES_LIMIT) + "&apikey=" + apiKey + "'",
+                                    username + "?page=" + page + "&apikey=" + apiKey + "'",
                             trimmedActivities
                     )
             );
@@ -355,7 +358,7 @@ public class ActivitiesService extends JsonService {
         List<Activity> trimmed = new ArrayList<Activity>();
         if (page < list.size()) {
             int limit = page + ACTIVITIES_LIMIT;
-            while (page < limit) {
+            while (page < limit && page < list.size()) {
                 trimmed.add(list.get(page));
                 page++;
             }
