@@ -2,6 +2,9 @@ package tv.notube.commons.model.activity;
 
 import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
+import tv.notube.commons.model.activity.rai.Comment;
+import tv.notube.commons.model.activity.rai.ContentItem;
+import tv.notube.commons.model.activity.rai.TVEvent;
 import tv.notube.commons.tests.annotations.Random;
 
 import java.io.Serializable;
@@ -9,6 +12,7 @@ import java.net.URL;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="type")
 @JsonSubTypes({
@@ -16,7 +20,11 @@ import java.net.URL;
         @JsonSubTypes.Type(value = Event.class, name = "EVENT"),
         @JsonSubTypes.Type(value = Article.class, name = "ARTICLE"),
         @JsonSubTypes.Type(value = Place.class, name = "PLACE"),
-        @JsonSubTypes.Type(value = Song.class, name = "SONG")
+        @JsonSubTypes.Type(value = Song.class, name = "SONG"),
+        @JsonSubTypes.Type(value = ContentItem.class, name = "RAI-CONTENT-ITEM"),
+        @JsonSubTypes.Type(value = TVEvent.class, name = "RAI-TV-EVENT"),
+        @JsonSubTypes.Type(value = Comment.class, name = "RAI-TV-COMMENT")
+
 })
 public class Object implements Serializable {
 

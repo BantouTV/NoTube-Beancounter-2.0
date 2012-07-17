@@ -271,6 +271,7 @@
         <module>profiles</module>
         <module>queues</module>
         <module>resolver</module>
+        <module>filter</module>
         <!-- analytics out of release 1.0 -->
         <!-- <module>analytics</module> -->
     </modules>

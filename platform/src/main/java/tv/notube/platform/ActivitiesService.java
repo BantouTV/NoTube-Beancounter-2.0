@@ -229,7 +229,7 @@ public class ActivitiesService extends JsonService {
             );
         }
         Response.ResponseBuilder rb = Response.ok();
-        if(activity==null) {
+        if(activity == null) {
             rb.entity(
                     new ActivityPlatformResponse(
                             ActivityPlatformResponse.Status.OK,

@@ -4,16 +4,24 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import tv.notube.commons.model.activity.Activity;
+import tv.notube.commons.model.activity.Context;
+import tv.notube.commons.model.activity.Verb;
+import tv.notube.commons.model.activity.rai.ContentItem;
 import tv.notube.platform.APIResponse;
 import tv.notube.platform.AbstractJerseyTestCase;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.UUID;
 
 /**
- * Reference test case for {@link tv.notube.platform.UserService}
+ * Reference test case for {@link tv.notube.platform.ActivitiesService}
  *
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
@@ -84,6 +92,146 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         Assert.assertEquals(responseBody.substring(0, 11), "{\"object\":\"");
         Assert.assertEquals(responseBody.substring(47), "\",\"message\":\"activity successfully registered\",\"status\":\"OK\"}");
+        APIResponse actual = fromJson(responseBody, APIResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                "activity successfully registered",
+                "OK"
+        );
+        Assert.assertEquals(actual.getMessage(), expected.getMessage());
+        Assert.assertEquals(actual.getStatus(), expected.getStatus());
+        deregisterTestApplication();
+    }
+
+    @Test
+    public void testCustomActivityContentItem() throws IOException {
+        APIKEY = registerTestApplication().toString();
+        final String baseQuery = "activities/add/%s?apikey=%s";
+        final String username = "test-user";
+        final String activity = "{\n" +
+                "    \"verb\": \"WATCHED\",\n" +
+                "    \"object\": {\n" +
+                "        \"type\": \"RAI-CONTENT-ITEM\",\n" +
+                "        \"url\": \"http://www.rai.tv/dl/RaiTV/programmi/media/ContentItem-17efdae2-c803-4411-aac9-f6185bdf13de.html\",\n" +
+                "        \"name\": \"test-name\",\n" +
+                "        \"description\": \"test-description\",\n" +
+                "        \"id\": \"17efdae2-c803-4411-aac9-f6185bdf13de\"\n" +
+                "    },\n" +
+                "    \"context\": {\n" +
+                "        \"date\": 1342456531059,\n" +
+                "        \"service\": \"rai.tv\",\n" +
+                "        \"mood\": null,\n" +
+                "        \"username\": \"dpalmisano\"\n" +
+                "    }\n" +
+                "}";
+        final String query = String.format(
+                baseQuery,
+                username,
+                APIKEY
+        );
+        PostMethod postMethod = new PostMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("activity", activity);
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
+        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        APIResponse actual = fromJson(responseBody, APIResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                "activity successfully registered",
+                "OK"
+        );
+        Assert.assertEquals(actual.getMessage(), expected.getMessage());
+        Assert.assertEquals(actual.getStatus(), expected.getStatus());
+        deregisterTestApplication();
+    }
+
+    @Test
+    public void testCustomActivityTvEvent() throws IOException {
+        APIKEY = registerTestApplication().toString();
+        final String baseQuery = "activities/add/%s?apikey=%s";
+        final String username = "test-user";
+        final String activity = "{\n" +
+                "    \"verb\": \"CHECKIN\",\n" +
+                "    \"object\": {\n" +
+                "        \"type\": \"RAI-TV-EVENT\",\n" +
+                "        \"url\": \"http://www.rai.tv/dl/RaiTV/programmi/media/EventItem-17efdae2-c803-4411-aac9f6185bdf13de.html\",\n" +
+                "        \"name\": \"test-name\",\n" +
+                "        \"description\": \"test-description\",\n" +
+                "        \"id\": \"17efdae2-c803-4411-aac9-f6185bdf13de\"\n" +
+                "    },\n" +
+                "    \"context\": {\n" +
+                "        \"date\": 1342456531059,\n" +
+                "        \"service\": \"rai.tv\",\n" +
+                "        \"mood\": null,\n" +
+                "        \"username\": \"dpalmisano\"\n" +
+                "    }\n" +
+                "}";
+        final String query = String.format(
+                baseQuery,
+                username,
+                APIKEY
+        );
+        PostMethod postMethod = new PostMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("activity", activity);
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
+        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        APIResponse actual = fromJson(responseBody, APIResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                "activity successfully registered",
+                "OK"
+        );
+        Assert.assertEquals(actual.getMessage(), expected.getMessage());
+        Assert.assertEquals(actual.getStatus(), expected.getStatus());
+        deregisterTestApplication();
+    }
+
+    @Test
+    public void testCustomActivityComment() throws IOException {
+        APIKEY = registerTestApplication().toString();
+        final String baseQuery = "activities/add/%s?apikey=%s";
+        final String username = "test-user";
+        final String activity = "{\n" +
+                "    \"verb\": \"COMMENT\",\n" +
+                "    \"object\": {\n" +
+                "        \"type\": \"RAI-TV-COMMENT\",\n" +
+                "        \"url\": \"http://www.rai.tv/dl/RaiTV/programmi/media/Comment-17efdae2-c803-4411-aac9f6185bdf13de.html\",\n" +
+                "        \"name\": \"test-name\",\n" +
+                "        \"description\": \"test-description\",\n" +
+                "        \"text\": \"this is a text of a comment\",\n" +
+                "        \"inReplyTo\": \"17efdae2-c803-4411-aac9-f6185bdf13de\",\n" +
+                "        \"id\": \"17efdae2-c803-4411-aac9-f6185bdf13de\"\n" +
+                "    },\n" +
+                "    \"context\": {\n" +
+                "        \"date\": 1342456531059,\n" +
+                "        \"service\": \"rai.tv\",\n" +
+                "        \"mood\": null,\n" +
+                "        \"username\": \"dpalmisano\"\n" +
+                "    }\n" +
+                "}";
+        final String query = String.format(
+                baseQuery,
+                username,
+                APIKEY
+        );
+        PostMethod postMethod = new PostMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("activity", activity);
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
+        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         APIResponse actual = fromJson(responseBody, APIResponse.class);
         APIResponse expected = new APIResponse(
                 null,
