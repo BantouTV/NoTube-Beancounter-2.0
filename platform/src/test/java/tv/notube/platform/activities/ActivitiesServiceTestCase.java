@@ -9,9 +9,7 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.Context;
 import tv.notube.commons.model.activity.Verb;
@@ -37,13 +35,13 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         super(9995);
     }
 
-    @BeforeTest
-    private void registerApplication() throws IOException {
+    @BeforeMethod
+    public void registerApp() throws Exception {
         APIKEY = registerTestApplication().toString();
     }
 
-    @AfterTest
-    private void deregisterTestApplication() throws IOException {
+    @AfterMethod
+    public void deregisterTestApplication() throws IOException {
         HttpClient client = new HttpClient();
         String baseQuery = "application/" + APIKEY;
         DeleteMethod deleteMethod = new DeleteMethod(base_uri + baseQuery);
@@ -113,7 +111,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetAllActivitiesDefault() throws IOException {
-        final String baseQuery = "activities/getall/%s?apikey=%s";
+        final String baseQuery = "activities/all/%s?apikey=%s";
         final String username = "test-user";
         final String query = String.format(
                 baseQuery,
@@ -141,7 +139,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetAllActivitiesNormal() throws IOException {
-        final String baseQuery = "activities/getall/%s?page=1&apikey=%s";
+        final String baseQuery = "activities/all/%s?page=1&apikey=%s";
         final String username = "test-user";
         final String query = String.format(
                 baseQuery,
@@ -169,7 +167,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetAllActivitiesMore() throws IOException {
-        final String baseQuery = "activities/getall/%s?page=2&apikey=%s";
+        final String baseQuery = "activities/all/%s?page=2&apikey=%s";
         final String username = "test-user";
         final String query = String.format(
                 baseQuery,
@@ -197,7 +195,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetAllActivitiesTooMany() throws IOException {
-        final String baseQuery = "activities/getall/%s?page=3&apikey=%s";
+        final String baseQuery = "activities/all/%s?page=3&apikey=%s";
         final String username = "test-user";
         final String query = String.format(
                 baseQuery,
@@ -225,7 +223,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetAllActivitiesDifferentPages() throws IOException {
-        final String baseQuery1 = "activities/getall/%s?apikey=%s";
+        final String baseQuery1 = "activities/all/%s?apikey=%s";
         final String username = "test-user";
         final String query = String.format(
                 baseQuery1,
@@ -239,7 +237,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody1);
 
-        final String baseQuery2 = "activities/getall/%s?page=1&apikey=%s";
+        final String baseQuery2 = "activities/all/%s?page=1&apikey=%s";
         final String query2 = String.format(
                 baseQuery2,
                 username,
