@@ -30,4 +30,8 @@ public class StringPlatformResponse extends PlatformResponse<String> {
         return string;
     }
 
+    public void setObject(String object) {
+        this.string = object;
+    }
+
 }
