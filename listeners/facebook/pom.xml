@@ -24,10 +24,17 @@
             <artifactId>user-manager</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>model</artifactId>
             <version>1.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>tv.notube.commons</groupId>
+            <artifactId>tests</artifactId>
+            <version>1.1-SNAPSHOT</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
@@ -58,21 +65,6 @@
             <artifactId>joda-time</artifactId>
         </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>apache.snapshots</id>
-            <name>Apache Development Snapshot Repository</name>
-            <url>https://repository.apache.org/content/repositories/snapshots/
-            </url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <build>
         <plugins>
