@@ -252,7 +252,7 @@ public class ActivitiesService extends JsonService {
 
 
     @GET
-    @Path("/getall/{username}")
+    @Path("/all/{username}")
     public Response getAllActivities(
             @PathParam("username") String username,
             @QueryParam("page") @DefaultValue("0") String pageString,

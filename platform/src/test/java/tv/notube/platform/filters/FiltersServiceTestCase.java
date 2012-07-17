@@ -50,20 +50,14 @@ public class FiltersServiceTestCase extends AbstractJerseyTestCase {
         return UUID.fromString(actual.getObject());
     }
 
-    @BeforeClass
-    public void setUp() throws Exception {
-        super.setUp();
+    @BeforeMethod
+    public void registerApp() throws Exception {
         APIKEY = registerTestApplication().toString();
     }
 
-    @AfterClass
-    public void tearDown() throws InterruptedException {
-        try {
+    @AfterMethod
+    public void deregisterApp() throws IOException {
             deregisterTestApplication();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        super.tearDown();
     }
 
     @Test
