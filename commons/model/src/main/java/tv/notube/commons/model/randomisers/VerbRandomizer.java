@@ -1,4 +1,4 @@
-package tv.notube.commons.tests.randomisers;
+package tv.notube.commons.model.randomisers;
 
 import java.util.Random;
 

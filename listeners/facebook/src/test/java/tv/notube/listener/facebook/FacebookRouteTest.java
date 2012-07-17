@@ -18,6 +18,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import tv.notube.commons.model.activity.Activity;
+import tv.notube.commons.model.randomisers.VerbRandomizer;
 import tv.notube.commons.tests.TestsBuilder;
 import tv.notube.commons.tests.TestsException;
 import tv.notube.listener.facebook.model.FacebookNotification;
@@ -160,7 +161,9 @@ public class FacebookRouteTest extends CamelTestSupport {
 
     private Activity anActivity() {
         try {
-            return TestsBuilder.getInstance().build().build(Activity.class).getObject();
+            TestsBuilder testsBuilder = TestsBuilder.getInstance();
+            testsBuilder.register(new VerbRandomizer("verb-randomizer"));
+            return testsBuilder.build().build(Activity.class).getObject();
         } catch (TestsException e) {
             throw new RuntimeException(e);
         }
