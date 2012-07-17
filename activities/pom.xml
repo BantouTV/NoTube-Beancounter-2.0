@@ -6,9 +6,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-      <groupId>tv.notube</groupId>
-      <artifactId>parent</artifactId>
-      <version>1.1-SNAPSHOT</version>
+        <groupId>tv.notube</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>activities</artifactId>
@@ -44,4 +44,30 @@
         </repository>
     </repositories>
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>auto-clean</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>data</directory>
+                        </fileset>
+                        <fileset>
+                            <directory>logs</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
