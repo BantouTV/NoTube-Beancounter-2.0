@@ -23,6 +23,8 @@ public class TestsBuilder {
         tests.register(new URLRandomiser("url-randomizer", true, true));
         tests.register(new JodaDateTimeRandomiser("dt-randomizer", DateTime.now().minusYears(1)));
         tests.register(new LongRandomiser("long-randomizer", 100000000L));
+        tests.register(new LongRandomiser("long-randomizer", 100000000L));
+        tests.register(new VerbRandomizer("verb-randomizer"));
     }
 
     public static synchronized TestsBuilder getInstance() {

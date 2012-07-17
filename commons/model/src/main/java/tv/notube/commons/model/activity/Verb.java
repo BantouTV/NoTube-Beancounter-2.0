@@ -2,6 +2,8 @@ package tv.notube.commons.model.activity;
 
 import java.io.Serializable;
 
+import tv.notube.commons.tests.annotations.Random;
+
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
@@ -19,5 +21,8 @@ public enum Verb implements Serializable {
     LISTEN,
     TWEET,
     WATCHED,
-    CHECKIN
+    CHECKIN;
+
+    @Random(names = {})
+    Verb() {}
 }
