@@ -29,44 +29,41 @@ public class IndexerRoute extends RouteBuilder {
     private Profiler profiler;
 
     public void configure() {
-        from("kestrel://{{kestrel.queue.internal.url}}?concurrentConsumers=10&waitTimeMs=500")
+        errorHandler(deadLetterChannel(errorEndpoint()));
+
+        from(fromKestrel())
                 .unmarshal().json(JsonLibrary.Jackson, ResolvedActivity.class)
                 .multicast().parallelProcessing().to("direct:es", "direct:profiler");
+
         from("direct:es")
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
                         ResolvedActivity resolvedActivity = exchange.getIn().getBody(ResolvedActivity.class);
                         try {
-                            activityStore.store(
-                                    resolvedActivity.getUserId(),
-                                    resolvedActivity.getActivity()
-                            );
-                        } catch (ActivityStoreException e) {
-                            final String errMsg = "Error while storing " + "resolved activity for user [" + resolvedActivity.getUserId() + "]";
+                            activityStore.store(resolvedActivity.getUserId(), resolvedActivity.getActivity());
+                        } catch (Exception e) {
+                            final String errMsg = "Error while storing " + "resolved activity for user ["    + resolvedActivity.getUserId() + "]";
                             LOGGER.error(errMsg, e);
                             throw new ActivityStoreException(errMsg, e);
                         }
                     }
                 });
+
         from("direct:profiler")
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
                         ResolvedActivity resolvedActivity = exchange.getIn().getBody(ResolvedActivity.class);
                         LOGGER.debug("Profiling activity {}.", resolvedActivity);
-                        UserProfile profile;
-                        // the profiler automatically stores the profile
                         try {
-                            profile = profiler.profile(
+                            UserProfile profile = profiler.profile(
                                     resolvedActivity.getUserId(),
                                     resolvedActivity.getActivity()
                             );
-                        } catch (ProfilerException e) {
+                        } catch (Exception e) {
                             // log the error but do not raise an exception
-                            final String errMsg = "Error while profiling " +
-                                    "user [" + resolvedActivity.getUserId()
-                                    + "]";
+                            final String errMsg = "Error while profiling user [" + resolvedActivity.getUserId() + "]";
                             LOGGER.error(errMsg, e);
                         }
                         // (TODO) (low) profile will be sent in a down stream queue
@@ -83,4 +80,14 @@ public class IndexerRoute extends RouteBuilder {
                 .to("kestrel://{{kestrel.queue.analytics}}");
                  **/
     }
+
+    protected String fromKestrel() {
+        return "kestrel://{{kestrel.queue.internal.url}}?concurrentConsumers=10&waitTimeMs=500";
+    }
+
+
+    protected String errorEndpoint() {
+        return "log:facebookRoute?level=ERROR";
+    }
+
 }

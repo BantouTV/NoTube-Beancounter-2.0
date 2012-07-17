@@ -1,6 +1,5 @@
 package tv.notube.listener.facebook;
 
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import com.google.inject.Inject;
@@ -10,13 +9,8 @@ import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 
-import tv.notube.commons.model.activity.Activity;
 import tv.notube.listener.facebook.model.FacebookNotification;
-import tv.notube.resolver.ResolverException;
 
-/**
- * @author Enrico Candino ( enrico.candino@gmail.com )
- */
 public class FacebookRoute extends RouteBuilder {
 
     @Inject
@@ -38,11 +32,15 @@ public class FacebookRoute extends RouteBuilder {
                     @Override
                     public void process(Exchange exchange) throws Exception {
                         log.debug("started verification");
-                        HttpServletRequest request = exchange.getIn().getHeader(Exchange.HTTP_SERVLET_REQUEST, HttpServletRequest.class);
-                        if ("subscribe".equals(request.getParameter("hub.mode")) && "TEST-BEANCOUNTER-FACEBOOK".equals(request.getParameter("hub.verify_token"))) {
+                        HttpServletRequest request = exchange.getIn()
+                                .getHeader(Exchange.HTTP_SERVLET_REQUEST, HttpServletRequest.class);
+                        if ("subscribe".equals(request.getParameter("hub.mode"))
+                                && "TEST-BEANCOUNTER-FACEBOOK"
+                                .equals(request.getParameter("hub.verify_token"))) {
                             exchange.getOut().setBody(request.getParameter("hub.challenge"));
                         }
-                        log.debug("hub.mode [" + request.getParameter("hub.mode") + "] - hub.verify_token [" + request.getParameter("hub.verify_token") + "]");
+                        log.debug("hub.mode [" + request.getParameter("hub.mode") + "] - hub.verify_token ["
+                                + request.getParameter("hub.verify_token") + "]");
                     }
                 });
 
@@ -62,8 +60,8 @@ public class FacebookRoute extends RouteBuilder {
     protected String toKestrelQueue() {
         return "kestrel://{{kestrel.queue.social.url}}";
     }
-    protected String errorEndpoint() {
-           return "log:facebookRoute?level=ERROR";
-       }
 
+    protected String errorEndpoint() {
+        return "log:facebookRoute?level=ERROR";
+    }
 }
