@@ -230,7 +230,7 @@ public class ActivitiesService extends JsonService {
             );
         }
         Response.ResponseBuilder rb = Response.ok();
-        if(activity==null) {
+        if(activity == null) {
             rb.entity(
                     new ActivityPlatformResponse(
                             ActivityPlatformResponse.Status.OK,
@@ -341,7 +341,7 @@ public class ActivitiesService extends JsonService {
                             ActivitiesPlatformResponse.Status.OK,
                             "user '" + username + "' activities found. " +
                                     "Next: 'http://api.beancounter.io/rest/activities/getall/" +
-                                    username + "?page=" + page + "&apikey=" + apiKey + "'",
+                                    username + "?page=" + (page + 1) + "&apikey=" + apiKey + "'",
                             trimmedActivities
                     )
             );

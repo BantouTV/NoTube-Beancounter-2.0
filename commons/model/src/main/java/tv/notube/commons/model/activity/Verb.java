@@ -9,20 +9,19 @@ import tv.notube.commons.tests.annotations.Random;
  */
 public enum Verb implements Serializable {
     LOCATED,
-    SAVE,
+    @Deprecated
     FOLLOWING,
-    JOIN,
     SHARE,
+    @Deprecated
     MAKEFRIEND,
-    TAG,
     RSVP,
     FAVORITED,
     LIKE,
     LISTEN,
     TWEET,
     WATCHED,
-    CHECKIN;
-
+    CHECKIN,
+    COMMENT;
     @Random(names = {})
     Verb() {}
 }

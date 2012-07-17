@@ -31,4 +31,8 @@ public class UserPlatformResponse extends PlatformResponse<User> {
         return user;
     }
 
+    public void setObject(User user) {
+        this.user = user;
+    }
+
 }

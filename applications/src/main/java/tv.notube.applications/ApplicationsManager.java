@@ -21,7 +21,8 @@ public interface ApplicationsManager {
     public enum Object {
         PROFILE,
         ACTIVITIES,
-        USER
+        USER,
+        FILTER,
     }
 
     /**

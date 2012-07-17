@@ -19,6 +19,8 @@ import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
 import tv.notube.commons.helper.resolver.Services;
 import tv.notube.commons.helper.PropertiesHelper;
 import tv.notube.commons.helper.jedis.JedisPoolFactory;
+import tv.notube.filter.FilterManager;
+import tv.notube.filter.JedisFilterManager;
 import tv.notube.profiles.JedisProfilesImpl;
 import tv.notube.profiles.Profiles;
 import tv.notube.queues.KestrelQueues;
@@ -67,6 +69,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(UserService.class);
                 bind(ActivitiesService.class);
                 bind(AliveService.class);
+                bind(FilterService.class);
                 // bind Production Implementations
 
                 Properties redisProperties = PropertiesHelper.readFromClasspath("/redis.properties");
@@ -87,6 +90,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(Profiles.class).to(JedisProfilesImpl.class);
                 bind(ActivityStore.class).toInstance(getElasticSearch());
                 bind(Queues.class).toInstance(getKestrelQueue());
+                bind(FilterManager.class).to(JedisFilterManager.class);
                 // add bindings for Jackson
                 bind(JacksonJaxbJsonProvider.class).asEagerSingleton();
                 bind(JacksonMixInProvider.class).asEagerSingleton();
