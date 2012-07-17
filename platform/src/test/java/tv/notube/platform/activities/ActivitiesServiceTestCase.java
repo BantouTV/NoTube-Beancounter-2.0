@@ -5,8 +5,9 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import tv.notube.platform.APIResponse;
 import tv.notube.platform.AbstractJerseyTestCase;
@@ -28,6 +29,12 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         super(9995);
     }
 
+    @BeforeTest
+    private void registerApplication() throws IOException {
+        APIKEY = registerTestApplication().toString();
+    }
+
+    @AfterTest
     private void deregisterTestApplication() throws IOException {
         HttpClient client = new HttpClient();
         String baseQuery = "application/" + APIKEY;
@@ -55,7 +62,6 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testAddActivity() throws IOException {
-        APIKEY = registerTestApplication().toString();
         final String baseQuery = "activities/add/%s?apikey=%s";
         final String username = "test-user";
         final String activity = "{\"object\":" +
@@ -85,8 +91,6 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        Assert.assertEquals(responseBody.substring(0, 70), "{\"status\":\"OK\",\"message\":\"activity successfully registered\",\"object\":\"");
-        Assert.assertEquals(responseBody.substring(106), "\"}");
         APIResponse actual = fromJson(responseBody, APIResponse.class);
         APIResponse expected = new APIResponse(
                 null,
@@ -95,14 +99,12 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         );
         Assert.assertEquals(actual.getMessage(), expected.getMessage());
         Assert.assertEquals(actual.getStatus(), expected.getStatus());
-        deregisterTestApplication();
+        Assert.assertNotNull(actual.getObject());
+        Assert.assertNotNull(UUID.fromString(actual.getObject()));
     }
 
     @Test
     public void testGetAllActivitiesDefault() throws IOException {
-        APIKEY = registerTestApplication().toString();
-        ObjectMapper mapper = new ObjectMapper();
-
         final String baseQuery = "activities/getall/%s?apikey=%s";
         final String username = "test-user";
         final String query = String.format(
@@ -117,18 +119,20 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertNotEquals(responseBody, "");
-        ActivitiesPlatformResponse apr = mapper.readValue(responseBody, ActivitiesPlatformResponse.class);
-        Assert.assertNotNull(apr);
-        Assert.assertEquals(apr.getObject().size(), 20);
-
-        deregisterTestApplication();
+        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                "user 'test-user' activities found. Next: 'http://api.beancounter.io/rest/activities/getall/test-user?page=1&apikey=" + APIKEY + "'",
+                "OK"
+        );
+        Assert.assertEquals(actual.getMessage(), expected.getMessage());
+        Assert.assertEquals(actual.getStatus().toString(), expected.getStatus());
+        Assert.assertNotNull(actual.getObject());
+        Assert.assertEquals(actual.getObject().size(), 20);
     }
 
     @Test
     public void testGetAllActivitiesNormal() throws IOException {
-        APIKEY = registerTestApplication().toString();
-        ObjectMapper mapper = new ObjectMapper();
-
         final String baseQuery = "activities/getall/%s?page=1&apikey=%s";
         final String username = "test-user";
         final String query = String.format(
@@ -139,22 +143,24 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
         int result = client.executeMethod(getMethod);
-        String responseBody1 = new String(getMethod.getResponseBody());
+        String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
-        logger.info("response body: " + responseBody1);
-
-        ActivitiesPlatformResponse apr = mapper.readValue(responseBody1, ActivitiesPlatformResponse.class);
-        Assert.assertNotNull(apr);
-        Assert.assertEquals(apr.getObject().size(), 20);
-
-        deregisterTestApplication();
+        logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
+        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                "user 'test-user' activities found. Next: 'http://api.beancounter.io/rest/activities/getall/test-user?page=2&apikey=" + APIKEY + "'",
+                "OK"
+        );
+        Assert.assertEquals(actual.getMessage(), expected.getMessage());
+        Assert.assertEquals(actual.getStatus().toString(), expected.getStatus());
+        Assert.assertNotNull(actual.getObject());
+        Assert.assertEquals(actual.getObject().size(), 20);
     }
 
     @Test
     public void testGetAllActivitiesMore() throws IOException {
-        APIKEY = registerTestApplication().toString();
-        ObjectMapper mapper = new ObjectMapper();
-
         final String baseQuery = "activities/getall/%s?page=2&apikey=%s";
         final String username = "test-user";
         final String query = String.format(
@@ -165,22 +171,24 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
         int result = client.executeMethod(getMethod);
-        String responseBody1 = new String(getMethod.getResponseBody());
+        String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
-        logger.info("response body: " + responseBody1);
-
-        ActivitiesPlatformResponse apr = mapper.readValue(responseBody1, ActivitiesPlatformResponse.class);
-        Assert.assertNotNull(apr);
-        Assert.assertEquals(apr.getObject().size(), 10);
-
-        deregisterTestApplication();
+        logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
+        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                "user 'test-user' activities found. Next: 'http://api.beancounter.io/rest/activities/getall/test-user?page=3&apikey=" + APIKEY + "'",
+                "OK"
+        );
+        Assert.assertEquals(actual.getMessage(), expected.getMessage());
+        Assert.assertEquals(actual.getStatus().toString(), expected.getStatus());
+        Assert.assertNotNull(actual.getObject());
+        Assert.assertEquals(actual.getObject().size(), 10);
     }
 
     @Test
     public void testGetAllActivitiesTooMany() throws IOException {
-        APIKEY = registerTestApplication().toString();
-        ObjectMapper mapper = new ObjectMapper();
-
         final String baseQuery = "activities/getall/%s?page=3&apikey=%s";
         final String username = "test-user";
         final String query = String.format(
@@ -191,22 +199,24 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
         int result = client.executeMethod(getMethod);
-        String responseBody1 = new String(getMethod.getResponseBody());
+        String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
-        logger.info("response body: " + responseBody1);
-
-        ActivitiesPlatformResponse apr = mapper.readValue(responseBody1, ActivitiesPlatformResponse.class);
-        Assert.assertNotNull(apr);
-        Assert.assertEquals(apr.getObject().size(), 0);
-
-        deregisterTestApplication();
+        logger.info("response body: " + responseBody);
+        Assert.assertNotEquals(responseBody, "");
+        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                "user 'test-user' activities found. Next: 'http://api.beancounter.io/rest/activities/getall/test-user?page=4&apikey=" + APIKEY + "'",
+                "OK"
+        );
+        Assert.assertEquals(actual.getMessage(), expected.getMessage());
+        Assert.assertEquals(actual.getStatus().toString(), expected.getStatus());
+        Assert.assertNotNull(actual.getObject());
+        Assert.assertEquals(actual.getObject().size(), 0);
     }
 
     @Test
     public void testGetAllActivitiesDifferentPages() throws IOException {
-        APIKEY = registerTestApplication().toString();
-        ObjectMapper mapper = new ObjectMapper();
-
         final String baseQuery1 = "activities/getall/%s?apikey=%s";
         final String username = "test-user";
         final String query = String.format(
@@ -221,10 +231,6 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody1);
 
-        ActivitiesPlatformResponse apr = mapper.readValue(responseBody1, ActivitiesPlatformResponse.class);
-        Assert.assertNotNull(apr);
-        Assert.assertEquals(apr.getObject().size(), 20);
-
         final String baseQuery2 = "activities/getall/%s?page=1&apikey=%s";
         final String query2 = String.format(
                 baseQuery2,
@@ -237,14 +243,9 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         String responseBody2 = new String(getMethod.getResponseBody());
         logger.info("result code: " + result2);
         logger.info("response body: " + responseBody2);
-
-        ActivitiesPlatformResponse apr2 = mapper.readValue(responseBody2, ActivitiesPlatformResponse.class);
-        Assert.assertNotNull(apr2);
-        Assert.assertEquals(apr2.getObject().size(), 20);
-
-        Assert.assertNotEquals(apr.getObject(), apr2.getObject());
-
-        deregisterTestApplication();
+        ActivitiesPlatformResponse actual1 = fromJson(responseBody1, ActivitiesPlatformResponse.class);
+        ActivitiesPlatformResponse actual2 = fromJson(responseBody2, ActivitiesPlatformResponse.class);
+        Assert.assertNotEquals(actual1, actual2);
     }
 
 }

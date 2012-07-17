@@ -341,7 +341,7 @@ public class ActivitiesService extends JsonService {
                             ActivitiesPlatformResponse.Status.OK,
                             "user '" + username + "' activities found. " +
                                     "Next: 'http://api.beancounter.io/rest/activities/getall/" +
-                                    username + "?page=" + page + "&apikey=" + apiKey + "'",
+                                    username + "?page=" + (page + 1) + "&apikey=" + apiKey + "'",
                             trimmedActivities
                     )
             );
