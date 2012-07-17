@@ -4,8 +4,10 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.Assert;
 import org.testng.annotations.*;
+import tv.notube.filter.model.Filter;
 import tv.notube.platform.APIResponse;
 import tv.notube.platform.AbstractJerseyTestCase;
 
@@ -155,6 +157,55 @@ public class FiltersServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         Assert.assertEquals(result, 200);
         logger.info("response body: " + responseBody);
+    }
+
+    @Test
+    public void testSerialization() throws IOException {
+        final String str = "{\n" +
+                "    \"name\": \"test-filter\",\n" +
+                "    \"description\": \"test-description\",\n" +
+                "    \"definedAt\": 1342546262929,\n" +
+                "    \"active\": false,\n" +
+                "    \"activityPattern\": {\n" +
+                "        \"userId\": {\n" +
+                "            \"uuid\": null\n" +
+                "        },\n" +
+                "        \"verb\": {\n" +
+                "            \"verb\": \"ANY\"\n" +
+                "        },\n" +
+                "        \"object\": {\n" +
+                "            \"type\": \"tv.notube.filter.model.pattern.rai.TVEventPattern\",\n" +
+                "            \"typePattern\": {\n" +
+                "                \"string\": \"tv.notube.filter.model.pattern.rai.TVEventPattern\"\n" +
+                "            },\n" +
+                "            \"url\": {\n" +
+                "                \"url\": null\n" +
+                "            },\n" +
+                "            \"uuidPattern\": {\n" +
+                "                \"uuid\": \"2590fd3d-97ea-49bb-b7ec-04da7553bb0a\"\n" +
+                "            }\n" +
+                "        },\n" +
+                "        \"context\": {\n" +
+                "            \"date\": {\n" +
+                "                \"date\": 1342530815683,\n" +
+                "                \"bool\": \"BEFORE\"\n" +
+                "            },\n" +
+                "            \"service\": {\n" +
+                "                \"string\": \"\"\n" +
+                "            },\n" +
+                "            \"mood\": {\n" +
+                "                \"string\": \"\"\n" +
+                "            },\n" +
+                "            \"username\": {\n" +
+                "                \"string\": \"\"\n" +
+                "            }\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
+        ObjectMapper mapper = new ObjectMapper();
+        Filter f;
+        f = mapper.readValue(str, Filter.class);
+        Assert.assertNotNull(f);
     }
 
 }

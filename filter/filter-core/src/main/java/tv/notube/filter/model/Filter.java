@@ -20,6 +20,10 @@ public class Filter {
 
     private ActivityPattern activityPattern;
 
+    public Filter() {
+        activityPattern = ActivityPattern.ANY;
+    }
+
     public Filter(String name, String description, ActivityPattern activityPattern) {
         this.name = name;
         this.description = description;
