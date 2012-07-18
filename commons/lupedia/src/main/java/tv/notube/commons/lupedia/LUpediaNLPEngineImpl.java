@@ -10,6 +10,8 @@ import tv.notube.commons.nlp.Entity;
 import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.commons.nlp.NLPEngineException;
 import tv.notube.commons.nlp.NLPEngineResult;
+import tv.notube.commons.redirects.RedirectException;
+import tv.notube.commons.redirects.RedirectResolver;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,11 +100,21 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
 
     @Override
     public NLPEngineResult enrich(URL url) throws NLPEngineException {
+        URL resolved;
+        try {
+            resolved = RedirectResolver.resolve(url);
+        } catch (RedirectException e) {
+            throw new NLPEngineException(
+                    "Error resolving the redirect for [" + url + "]",
+                    e
+            );
+        }
         String text;
         try {
-            text = ArticleExtractor.INSTANCE.getText(url);
+            // TODO (mid) pass text to boilerplate instead of url
+            text = ArticleExtractor.INSTANCE.getText(resolved);
         } catch (BoilerpipeProcessingException e) {
-            throw new NLPEngineException("Error while removing boiler plate from [" + url +  "]", e);
+            throw new NLPEngineException("Error while removing boiler plate from [" + resolved +  "]", e);
         }
         return enrich(text);
     }
