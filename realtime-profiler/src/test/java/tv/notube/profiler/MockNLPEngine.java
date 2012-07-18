@@ -28,7 +28,6 @@ public class MockNLPEngine implements NLPEngine {
         } catch (Exception e) {
             throw new NLPEngineException("Something went wrong in the MockEngine!", e);
         }
-        System.out.println(result);
         return result;
     }
 
