@@ -13,6 +13,8 @@ import tv.notube.commons.cogito.model.Relevants;
 import tv.notube.commons.cogito.model.Response;
 import tv.notube.commons.cogito.parser.DigesterParser;
 import tv.notube.commons.nlp.*;
+import tv.notube.commons.redirects.RedirectException;
+import tv.notube.commons.redirects.RedirectResolver;
 
 import java.io.*;
 import java.net.*;
@@ -126,9 +128,19 @@ public class CogitoNLPEngineImpl implements NLPEngine {
 
     @Override
     public NLPEngineResult enrich(URL url) throws NLPEngineException {
+        URL resolved;
+        try {
+            resolved = RedirectResolver.resolve(url);
+        } catch (RedirectException e) {
+            throw new NLPEngineException(
+                    "Error resolving the redirect for [" + url + "]",
+                    e
+            );
+        }
         String text;
         try {
-            text = ArticleExtractor.INSTANCE.getText(url);
+            // TODO (mid) pass text to boilerplate instead of url
+            text = ArticleExtractor.INSTANCE.getText(resolved);
         } catch (BoilerpipeProcessingException e) {
             final String errMsg = "Error while removing boiler plate from [" + url + "]";
             LOGGER.error(errMsg, e);
