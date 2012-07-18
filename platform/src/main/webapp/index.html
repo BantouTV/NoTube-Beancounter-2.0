@@ -17,7 +17,8 @@
 			<li class="selected"><a href="#">Home</a></li>
 			<li><a href="#Authentication API">Authentication API</a></li>
             <li><a href="#User API">User API</a></li>
-            <li><a href="#">Support</a></li>
+            <li><a href="#Filter API">Filter API</a></li>
+            <li><a href="#Utils API">Utils API</a></li>
 		</ul>
 	</nav>
 	
@@ -471,7 +472,7 @@
                         <h2>13) Get multiple activities</h2>
                     </header>
 
-                    Path: /activities/getall/{username}/<br>
+                    Path: /activities/all/{username}/<br>
                     Method: GET<br>
                     Parameters: <br>
                     - {username} the Beancounter username<br>
@@ -480,7 +481,7 @@
                     <br>
                     Example: with curl<br><br>
 
-                    curl http://api.beancounter.io/rest/activities/getall/dpalmisano?apikey=your-api-key
+                    curl http://api.beancounter.io/rest/activities/all/dpalmisano?apikey=your-api-key
                     <br><br>
 
                 </article>
@@ -516,19 +517,280 @@
 
                 </article>
 
+<hr>
+
+    <article class="articlecontent">
+
+					<header id="Filter API">
+						<h2 class="centered">Filter API</h2>
+					</header>
+
+					<p>
+    				A filter is a way to divert activities through different
+                        channels. A filter is basically identified with a
+                        name and could be described with a human-readable
+                        description. A filter must be paired with an
+                        activity pattern which identifies which activities
+                        need to be diverted through the filter. This section
+                        describes how register and manage filters on
+                        beancounter.io.
+					<p>
+
+				</article>
+
+    <article class="articlecontent">
+
+                    <header>
+                        <h2>15) Register a filter</h2>
+                    </header>
+
+                    Path: /filters/register/{name}<br>
+                    Method: POST<br>
+                    Parameters: <br>
+                        - {name} the name uniquely identifying the filter <br>
+                        - description:a human-readable description of the filter   <br>
+                        - pattern : the activity pattern, in JSON format <br>
+                        - apikey : your app key <br>
+                    Description: it register a new filter if the provided name has not been taken already
+                    <br>
+                    Example: with curl<br><br>
+                    curl -d "description=test-description&pattern={\"userId\":{\"uuid\":null},\"verb\":{\"verb\":\"ANY\"},\"object\":{\"type\":\"tv.notube.filter.model.pattern.rai.TVEventPattern\",\"typePattern\":{\"string\":\"tv.notube.filter.model.pattern.rai.TVEventPattern\"},\"url\":{\"url\":null},\"uuidPattern\":{\"uuid\":\"2590fd3d-97ea-49bb-b7ec-04da7553bb0a\"}},\"context\":{\"date\":{\"date\":1342530815683,\"bool\":\"BEFORE\"},\"service\":{\"string\":\"\"},\"mood\":{\"string\":\"\"},\"username\":{\"string\":\"\"}}}" http://api.beancounter.io/rest/filters/register/test-filter?apikey=your-app-key
+                    <br><br>
+
+                <pre><code>
+        {
+               "status": "OK",
+               "message": "filter [test-filter] successfully registered",
+               "object": "test-filter"
+        }
+                </code></pre>
+
+        A "basic" JSON activity <i>pattern</i> is made from an "object",
+        a "context" and a "verb", as described below:
+                    <br/>
+
+                    <pre><code>
+    {
+    "activityPattern": {
+            "userId": {
+                "uuid": null     <i>if a userId is specified here, only that user's activity will be matched</i>
+            },
+            "verb": {
+                "verb": "ANY" <i>ANY means that evey verb is matched. You can specify one, i.e: TWEET</i>
+            },
+            "object": {
+                "type": "tv.notube.filter.model.pattern.rai.TVEventPattern",
+                "typePattern": {
+                    "string": "tv.notube.filter.model.pattern.rai.TVEventPattern" <i>this matched only this kind of events</i>
+                },
+                "url": {
+                    "url": null
+                },
+                "uuidPattern": {
+                    "uuid": "2590fd3d-97ea-49bb-b7ec-04da7553bb0a"
+                }
+            },
+            "context": {
+                "date": {
+                    "date": 1342530815683,
+                    "bool": "BEFORE"
+                },
+                "service": {
+                    "string": ""
+                },
+                "mood": {
+                    "string": ""
+                },
+                "username": {
+                    "string": ""
+                }
+    }
+    }
+                    </code></pre>
+
+                </article>
+
+    <article class="articlecontent">
+
+                    <header>
+                        <h2>16) Retrieve a filter</h2>
+                    </header>
+
+                    Path: /filters/{name}<br>
+                    Method: GET<br>
+                    Parameters: <br>
+                        - {name} the name uniquely identifying the filter <br>
+                        - apikey : your app key <br>
+                    Description: it retrieves the filter, if present
+                    <br>
+                    Example: with curl<br><br>
+                    curl http://api.beancounter.io/rest/filters/test-filter?apikey=your-app-key
+                    <br><br>
+
+                <pre><code>
+                {
+                    "name": "test-filter",
+                    "description": "test-description",
+                    "definedAt": 1342547931627,
+                    "active": false,
+                    "activityPattern": {
+                        "userId": {},
+                        "verb": {
+                            "verb": "ANY"
+                        },
+                        "object": {
+                            "type": "tv.notube.filter.model.pattern.rai.TVEventPattern",
+                            "typePattern": {
+                                "string": "tv.notube.filter.model.pattern.rai.TVEventPattern"
+                            },
+                            "url": {},
+                            "uuidPattern": {
+                                "uuid": "2590fd3d-97ea-49bb-b7ec-04da7553bb0a"
+                            }
+                        },
+                        "context": {
+                            "date": {
+                                "date": 1342530815683,
+                                "bool": "BEFORE"
+                            },
+                            "service": {
+                                "string": ""
+                            },
+                            "mood": {
+                                "string": ""
+                            },
+                            "username": {
+                                "string": ""
+                            }
+                }
+                </code></pre>
+
+                </article>
+
+    <article class="articlecontent">
+
+                    <header>
+                        <h2>17) List all registered filters</h2>
+                    </header>
+
+                    Path: /filters/list/all<br>
+                    Method: GET<br>
+                    Description: lists all the names of the registered filters
+                    <br>
+                    Example: with curl<br><br>
+                    curl http://api.beancounter.io/rest/filters/list/all?apikey=your-app-key
+                    <br><br>
+
+                <pre><code>
+                {
+                        "status":"OK",
+                        "message":"[1] registered filters found",
+                        "object":["test-filter"]
+                }
+                </code></pre>
+
+                </article>
+
+    <article class="articlecontent">
+
+                    <header>
+                        <h2>18) Start a specific filter</h2>
+                    </header>
+
+                    Path: /filters/{name}/start<br>
+                    Method: GET<br>
+                    Description: starts a registered filter
+                    <br>
+                    Example: with curl<br><br>
+                    curl http://api.beancounter.io/rest/filters/test-filter/start?apikey=your-app-key
+                    <br><br>
+
+                <pre><code>
+                {
+                        "status":"OK",
+                        "message":"filter with name [test-filter] started",
+                        "object":"test-filter"
+                }
+                </code></pre>
+
+                </article>
+
+    <article class="articlecontent">
+
+                    <header>
+                        <h2>19) Stop a specific filter</h2>
+                    </header>
+
+                    Path: /filters/t{name}/stop<br>
+                    Method: GET<br>
+                    Description: stops a registered filter
+                    <br>
+                    Example: with curl<br><br>
+                    curl http://api.beancounter.io/rest/filters/test-filter/stop?apikey=your-app-key
+                    <br><br>
+
+                <pre><code>
+                {
+                        "status":"OK",
+                        "message":"filter with name [test-filter] stopped",
+                        "object":"test-filter"
+                }
+                </code></pre>
+
+                </article>
+
+    <article class="articlecontent">
+
+                    <header>
+                        <h2>20) Delete a specific filter</h2>
+                    </header>
+
+                    Path: /filters/t{name}/stop<br>
+                    Method: DELETE<br>
+                    Description: completely removes a registered filter
+                    <br>
+                    Example: with curl<br><br>
+                    curl -X DELETE http://api.beancounter.io/rest/filters/test-filter?apikey=your-app-key
+                    <br><br>
+
+                <pre><code>
+                {
+                        "status":"OK",
+                        "message":"filter with name [test-filter] deleted",
+                        "object":"test-filter"
+                }
+                </code></pre>
+
+                </article>
+
+    <hr>
 
                 <article class="articlecontent">
 
+					<header id="Utils API">
+						<h2 class="centered">Utils API</h2>
+					</header>
+
+					<p>
+    				Utilities APIs to check beancounter.io status and other
+                        amenities. The apikey is not needed for these APIs.
+					<p>
+
+				</article>
+
+
+    <article class="articlecontent">
+
                     <header>
-                        <h2>13) Check Beancounter.io service</h2>
+                        <h2>20) Check Beancounter.io service</h2>
                     </header>
 
-                    Path: /alive/check<br>
+                    Path: /api/check<br>
                     Description: it checks the status of the Beancounter.io returning the timestamp in ms
                     <br>
                     Example: with curl<br><br>
 
-                    curl http://api.beancounter.io/rest/alive/check
+                    curl http://api.beancounter.io/api/alive/check
                     <br><br>
 
                 <pre><code>
@@ -536,6 +798,30 @@
                 "status":       "OK",
                 "message":      "system up and running at",
                 "object":       "1342112536581"
+        }
+                </code></pre>
+
+                </article>
+
+    <article class="articlecontent">
+
+                    <header>
+                        <h2>21) Get beancounter.io version</h2>
+                    </header>
+
+                    Path: /api/version<br>
+                    Description: it retrieves the beancounter.io current version
+                    <br>
+                    Example: with curl<br><br>
+
+                    curl http://api.beancounter.io/rest/api/
+                    <br><br>
+
+                <pre><code>
+        {
+                    "status":"OK",
+                    "message":"beancounter.io version",
+                    "object":"1.1"
         }
                 </code></pre>
 
