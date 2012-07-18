@@ -29,6 +29,11 @@
             <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>tv.notube.filter</groupId>
+            <artifactId>filter-core</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-core</artifactId>
         </dependency>
@@ -44,21 +49,21 @@
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-guice</artifactId>
         </dependency>
-         <dependency>
-             <groupId>org.hamcrest</groupId>
-             <artifactId>hamcrest-all</artifactId>
-             <scope>test</scope>
-         </dependency>
-         <dependency>
-             <groupId>org.mockito</groupId>
-             <artifactId>mockito-all</artifactId>
-             <scope>test</scope>
-         </dependency>
-         <dependency>
-             <groupId>org.apache.camel</groupId>
-             <artifactId>camel-testng</artifactId>
-             <scope>test</scope>
-         </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-testng</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

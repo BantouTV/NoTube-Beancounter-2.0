@@ -15,6 +15,8 @@ import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
 import tv.notube.commons.helper.jedis.JedisPoolFactory;
 import tv.notube.commons.lupedia.LUpediaNLPEngineImpl;
 import tv.notube.commons.model.activity.*;
+import tv.notube.filter.FilterService;
+import tv.notube.filter.FilterServiceImpl;
 import tv.notube.profiler.DefaultProfilerImpl;
 import tv.notube.profiler.Profiler;
 import tv.notube.profiler.ProfilerException;
@@ -51,6 +53,7 @@ public class IndexerModule extends CamelModuleWithMatchingRoutes {
         bindInstance("esConfiguration", ElasticSearchConfiguration.build(esProperties));
 
         bind(ActivityStore.class).to(ElasticSearchActivityStoreImpl.class);
+        bind(FilterService.class).to(FilterServiceImpl.class);
         bind(IndexerRoute.class);
     }
 
