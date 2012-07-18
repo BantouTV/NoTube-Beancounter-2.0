@@ -19,17 +19,30 @@ Beancounter.Pie = function (username, container) {
     var w = 960,
         h = 500,
         r = Math.min(w, h) / 2,
+        defaultOuterRadius = r - 20,
+        hoverOuterRadius = r,
         data = [],
+        selectedArc,
         colour = d3.scale.category20b(),
         random = d3.random.normal(0, 1),
         pie = d3.layout.pie().sort(null).value(function (d) { return d.weight; }),
-        arc = d3.svg.arc().innerRadius(r - 150).outerRadius(r - 20),
+        arc = d3.svg.arc().innerRadius(r - 150).outerRadius(defaultOuterRadius),
+        arcHover = d3.svg.arc().innerRadius(r - 150).outerRadius(hoverOuterRadius),
         svg = d3.select(container)
             .append("svg")
                 .attr("width", w)
                 .attr("height", h)
             .append("g")
-                .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")");
+                .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")"),
+        pieStats = svg.append("g").attr("class", "pie-stats"),
+        pieStatsInterest = pieStats.append("text")
+            .attr("class", "pie-stats-interest")
+            .attr("text-anchor", "middle")
+            .attr("dy", -10),
+        pieStatsWeight = pieStats.append("text")
+            .attr("class", "pie-stats-weight")
+            .attr("text-anchor", "middle")
+            .attr("dy", 10);
 
     function getData() {
         var i,
@@ -51,18 +64,47 @@ Beancounter.Pie = function (username, container) {
         return interestArray;
     }
 
-    // Store the currently-displayed angles in this.currentArc.
-    // Then, interpolate from this.currentArc to the new angles.
     function arcTween(a) {
-        var i = d3.interpolate(this.currentArc, a);
+        var i = d3.interpolate(this.currentArc, a),
+            arcUpdate = d3.svg.arc().innerRadius(r - 150);
         this.currentArc = i(0);
+        arcUpdate.outerRadius(this.outerRadius === undefined
+            ? defaultOuterRadius
+            : this.outerRadius);
+
         return function (t) {
-            return arc(i(t));
+            return arcUpdate(i(t));
         };
     }
 
+    function handleClickOnArc(d) {
+        if (selectedArc !== undefined && selectedArc !== null) {
+            selectedArc
+                .classed("selected", false)
+                .transition()
+                .attr("d", arc)
+                .each(function (d) {
+                    this.outerRadius = defaultOuterRadius;
+                    this.currentArc = d;
+                });
+        }
+
+        selectedArc = d3.select(this);
+        selectedArc.classed("selected", true)
+            .transition()
+            .attr("d", arcHover)
+            .each(function (d) {
+                this.outerRadius = hoverOuterRadius;
+                this.currentArc = d;
+            });
+
+        pieStatsInterest.text(d.data.name);
+        pieStatsWeight.text(d.value + "%");
+    }
+
     function redraw() {
-        var arcs, arcsEnter, arcsUpdate, arcsExit;
+        var arcs, arcsEnter, arcsExit,
+            currentWeight;
 
         // TODO: Replace this with real data from AJAX call.
         data = getData();
@@ -75,9 +117,14 @@ Beancounter.Pie = function (username, container) {
         arcsEnter.append("path")
             .attr("fill", function (d, i) { return colour(i); })
             .attr("d", arc)
+            .on("click", handleClickOnArc)
             .each(function (d) { this.currentArc = d; });
 
         arcs.select("path").transition().duration(750).attrTween("d", arcTween);
+        if (selectedArc !== undefined && selectedArc !== null) {
+            selectedArc.each(function (d) { currentWeight = d.value; });
+            pieStatsWeight.text(currentWeight + "%");
+        }
 
         // TODO: Handle interests being removed.
     }
@@ -96,7 +143,7 @@ Beancounter.Pie = function (username, container) {
 
 Beancounter.StreamGraph = function (username, container) {
     var n = 200,
-        stack = d3.layout.stack().offset("wiggle")
+        stack = d3.layout.stack().offset("silhouette")
             .values(function (d) { return d.values; })
             .x(function (d, i) { return i; }),
         data = [],
@@ -106,16 +153,12 @@ Beancounter.StreamGraph = function (username, container) {
         height = 500,
         mx = n - 1,
         my = 100,
-        // my = d3.max(data0, function (d) {
-        //     return d3.max(d.values, function (d) {
-        //         return d.y0 + d.y;
-        //     });
-        // }),
         x = d3.scale.linear().range([0, width]),
+        y = d3.scale.linear().range([height, 0]),
         area = d3.svg.area()
             .x(function (d, i) { return x(i); })
-            .y0(function (d) { return height - d.y0 * height / my; })
-            .y1(function (d) { return height - (d.y + d.y0) * height / my; }),
+            .y0(function (d) { return y(d.y0); })
+            .y1(function (d) { return y(d.y + d.y0); }),
         svg = d3.select(container)
             .append("svg")
                 .attr("width", width)
@@ -127,7 +170,9 @@ Beancounter.StreamGraph = function (username, container) {
             .attr("width", width - 10)
             .attr("height", height);
 
-    svg = svg.append("g").attr("clip-path", "url(#clip)");
+    svg = svg.append("g")
+        .attr("class", "stream-graph")
+        .attr("clip-path", "url(#clip)");
 
     function streamIndex(d) {
         return {y: Math.max(0, d)};
@@ -172,32 +217,49 @@ Beancounter.StreamGraph = function (username, container) {
         var layers;
 
         data = addData(data);
-        x.domain([0, (data[0].values.length > n) ? n : data[0].values.length - 1]);
+        y.domain([0, d3.max(stack(data), function (d) {
+            return d3.max(d.values, function (d) {
+                return d.y0 + d.y;
+            });
+        })]);
 
         layers = svg.selectAll("path").data(stack(data));
 
         layers.enter().append("path")
-                .style("fill", function (d, i) { return colour(i); })
-                .attr("d", function (d) { return area(d.values); })
+            .style("fill", function (d, i) { return colour(i); })
+            .attr("d", function (d) { return area(d.values); })
+            .on("click", function (d) {
+                // TODO.
+            })
             .append("title")
                 .text(function (d) { return d.name; });
 
-        /*
-        if (data[0].values.length < n) {
-            layers.transition()
-                .duration(500)
-                .attr("d", function (d) { return area(d.values); });
-        } else {
-            layers.attr("d", function (d) { return area(d.values); });
-        }
-        */
-
+        // TODO: Fix the jerky re-centring of the graph in the y-axis.
+        // Draw the new data outside the range of the x-axis, then update the
+        // domain of the scale and gracefully transition the new data into the
+        // container.
+        // layers.transition()
+        //     .duration(500)
+        //     .attr("d", function (d) { return area(d.values); });
         layers.attr("d", function (d) { return area(d.values); });
+        x.domain([0, (data[0].values.length > n) ? n : data[0].values.length - 1]);
+        layers.transition()
+            .duration(1000)
+            .attr("d", function (d) { return area(d.values); });
+        // layers.transition()
+        //     .delay(500)
+        //     .duration(500)
+        //     .attr("d", function (d) {
+        //         x.domain([0, (data[0].values.length > n) ? n : data[0].values.length - 1]);
+        //         return area(d.values);
+        //     });
 
+        // If the number of samples has reached some specified threshold, start
+        // scrolling the data across the container.
         if (data[0].values.length > n) {
             layers.attr("transform", null)
                 .transition()
-                    .duration(5000)
+                    .duration(1000)
                     .ease("linear")
                     .attr("transform", "translate(" + x(-1) + ")");
 
@@ -207,7 +269,7 @@ Beancounter.StreamGraph = function (username, container) {
 
     function updateStreamGraph() {
         redraw();
-        setTimeout(updateStreamGraph, 5000);
+        setTimeout(updateStreamGraph, 1000);
     }
 
     return {
