@@ -139,6 +139,9 @@ public class FilterService extends JsonService {
         try {
             filter = filterManager.get(name);
         } catch (FilterManagerException e) {
+            return error(e, "error while retrieving filter [" + name + "]");
+        }
+        if(filter == null) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(new StringPlatformResponse(
                     StringPlatformResponse.Status.NOK,

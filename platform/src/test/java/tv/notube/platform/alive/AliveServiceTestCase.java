@@ -24,7 +24,7 @@ public class AliveServiceTestCase extends AbstractJerseyTestCase {
     @Test
     private void testCheck() throws IOException {
         HttpClient client = new HttpClient();
-        String baseQuery = "alive/check";
+        String baseQuery = "api/check";
         GetMethod getMethod = new GetMethod(base_uri + baseQuery);
         int result = client.executeMethod(getMethod);
         Assert.assertEquals(result, HttpStatus.SC_OK);
@@ -43,4 +43,24 @@ public class AliveServiceTestCase extends AbstractJerseyTestCase {
         Assert.assertNotNull(Long.parseLong(actual.getObject()));
     }
 
+    @Test
+    private void testVersion() throws IOException {
+        HttpClient client = new HttpClient();
+        String baseQuery = "api/version";
+        GetMethod getMethod = new GetMethod(base_uri + baseQuery);
+        int result = client.executeMethod(getMethod);
+        Assert.assertEquals(result, HttpStatus.SC_OK);
+        String responseBody = new String(getMethod.getResponseBody());
+        Assert.assertNotNull(responseBody);
+        Assert.assertNotEquals(responseBody, "");
+        logger.info("response: " + responseBody);
+        APIResponse actual = fromJson(responseBody, APIResponse.class);
+        APIResponse expected = new APIResponse(
+                actual.getObject(),
+                "beancounter.io version",
+                "OK"
+        );
+        Assert.assertEquals(actual, expected);
+        Assert.assertNotNull(actual.getObject());
+    }
 }

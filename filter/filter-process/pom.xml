@@ -16,8 +16,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>tv.notube.resolver</groupId>
-            <artifactId>core</artifactId>
+            <groupId>tv.notube.filter</groupId>
+            <artifactId>filter-core</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>

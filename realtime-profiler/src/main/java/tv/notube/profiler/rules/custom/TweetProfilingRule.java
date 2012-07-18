@@ -2,8 +2,10 @@ package tv.notube.profiler.rules.custom;
 
 import tv.notube.commons.linking.LinkingEngine;
 import tv.notube.commons.model.activity.Tweet;
+import tv.notube.commons.nlp.Entity;
 import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.commons.nlp.NLPEngineException;
+import tv.notube.commons.nlp.NLPEngineResult;
 import tv.notube.commons.tagdef.TagDef;
 import tv.notube.commons.tagdef.TagDefException;
 import tv.notube.profiler.rules.ProfilingRuleException;
@@ -18,6 +20,7 @@ import java.util.*;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
+// TODO: make a better use of the new stuff coming from NLPengine
 public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
 
     private Set<URI> result = new HashSet<URI>();
@@ -45,25 +48,37 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
     }
 
     private Collection<URI> getResources(String text) throws ProfilingRuleException {
+        NLPEngineResult nlpResult;
         try {
-            return getNLPEngine().enrich(text);
+            nlpResult = getNLPEngine().enrich(text);
         } catch (NLPEngineException e) {
             throw new ProfilingRuleException(
                     "Error while extracting interests from text [" + text + "]",
                     e
             );
         }
+        return toURICollection(nlpResult);
+    }
+
+    private Collection<URI> toURICollection(NLPEngineResult nlpResult) {
+        Collection<URI> result = new HashSet<URI>();
+        for(Entity entity : nlpResult.getEntities()) {
+            result.add(entity.getResource());
+        }
+        return result;
     }
 
     private Collection<URI> getResources(URL url) throws ProfilingRuleException {
+        NLPEngineResult nlpResult;
         try {
-            return getNLPEngine().enrich(url);
+            nlpResult = getNLPEngine().enrich(url);
         } catch (NLPEngineException e) {
             throw new ProfilingRuleException(
                     "Error while extracting interests from url [" + url + "]",
                     e
             );
         }
+        return toURICollection(nlpResult);
     }
 
     private Collection<URI> getResourcesFromHashTag(String hashTag) throws ProfilingRuleException {
@@ -81,7 +96,7 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
         for (String def : defs) {
             try {
                 resources.addAll(
-                        getNLPEngine().enrich(def)
+                        toURICollection(getNLPEngine().enrich(def))
                 );
             } catch (NLPEngineException e) {
                 throw new ProfilingRuleException(

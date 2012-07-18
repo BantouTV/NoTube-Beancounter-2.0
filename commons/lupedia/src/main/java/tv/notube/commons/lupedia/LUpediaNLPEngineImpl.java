@@ -6,8 +6,10 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.TypeFactory;
+import tv.notube.commons.nlp.Entity;
 import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.commons.nlp.NLPEngineException;
+import tv.notube.commons.nlp.NLPEngineResult;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +27,7 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
     public final static String QUERY_PATTERN = "http://lupedia.ontotext.com/lookup/text2json?threshold=%s";
 
     @Override
-    public Collection<URI> enrich(String text) throws NLPEngineException {
+    public NLPEngineResult enrich(String text) throws NLPEngineException {
         try {
             text = URLEncoder.encode(text, "UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -69,19 +71,33 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
                 );
             }
         }
-        Set<URI> result = new HashSet<URI>();
+        NLPEngineResult result = new NLPEngineResult();
         for(LUpediaEntity entity : entities) {
-            try {
-                result.add(new URI(entity.getInstanceUri()));
-            } catch (URISyntaxException e) {
-                // unlikely but could happen
-            }
+            String candidateLabel = getURILastPart(entity.getInstanceUri());
+            Entity e = Entity.build(
+                    entity.getInstanceUri(),
+                    candidateLabel
+            );
+            e.setType(getURILastPart(entity.getInstanceClass()));
+            result.addEntity(e);
         }
         return result;
     }
 
+    private String getURILastPart(String uri) {
+        URI uriObj;
+        try {
+            uriObj = new URI(uri);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        String path = uriObj.getPath();
+        String[] pathParts = path.split("/");
+        return pathParts[pathParts.length - 1];
+    }
+
     @Override
-    public Collection<URI> enrich(URL url) throws NLPEngineException {
+    public NLPEngineResult enrich(URL url) throws NLPEngineException {
         String text;
         try {
             text = ArticleExtractor.INSTANCE.getText(url);

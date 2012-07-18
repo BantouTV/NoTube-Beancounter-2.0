@@ -36,11 +36,9 @@ public class JedisFilterManager implements FilterManager {
 
     @Inject
     public JedisFilterManager(
-            JedisPoolFactory factory,
-            int db
+            JedisPoolFactory factory
     ) {
         pool = factory.build();
-        this.db = db;
         this.objectMapper = new ObjectMapper();
     }
 
@@ -145,11 +143,6 @@ public class JedisFilterManager implements FilterManager {
     @Override
     public void update(Filter filter) throws FilterManagerException {
         String name = filter.getName();
-        if(get(name) != null) {
-            final String errMsg = "Filter [" + name + "] already exists";
-            LOGGER.error(errMsg);
-            throw new FilterManagerException(errMsg);
-        }
         String filterJson;
         try {
             filterJson = objectMapper.writeValueAsString(filter);
