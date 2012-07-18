@@ -11,8 +11,8 @@ import java.util.Collection;
  */
 public interface NLPEngine {
 
-    public Collection<URI> enrich(String text) throws NLPEngineException;
+    public NLPEngineResult enrich(String text) throws NLPEngineException;
 
-    public Collection<URI> enrich(URL url) throws NLPEngineException;
+    public NLPEngineResult enrich(URL url) throws NLPEngineException;
 
 }
