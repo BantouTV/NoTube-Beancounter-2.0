@@ -19,6 +19,17 @@ public class Category extends Feature {
         }
     }
 
+    public static Category build(String uri, String label) {
+        try {
+            return new Category(
+                    new URI(uri),
+                    label
+            );
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("[" + uri + "] is not a well formed URI", e);
+        }
+    }
+
     private double score;
 
     public Category(URI resource, String label) {
