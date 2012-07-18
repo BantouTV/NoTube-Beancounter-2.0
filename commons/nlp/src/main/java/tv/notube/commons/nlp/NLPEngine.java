@@ -1,8 +1,6 @@
 package tv.notube.commons.nlp;
 
-import java.net.URI;
 import java.net.URL;
-import java.util.Collection;
 
 /**
  * put class description here

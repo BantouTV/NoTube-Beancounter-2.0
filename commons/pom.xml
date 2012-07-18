@@ -21,6 +21,7 @@
         <module>nlp</module>
         <module>lupedia</module>
         <module>helper</module>
+        <module>cogito</module>
     </modules>
 
 </project>
