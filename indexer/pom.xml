@@ -44,6 +44,21 @@
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-guice</artifactId>
         </dependency>
+         <dependency>
+             <groupId>org.hamcrest</groupId>
+             <artifactId>hamcrest-all</artifactId>
+             <scope>test</scope>
+         </dependency>
+         <dependency>
+             <groupId>org.mockito</groupId>
+             <artifactId>mockito-all</artifactId>
+             <scope>test</scope>
+         </dependency>
+         <dependency>
+             <groupId>org.apache.camel</groupId>
+             <artifactId>camel-testng</artifactId>
+             <scope>test</scope>
+         </dependency>
     </dependencies>
     <build>
         <plugins>
