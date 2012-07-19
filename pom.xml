@@ -326,6 +326,7 @@
         <module>queues</module>
         <module>resolver</module>
         <module>filter</module>
+        <module>camel-redis</module>
         <!-- analytics out of release 1.0 -->
         <!-- <module>analytics</module> -->
   </modules>
