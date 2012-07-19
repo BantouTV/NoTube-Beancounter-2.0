@@ -10,7 +10,7 @@ import java.util.UUID;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class Comment extends tv.notube.commons.model.activity.Object{
+public class Comment extends tv.notube.commons.model.activity.Object {
 
     private final static String BASE_URL = "http://www.rai.tv/dl/RaiTV/programmi/media/Comment-";
 
@@ -19,6 +19,8 @@ public class Comment extends tv.notube.commons.model.activity.Object{
     private String text;
 
     private UUID inReplyTo;
+
+    private UUID onEvent;
 
     public Comment() {
         super();
@@ -53,6 +55,14 @@ public class Comment extends tv.notube.commons.model.activity.Object{
         this.inReplyTo = inReplyTo;
     }
 
+    public UUID getOnEvent() {
+        return onEvent;
+    }
+
+    public void setOnEvent(UUID onEvent) {
+        this.onEvent = onEvent;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -83,6 +93,7 @@ public class Comment extends tv.notube.commons.model.activity.Object{
                 "id=" + id +
                 ", text='" + text + '\'' +
                 ", inReplyTo=" + inReplyTo +
+                ", onEvent=" + onEvent +
                 '}';
     }
 }

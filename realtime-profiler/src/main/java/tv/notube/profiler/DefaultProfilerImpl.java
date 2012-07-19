@@ -11,6 +11,7 @@ import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.profiler.rules.ObjectProfilingRule;
 import tv.notube.profiler.rules.ProfilingRule;
 import tv.notube.profiler.rules.ProfilingRuleException;
+import tv.notube.profiler.rules.custom.DevNullProfilingRule;
 import tv.notube.profiler.utils.Utils;
 import tv.notube.profiles.Profiles;
 import tv.notube.profiles.ProfilesException;
@@ -59,6 +60,10 @@ public class DefaultProfilerImpl implements Profiler {
     private ObjectProfilingRule getRule(Activity activity) throws ProfilerException {
         Class<? extends Object> type = activity.getObject().getClass();
         Class<? extends ObjectProfilingRule> ruleClass = objectRules.get(type);
+        if(ruleClass == null) {
+            // if I can't handle it, then send to >> /dev/null
+            ruleClass = DevNullProfilingRule.class;
+        }
         ObjectProfilingRule opr = build(
                 ruleClass,
                 type,
@@ -256,6 +261,9 @@ public class DefaultProfilerImpl implements Profiler {
             NLPEngine nlpEngine,
             LinkingEngine linkEng
     ) throws ProfilerException {
+        if(ruleClass.equals(DevNullProfilingRule.class)) {
+            return new DevNullProfilingRule();
+        }
         Constructor<? extends ObjectProfilingRule> constructor;
         try {
             constructor = ruleClass.getConstructor(

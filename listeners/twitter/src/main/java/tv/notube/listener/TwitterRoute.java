@@ -53,7 +53,7 @@ public class TwitterRoute extends RouteBuilder {
     }
 
     protected String fromEndpoint() {
-        return "twitter://streaming/filter?keywords=London&type=event&consumerKey={{consumer.key}}&consumerSecret={{consumer.secret}}&accessToken={{access.token}}&accessTokenSecret={{access.token.secret}}";
+        return "twitter://streaming/filter?keywords=London2012&type=event&consumerKey={{consumer.key}}&consumerSecret={{consumer.secret}}&accessToken={{access.token}}&accessTokenSecret={{access.token.secret}}";
     }
 }
 
