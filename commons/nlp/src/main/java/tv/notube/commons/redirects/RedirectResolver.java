@@ -12,6 +12,7 @@ import java.net.Proxy;
 import java.net.URL;
 
 /**
+ * This class resolves shorted urls.
  *
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
@@ -45,7 +46,7 @@ public class RedirectResolver {
             LOGGER.error(errMsg, e);
             throw new RedirectException(errMsg, e);
         }
-        if(result == 200) {
+        if (result == 200) {
             InputStream in;
             try {
                 in = connection.getInputStream();
@@ -64,9 +65,16 @@ public class RedirectResolver {
                 throw new RedirectException(errMsg, e);
             } finally {
                 connection.disconnect();
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    final String errMsg = "Error while closing the input stream of [" + url + "]";
+                    LOGGER.error(errMsg, e);
+                    throw new RedirectException(errMsg, e);
+                }
             }
             return text;
-        } else if(result != 301 && result != 302) {
+        } else if (result != 301 && result != 302) {
             connection.disconnect();
             final String errMsg = "Seem that the redirect for [" + url + "] went wrong [error code: " + result + "]";
             LOGGER.error(errMsg);

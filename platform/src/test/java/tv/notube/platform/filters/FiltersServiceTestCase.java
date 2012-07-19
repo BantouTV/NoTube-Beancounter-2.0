@@ -67,6 +67,7 @@ public class FiltersServiceTestCase extends AbstractJerseyTestCase {
         final String baseQuery = "filters/register/%s?apikey=%s";
         final String name = "social-event-filter";
         final String description = "this filter filters all the activities matching a given event";
+        final String queue = "fake-queue";
         final String pattern = "{\n" +
                 "    \"userId\": {\n" +
                 "        \"uuid\": null\n" +
@@ -111,6 +112,7 @@ public class FiltersServiceTestCase extends AbstractJerseyTestCase {
         HttpClient client = new HttpClient();
         postMethod.addParameter("pattern", pattern);
         postMethod.addParameter("description", description);
+        postMethod.addParameter("queue", queue);
         int result = client.executeMethod(postMethod);
         String responseBody = new String(postMethod.getResponseBody());
         logger.info("result code: " + result);
