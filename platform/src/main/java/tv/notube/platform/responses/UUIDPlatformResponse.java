@@ -15,6 +15,8 @@ public class UUIDPlatformResponse extends PlatformResponse<UUID> {
 
     private UUID uuid;
 
+    public UUIDPlatformResponse() {}
+
     public UUIDPlatformResponse(Status status, String message, UUID uuid) {
         super(status, message);
         this.uuid = uuid;
@@ -23,6 +25,10 @@ public class UUIDPlatformResponse extends PlatformResponse<UUID> {
     @XmlElement
     public UUID getObject() {
         return uuid;
+    }
+
+    public void setObject(UUID uuid) {
+        this.uuid = uuid;
     }
 
 }

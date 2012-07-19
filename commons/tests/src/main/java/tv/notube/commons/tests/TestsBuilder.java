@@ -1,6 +1,7 @@
 package tv.notube.commons.tests;
 
 import org.joda.time.DateTime;
+
 import tv.notube.commons.tests.randomisers.*;
 
 /**
@@ -23,6 +24,7 @@ public class TestsBuilder {
         tests.register(new URLRandomiser("url-randomizer", true, true));
         tests.register(new JodaDateTimeRandomiser("dt-randomizer", DateTime.now().minusYears(1)));
         tests.register(new LongRandomiser("long-randomizer", 100000000L));
+        tests.register(new LongRandomiser("long-randomizer", 100000000L));
     }
 
     public static synchronized TestsBuilder getInstance() {
@@ -30,6 +32,10 @@ public class TestsBuilder {
             instance = new TestsBuilder();
         }
         return instance;
+    }
+
+    public void register(Randomiser randomiser) {
+        tests.register(randomiser);
     }
 
     public synchronized Tests build() {

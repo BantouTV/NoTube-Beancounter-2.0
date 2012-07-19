@@ -5,7 +5,7 @@ import java.net.URL;
 
 import org.joda.time.DateTime;
 
-import tv.notube.crawler.requester.request.twitter.TwitterTweet;
+import tv.notube.listener.model.TwitterTweet;
 import twitter4j.HashtagEntity;
 import twitter4j.Status;
 import twitter4j.URLEntity;

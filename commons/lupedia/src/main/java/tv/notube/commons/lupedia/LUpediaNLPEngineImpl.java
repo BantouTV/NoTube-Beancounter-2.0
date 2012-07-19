@@ -1,13 +1,17 @@
 package tv.notube.commons.lupedia;
 
 import de.l3s.boilerpipe.BoilerpipeProcessingException;
-import de.l3s.boilerpipe.document.TextDocument;
 import de.l3s.boilerpipe.extractors.ArticleExtractor;
-import de.l3s.boilerpipe.extractors.DefaultExtractor;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.TypeFactory;
+import tv.notube.commons.nlp.Entity;
 import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.commons.nlp.NLPEngineException;
+import tv.notube.commons.nlp.NLPEngineResult;
+import tv.notube.commons.redirects.RedirectException;
+import tv.notube.commons.redirects.RedirectResolver;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,13 +24,12 @@ import java.util.*;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-// TODO (med) make POST requests to handle long texts
 public final class LUpediaNLPEngineImpl implements NLPEngine {
 
-    public final static String QUERY_PATTERN = "http://lupedia.ontotext.com/lookup/text2json?lookupText=%s&threshold=%s";
+    public final static String QUERY_PATTERN = "http://lupedia.ontotext.com/lookup/text2json?threshold=%s";
 
     @Override
-    public Collection<URI> enrich(String text) throws NLPEngineException {
+    public NLPEngineResult enrich(String text) throws NLPEngineException {
         try {
             text = URLEncoder.encode(text, "UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -34,13 +37,22 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
         }
         URL query;
         // TODO (high) this should be configurable
-        String queryStr = String.format(QUERY_PATTERN, text, 0.85);
+        String queryStr = String.format(QUERY_PATTERN, 0.85);
         try {
             query = new URL(queryStr);
         } catch (MalformedURLException e) {
             throw new NLPEngineException("url [" + queryStr + "] seems to be ill-formed", e);
         }
-        InputStream is = getStream(query);
+        PostMethod postMethod = new PostMethod(queryStr);
+        postMethod.setParameter("lookupText", text);
+        HttpClient client = new HttpClient();
+        InputStream is;
+        try {
+            client.executeMethod(postMethod);
+            is = postMethod.getResponseBodyAsStream();
+        } catch (IOException e) {
+            throw new NLPEngineException("error opening the connection for [" + queryStr + "]", e);
+        }
         ObjectMapper mapper = new ObjectMapper();
         List<LUpediaEntity> entities;
         try {
@@ -51,6 +63,7 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
                     e
             );
         } finally {
+            postMethod.releaseConnection();
             try {
                 is.close();
             } catch (IOException e) {
@@ -60,42 +73,48 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
                 );
             }
         }
-        Set<URI> result = new HashSet<URI>();
+        NLPEngineResult result = new NLPEngineResult();
         for(LUpediaEntity entity : entities) {
-            try {
-                result.add(new URI(entity.getInstanceUri()));
-            } catch (URISyntaxException e) {
-                // unlikely but could happen
-            }
+            String candidateLabel = getURILastPart(entity.getInstanceUri());
+            Entity e = Entity.build(
+                    entity.getInstanceUri(),
+                    candidateLabel
+            );
+            e.setType(getURILastPart(entity.getInstanceClass()));
+            result.addEntity(e);
         }
         return result;
     }
 
-    private InputStream getStream(URL query) throws NLPEngineException {
-        URLConnection urlConnection;
+    private String getURILastPart(String uri) {
+        URI uriObj;
         try {
-            urlConnection = query.openConnection();
-        } catch (IOException e) {
-            throw new NLPEngineException(
-                    "Error while opening connection from [" + query + "]", e
-            );
+            uriObj = new URI(uri);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
-        try {
-            return urlConnection.getInputStream();
-        } catch (IOException e) {
-            throw new NLPEngineException(
-                    "Error getting stream from [" + query + "]", e
-            );
-        }
+        String path = uriObj.getPath();
+        String[] pathParts = path.split("/");
+        return pathParts[pathParts.length - 1];
     }
 
     @Override
-    public Collection<URI> enrich(URL url) throws NLPEngineException {
+    public NLPEngineResult enrich(URL url) throws NLPEngineException {
+        URL resolved;
+        try {
+            resolved = RedirectResolver.resolve(url);
+        } catch (RedirectException e) {
+            throw new NLPEngineException(
+                    "Error resolving the redirect for [" + url + "]",
+                    e
+            );
+        }
         String text;
         try {
-            text = ArticleExtractor.INSTANCE.getText(url);
+            // TODO (mid) pass text to boilerplate instead of url
+            text = ArticleExtractor.INSTANCE.getText(resolved);
         } catch (BoilerpipeProcessingException e) {
-            throw new NLPEngineException("Error while removing boiler plate from [" + url +  "]", e);
+            throw new NLPEngineException("Error while removing boiler plate from [" + resolved +  "]", e);
         }
         return enrich(text);
     }

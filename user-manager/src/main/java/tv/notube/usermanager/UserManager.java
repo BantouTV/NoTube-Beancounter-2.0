@@ -42,12 +42,24 @@ public interface UserManager {
     /**
      * Get the user <a href="http://oauth.net">OAuth</> token.
      *
+     *
      * @param service
      * @param username
      * @return
      */
-    OAuthToken getOAuthToken(String service, String username)
+    public OAuthToken getOAuthToken(String service, String username)
             throws UserManagerException;
+
+    /**
+     *
+     * @param serviceName
+     * @param username
+     * @param url the custom callback. it overwrites the one in {@link tv.notube.commons.model.Service}
+     * @return
+     */
+    public OAuthToken getOAuthToken(String serviceName, String username, URL url)
+            throws UserManagerException;
+
 
     /**
      * It handles all the <i>OAuth-like</i> protocols handshaking.
@@ -118,4 +130,11 @@ public interface UserManager {
      */
     public URL consumeUserFinalRedirect(String username) throws UserManagerException;
 
+    /**
+     * This voids the current user OAuth token for the given service.
+     *
+     * @param user
+     * @param service
+     */
+    public void voidOAuthToken(User user, String service) throws UserManagerException;;
 }

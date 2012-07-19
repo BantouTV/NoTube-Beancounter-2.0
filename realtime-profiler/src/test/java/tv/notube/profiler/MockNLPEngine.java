@@ -1,12 +1,11 @@
 package tv.notube.profiler;
 
+import tv.notube.commons.nlp.Entity;
 import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.commons.nlp.NLPEngineException;
+import tv.notube.commons.nlp.NLPEngineResult;
 
-import java.net.URI;
 import java.net.URL;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Random;
 
 /**
@@ -14,38 +13,35 @@ import java.util.Random;
  */
 public class MockNLPEngine implements NLPEngine {
 
-    private Collection<URI> uris;
-
     private Random random = new Random();
 
-    public MockNLPEngine() {
-        uris = new HashSet<URI>();
-    }
-
     @Override
-    public Collection<URI> enrich(String text) throws NLPEngineException {
+    public NLPEngineResult enrich(String text) throws NLPEngineException {
+        NLPEngineResult result = new NLPEngineResult();
         try {
-            for(int i = 0; i<random.nextInt(5);i++)
-                uris.add(new URI(getRandomInterest()));
-        }catch (Exception e ) {
-            throw new NLPEngineException("Something went wrong in the MockEngine!",e);
+            for (int i = 0; i < random.nextInt(5); i++) {
+                result.addEntity(Entity.build(
+                        getRandomInterest(),
+                        getRandomInterest())
+                );
+            }
+        } catch (Exception e) {
+            throw new NLPEngineException("Something went wrong in the MockEngine!", e);
         }
-        HashSet<URI> temp = new HashSet<URI>();
-        temp.addAll(uris);
-        uris.removeAll(uris);
-        System.out.println(temp);
-        return temp;
+        return result;
     }
 
     @Override
-    public Collection<URI> enrich(URL url) throws NLPEngineException {
+    public NLPEngineResult enrich(URL url) throws NLPEngineException {
+        NLPEngineResult result = new NLPEngineResult();
         try {
-            if(url.equals(new URL("http://www.bbc.co.uk/news/uk-18494541")))
-                uris.add(new URI("BBC"));
+            if(url.equals(new URL("http://www.bbc.co.uk/news/uk-18494541"))) {
+                result.addEntity(Entity.build("BBC", "BBC"));
+            }
         } catch (Exception e) {
             throw new NLPEngineException("Something went wrong in the MockEngine!",e);
         }
-        return uris;
+        return result;
     }
 
     private String getRandomInterest() {

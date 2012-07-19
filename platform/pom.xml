@@ -5,7 +5,7 @@
     <parent>
         <groupId>tv.notube</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>platform</artifactId>
@@ -28,7 +28,7 @@
         <dependency>
             <groupId>tv.notube</groupId>
             <artifactId>user-manager</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>tv.notube.commons</groupId>
@@ -39,19 +39,15 @@
         <dependency>
             <groupId>tv.notube</groupId>
             <artifactId>profiles</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>tv.notube</groupId>
             <artifactId>applications</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>tv.notube.commons</groupId>
-                    <artifactId>model</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>tv.notube.commons.storage</groupId>
                     <artifactId>model</artifactId>
                 </exclusion>
             </exclusions>
@@ -59,18 +55,7 @@
         <dependency>
             <groupId>tv.notube</groupId>
             <artifactId>activities</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>tv.notube</groupId>
-            <artifactId>crawler</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>tv.notube</groupId>
-                    <artifactId>user-manager</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
@@ -79,6 +64,16 @@
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-mapper-asl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-core-asl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>asm</groupId>
@@ -110,7 +105,12 @@
         <dependency>
             <groupId>tv.notube</groupId>
             <artifactId>queues</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube.filter</groupId>
+            <artifactId>filter-core</artifactId>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.sun.grizzly</groupId>

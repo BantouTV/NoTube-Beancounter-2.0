@@ -9,29 +9,29 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>tv.notube</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.1-SNAPSHOT</version>
     </parent>
 
     <groupId>tv.notube</groupId>
     <artifactId>indexer</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <name>NoTube 2.0 Indexer</name>
 
     <dependencies>
         <dependency>
             <groupId>tv.notube</groupId>
-            <artifactId>crawler</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>tv.notube</groupId>
             <artifactId>realtime-profiler</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>tv.notube</groupId>
             <artifactId>activities</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube.filter</groupId>
+            <artifactId>filter-core</artifactId>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
@@ -45,11 +45,24 @@
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jackson</artifactId>
         </dependency>
-        <!-- TODO (low) move deps to parent or switch to a non SNAPSHOT one -->
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-guice</artifactId>
-            <version>2.10-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-testng</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

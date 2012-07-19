@@ -8,15 +8,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tv.notube.commons.model.activity.Activity;
-import tv.notube.crawler.requester.request.twitter.TwitterTweet;
+import tv.notube.listener.model.TwitterTweet;
 import twitter4j.Status;
 
 public class TwitterRoute extends RouteBuilder {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(TwitterRoute.class);
 
     public void configure() {
-        from("twitter://streaming/filter?keywords=London&type=event&consumerKey={{consumer.key}}&consumerSecret={{consumer.secret}}&accessToken={{access.token}}&accessTokenSecret={{access.token.secret}}")
+        errorHandler(deadLetterChannel(errorEndpoint()));
+
+        from(fromEndpoint())
 
                 .process(new Processor() {
                     @Override
@@ -40,7 +41,19 @@ public class TwitterRoute extends RouteBuilder {
                         LOGGER.debug("Sending twitterTweet to the queue. {} ", exchange.getIn().getBody());
                     }
                 })
-                .to("kestrel://{{kestrel.queue.url}}");
+                .to(toEndpoint());
+    }
+
+    protected String errorEndpoint() {
+        return "log:twitterRoute?level=ERROR";
+    }
+
+    protected String toEndpoint() {
+        return "kestrel://{{kestrel.queue.url}}";
+    }
+
+    protected String fromEndpoint() {
+        return "twitter://streaming/filter?keywords=London&type=event&consumerKey={{consumer.key}}&consumerSecret={{consumer.secret}}&accessToken={{access.token}}&accessTokenSecret={{access.token.secret}}";
     }
 }
 

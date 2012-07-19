@@ -5,10 +5,9 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import tv.notube.commons.model.Interest;
 import tv.notube.commons.model.UserProfile;
-import tv.notube.commons.model.activity.Activity;
-import tv.notube.commons.model.activity.Context;
-import tv.notube.commons.model.activity.Tweet;
-import tv.notube.commons.model.activity.Verb;
+import tv.notube.commons.model.activity.*;
+import tv.notube.commons.model.activity.Object;
+import tv.notube.profiler.rules.custom.DevNullProfilingRule;
 import tv.notube.profiler.rules.custom.TweetProfilingRule;
 import tv.notube.profiles.MockProfiles;
 import tv.notube.profiles.Profiles;
@@ -44,6 +43,8 @@ public class DefaultProfilerImplTestCase {
         properties.setProperty("tagdef.enable", "true");
         // tweets are more important than other
         properties.setProperty("verb.multiplier.TWEET", "10");
+        // likes are nothing atm
+        properties.setProperty("verb.multiplier.LIKE", "1");
         // profiles are made only of top 5 interests
         properties.setProperty("interest.limit", String.valueOf(LIMIT));
         // activities per interest limit
@@ -56,6 +57,7 @@ public class DefaultProfilerImplTestCase {
                 properties
         );
         profiler.registerRule(Tweet.class, TweetProfilingRule.class);
+        profiler.registerRule(tv.notube.commons.model.activity.Object.class, DevNullProfilingRule.class);
     }
 
     @Test
@@ -85,6 +87,13 @@ public class DefaultProfilerImplTestCase {
 
         // add an activity that leads to no interests
         actual = profiler.profile(userId, getEmptyActivity());
+        Assert.assertNotNull(actual);
+        numOfInts = actual.getInterests().size();
+        Assert.assertTrue(numOfInts > 0 && numOfInts <= LIMIT);
+        dumpInterests(actual, System.out);
+
+        // add an which do not impact
+        actual = profiler.profile(userId, getObjectActivity());
         Assert.assertNotNull(actual);
         numOfInts = actual.getInterests().size();
         Assert.assertTrue(numOfInts > 0 && numOfInts <= LIMIT);
@@ -146,6 +155,20 @@ public class DefaultProfilerImplTestCase {
         t.setText("Okay,leaving the BBC!");
         t.setUrl(new URL("http://twitter.com/dpalmisano/statuses/32733"));
         activity.setObject(t);
+
+        activity.setContext(new Context());
+        return activity;
+    }
+
+    private Activity getObjectActivity() throws MalformedURLException {
+        Activity activity = new Activity();
+        activity.setVerb(Verb.LIKE);
+
+        Object o = new Object();
+        o.setName("fake name");
+        o.setDescription("fake description");
+        o.setUrl(new URL("http://fakeurl.com"));
+        activity.setObject(o);
 
         activity.setContext(new Context());
         return activity;

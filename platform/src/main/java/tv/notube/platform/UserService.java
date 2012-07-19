@@ -10,9 +10,7 @@ import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.UserProfile;
 import tv.notube.commons.model.activity.Activity;
-import tv.notube.crawler.Crawler;
-import tv.notube.crawler.CrawlerException;
-import tv.notube.crawler.Report;
+import tv.notube.commons.model.auth.OAuthAuth;
 import tv.notube.platform.responses.*;
 import tv.notube.profiles.Profiles;
 import tv.notube.profiles.ProfilesException;
@@ -41,20 +39,16 @@ public class UserService extends JsonService {
 
     private Profiles profiles;
 
-    private Crawler crawler;
-
     @Inject
     public UserService(
             final ApplicationsManager am,
             final UserManager um,
             final ActivityStore activities,
-            final Profiles ps,
-            final Crawler cr
+            final Profiles ps
     ) {
         this.applicationsManager = am;
         this.userManager = um;
         this.activities = activities;
-        this.crawler = cr;
         this.profiles = ps;
     }
 
@@ -366,6 +360,85 @@ public class UserService extends JsonService {
         return rb.build();
     }
 
+    @GET
+    @Path("/{username}/{service}/check")
+    public Response checkToken(
+            @PathParam("username") String username,
+            @PathParam("service") String service,
+            @QueryParam("apikey") String apiKey
+    ) {
+        try {
+            check(
+                    this.getClass(),
+                    "checkToken",
+                    username,
+                    service,
+                    apiKey
+            );
+        } catch (ServiceException e) {
+            return error(e, "Error while checking parameters");
+        }
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
+        }
+        boolean isAuth;
+        try {
+            isAuth = applicationsManager.isAuthorized(
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.RETRIEVE,
+                    ApplicationsManager.Object.USER
+            );
+        } catch (ApplicationsManagerException e) {
+            return error(e, "Error while authenticating your application");
+        }
+        if (!isAuth) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    "Sorry, you're not allowed to do that")
+            );
+            return rb.build();
+        }
+        User user;
+        try {
+            user = userManager.getUser(username);
+        } catch (UserManagerException e) {
+            return error(e, "Error while retrieving user [" + username + "]");
+        }
+        if (user == null) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    "user with username [" + username + "] not found")
+            );
+            return rb.build();
+        }
+        OAuthAuth auth = (OAuthAuth) user.getAuth(service);
+        if(auth == null) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    "user with username [" + username + "] has not a token for service [" + service + "]")
+            );
+            return rb.build();
+        }
+        if (auth.isExpired()) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    "[" + service + "] token for [" + username + "] has expired")
+            );
+            return rb.build();
+        }
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(new StringPlatformResponse(
+                StringPlatformResponse.Status.OK,
+                "[" + service + "] token for [" + username + "] is valid")
+        );
+        return rb.build();
+    }
 
     @POST
     @Path("/{username}/authenticate")
@@ -714,67 +787,6 @@ public class UserService extends JsonService {
                 UserProfilePlatformResponse.Status.OK,
                 "profile for user [" + username + "] found",
                 up
-        )
-        );
-        return rb.build();
-    }
-
-    @GET
-    @Path("/{username}/activities/update")
-    public Response forceUserCrawl(
-            @PathParam("username") String username,
-            @QueryParam("apikey") String apiKey
-    ) {
-        try {
-            check(
-                    this.getClass(),
-                    "forceUserCrawl",
-                    username,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
-        }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.UPDATE,
-                    ApplicationsManager.Object.PROFILE
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating your application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry. You're not allowed to do that.")
-            );
-            return rb.build();
-        }
-        User user;
-        try {
-            user = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            return error(e, "Error while getting user with username [" + username + "]");
-        }
-        Report report;
-        try {
-            report = crawler.crawl(user.getUsername());
-        } catch (CrawlerException e) {
-            return error(e, "Error while getting activities for user [" + username + "]");
-        }
-        Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new ReportPlatformResponse(
-                ReportPlatformResponse.Status.OK,
-                "activities updated for [" + username + "]",
-                report
         )
         );
         return rb.build();

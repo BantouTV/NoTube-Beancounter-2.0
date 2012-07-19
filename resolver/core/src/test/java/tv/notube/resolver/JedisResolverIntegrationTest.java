@@ -42,8 +42,8 @@ public class JedisResolverIntegrationTest {
     public void testResolveTweet() throws Exception {
         jedis.select(3);
         UUID uuid = UUID.randomUUID();
-        String value = UserValues.unparse(new UserValues(uuid, "beancounter-username"));
-        jedis.set("twitter_username", value);
+        jedis.hset("twitter_username", "uuid", uuid.toString());
+        jedis.hset("twitter_username", "username", "beancounter-username");
         Activity tweet = getTweetActivity();
         UUID resolvedUserId = resolver.resolve(tweet);
         Assert.assertEquals(resolvedUserId, uuid);
@@ -53,8 +53,8 @@ public class JedisResolverIntegrationTest {
     public void testResolveFacebookEvent() throws Exception {
         jedis.select(4);
         UUID uuid = UUID.randomUUID();
-        String value = UserValues.unparse(new UserValues(uuid, "beancounter-username"));
-        jedis.set("facebook_username", value);
+        jedis.hset("facebook_username", "uuid", uuid.toString());
+        jedis.hset("facebook_username", "username", "beancounter-username");
         Activity event = getEventActivity();
         UUID resolvedUserId = resolver.resolve(event);
         Assert.assertEquals(resolvedUserId, uuid);
@@ -64,8 +64,8 @@ public class JedisResolverIntegrationTest {
     public void testResolveFacebookEventNotStoredUser() throws Exception {
         jedis.select(4);
         UUID uuid = UUID.randomUUID();
-        String value = UserValues.unparse(new UserValues(uuid, "beancounter-username"));
-        jedis.set("facebook_username", value);
+        jedis.hset("facebook_username", "uuid", uuid.toString());
+        jedis.hset("facebook_username", "username", "beancounter-username");
         Activity event = getEventActivity();
         event.getContext().setUsername("not-existing-user");
         UUID resolved = resolver.resolve(event);
@@ -75,7 +75,8 @@ public class JedisResolverIntegrationTest {
     @Test
     public void testResolveNotSupportedActivity() throws Exception {
         jedis.select(3);
-        jedis.set("something_username","beancounter");
+        jedis.hset("twitter_username", "uuid", UUID.randomUUID().toString());
+        jedis.hset("twitter_username", "username", "beancounter-username");
         Activity unsupportedActivity = getEventActivity();
         unsupportedActivity.setVerb(Verb.CHECKIN);
         UUID resolved = resolver.resolve(unsupportedActivity);

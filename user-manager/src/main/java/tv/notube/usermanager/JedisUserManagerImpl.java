@@ -13,6 +13,7 @@ import tv.notube.commons.model.auth.AuthHandler;
 import tv.notube.commons.model.auth.AuthHandlerException;
 import tv.notube.commons.helper.jedis.JedisPoolFactory;
 import tv.notube.commons.model.auth.AuthenticatedUser;
+import tv.notube.commons.model.auth.OAuthAuth;
 import tv.notube.resolver.Resolver;
 import tv.notube.resolver.ResolverException;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
@@ -43,7 +44,8 @@ public class JedisUserManagerImpl implements UserManager {
     private ServiceAuthorizationManager sam;
 
     @Inject
-    @Named("redis.db.users") private int database;
+    @Named("redis.db.users")
+    private int database;
 
     @Inject
     public JedisUserManagerImpl(
@@ -143,6 +145,37 @@ public class JedisUserManagerImpl implements UserManager {
         }
         try {
             return authHandler.getToken(username);
+        } catch (AuthHandlerException e) {
+            final String errMsg = "Error while getting auth manager for service '" + serviceName + "'";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+    }
+
+    @Override
+    public OAuthToken getOAuthToken(String serviceName, String username, URL callback)
+            throws UserManagerException {
+        try {
+            if (sam.getService(serviceName) == null) {
+                final String errMsg = "Service '" + serviceName + "' is not supported.";
+                LOGGER.error(errMsg);
+                throw new UserManagerException(errMsg);
+            }
+        } catch (ServiceAuthorizationManagerException e) {
+            final String errMsg = "Error while getting service '" + serviceName + "'";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        AuthHandler authHandler;
+        try {
+            authHandler = sam.getHandler(serviceName);
+        } catch (ServiceAuthorizationManagerException e) {
+            final String errMsg = "Error while getting auth manager for service '" + serviceName + "'";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        try {
+            return authHandler.getToken(username, callback);
         } catch (AuthHandlerException e) {
             final String errMsg = "Error while getting auth manager for service '" + serviceName + "'";
             LOGGER.error(errMsg, e);
@@ -272,5 +305,17 @@ public class JedisUserManagerImpl implements UserManager {
             return redirect;
         }
         throw new UserManagerException("It seems that a temporary url for this user has not been set yet.");
+    }
+
+    @Override
+    public synchronized void voidOAuthToken(User user, String service) throws UserManagerException {
+        OAuthAuth auth = (OAuthAuth) user.getAuth(service);
+        if(auth == null) {
+            throw new UserManagerException("it seems there is no auth for service [" + service + "] on user [" + user.getUsername() + "]");
+        }
+        auth.setExpired(true);
+        user.removeService(service);
+        user.addService(service, auth);
+        this.storeUser(user);
     }
 }

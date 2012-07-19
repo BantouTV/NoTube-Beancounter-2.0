@@ -1,9 +1,9 @@
 package tv.notube.listener;
 
 import tv.notube.commons.model.activity.Activity;
-import tv.notube.crawler.requester.ServiceResponseException;
-import tv.notube.crawler.requester.request.twitter.TwitterResponse;
-import tv.notube.crawler.requester.request.twitter.TwitterTweet;
+import tv.notube.listener.model.ServiceResponseException;
+import tv.notube.listener.model.TwitterResponse;
+import tv.notube.listener.model.TwitterTweet;
 
 import java.util.ArrayList;
 
