@@ -7,6 +7,7 @@ import tv.notube.commons.nlp.Entity;
 import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.commons.nlp.NLPEngineException;
 import tv.notube.commons.nlp.NLPEngineResult;
+import tv.notube.commons.redirects.RedirectException;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -74,12 +75,78 @@ public class LUpediaNLPEngineImplTestCase {
         Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/Beijing")));
         Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/Glasgow")));
         Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/World")));
+    }
 
+    @Test
+    public void testTinyUrl() throws NLPEngineException, URISyntaxException, MalformedURLException {
+        final URL url = new URL("http://bit.ly/4XzVxm");
+        NLPEngineResult result = nlpEngine.enrich(url);
+        Set<Entity> entities = result.getEntities();
+        Assert.assertEquals(entities.size(), 15);
+        Set<URI> actual = toURISet(entities);
+        Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/Google")));
+    }
+
+    @Test
+    public void testTinyUrlTwo() throws NLPEngineException, URISyntaxException, MalformedURLException {
+        final URL url = new URL("http://ow.ly/1kDDFe");
+        NLPEngineResult result;
+        try {
+            result = nlpEngine.enrich(url);
+        } catch (NLPEngineException e) {
+            Assert.assertTrue(e.getCause() instanceof RedirectException);
+            Assert.assertEquals(
+                    e.getCause().getMessage(),
+                    "Error while creating the new url for the redirect [/hotel/superPage.jsp?startDate=06%2F22%2F2012&encDealHash=MTAwOjE3MzAyNjo4OTcxOTo0LjA6NDkuOTk5OTk2Olk6WTpZ&rid=r-69820702248&wid=w-3&xid=x-103&rs=20500&endDate=06%2F24%2F2012]"
+            );
+        }
+    }
+
+    // boiler plate error! enable this when we pass to boilerpipe directly the text
+    @Test(enabled = false)
+    public void testTinyUrlThree() throws NLPEngineException, URISyntaxException, MalformedURLException {
+        final URL url = new URL("http://tpt.to/a2Cp9h3");
+        NLPEngineResult result = nlpEngine.enrich(url);
+        Set<Entity> entities = result.getEntities();
+        Assert.assertEquals(entities.size(), 0);
+        Set<URI> actual = toURISet(entities);
+        Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/Google")));
+    }
+
+    @Test
+    public void testNotFoundUrl() throws NLPEngineException, URISyntaxException, MalformedURLException {
+        final URL url = new URL("http://www.cedarsummit.com/error");
+        NLPEngineResult result;
+        try {
+            result = nlpEngine.enrich(url);
+        } catch (NLPEngineException e) {
+            Assert.assertTrue(e.getCause() instanceof RedirectException);
+            Assert.assertEquals(
+                    e.getCause().getMessage(),
+                    "Seem that the redirect for [http://www.cedarsummit.com/error] went wrong [error code: 404]"
+            );
+        }
+    }
+
+    @Test
+    public void testDifferentErrorUrl() throws NLPEngineException, URISyntaxException, MalformedURLException {
+        final URL url = new URL("http://api.beancounter.io/rest/user/ndkcee?apikey=14fb6663");
+        NLPEngineResult result;
+        try {
+            result = nlpEngine.enrich(url);
+        } catch (NLPEngineException e) {
+            Assert.assertTrue(e.getCause() instanceof RedirectException);
+            Assert.assertEquals(
+                    e.getCause().getMessage(),
+                    "Seem that the redirect for [http://api.beancounter.io/rest/user/ndkcee?apikey=14fb6663]" +
+                            " went wrong [error code: 500]"
+            );
+        }
     }
 
     private Set<URI> toURISet(Set<Entity> entities) {
         Set<URI> uris = new HashSet<URI>();
-        for(Entity entity : entities) {
+        for (Entity entity : entities) {
             uris.add(entity.getResource());
         }
         return uris;
