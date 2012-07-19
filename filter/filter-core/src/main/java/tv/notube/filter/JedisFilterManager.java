@@ -11,6 +11,7 @@ import redis.clients.jedis.JedisPool;
 import tv.notube.commons.helper.jedis.JedisPoolFactory;
 import tv.notube.filter.model.Filter;
 import tv.notube.filter.model.pattern.ActivityPattern;
+import tv.notube.filter.notification.Notification;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,10 +28,13 @@ public class JedisFilterManager implements FilterManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JedisFilterManager.class);
 
+    private static final String CHANNEL = "filters";
+
     private JedisPool pool;
 
     @Inject
-    @Named("redis.db.filters") private int db;
+    @Named("redis.db.filters")
+    private int db;
 
     private ObjectMapper objectMapper;
 
@@ -48,7 +52,7 @@ public class JedisFilterManager implements FilterManager {
             String description,
             ActivityPattern activityPattern
     ) throws FilterManagerException {
-        if(get(name) != null) {
+        if (get(name) != null) {
             final String errMsg = "Filter [" + name + "] already exists";
             LOGGER.error(errMsg);
             throw new FilterManagerException(errMsg);
@@ -69,10 +73,11 @@ public class JedisFilterManager implements FilterManager {
         Jedis jedis = pool.getResource();
         jedis.select(db);
         try {
-        jedis.set(name, filterJson);
+            jedis.set(name, filterJson);
         } finally {
             pool.returnResource(jedis);
         }
+
         return name;
     }
 
@@ -86,7 +91,7 @@ public class JedisFilterManager implements FilterManager {
         } finally {
             pool.returnResource(jedis);
         }
-        if(filterJson == null) {
+        if (filterJson == null) {
             return null;
         }
         Filter filter;
@@ -102,15 +107,19 @@ public class JedisFilterManager implements FilterManager {
 
     @Override
     public void delete(String name) throws FilterManagerException {
-        if(get(name) == null) {
+        if (get(name) == null) {
             final String errMsg = "Filter [" + name + "] does not exist";
             LOGGER.error(errMsg);
             throw new FilterManagerException(errMsg);
         }
+        // notify the filter has been stopped
+        notify(Notification.Action.STOP, name);
+
+        // then delete it
         Jedis jedis = pool.getResource();
         jedis.select(db);
         try {
-        jedis.del(name);
+            jedis.del(name);
         } finally {
             pool.returnResource(jedis);
         }
@@ -118,7 +127,7 @@ public class JedisFilterManager implements FilterManager {
 
     @Override
     public void start(String name) throws FilterManagerException {
-        if(get(name) == null) {
+        if (get(name) == null) {
             final String errMsg = "Filter [" + name + "] does not exist";
             LOGGER.error(errMsg);
             throw new FilterManagerException(errMsg);
@@ -126,11 +135,33 @@ public class JedisFilterManager implements FilterManager {
         Filter filter = get(name);
         filter.setActive(true);
         update(filter);
+        // notify the filter has been started
+        notify(Notification.Action.START, filter.getName());
+    }
+
+    private void notify(Notification.Action action, String name) throws FilterManagerException {
+        String notifyJson;
+        try {
+            notifyJson = objectMapper.writeValueAsString(
+                    new Notification(action, name)
+            );
+        } catch (IOException e) {
+            final String errMsg = "Error while converting notification [" + name + "] to json";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        }
+        Jedis jedis = pool.getResource();
+        jedis.select(db);
+        try {
+            jedis.publish(CHANNEL, notifyJson);
+        } finally {
+            pool.returnResource(jedis);
+        }
     }
 
     @Override
     public void stop(String name) throws FilterManagerException {
-        if(get(name) == null) {
+        if (get(name) == null) {
             final String errMsg = "Filter [" + name + "] does not exist";
             LOGGER.error(errMsg);
             throw new FilterManagerException(errMsg);
@@ -138,6 +169,8 @@ public class JedisFilterManager implements FilterManager {
         Filter filter = get(name);
         filter.setActive(false);
         update(filter);
+        // notify the filter has been stopped
+        notify(Notification.Action.STOP, filter.getName());
     }
 
     @Override
@@ -154,7 +187,7 @@ public class JedisFilterManager implements FilterManager {
         Jedis jedis = pool.getResource();
         jedis.select(db);
         try {
-        jedis.set(name, filterJson);
+            jedis.set(name, filterJson);
         } finally {
             pool.returnResource(jedis);
         }
@@ -170,7 +203,7 @@ public class JedisFilterManager implements FilterManager {
         } finally {
             pool.returnResource(jedis);
         }
-        if(keys == null) {
+        if (keys == null) {
             return new ArrayList<String>();
         }
         return new ArrayList<String>(keys);
