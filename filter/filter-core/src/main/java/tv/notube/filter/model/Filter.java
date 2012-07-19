@@ -4,7 +4,9 @@ import org.joda.time.DateTime;
 import tv.notube.filter.model.pattern.ActivityPattern;
 
 /**
- * put class description here
+ * This class describes a Filter. A Filter is a component able to divert
+ * to a specific queue an {@link tv.notube.commons.model.activity.Activity}
+ * matching a certain {@link ActivityPattern}.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
@@ -16,7 +18,9 @@ public class Filter {
 
     private DateTime definedAt;
 
-    public boolean active = false;
+    private boolean active = false;
+
+    private String queue;
 
     private ActivityPattern activityPattern;
 
@@ -24,10 +28,11 @@ public class Filter {
         activityPattern = ActivityPattern.ANY;
     }
 
-    public Filter(String name, String description, ActivityPattern activityPattern) {
+    public Filter(String name, String description, ActivityPattern activityPattern, String queue) {
         this.name = name;
         this.description = description;
         this.activityPattern = activityPattern;
+        this.queue = queue;
         this.definedAt = DateTime.now();
     }
 
@@ -71,6 +76,14 @@ public class Filter {
         this.active = active;
     }
 
+    public String getQueue() {
+        return queue;
+    }
+
+    public void setQueue(String queue) {
+        this.queue = queue;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -96,6 +109,7 @@ public class Filter {
                 ", description='" + description + '\'' +
                 ", definedAt=" + definedAt +
                 ", active=" + active +
+                ", queue='" + queue + '\'' +
                 ", activityPattern=" + activityPattern +
                 '}';
     }
