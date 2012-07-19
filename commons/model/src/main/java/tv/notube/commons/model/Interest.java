@@ -20,6 +20,8 @@ public class Interest implements Comparable<Interest> {
 
     private Collection<UUID> activitiesUUIDs = new ArrayList<UUID>();
 
+    private int activitiesSize;
+
     public Interest() {}
 
     public Interest(URI resource) {
@@ -61,6 +63,14 @@ public class Interest implements Comparable<Interest> {
 
     public boolean addActivity(UUID activityUUID) {
         return this.activitiesUUIDs.add(activityUUID);
+    }
+
+    public int getActivitiesSize() {
+        return this.activitiesUUIDs.size();
+    }
+
+    public void setActivitiesSize(int activitiesSize) {
+        this.activitiesSize = activitiesUUIDs.size();
     }
 
     @Override

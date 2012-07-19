@@ -28,9 +28,9 @@ public class CogitoNLPEngineImplTest {
         Assert.assertTrue(actual.contains(new URI("http://dati.rai.tv/entity/12631236")));
     }
 
-    @Test
+    // TODO (med) make it static, the article could change
+    @Test(enabled = false)
     public void testBigText() throws NLPEngineException, MalformedURLException, URISyntaxException {
-        // TODO (med) make it static
         String url = "http://ansa.it/web/notizie/rubriche/associata/2012/07/18/CRISI-NAPOLITANO-OGGI-INCONTRO-URGENTE-MONTI_7201843.html";
         CogitoNLPEngineImpl nlp = new CogitoNLPEngineImpl(null);
         NLPEngineResult result = nlp.enrich(new URL(url));

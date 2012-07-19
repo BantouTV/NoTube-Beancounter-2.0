@@ -339,9 +339,7 @@ public class ActivitiesService extends JsonService {
             rb.entity(
                     new ActivitiesPlatformResponse(
                             ActivitiesPlatformResponse.Status.OK,
-                            "user '" + username + "' activities found. " +
-                                    "Next: 'http://api.beancounter.io/rest/activities/getall/" +
-                                    username + "?page=" + (page + 1) + "&apikey=" + apiKey + "'",
+                            "user '" + username + "' activities found.",
                             trimmedActivities
                     )
             );
