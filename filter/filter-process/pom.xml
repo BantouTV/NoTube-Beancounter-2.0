@@ -21,6 +21,11 @@
             <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>tv.notube</groupId>
+            <artifactId>activities</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-core</artifactId>
         </dependency>
@@ -32,20 +37,44 @@
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jackson</artifactId>
         </dependency>
-        <!-- TODO (low) move deps to parent or switch to a non SNAPSHOT one -->
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-redis</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-guice</artifactId>
-            <version>2.10-SNAPSHOT</version>
         </dependency>
+
+        <!-- testing-->
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
     </dependencies>
 
-     <build>
+    <build>
+        <!-- Allows to be run via 'mvn compile exec:java' -->
+        <!-- java -jar filter-process-1.0-SNAPSHOT-jar-with-dependencies.jar -jndiProperties /guicejndi.properties -->
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <finalName>resolver-1.1-SNAPSHOT</finalName>
+                    <finalName>filter-1.1-SNAPSHOT</finalName>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
