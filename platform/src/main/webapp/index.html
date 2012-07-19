@@ -550,11 +550,12 @@
                         - {name} the name uniquely identifying the filter <br>
                         - description:a human-readable description of the filter   <br>
                         - pattern : the activity pattern, in JSON format <br>
+                        - queue : the name of the target queue <br>
                         - apikey : your app key <br>
                     Description: it register a new filter if the provided name has not been taken already
                     <br>
                     Example: with curl<br><br>
-                    curl -d "description=test-description&pattern={\"userId\":{\"uuid\":null},\"verb\":{\"verb\":\"ANY\"},\"object\":{\"type\":\"tv.notube.filter.model.pattern.rai.TVEventPattern\",\"typePattern\":{\"string\":\"tv.notube.filter.model.pattern.rai.TVEventPattern\"},\"url\":{\"url\":null},\"uuidPattern\":{\"uuid\":\"2590fd3d-97ea-49bb-b7ec-04da7553bb0a\"}},\"context\":{\"date\":{\"date\":1342530815683,\"bool\":\"BEFORE\"},\"service\":{\"string\":\"\"},\"mood\":{\"string\":\"\"},\"username\":{\"string\":\"\"}}}" http://api.beancounter.io/rest/filters/register/test-filter?apikey=your-app-key
+                    curl -d "description=test-description&queue=social&pattern={\"userId\":{\"uuid\":null},\"verb\":{\"verb\":\"ANY\"},\"object\":{\"type\":\"tv.notube.filter.model.pattern.rai.TVEventPattern\",\"typePattern\":{\"string\":\"tv.notube.filter.model.pattern.rai.TVEventPattern\"},\"url\":{\"url\":null},\"uuidPattern\":{\"uuid\":\"2590fd3d-97ea-49bb-b7ec-04da7553bb0a\"}},\"context\":{\"date\":{\"date\":1342530815683,\"bool\":\"BEFORE\"},\"service\":{\"string\":\"\"},\"mood\":{\"string\":\"\"},\"username\":{\"string\":\"\"}}}" http://api.beancounter.io/rest/filters/register/test-filter?apikey=your-app-key
                     <br><br>
 
                 <pre><code>

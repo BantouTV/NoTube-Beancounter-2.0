@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import org.codehaus.jackson.map.ObjectMapper;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
-import tv.notube.filter.FilterManager;
-import tv.notube.filter.FilterManagerException;
+import tv.notube.filter.manager.FilterManager;
+import tv.notube.filter.manager.FilterManagerException;
 import tv.notube.filter.model.Filter;
 import tv.notube.filter.model.pattern.ActivityPattern;
 import tv.notube.platform.responses.FilterPlatformResponse;
@@ -41,6 +41,7 @@ public class FilterService extends JsonService {
             @PathParam("name") String name,
             @FormParam("description") String description,
             @FormParam("pattern") String patternJson,
+            @FormParam("queue") String queue,
             @QueryParam("apikey") String apiKey
     ) {
         try {
@@ -50,6 +51,7 @@ public class FilterService extends JsonService {
                     name,
                     description,
                     patternJson,
+                    queue,
                     apiKey
             );
         } catch (ServiceException e) {
@@ -87,7 +89,7 @@ public class FilterService extends JsonService {
         }
         String actualName;
         try {
-            actualName = filterManager.register(name, description, pattern);
+            actualName = filterManager.register(name, description, queue, pattern);
         } catch (FilterManagerException e) {
             final String errMsg = "Error while [" + name + "] filter";
             return error(e, errMsg);

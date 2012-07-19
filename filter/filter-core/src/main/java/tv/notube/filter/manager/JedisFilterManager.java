@@ -1,4 +1,4 @@
-package tv.notube.filter;
+package tv.notube.filter.manager;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -11,7 +11,6 @@ import redis.clients.jedis.JedisPool;
 import tv.notube.commons.helper.jedis.JedisPoolFactory;
 import tv.notube.filter.model.Filter;
 import tv.notube.filter.model.pattern.ActivityPattern;
-import tv.notube.filter.notification.Notification;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,6 +49,7 @@ public class JedisFilterManager implements FilterManager {
     public String register(
             String name,
             String description,
+            String queue,
             ActivityPattern activityPattern
     ) throws FilterManagerException {
         if (get(name) != null) {
@@ -60,7 +60,8 @@ public class JedisFilterManager implements FilterManager {
         Filter filter = new Filter(
                 name,
                 description,
-                activityPattern
+                activityPattern,
+                queue
         );
         String filterJson;
         try {
@@ -113,7 +114,7 @@ public class JedisFilterManager implements FilterManager {
             throw new FilterManagerException(errMsg);
         }
         // notify the filter has been stopped
-        notify(Notification.Action.STOP, name);
+        notify(name);
 
         // then delete it
         Jedis jedis = pool.getResource();
@@ -136,24 +137,14 @@ public class JedisFilterManager implements FilterManager {
         filter.setActive(true);
         update(filter);
         // notify the filter has been started
-        notify(Notification.Action.START, filter.getName());
+        notify(filter.getName());
     }
 
-    private void notify(Notification.Action action, String name) throws FilterManagerException {
-        String notifyJson;
-        try {
-            notifyJson = objectMapper.writeValueAsString(
-                    new Notification(action, name)
-            );
-        } catch (IOException e) {
-            final String errMsg = "Error while converting notification [" + name + "] to json";
-            LOGGER.error(errMsg, e);
-            throw new FilterManagerException(errMsg, e);
-        }
+    private void notify(String name) throws FilterManagerException {
         Jedis jedis = pool.getResource();
         jedis.select(db);
         try {
-            jedis.publish(CHANNEL, notifyJson);
+            jedis.publish(CHANNEL, name);
         } finally {
             pool.returnResource(jedis);
         }
@@ -170,7 +161,7 @@ public class JedisFilterManager implements FilterManager {
         filter.setActive(false);
         update(filter);
         // notify the filter has been stopped
-        notify(Notification.Action.STOP, filter.getName());
+        notify(filter.getName());
     }
 
     @Override

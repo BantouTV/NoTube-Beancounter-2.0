@@ -1,4 +1,4 @@
-package tv.notube.filter;
+package tv.notube.filter.manager;
 
 import tv.notube.filter.model.Filter;
 import tv.notube.filter.model.pattern.ActivityPattern;
@@ -18,12 +18,14 @@ public class InMemoryFilterManager implements FilterManager {
     public synchronized String register(
             String name,
             String description,
+            String queue,
             ActivityPattern activityPattern
     ) throws FilterManagerException {
         Filter filter = new Filter(
                 name,
                 description,
-                activityPattern
+                activityPattern,
+                queue
         );
         filters.add(filter);
         return name;
