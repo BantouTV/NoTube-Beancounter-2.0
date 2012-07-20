@@ -1,6 +1,8 @@
 package tv.notube.profiler.rules.custom;
 
 import tv.notube.commons.linking.LinkingEngine;
+import tv.notube.commons.model.activity.*;
+import tv.notube.commons.model.activity.Object;
 import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.profiler.rules.ObjectProfilingRule;
 import tv.notube.profiler.rules.ProfilingRuleException;
@@ -16,11 +18,15 @@ import java.util.Set;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class DevNullProfilingRule extends ObjectProfilingRule<tv.notube.commons.model.activity.Object> {
+public class DevNullProfilingRule extends ObjectProfilingRule<Object> {
 
-    private Set<URI> result = new HashSet<URI>();
+    private final Set<URI> result = new HashSet<URI>();
 
-    public DevNullProfilingRule(tv.notube.commons.model.activity.Object object, NLPEngine nlpEngine, LinkingEngine linkingEngine) {
+    public DevNullProfilingRule() {
+        this(null, null, null);
+    }
+
+    private DevNullProfilingRule(Object object, NLPEngine nlpEngine, LinkingEngine linkingEngine) {
         super(object, nlpEngine, linkingEngine);
     }
 

@@ -2,6 +2,7 @@ package tv.notube.commons.model.activity;
 
 import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
+import tv.notube.commons.model.activity.facebook.Like;
 import tv.notube.commons.model.activity.rai.Comment;
 import tv.notube.commons.model.activity.rai.ContentItem;
 import tv.notube.commons.model.activity.rai.TVEvent;
@@ -23,8 +24,8 @@ import java.net.URL;
         @JsonSubTypes.Type(value = Song.class, name = "SONG"),
         @JsonSubTypes.Type(value = ContentItem.class, name = "RAI-CONTENT-ITEM"),
         @JsonSubTypes.Type(value = TVEvent.class, name = "RAI-TV-EVENT"),
-        @JsonSubTypes.Type(value = Comment.class, name = "RAI-TV-COMMENT")
-
+        @JsonSubTypes.Type(value = Comment.class, name = "RAI-TV-COMMENT"),
+        @JsonSubTypes.Type(value = Like.class, name = "FB-LIKE")
 })
 public class Object implements Serializable {
 

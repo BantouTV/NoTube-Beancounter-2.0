@@ -1,13 +1,13 @@
 package tv.notube.filter.model.pattern;
 
-import tv.notube.commons.model.activity.Activity;
+import tv.notube.commons.model.activity.ResolvedActivity;
 
 /**
  * put class description here
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class ActivityPattern implements Pattern<Activity> {
+public class ActivityPattern implements Pattern<ResolvedActivity> {
 
     public final static ActivityPattern ANY = new ActivityPattern(
             UUIDPattern.ANY,
@@ -71,10 +71,10 @@ public class ActivityPattern implements Pattern<Activity> {
     }
 
     @Override
-    public boolean matches(Activity activity) {
-        return (this.equals(ANY)) || (userId.matches(activity.getId()) &&
-                verb.matches(activity.getVerb()) &&
-                context.matches(activity.getContext()));
+    public boolean matches(ResolvedActivity ra) {
+        return (this.equals(ANY)) || (userId.matches(ra.getUserId()) &&
+                verb.matches(ra.getActivity().getVerb()) &&
+                context.matches(ra.getActivity().getContext()));
     }
 
     @Override

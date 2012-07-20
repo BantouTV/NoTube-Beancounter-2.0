@@ -5,21 +5,13 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.*;
-import tv.notube.commons.model.activity.Activity;
-import tv.notube.commons.model.activity.Context;
-import tv.notube.commons.model.activity.Verb;
-import tv.notube.commons.model.activity.rai.ContentItem;
 import tv.notube.platform.APIResponse;
 import tv.notube.platform.AbstractJerseyTestCase;
 import tv.notube.platform.responses.ActivitiesPlatformResponse;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.UUID;
 
 /**
@@ -128,7 +120,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
-                "user 'test-user' activities found. Next: 'http://api.beancounter.io/rest/activities/getall/test-user?page=1&apikey=" + APIKEY + "'",
+                "user 'test-user' activities found.",
                 "OK"
         );
         Assert.assertEquals(actual.getMessage(), expected.getMessage());
@@ -156,7 +148,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
-                "user 'test-user' activities found. Next: 'http://api.beancounter.io/rest/activities/getall/test-user?page=2&apikey=" + APIKEY + "'",
+                "user 'test-user' activities found.",
                 "OK"
         );
         Assert.assertEquals(actual.getMessage(), expected.getMessage());
@@ -184,7 +176,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
-                "user 'test-user' activities found. Next: 'http://api.beancounter.io/rest/activities/getall/test-user?page=3&apikey=" + APIKEY + "'",
+                "user 'test-user' activities found.",
                 "OK"
         );
         Assert.assertEquals(actual.getMessage(), expected.getMessage());
@@ -212,7 +204,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
-                "user 'test-user' activities found. Next: 'http://api.beancounter.io/rest/activities/getall/test-user?page=4&apikey=" + APIKEY + "'",
+                "user 'test-user' activities found.",
                 "OK"
         );
         Assert.assertEquals(actual.getMessage(), expected.getMessage());

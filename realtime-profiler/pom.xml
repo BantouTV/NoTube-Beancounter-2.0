@@ -38,13 +38,13 @@
         </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
-            <artifactId>tagdef</artifactId>
+            <artifactId>cogito</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <scope>test</scope>
+            <groupId>tv.notube.commons</groupId>
+            <artifactId>tagdef</artifactId>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

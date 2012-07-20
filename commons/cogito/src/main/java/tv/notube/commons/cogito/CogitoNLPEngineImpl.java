@@ -35,39 +35,35 @@ public class CogitoNLPEngineImpl implements NLPEngine {
 
     private final static String RELEVANT ="category/";
 
-    private final static String QUERY_PATTERN = "http://test.expertsystem.it/IPTC_ITA/EssexWS.asmx/ESSEXIndexdata";
-
     private String service;
 
     private DigesterParser parser;
 
-    public CogitoNLPEngineImpl(String service) {
-        this.service = service;
+    public CogitoNLPEngineImpl(String endpoint) {
+        try {
+            new URL(endpoint);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("url [" + endpoint + "] seems to be ill-formed", e);
+        }
+        this.service = endpoint;
         parser = new DigesterParser();
     }
 
     @Override
     public NLPEngineResult enrich(String text) throws NLPEngineException {
-        // just to check the QUERY_PATTERN (we can probably delete this)
-        // TODO (med) move in the constructor
-        try {
-            new URL(QUERY_PATTERN);
-        } catch (MalformedURLException e) {
-            throw new NLPEngineException("url [" + QUERY_PATTERN + "] seems to be ill-formed", e);
-        }
-        PostMethod postMethod = new PostMethod(QUERY_PATTERN);
+        PostMethod postMethod = new PostMethod(service);
         postMethod.setParameter("text", text);
         HttpClient client = new HttpClient();
         int response;
         try {
             response = client.executeMethod(postMethod);
         } catch (IOException e) {
-            final String errMsg = "Error while POST-ing to [" + QUERY_PATTERN + "]";
+            final String errMsg = "Error while POST-ing to [" + service + "]";
             LOGGER.error(errMsg, e);
             throw new NLPEngineException(errMsg, e);
         }
         if (response != HttpStatus.SC_OK) {
-            final String errMsg = "[" + QUERY_PATTERN + "] replied with HTTP [" + response + "]";
+            final String errMsg = "[" + service + "] replied with HTTP [" + response + "]";
             LOGGER.error(errMsg);
             throw new NLPEngineException(errMsg, null);
         }
@@ -75,7 +71,7 @@ public class CogitoNLPEngineImpl implements NLPEngine {
         try {
             is = postMethod.getResponseBodyAsStream();
         } catch (IOException e) {
-            final String errMsg = "Error while getting response body as stream from [" + QUERY_PATTERN + "]";
+            final String errMsg = "Error while getting response body as stream from [" + service + "]";
             LOGGER.error(errMsg, e);
             throw new NLPEngineException(errMsg, e);
         }
@@ -83,14 +79,14 @@ public class CogitoNLPEngineImpl implements NLPEngine {
         try {
             cogitoResponse = parser.parse(is);
         } catch (Exception e){
-            final String errMsg = "Error while parsing response body from [" + QUERY_PATTERN + "]";
+            final String errMsg = "Error while parsing response body from [" + service + "]";
             LOGGER.error(errMsg);
             throw new NLPEngineException(errMsg, e);
         } finally {
             try {
                 is.close();
             } catch (IOException e) {
-                final String errMsg = "Error while closing stream response body from [" + QUERY_PATTERN + "]";
+                final String errMsg = "Error while closing stream response body from [" + service + "]";
                 LOGGER.error(errMsg);
                 throw new NLPEngineException(errMsg, e);
             }
@@ -128,9 +124,9 @@ public class CogitoNLPEngineImpl implements NLPEngine {
 
     @Override
     public NLPEngineResult enrich(URL url) throws NLPEngineException {
-        URL resolved;
+        String response;
         try {
-            resolved = RedirectResolver.resolve(url);
+            response = RedirectResolver.resolve(url);
         } catch (RedirectException e) {
             throw new NLPEngineException(
                     "Error resolving the redirect for [" + url + "]",
@@ -139,8 +135,7 @@ public class CogitoNLPEngineImpl implements NLPEngine {
         }
         String text;
         try {
-            // TODO (mid) pass text to boilerplate instead of url
-            text = ArticleExtractor.INSTANCE.getText(resolved);
+            text = ArticleExtractor.INSTANCE.getText(response);
         } catch (BoilerpipeProcessingException e) {
             final String errMsg = "Error while removing boiler plate from [" + url + "]";
             LOGGER.error(errMsg, e);

@@ -100,9 +100,9 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
 
     @Override
     public NLPEngineResult enrich(URL url) throws NLPEngineException {
-        URL resolved;
+        String response;
         try {
-            resolved = RedirectResolver.resolve(url);
+            response = RedirectResolver.resolve(url);
         } catch (RedirectException e) {
             throw new NLPEngineException(
                     "Error resolving the redirect for [" + url + "]",
@@ -111,10 +111,9 @@ public final class LUpediaNLPEngineImpl implements NLPEngine {
         }
         String text;
         try {
-            // TODO (mid) pass text to boilerplate instead of url
-            text = ArticleExtractor.INSTANCE.getText(resolved);
+            text = ArticleExtractor.INSTANCE.getText(response);
         } catch (BoilerpipeProcessingException e) {
-            throw new NLPEngineException("Error while removing boiler plate from [" + resolved +  "]", e);
+            throw new NLPEngineException("Error while removing boiler plate from [" + url +  "]", e);
         }
         return enrich(text);
     }

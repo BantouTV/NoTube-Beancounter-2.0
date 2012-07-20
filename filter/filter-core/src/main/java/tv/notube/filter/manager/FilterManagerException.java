@@ -1,4 +1,4 @@
-package tv.notube.filter;
+package tv.notube.filter.manager;
 
 /**
  * put class description here

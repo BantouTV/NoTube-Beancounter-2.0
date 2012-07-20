@@ -1,4 +1,4 @@
-package tv.notube.filter;
+package tv.notube.filter.manager;
 
 import tv.notube.filter.model.Filter;
 import tv.notube.filter.model.pattern.ActivityPattern;
@@ -6,7 +6,8 @@ import tv.notube.filter.model.pattern.ActivityPattern;
 import java.util.Collection;
 
 /**
- * put class description here
+ * This interface defines the minimum contract to perform CRUD operations
+ * on {@link Filter}.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
@@ -15,6 +16,7 @@ public interface FilterManager {
     public String register(
             String name,
             String description,
+            String queue,
             ActivityPattern activityPattern
     ) throws FilterManagerException;
 
