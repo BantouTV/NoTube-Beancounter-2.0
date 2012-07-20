@@ -8,6 +8,25 @@
     <version>1.1-SNAPSHOT</version>
     <name>NoTube 2.0 Parent</name>
 
+    <modules>
+        <module>commons</module>
+        <module>platform</module>
+        <module>user-manager</module>
+        <module>applications</module>
+        <module>activities</module>
+        <module>listeners</module>
+        <module>indexer</module>
+        <module>realtime-profiler</module>
+        <module>profiles</module>
+        <module>queues</module>
+        <module>resolver</module>
+        <module>filter</module>
+        <module>dispatcher</module>
+        <module>camel-redis</module>
+        <!-- analytics out of release 1.0 -->
+        <!-- <module>analytics</module> -->
+  </modules>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <camel.version>2.10-SNAPSHOT</camel.version>
@@ -312,24 +331,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <modules>
-        <module>commons</module>
-        <module>platform</module>
-        <module>user-manager</module>
-        <module>applications</module>
-        <module>activities</module>
-        <module>listeners</module>
-        <module>indexer</module>
-        <module>realtime-profiler</module>
-        <module>profiles</module>
-        <module>queues</module>
-        <module>resolver</module>
-        <module>filter</module>
-        <module>camel-redis</module>
-        <!-- analytics out of release 1.0 -->
-        <!-- <module>analytics</module> -->
-  </modules>
 
     <distributionManagement>
         <repository>
