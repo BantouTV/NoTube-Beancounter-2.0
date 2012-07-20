@@ -79,7 +79,6 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
                 .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
                 .setSize(max)
                 .execute().actionGet();
-
         return retrieveActivitiesFromSearchResponse(searchResponse);
     }
 
@@ -176,6 +175,22 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
     @Override
     public void shutDown() throws ActivityStoreException {
         closeClient();
+    }
+
+    @Override
+    public Collection<Activity> search(String path, String value) throws ActivityStoreException {
+        throw new UnsupportedOperationException("NIY");
+    }
+
+    // TODO (high) this will be deprecated as soon as #search will be available
+    @Override
+    public Collection<Activity> getByOnEvent(String value) throws ActivityStoreException {
+        SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
+                .setQuery(queryString("onEvent:" + value))
+                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
+                .execute().actionGet();
+
+        return retrieveActivitiesFromSearchResponse(searchResponse);
     }
 
     public void closeClient() throws ActivityStoreException {

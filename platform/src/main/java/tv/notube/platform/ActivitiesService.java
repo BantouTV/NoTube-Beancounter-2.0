@@ -250,6 +250,66 @@ public class ActivitiesService extends JsonService {
         return rb.build();
     }
 
+    @GET
+    @Path("/search")
+    public Response search(
+            @QueryParam("path") String path,
+            @QueryParam("value") String value,
+            @QueryParam("apikey") String apiKey
+    ) {
+        try {
+            check(
+                    this.getClass(),
+                    "search",
+                    path,
+                    value,
+                    apiKey
+            );
+        } catch (ServiceException e) {
+            return error(e, "Error while checking parameters");
+        }
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
+        }
+        boolean isAuth;
+        try {
+            isAuth = applicationsManager.isAuthorized(
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.RETRIEVE,
+                    ApplicationsManager.Object.ACTIVITIES
+            );
+        } catch (ApplicationsManagerException e) {
+            return error(e, "Error while authenticating you application");
+        }
+        if (!isAuth) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    "Sorry. You're not allowed to do that.")
+            );
+            return rb.build();
+        }
+        // TODO (really high): replace this with the general one activities.search(path, value);
+        Collection<Activity> activities;
+        try {
+            activities = this.activities.getByOnEvent(value);
+        } catch (ActivityStoreException e) {
+            return error(e, "Error while getting activities where [" + path + "=" + value +"]");
+        }
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(
+                new ActivitiesPlatformResponse(
+                        ActivitiesPlatformResponse.Status.OK,
+                        "user [" + path + "=" + value +"] activities found.",
+                        activities
+                )
+        );
+        return rb.build();
+    }
+
+
 
     @GET
     @Path("/all/{username}")
@@ -368,6 +428,6 @@ public class ActivitiesService extends JsonService {
 class ActivityComparator implements Comparator<Activity> {
     @Override
     public int compare(Activity a1, Activity a2) {
-        return a1.getContext().getDate().compareTo(a2.getContext().getDate());
+        return a2.getContext().getDate().compareTo(a1.getContext().getDate());
     }
 }
