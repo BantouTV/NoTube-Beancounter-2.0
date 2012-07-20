@@ -25,6 +25,9 @@ import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.Context;
 import tv.notube.commons.model.activity.Object;
 import tv.notube.commons.model.activity.Verb;
+import tv.notube.commons.model.activity.facebook.Like;
+import tv.notube.listener.facebook.converter.ConverterException;
+import tv.notube.listener.facebook.converter.FacebookLikeConverter;
 import tv.notube.listener.facebook.model.FacebookChange;
 import tv.notube.listener.facebook.model.FacebookData;
 import tv.notube.listener.facebook.model.FacebookNotification;
@@ -34,6 +37,7 @@ import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.UserManagerException;
 
 public class FacebookActivityConverter implements ActivityConverter {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FacebookActivityConverter.class);
 
     private final static String SERVICE = "facebook";
@@ -46,6 +50,7 @@ public class FacebookActivityConverter implements ActivityConverter {
 
 
     private long getOldTimeStamp() {
+        // TODO (med) fix this
         return 1;
     }
 
@@ -119,25 +124,21 @@ public class FacebookActivityConverter implements ActivityConverter {
     private List<Activity> convertLikesToActivities(String userId, List<FacebookData> likes) {
         List<Activity> activities = new ArrayList<Activity>();
         for (FacebookData like : likes) {
+            Like likeObj;
             try {
-                Activity activity = new Activity();
-                // TODO (med)
-                activity.setVerb(Verb.LIKE);
-                tv.notube.commons.model.activity.Object object
-                        = new tv.notube.commons.model.activity.Object();
-                object.setName(like.getName());
-                object.setDescription(like.getCategory());
-                object.setUrl(new URL("http://www.facebook.com/" + like.getId()));
-                activity.setObject(object);
-                Context context = new Context();
-                context.setUsername(userId);
-                context.setDate(new DateTime(like.getCreatedTime()));
-                context.setService("facebook");
-                activity.setContext(context);
-                activities.add(activity);
-            } catch (MalformedURLException e) {
-                LOGGER.error("the url is malformed");
+                likeObj = (new FacebookLikeConverter()).convert(like, true);
+            } catch (ConverterException e) {
+                throw new RuntimeException("Error while converting like", e);
             }
+            Activity activity = new Activity();
+            activity.setVerb(Verb.LIKE);
+            activity.setObject(likeObj);
+            Context context = new Context();
+            context.setUsername(userId);
+            context.setDate(new DateTime(like.getCreatedTime()));
+            context.setService("facebook");
+            activity.setContext(context);
+            activities.add(activity);
         }
         return activities;
     }

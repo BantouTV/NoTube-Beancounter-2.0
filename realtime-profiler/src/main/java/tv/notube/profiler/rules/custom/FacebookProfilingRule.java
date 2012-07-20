@@ -20,7 +20,11 @@ public class FacebookProfilingRule extends ObjectProfilingRule<tv.notube.commons
 
     private Set<URI> result = new HashSet<URI>();
 
-    public FacebookProfilingRule(tv.notube.commons.model.activity.Object object, NLPEngine nlpEngine, LinkingEngine linkingEngine) {
+    public FacebookProfilingRule(
+            tv.notube.commons.model.activity.Object object,
+            NLPEngine nlpEngine,
+            LinkingEngine linkingEngine
+    ) {
         super(object, nlpEngine, linkingEngine);
     }
 
