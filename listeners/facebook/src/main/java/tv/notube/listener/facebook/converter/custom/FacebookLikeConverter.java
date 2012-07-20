@@ -1,8 +1,10 @@
-package tv.notube.listener.facebook.converter;
+package tv.notube.listener.facebook.converter.custom;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.joda.time.DateTime;
+import tv.notube.commons.model.activity.Context;
 import tv.notube.commons.model.activity.facebook.Like;
 import tv.notube.listener.facebook.model.FacebookData;
 
@@ -23,6 +25,8 @@ import java.util.Map;
  */
 public class FacebookLikeConverter implements Converter<FacebookData, Like> {
 
+    private static final String SERVICE = "facebook";
+
     private ObjectMapper mapper;
 
     @Override
@@ -36,6 +40,15 @@ public class FacebookLikeConverter implements Converter<FacebookData, Like> {
         fields.put("description", "description");
         fromOpenGraph(facebookData.getId(), fields, like);
         return like;
+    }
+
+    @Override
+    public Context getContext(FacebookData facebookData) throws ConverterException {
+        Context context = new Context();
+        context.setDate(new DateTime(facebookData.getCreatedTime()));
+        context.setUsername(facebookData.getId());
+        context.setService(SERVICE);
+        return context;
     }
 
     private void fromOpenGraph(String id, Map<String, String> fields, Like like) throws ConverterException {
