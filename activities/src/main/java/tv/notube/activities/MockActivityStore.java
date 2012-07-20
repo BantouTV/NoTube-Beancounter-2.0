@@ -6,10 +6,7 @@ import tv.notube.commons.tests.Tests;
 import tv.notube.commons.tests.TestsBuilder;
 import tv.notube.commons.tests.TestsException;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )
@@ -92,6 +89,16 @@ public class MockActivityStore implements ActivityStore {
 
     @Override
     public void shutDown() throws ActivityStoreException {}
+
+    @Override
+    public Collection<Activity> search(String path, String value) throws ActivityStoreException {
+        throw new UnsupportedOperationException("NIY");
+    }
+
+    @Override
+    public List<Activity> getByOnEvent(String value) throws ActivityStoreException {
+        throw new UnsupportedOperationException("NIY");
+    }
 
     public Activity getLastActivity() {
         return lastActivity;

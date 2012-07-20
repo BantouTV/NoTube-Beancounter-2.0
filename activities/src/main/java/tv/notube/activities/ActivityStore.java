@@ -4,6 +4,7 @@ import org.joda.time.DateTime;
 import tv.notube.commons.model.activity.Activity;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -109,4 +110,15 @@ public interface ActivityStore {
      */
     public void shutDown() throws ActivityStoreException;
 
+    /**
+     * It performs an exact match of <i>value</i> parameter against the given
+     * json path.
+     *
+     * @param path
+     * @throws ActivityStoreException
+     */
+    public Collection<Activity>  search(String path, String value) throws ActivityStoreException;
+
+    // TODO (high) remove as soon as #search is ready
+    public Collection<Activity> getByOnEvent(String value) throws ActivityStoreException;
 }
