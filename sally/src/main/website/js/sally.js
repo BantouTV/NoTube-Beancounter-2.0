@@ -11,10 +11,8 @@
 var Beancounter = window.Beancounter || {};
 
 Beancounter.getNameFromResource = function (resource) {
-    return resource
+    return decodeURI(resource)
             .replace(/_/g, " ")
-            .replace(/\%28/g, "(")
-            .replace(/\%29/g, ")")
             .replace(/http:\/\/dbpedia\.org\/resource\//gi, "");
 };
 
@@ -203,7 +201,8 @@ Beancounter.Pie = function (username, container) {
 };
 
 Beancounter.StreamGraph = function (username, container) {
-    var n = 200,
+    // var n = 200,
+    var n = 100,
         stack = d3.layout.stack().offset("silhouette")
             .values(function (d) { return d.values; })
             .x(function (d, i) { return i; }),
@@ -240,32 +239,52 @@ Beancounter.StreamGraph = function (username, container) {
         return {y: Math.max(0, d)};
     }
 
-    function getData() {
-        var i,
-            len,
-            name,
-            layers = [],
-            interest,
-            interests = testData.object.interests;
+    function getData(profile) {
+        var interests = profile.object.interests;
 
-        for (i = 0, len = interests.length; i < len; i++) {
-            interest = interests[i];
-            name = Beancounter.getNameFromResource(interest.resource);
-            layers.push({
-                name: name,
-                values: [streamIndex(interest.weight)]
-            });
-        }
-
-        return layers;
+        return interests.map(function (interest) {
+            return {
+                name: Beancounter.getNameFromResource(interest.resource),
+                values: [streamIndex(interest.weight * 100)]
+                // values: [streamIndex(Math.log(interest.weight * 100))]
+            };
+        });
     }
 
-    function addData(data) {
-        return data.map(function (d) {
-            var currentValue = d.values[d.values.length - 1],
-                newValue = currentValue.y - (currentValue.y + random());
-            d.values.push(streamIndex(currentValue.y + random()));
-            return d;
+    function addData(profile) {
+        var profileData = getData(profile),
+            dataIndexMap = {},
+            index,
+            dataLength = data[0].values.length,
+            maxLength = data[0].values.length,
+            prependArray;
+
+        data.forEach(function (d, i) {
+            dataIndexMap[d.name] = i;
+        });
+
+        profileData.forEach(function (interest) {
+            index = dataIndexMap[interest.name];
+            if (index !== undefined) {
+                data[index].values = data[index].values.concat(interest.values);
+
+                if (data[index].values.length > maxLength) {
+                    maxLength = data[index].values.length;
+                }
+            } else {
+                prependArray = [];
+                while (prependArray.length < dataLength) {
+                    prependArray.push(streamIndex(0));
+                }
+                interest.values = prependArray.concat(interest.values);
+                data.push(interest);
+            }
+        });
+
+        data.map(function (d) {
+            while (d.values.length < maxLength) {
+                d.values.push(streamIndex(0));
+            }
         });
     }
 
@@ -276,10 +295,12 @@ Beancounter.StreamGraph = function (username, container) {
         });
     }
 
-    function redraw() {
+    // TODO: Currently all interests ever seen are stored in the data array.
+    // As a minimum, they should be pruned once the sliding window begins.
+    function redraw(profile) {
         var layers;
 
-        data = addData(data);
+        addData(profile);
         y.domain([0, d3.max(stack(data), function (d) {
             return d3.max(d.values, function (d) {
                 return d.y0 + d.y;
@@ -331,14 +352,44 @@ Beancounter.StreamGraph = function (username, container) {
     }
 
     function updateStreamGraph() {
-        redraw();
-        setTimeout(updateStreamGraph, 1000);
+        $.ajax({
+            url: 'http://46.4.89.183/sally/profile-proxy.php',
+            data: {
+                'username': username
+            },
+            dataType: 'json',
+            cache: false,
+            success: function (profile) {
+                redraw($.parseJSON(profile));
+                setTimeout(updateStreamGraph, 1000);
+            },
+            error: function (request, errorText, data) {
+                var obj = $.parseJSON(request.responseText),
+                    error = obj.message;
+                $("#errorContainer").html('<p>' + error + '</p>');
+            }
+        });
     }
 
     return {
         init: function () {
-            data = getData();
-            updateStreamGraph();
+            $.ajax({
+                url: 'http://46.4.89.183/sally/profile-proxy.php',
+                data: {
+                    'username': username
+                },
+                dataType: 'json',
+                cache: false,
+                success: function (profile) {
+                    data = getData($.parseJSON(profile));
+                    updateStreamGraph();
+                },
+                error: function (request, errorText, data) {
+                    var obj = $.parseJSON(request.responseText),
+                        error = obj.message;
+                    $("#errorContainer").html('<p>' + error + '</p>');
+                }
+            });
         }
     };
 };
