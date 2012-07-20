@@ -368,6 +368,6 @@ public class ActivitiesService extends JsonService {
 class ActivityComparator implements Comparator<Activity> {
     @Override
     public int compare(Activity a1, Activity a2) {
-        return a1.getContext().getDate().compareTo(a2.getContext().getDate());
+        return a2.getContext().getDate().compareTo(a1.getContext().getDate());
     }
 }
