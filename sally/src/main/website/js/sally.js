@@ -3,7 +3,7 @@
 /* 
  * Sally Demo
  *
- * Version: 0.2
+ * Version: 0.3
  *
  * Author: Alex Cowell ( alxcwll [at] gmail [dot] com )
  * Author: Enrico Candino ( enrico.candino [at] gmail [dot] com )
@@ -11,8 +11,11 @@
 var Beancounter = window.Beancounter || {};
 
 Beancounter.getNameFromResource = function (resource) {
-    return resource.replace(/_/g, " ")
-            .replace(/http:\/\/dbpedia\.org\/resource\/|\%28|\%29/gi, "");
+    return resource
+            .replace(/_/g, " ")
+            .replace(/\%28/g, "(")
+            .replace(/\%29/g, ")")
+            .replace(/http:\/\/dbpedia\.org\/resource\//gi, "");
 };
 
 Beancounter.Pie = function (username, container) {
@@ -21,13 +24,14 @@ Beancounter.Pie = function (username, container) {
         r = Math.min(w, h) / 2,
         defaultOuterRadius = r - 20,
         hoverOuterRadius = r,
+        innerRadius = r - 150,
         data = [],
         selectedArc,
         colour = d3.scale.category20b(),
         random = d3.random.normal(0, 1),
-        pie = d3.layout.pie().sort(null).value(function (d) { return d.weight; }),
-        arc = d3.svg.arc().innerRadius(r - 150).outerRadius(defaultOuterRadius),
-        arcHover = d3.svg.arc().innerRadius(r - 150).outerRadius(hoverOuterRadius),
+        pie = d3.layout.pie().value(function (d) { return d.weight; }),
+        arc = d3.svg.arc().innerRadius(innerRadius).outerRadius(defaultOuterRadius),
+        arcHover = d3.svg.arc().innerRadius(innerRadius).outerRadius(hoverOuterRadius),
         svg = d3.select(container)
             .append("svg")
                 .attr("width", w)
@@ -38,26 +42,26 @@ Beancounter.Pie = function (username, container) {
         pieStatsInterest = pieStats.append("text")
             .attr("class", "pie-stats-interest")
             .attr("text-anchor", "middle")
-            .attr("dy", -10),
+            .attr("dy", -5),
         pieStatsWeight = pieStats.append("text")
             .attr("class", "pie-stats-weight")
             .attr("text-anchor", "middle")
-            .attr("dy", 10);
+            .attr("dy", 15);
 
-    function getData() {
+    function getData(profile) {
         var i,
             len,
             name,
             interestArray = [],
             interest,
-            interests = testData.object.interests;
+            interests = profile.object.interests;
 
         for (i = 0, len = interests.length; i < len; i++) {
             interest = interests[i];
             name = Beancounter.getNameFromResource(interest.resource);
             interestArray.push({
                 'name': name,
-                'weight': Math.abs((interest.weight * 10) + random())
+                'weight': interest.weight * 100
             });
         }
 
@@ -65,12 +69,26 @@ Beancounter.Pie = function (username, container) {
     }
 
     function arcTween(a) {
-        var i = d3.interpolate(this.currentArc, a),
-            arcUpdate = d3.svg.arc().innerRadius(r - 150);
+        var currentArc = this.currentArc || {},
+            startAngle = currentArc.startAngle || a.startAngle,
+            endAngle = currentArc.endAngle || a.startAngle,
+            i = d3.interpolate({startAngle: startAngle, endAngle: endAngle}, a),
+            arcUpdate = d3.svg.arc()
+                            .innerRadius(innerRadius)
+                            .outerRadius(this.outerRadius || defaultOuterRadius);
+
         this.currentArc = i(0);
-        arcUpdate.outerRadius(this.outerRadius === undefined
-            ? defaultOuterRadius
-            : this.outerRadius);
+
+        return function (t) {
+            return arcUpdate(i(t));
+        };
+    }
+
+    function removeArcTween(a) {
+        var i = d3.interpolate(a, {startAngle: a.endAngle, endAngle: a.endAngle}),
+            arcUpdate = d3.svg.arc()
+                            .innerRadius(innerRadius)
+                            .outerRadius(this.outerRadius || defaultOuterRadius);
 
         return function (t) {
             return arcUpdate(i(t));
@@ -98,16 +116,35 @@ Beancounter.Pie = function (username, container) {
                 this.currentArc = d;
             });
 
-        pieStatsInterest.text(d.data.name);
+        pieStatsInterest
+            .text(d.data.name)
+            .style("font-size", "24px")
+            .style("font-size", function () {
+                return (2 * innerRadius - 24) / this.getComputedTextLength() * 24 + "px";
+            });
         pieStatsWeight.text(d.value + "%");
     }
 
-    function redraw() {
-        var arcs, arcsEnter, arcsExit,
-            currentWeight;
+    function updatePieStats() {
+        if (selectedArc !== undefined && selectedArc !== null) {
+            if ($("g.arc path.selected").length === 0) {
+                // This is no longer one of the top interests in the user
+                // profile.
+                selectedArc = undefined;
+                pieStatsInterest.text("");
+                pieStatsWeight.text("");
+            } else {
+                selectedArc.each(function (d) {
+                    pieStatsWeight.text(d.value + "%");
+                });
+            }
+        }
+    }
 
-        // TODO: Replace this with real data from AJAX call.
-        data = getData();
+    function redraw(profile) {
+        var arcs, arcsEnter, arcsExit;
+
+        data = getData(profile);
         arcs = svg.selectAll("g.arc")
             .data(pie(data), function (d) { return d.data.name; });
 
@@ -116,22 +153,46 @@ Beancounter.Pie = function (username, container) {
 
         arcsEnter.append("path")
             .attr("fill", function (d, i) { return colour(i); })
-            .attr("d", arc)
             .on("click", handleClickOnArc)
-            .each(function (d) { this.currentArc = d; });
+            .transition()
+                .duration(750)
+                .attrTween("d", arcTween);
 
-        arcs.select("path").transition().duration(750).attrTween("d", arcTween);
-        if (selectedArc !== undefined && selectedArc !== null) {
-            selectedArc.each(function (d) { currentWeight = d.value; });
-            pieStatsWeight.text(currentWeight + "%");
-        }
+        arcs.select("path").transition()
+            .duration(750)
+            .attrTween("d", arcTween);
 
-        // TODO: Handle interests being removed.
+        arcsExit = arcs.exit();
+
+        arcsExit.select("path")
+            .transition()
+                .duration(750)
+                .attrTween("d", removeArcTween);
+
+        arcsExit.transition()
+            .delay(750)
+            .remove()
+            .each("end", updatePieStats);
     }
 
     function updatePieChart() {
-        redraw();
-        setTimeout(updatePieChart, 2000);
+        $.ajax({
+            url: 'http://46.4.89.183/sally/profile-proxy.php',
+            data: {
+                'username': username
+            },
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+                redraw($.parseJSON(data));
+                setTimeout(updatePieChart, 5000);
+            },
+            error: function (request, errorText, data) {
+                var obj = $.parseJSON(request.responseText),
+                    error = obj.message;
+                $("#errorContainer").html('<p>' + error + '</p>');
+            }
+        });
     }
 
     return {
@@ -156,6 +217,7 @@ Beancounter.StreamGraph = function (username, container) {
         x = d3.scale.linear().range([0, width]),
         y = d3.scale.linear().range([height, 0]),
         area = d3.svg.area()
+            // .interpolate("basis")
             .x(function (d, i) { return x(i); })
             .y0(function (d) { return y(d.y0); })
             .y1(function (d) { return y(d.y + d.y0); }),
@@ -200,7 +262,8 @@ Beancounter.StreamGraph = function (username, container) {
 
     function addData(data) {
         return data.map(function (d) {
-            var currentValue = d.values[d.values.length - 1];
+            var currentValue = d.values[d.values.length - 1],
+                newValue = currentValue.y - (currentValue.y + random());
             d.values.push(streamIndex(currentValue.y + random()));
             return d;
         });
