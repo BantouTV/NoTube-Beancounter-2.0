@@ -1,0 +1,47 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>tv.notube</groupId>
+        <artifactId>realtime-profiler</artifactId>
+        <version>1.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>realtime-profiler-core</artifactId>
+    <name>NoTube 2.0 Realtime Profiler core</name>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>tv.notube.commons</groupId>
+            <artifactId>model</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube</groupId>
+            <artifactId>profiles</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube.commons</groupId>
+            <artifactId>nlp</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube.commons</groupId>
+            <artifactId>lupedia</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube.commons</groupId>
+            <artifactId>cogito</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube.commons</groupId>
+            <artifactId>tagdef</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+</project>

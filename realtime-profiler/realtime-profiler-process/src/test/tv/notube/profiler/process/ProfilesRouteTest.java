@@ -1,7 +1,9 @@
-package tv.notube.indexer;
+package tv.notube.filter.process;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import com.google.inject.Binder;
@@ -9,7 +11,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 
-import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.testng.CamelTestSupport;
@@ -17,25 +18,26 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import tv.notube.activities.ActivityStore;
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.ResolvedActivity;
 import tv.notube.commons.model.randomisers.VerbRandomizer;
 import tv.notube.commons.tests.TestsBuilder;
 import tv.notube.commons.tests.TestsException;
+import tv.notube.filter.FilterService;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-public class IndexerRouteTest extends CamelTestSupport {
+public class FilterRouteTest extends CamelTestSupport {
     private Injector injector;
-    private ActivityStore activityStore;
+    private FilterService filterService;
 
     @Override
     protected RouteBuilder createRouteBuilder() throws Exception {
-        return injector.getInstance(IndexerRoute.class);
+        return injector.getInstance(FilterRoute.class);
     }
 
     @BeforeMethod
@@ -45,9 +47,10 @@ public class IndexerRouteTest extends CamelTestSupport {
 
             @Override
             public void configure(Binder binder) {
-                activityStore = mock(ActivityStore.class);
-                binder.bind(ActivityStore.class).toInstance(activityStore);
-                binder.bind(IndexerRoute.class).toInstance(new IndexerRoute() {
+                filterService = mock(FilterService.class);
+                binder.bind(FilterService.class).toInstance(filterService);
+
+                binder.bind(FilterRoute.class).toInstance(new FilterRoute() {
                     @Override
                     public String fromKestrel() {
                         return "direct:start";
@@ -56,6 +59,18 @@ public class IndexerRouteTest extends CamelTestSupport {
                     @Override
                     public String errorEndpoint() {
                         return "mock:error";
+                    }
+
+                    @Override
+                    public String fromRedis() {
+                        return "direct:redis";
+                    }
+
+                    @Override
+                    protected Set<String> appendTargetPrefix(Set<String> targets) {
+                        HashSet<String> newTargets = new HashSet<String>();
+                        newTargets.add("mock:custom");
+                        return newTargets;
                     }
                 });
             }
@@ -66,7 +81,7 @@ public class IndexerRouteTest extends CamelTestSupport {
 
 
     @Test
-    public void activityReachesBothServices() throws Exception {
+    public void activityReachesFilterServices() throws Exception {
         MockEndpoint error = getMockEndpoint("mock:error");
         error.expectedMessageCount(0);
 
@@ -75,7 +90,7 @@ public class IndexerRouteTest extends CamelTestSupport {
         template.sendBody("direct:start", json);
 
         error.assertIsSatisfied();
-        verify(activityStore).store(any(UUID.class), any(Activity.class));
+        verify(filterService).processActivity(any(ResolvedActivity.class));
     }
 
     @Test
@@ -83,14 +98,40 @@ public class IndexerRouteTest extends CamelTestSupport {
         MockEndpoint error = getMockEndpoint("mock:error");
         error.expectedMessageCount(1);
 
-        doThrow(new RuntimeException("problem")).when(activityStore)
-                .store(any(UUID.class), any(Activity.class));
+        doThrow(new RuntimeException("problem")).when(filterService)
+                .processActivity(any(ResolvedActivity.class));
         template.sendBody("direct:start", activityAsJson());
 
         error.assertIsSatisfied();
-        verify(activityStore).store(any(UUID.class), any(Activity.class));
-        List<Exchange> exchanges = error.getReceivedExchanges();
-        System.out.println(" ss"  + exchanges);
+        verify(filterService).processActivity(any(ResolvedActivity.class));
+    }
+
+    @Test
+    public void activityReachesCustomEndpoint() throws Exception {
+        MockEndpoint custom = getMockEndpoint("mock:custom");
+        custom.expectedMessageCount(1);
+
+        String json = activityAsJson();
+        when(filterService.processActivity(any(ResolvedActivity.class))).thenReturn(
+                Collections.<String>emptySet());
+
+
+        template.sendBody("direct:start", json);
+
+        custom.assertIsSatisfied();
+    }
+
+
+    @Test
+    public void redisNotificationReachesFilterService() throws Exception {
+        MockEndpoint error = getMockEndpoint("mock:error");
+        error.expectedMessageCount(0);
+
+        String filterId = "1234";
+        template.sendBody("direct:redis", filterId);
+
+        error.assertIsSatisfied();
+        verify(filterService).refresh(filterId);
     }
 
 
@@ -114,3 +155,4 @@ public class IndexerRouteTest extends CamelTestSupport {
         }
     }
 }
+

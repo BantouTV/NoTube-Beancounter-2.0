@@ -66,7 +66,7 @@ public class FilterRoute extends RouteBuilder {
     }
 
     protected String fromKestrel() {
-        return "kestrel://{{kestrel.queue.internal.url}}";
+        return "kestrel://{{kestrel.queue.filter.url}}";
     }
 
     protected String errorEndpoint() {

@@ -1,26 +1,33 @@
-<?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>parent</artifactId>
+        <artifactId>realtime-profiler</artifactId>
         <groupId>tv.notube</groupId>
         <version>1.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>tv.notube</groupId>
-    <artifactId>indexer</artifactId>
-    <version>1.1-SNAPSHOT</version>
-    <name>NoTube 2.0 Indexer</name>
+    <artifactId>realtime-profiler-process</artifactId>
+    <name>NoTube 2.0 Realtime Profiler Camel Process</name>
 
     <dependencies>
         <dependency>
             <groupId>tv.notube</groupId>
+            <artifactId>realtime-profiler-core</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube</groupId>
             <artifactId>activities</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube</groupId>
+            <artifactId>realtime-profiler</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -36,9 +43,16 @@
             <artifactId>camel-jackson</artifactId>
         </dependency>
         <dependency>
+            <groupId>tv.notube</groupId>
+            <artifactId>camel-redis</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-guice</artifactId>
         </dependency>
+
+        <!-- testing-->
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
@@ -54,22 +68,18 @@
             <artifactId>camel-testng</artifactId>
             <scope>test</scope>
         </dependency>
+
+
     </dependencies>
+
     <build>
+        <!-- Allows to be run via 'mvn compile exec:java' -->
+        <!-- java -jar filter-process-1.0-SNAPSHOT-jar-with-dependencies.jar -jndiProperties /guicejndi.properties -->
         <plugins>
-            <!-- Allows to be run via 'mvn compile exec:java' -->
-            <!-- java -jar twitter-1.0-SNAPSHOT-jar-with-dependencies.jar -jndiProperties /guicejndi.properties -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>tv.notube.indexer.camel.IndexerMain</mainClass>
-                    <includePluginDependencies>false</includePluginDependencies>
-                </configuration>
-            </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
+                    <finalName>profiler-1.1-SNAPSHOT</finalName>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
@@ -91,6 +101,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>
