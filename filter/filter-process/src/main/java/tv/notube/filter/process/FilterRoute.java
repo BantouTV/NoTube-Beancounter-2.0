@@ -9,11 +9,14 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import tv.notube.commons.model.activity.ResolvedActivity;
 import tv.notube.filter.FilterService;
 
 public class FilterRoute extends RouteBuilder {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FilterRoute.class);
     private static final String ENDPOINTS_HEADER = "endpoints";
 
     @Inject
@@ -45,7 +48,7 @@ public class FilterRoute extends RouteBuilder {
                     @Override
                     public void process(Exchange exchange) throws Exception {
                         String filterId = exchange.getIn().getBody(String.class);
-                        System.out.println("RELOADIIIIIIIIIIIING: " + filterId);
+                        LOGGER.debug("reloading filter {}", filterId);
                         filterService.refresh(filterId);
                     }
                 });
@@ -63,7 +66,7 @@ public class FilterRoute extends RouteBuilder {
     }
 
     protected String fromKestrel() {
-        return "kestrel://{{kestrel.queue.filter.url}}";
+        return "kestrel://{{kestrel.queue.internal.url}}";
     }
 
     protected String errorEndpoint() {

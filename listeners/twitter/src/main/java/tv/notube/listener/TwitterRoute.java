@@ -49,7 +49,7 @@ public class TwitterRoute extends RouteBuilder {
     }
 
     protected String toEndpoint() {
-        return "kestrel://{{kestrel.queue.url}}";
+        return "kestrel://{{kestrel.queue.social.url}}";
     }
 
     protected String fromEndpoint() {

@@ -28,7 +28,7 @@ public class ResolverRoute extends RouteBuilder {
     public void configure() {
         errorHandler(deadLetterChannel(errorEndpoint()));
 
-        from(fromKestrelEndpoint())
+        from(fromEndpoint())
                 // ?concurrentConsumers=10&waitTimeMs=500
                 .convertBodyTo(String.class)
                 .unmarshal().json(JsonLibrary.Jackson, Activity.class)
@@ -50,19 +50,14 @@ public class ResolverRoute extends RouteBuilder {
                 .filter(body().isNotNull())
                 .marshal().json(JsonLibrary.Jackson)
                 .convertBodyTo(String.class)
-
-                .multicast().parallelProcessing().to(toInternalQueue(), toFilterQueue());
-    }
-
-    protected String toFilterQueue() {
-        return "kestrel://{{kestrel.queue.filter.url}}";
+                .to(toInternalQueue());
     }
 
     protected String toInternalQueue() {
         return "kestrel://{{kestrel.queue.internal.url}}";
     }
 
-    protected String fromKestrelEndpoint() {
+    protected String fromEndpoint() {
         return "kestrel://{{kestrel.queue.social.url}}";
     }
 

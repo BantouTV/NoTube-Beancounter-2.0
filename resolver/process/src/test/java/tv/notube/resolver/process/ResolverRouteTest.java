@@ -33,18 +33,13 @@ public class ResolverRouteTest extends CamelTestSupport {
                 binder.bind(Resolver.class).toInstance(resolver);
                 binder.bind(ResolverRoute.class).toInstance(new ResolverRoute() {
                     @Override
-                    protected String fromKestrelEndpoint() {
+                    protected String fromEndpoint() {
                         return "direct:start";
                     }
 
                     @Override
                     public String toInternalQueue() {
                         return "mock:internal";
-                    }
-
-                    @Override
-                    protected String toFilterQueue() {
-                        return "mock:filter";
                     }
 
                     @Override
