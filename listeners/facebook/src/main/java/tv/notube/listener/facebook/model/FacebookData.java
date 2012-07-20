@@ -8,6 +8,8 @@ import com.restfb.types.NamedFacebookType;
  */
 public class FacebookData extends NamedFacebookType {
 
+    private String id;
+
     @Facebook
     private String category;
 
@@ -28,5 +30,14 @@ public class FacebookData extends NamedFacebookType {
 
     public void setCreatedTime(String createdTime) {
         this.createdTime = createdTime;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    @Override
+    public String getId() {
+        return super.getId();
     }
 }
