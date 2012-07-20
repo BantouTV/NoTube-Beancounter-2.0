@@ -2,6 +2,7 @@ package tv.notube.listener.facebook;
 
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
+import com.restfb.types.Post;
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.guice.CamelModuleWithMatchingRoutes;
 import org.guiceyfruit.jndi.JndiBind;
@@ -9,6 +10,12 @@ import tv.notube.commons.helper.PropertiesHelper;
 import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
 import tv.notube.commons.helper.jedis.JedisPoolFactory;
 import tv.notube.commons.helper.resolver.Services;
+import tv.notube.commons.model.activity.Verb;
+import tv.notube.listener.facebook.converter.FacebookActivityConverter;
+import tv.notube.listener.facebook.converter.FacebookActivityConverterException;
+import tv.notube.listener.facebook.converter.custom.FacebookLikeConverter;
+import tv.notube.listener.facebook.converter.custom.FacebookShareConverter;
+import tv.notube.listener.facebook.model.FacebookData;
 import tv.notube.resolver.JedisResolver;
 import tv.notube.resolver.Resolver;
 import tv.notube.usermanager.JedisUserManagerImpl;
@@ -40,7 +47,15 @@ public class FacebookModule extends CamelModuleWithMatchingRoutes {
 
         bind(ServiceAuthorizationManager.class).toInstance(sam);
         bind(UserManager.class).to(JedisUserManagerImpl.class);
-        bind(ActivityConverter.class).to(FacebookActivityConverter.class);
+        FacebookActivityConverter fac = new FacebookActivityConverter();
+        try {
+            fac.registerConverter(Post.class, Verb.SHARE, new FacebookLikeConverter());
+            fac.registerConverter(FacebookData.class, Verb.LIKE, new FacebookShareConverter());
+        } catch (FacebookActivityConverterException e) {
+            throw new RuntimeException("Error while instantiating Facebook converters", e);
+        }
+        bind(FacebookActivityConverter.class).toInstance(fac);
+        bind(ActivityConverter.class).to(FacebookConverter.class);
         bind(FacebookRoute.class);
     }
 
