@@ -1,8 +1,12 @@
 package tv.notube.listener.facebook.converter;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.codehaus.jackson.map.ObjectMapper;
 import tv.notube.commons.model.activity.facebook.Like;
 import tv.notube.listener.facebook.model.FacebookData;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -19,11 +23,14 @@ import java.util.Map;
  */
 public class FacebookLikeConverter implements Converter<FacebookData, Like> {
 
+    private ObjectMapper mapper;
+
     @Override
     public Like convert(FacebookData facebookData, boolean isOpenGraph) throws ConverterException {
         if(!isOpenGraph) {
             return convert(facebookData);
         }
+        mapper = new ObjectMapper();
         Like like = convert(facebookData);
         Map<String, String> fields = new HashMap<String, String>();
         fields.put("description", "description");
@@ -31,7 +38,7 @@ public class FacebookLikeConverter implements Converter<FacebookData, Like> {
         return like;
     }
 
-    private void fromOpenGraph(String id, Map<String, String> fields, Like like) {
+    private void fromOpenGraph(String id, Map<String, String> fields, Like like) throws ConverterException {
         Map<String, String> jsonAsMap = makeHttpCall(id);
         for(String fieldOnJson : fields.keySet()) {
             String jsonValue = jsonAsMap.get(fieldOnJson);
@@ -41,8 +48,40 @@ public class FacebookLikeConverter implements Converter<FacebookData, Like> {
         }
     }
 
-    private Map<String, String> makeHttpCall(String id) {
-        throw new UnsupportedOperationException("NIY");
+    private Map<String, String> makeHttpCall(String id) throws ConverterException {
+        String urlStr = "http://graph.facebook.com/" + id;
+        GetMethod getMethod = new GetMethod(urlStr);
+        HttpClient client = new HttpClient();
+        try {
+            client.executeMethod(getMethod);
+        } catch (IOException ioe) {
+            try {
+                getMethod.releaseConnection();
+            } catch (Exception e) {
+                throw new ConverterException("error while closing the connection [" + urlStr + "]", e);
+            }
+            throw new ConverterException("error while calling facebook api [" + urlStr + "]", ioe);
+        }
+        String responseBody;
+        try {
+            responseBody = new String(getMethod.getResponseBody());
+        } catch (IOException e) {
+            throw new ConverterException("error while getting response body from facebook api [" + urlStr + "]", e);
+        } finally {
+            try {
+                getMethod.releaseConnection();
+            } catch (Exception e) {
+                throw new ConverterException("error while closing the connection [" + urlStr + "]", e);
+            }
+        }
+        Object map;
+        try {
+            map = mapper.readValue(responseBody, Object.class);
+        } catch (IOException e) {
+            throw new ConverterException("error while parsing the response [" + responseBody + "]" +
+                    "from facebook api [" + urlStr + "]", e);
+        }
+        return (Map<String, String>) map;
     }
 
     private void set(Like like, String fieldName, String jsonValue) {
@@ -76,7 +115,6 @@ public class FacebookLikeConverter implements Converter<FacebookData, Like> {
             throw new ConverterException("[" + candidateUrl + "] is ill-formed", e);
         }
         like.setUrl(url);
-
         return like;
     }
 

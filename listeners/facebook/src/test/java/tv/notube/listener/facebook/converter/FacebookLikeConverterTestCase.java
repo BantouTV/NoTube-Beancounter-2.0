@@ -20,14 +20,15 @@ public class FacebookLikeConverterTestCase {
         flc = new FacebookLikeConverter();
     }
 
-    @Test(enabled = false)
+    @Test
     public void test() throws ConverterException {
         Like like = flc.convert(getFacebookData(), true);
         Assert.assertNotNull(like);
     }
 
     private FacebookData getFacebookData() {
-        FacebookData fbd = new FacebookData();
+        FacebookDataTest fbd = new FacebookDataTest();
+        fbd.setName("Radio Globo");
         fbd.setCategory("Radio station");
         fbd.setCreatedTime("2011-12-23T13:14:41+0000");
         fbd.setId("53420726443");

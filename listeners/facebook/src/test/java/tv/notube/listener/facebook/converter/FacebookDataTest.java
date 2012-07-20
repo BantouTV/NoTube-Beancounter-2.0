@@ -1,18 +1,35 @@
-package tv.notube.listener.facebook.model;
+package tv.notube.listener.facebook.converter;
 
-import com.restfb.Facebook;
-import com.restfb.types.NamedFacebookType;
+import tv.notube.listener.facebook.model.FacebookData;
 
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-public class FacebookData extends NamedFacebookType {
+public class FacebookDataTest extends FacebookData {
 
-    @Facebook
+    private String id;
+
+    private String name;
+
     private String category;
 
-    @Facebook("created_time")
     private String createdTime;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getCategory() {
         return category;
