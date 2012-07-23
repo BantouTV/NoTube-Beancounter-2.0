@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.ResolvedActivity;
-import tv.notube.resolver.JedisResolver;
 import tv.notube.resolver.Resolver;
 
 /**
@@ -27,9 +26,9 @@ public class ResolverRoute extends RouteBuilder {
     private Resolver resolver;
 
     public void configure() {
-        errorHandler(deadLetterChannel(errorEndpint()));
+        errorHandler(deadLetterChannel(errorEndpoint()));
 
-        from(fromKestrelEndpoint())
+        from(fromEndpoint())
                 // ?concurrentConsumers=10&waitTimeMs=500
                 .convertBodyTo(String.class)
                 .unmarshal().json(JsonLibrary.Jackson, Activity.class)
@@ -51,18 +50,18 @@ public class ResolverRoute extends RouteBuilder {
                 .filter(body().isNotNull())
                 .marshal().json(JsonLibrary.Jackson)
                 .convertBodyTo(String.class)
-                .to(toTargetQueue());
+                .to(toInternalQueue());
     }
 
-    protected String toTargetQueue() {
+    protected String toInternalQueue() {
         return "kestrel://{{kestrel.queue.internal.url}}";
     }
 
-    protected String fromKestrelEndpoint() {
+    protected String fromEndpoint() {
         return "kestrel://{{kestrel.queue.social.url}}";
     }
 
-    protected String errorEndpint() {
+    protected String errorEndpoint() {
         return "log:resolverRoute?level=ERROR";
     }
 }

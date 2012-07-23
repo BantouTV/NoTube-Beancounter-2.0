@@ -1,331 +1,179 @@
-/*global Highcharts, $ */
+/*global $, d3, testData */
 
 /* 
  * Sally Demo
  *
- * Version: 0.1
+ * Version: 0.3
  *
  * Author: Alex Cowell ( alxcwll [at] gmail [dot] com )
  * Author: Enrico Candino ( enrico.candino [at] gmail [dot] com )
  */
 var Beancounter = window.Beancounter || {};
 
-/*
- * A base set of options for the charts.
- * See the Highchart API for more details (http://www.highcharts.com/ref)
- *
- * You should configure the following options as necessary:
- *      chart.renderTo [String|Object]
- *      title.text [String]
- *      series [Object]
- */
-Beancounter.getDefaultChartOptions = function () {
-    return {
-        chart: {
-            renderTo: null,
-            plotBackgroundColor: null,
-            plotBorderWidth: null,
-            plotShadow: false,
-            events: {}
-        },
-        title: {
-            text: null
-        },
-        tooltip: {
-            formatter: function () {
-                return '<b>' + this.point.name + '</b>: '
-                    + Highcharts.numberFormat(this.percentage, 1) + ' %';
-            }
-        },
-        plotOptions: {
-            pie: {
-                allowPointSelect: true,
-                cursor: 'pointer',
-                dataLabels: {
-                    enabled: true,
-                    color: '#000000',
-                    connectorColor: '#000000',
-                    formatter: function () {
-                        return '<b>' + this.point.name + '</b>: '
-                            + Highcharts.numberFormat(this.percentage, 1) + ' %';
-                    }
-                }
-            },
-            area: {
-                stacking: 'percent',
-                lineColor: '#ffffff',
-                lineWidth: 1,
-                marker: {
-                    lineWidth: 1,
-                    lineColor: '#ffffff'
-                }
-            },
-            areaspline: {
-                fillOpacity: 0.5,
-                stacking: 'percent'
-            }
-        }
-    };
-};
-
-// TODO: Change colours.
-Highcharts.setOptions({
-    colors: ['#326F93', '#385A6E', '#104260', '#66A4C9', '#80AEC9',
-             '#326F93', '#385A6E', '#104260', '#66A4C9', '#80AEC9',
-             '#326F93', '#385A6E', '#104260', '#66A4C9', '#80AEC9',
-             '#326F93', '#385A6E', '#104260', '#66A4C9', '#80AEC9']
-});
-
-var testData = {
-    "object": {
-        "userId": "c5e1d997-a9fb-4488-8764-6e08269409c6",
-        "visibility": "PUBLIC",
-        "interests": [
-            {
-                "resource": "http://dbpedia.org/resource/Selfridges",
-                "activities": [
-                    "fd4f6fbf-13c2-4de7-82ca-ffd436405d9c"
-                ],
-                "visible": true,
-                "weight": 0.02095305737012103
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Chance_%28band%29",
-                "activities": [
-                    "1fb6dda4-25ec-4503-ab0a-443e7fdb15be"
-                ],
-                "visible": true,
-                "weight": 0.00481290288328039
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Amsterdam",
-                "activities": [
-                    "1fb6dda4-25ec-4503-ab0a-443e7fdb15be"
-                ],
-                "visible": true,
-                "weight": 0.00481290288328039
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Twitter",
-                "activities": [
-                    "ad46b8ba-f673-4684-acd3-6c9e8f0e12c6",
-                    "24bac05e-8f31-404c-97ab-dcb61da89dc7",
-                    "6c052457-99a5-4a60-a8b2-977bb807d5f8",
-                    "95bdc8ba-5b13-4d67-9134-4397ee17cdb5",
-                    "a22586fe-e2cf-475a-bf69-6a8e753fe4c6"
-                ],
-                "visible": true,
-                "weight": 0.004423006504690251
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Children_%28film%29",
-                "activities": [
-                    "5220c442-0a54-4dfb-8543-196197cfbb58",
-                    "95bdc8ba-5b13-4d67-9134-4397ee17cdb5",
-                    "86d146e9-f43e-4e4c-9e7d-1b7b11ef876f",
-                    "a22586fe-e2cf-475a-bf69-6a8e753fe4c6",
-                    "4ce2bc60-1457-4d5b-81c6-1e81e4e8aa06",
-                    "43b48e80-2237-47a2-9983-17c90518dfff",
-                    "b68e1d45-f1f3-48ba-9d7e-3a9a5fa77205"
-                ],
-                "visible": true,
-                "weight": 0.01893951342614978
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Made_%28Netherlands%29",
-                "activities": [
-                    "56f89497-c0df-4bda-b575-0ae4d2120795",
-                    "3a721d85-46ee-49ed-8ebe-519a1e87a294",
-                    "c2b67d75-cb55-4a9e-b124-f6c9bd2e54fc"
-                ],
-                "visible": true,
-                "weight": 0.012827952899143702
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Republic_%28political_organisation%29",
-                "activities": [
-                    "5220c442-0a54-4dfb-8543-196197cfbb58",
-                    "95bdc8ba-5b13-4d67-9134-4397ee17cdb5",
-                    "86d146e9-f43e-4e4c-9e7d-1b7b11ef876f",
-                    "a22586fe-e2cf-475a-bf69-6a8e753fe4c6",
-                    "4ce2bc60-1457-4d5b-81c6-1e81e4e8aa06",
-                    "43b48e80-2237-47a2-9983-17c90518dfff",
-                    "b68e1d45-f1f3-48ba-9d7e-3a9a5fa77205"
-                ],
-                "visible": true,
-                "weight": 0.01893951342614978
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Shopping_%28film%29",
-                "activities": [
-                    "1fb6dda4-25ec-4503-ab0a-443e7fdb15be"
-                ],
-                "visible": true,
-                "weight": 0.00481290288328039
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Free_%28rapper%29",
-                "activities": [
-                    "1beded03-c394-4784-8407-89eff638c3c3"
-                ],
-                "visible": true,
-                "weight": 0.005091273285348852
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Lizzie_Borden",
-                "activities": [
-                    "973e411d-45ab-48b4-908b-8b2f03543493"
-                ],
-                "visible": true,
-                "weight": 0.0325794120465657
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Rihanna",
-                "activities": [
-                    "24bac05e-8f31-404c-97ab-dcb61da89dc7",
-                    "6c052457-99a5-4a60-a8b2-977bb807d5f8",
-                    "cd84a32a-276b-4995-b09b-7030ba9c0ca8"
-                ],
-                "visible": true,
-                "weight": 0.008578948533907924
-            },
-            {
-                "resource": "http://dbpedia.org/resource/London_College_of_Fashion",
-                "activities": [
-                    "1fb6dda4-25ec-4503-ab0a-443e7fdb15be"
-                ],
-                "visible": true,
-                "weight": 0.00481290288328039
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Birmingham",
-                "activities": [
-                    "1fb6dda4-25ec-4503-ab0a-443e7fdb15be"
-                ],
-                "visible": true,
-                "weight": 0.00481290288328039
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Nick_Hornby",
-                "activities": [
-                    "86d146e9-f43e-4e4c-9e7d-1b7b11ef876f",
-                    "4ce2bc60-1457-4d5b-81c6-1e81e4e8aa06",
-                    "b68e1d45-f1f3-48ba-9d7e-3a9a5fa77205"
-                ],
-                "visible": true,
-                "weight": 0.010147895780424054
-            },
-            {
-                "resource": "http://dbpedia.org/resource/London",
-                "activities": [
-                    "52ec6d32-9d71-46e1-86e6-1f8ee3853af9",
-                    "ffd36273-d331-4083-a9fd-e51c16db40a1",
-                    "39287dc6-c880-4d3d-be87-345d18eed611",
-                    "d2a48dcd-d496-4529-ad69-2a6c8c623572",
-                    "24bac05e-8f31-404c-97ab-dcb61da89dc7",
-                    "6c052457-99a5-4a60-a8b2-977bb807d5f8",
-                    "fc71d59d-4192-494d-9899-307d7adf083a",
-                    "0e0348d4-9ed3-4dcc-8499-ce30efc5cf95",
-                    "84dc2e39-171d-4a63-945d-dd2a3452f0b5",
-                    "1fb6dda4-25ec-4503-ab0a-443e7fdb15be",
-                    "2eee4fc0-61cb-4a4e-9bd5-efdd2b10c444"
-                ],
-                "visible": true,
-                "weight": 0.09168837567265967
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Bells_%28Blackadder%29",
-                "activities": [
-                    "b11bffd3-9855-4013-b78a-ccb3888a8851"
-                ],
-                "visible": true,
-                "weight": 0.005851658281267652
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Benjamin_Reynolds",
-                "activities": [
-                    "1fb6dda4-25ec-4503-ab0a-443e7fdb15be"
-                ],
-                "visible": true,
-                "weight": 0.00481290288328039
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Shoreditch",
-                "activities": [
-                    "073c377b-a1c0-44d0-905b-b60bc7444d03",
-                    "3eef2837-e3f8-442f-98f1-c76df17b3842",
-                    "b549d571-ae45-4739-bd99-409beb251bc3",
-                    "5cab319e-7e8a-489a-ab63-78cd1b165eeb",
-                    "1fb6dda4-25ec-4503-ab0a-443e7fdb15be",
-                    "db662b6b-25cb-432a-8472-9f3bcdeb9c79",
-                    "6231f711-f390-45cf-b535-2e5b02ba9029",
-                    "ccf69264-aa30-4c16-b6a6-ea1c8e80ed65",
-                    "64019ebe-58d2-46ba-8ca7-51c62e3a9f21",
-                    "bc279cd0-70e7-49cb-8f8b-a542b5fbec60",
-                    "01a24ed8-bb0f-473d-98a0-0ea688a72991"
-                ],
-                "visible": true,
-                "weight": 0.7330409285898609
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Perfect_%28musician%29",
-                "activities": [
-                    "6edcf276-5a27-4d0c-afb2-aedcdf8ea491"
-                ],
-                "visible": true,
-                "weight": 0.003248144000747745
-            },
-            {
-                "resource": "http://dbpedia.org/resource/Taiwan",
-                "activities": [
-                    "1fb6dda4-25ec-4503-ab0a-443e7fdb15be"
-                ],
-                "visible": true,
-                "weight": 0.00481290288328039
-            }
-        ]
-    },
-    "message": "profile for user [sally-beancounter] found",
-    "status": "OK"
+Beancounter.getNameFromResource = function (resource) {
+    return decodeURI(resource)
+            .replace(/_/g, " ")
+            .replace(/http:\/\/dbpedia\.org\/resource\//gi, "");
 };
 
 Beancounter.Pie = function (username, container) {
-    var chart,
-        options = Beancounter.getDefaultChartOptions();
+    var w = 960,
+        h = 500,
+        r = Math.min(w, h) / 2,
+        defaultOuterRadius = r - 20,
+        hoverOuterRadius = r,
+        innerRadius = r - 150,
+        data = [],
+        selectedArc,
+        colour = d3.scale.category20b(),
+        random = d3.random.normal(0, 1),
+        pie = d3.layout.pie().value(function (d) { return d.weight; }),
+        arc = d3.svg.arc().innerRadius(innerRadius).outerRadius(defaultOuterRadius),
+        arcHover = d3.svg.arc().innerRadius(innerRadius).outerRadius(hoverOuterRadius),
+        svg = d3.select(container)
+            .append("svg")
+                .attr("width", w)
+                .attr("height", h)
+            .append("g")
+                .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")"),
+        pieStats = svg.append("g").attr("class", "pie-stats"),
+        pieStatsInterest = pieStats.append("text")
+            .attr("class", "pie-stats-interest")
+            .attr("text-anchor", "middle")
+            .attr("dy", -5),
+        pieStatsWeight = pieStats.append("text")
+            .attr("class", "pie-stats-weight")
+            .attr("text-anchor", "middle")
+            .attr("dy", 15);
 
-    function getNameFromResource(resource) {
-        return resource.replace(/_/g, " ")
-                .replace(/http:\/\/dbpedia\.org\/resource\/|\%28|\%29/gi, "");
-    }
-
-    function updateChartData(profile) {
+    function getData(profile) {
         var i,
             len,
-            interest,
-            interests = profile.object.interests,
             name,
-            point;
+            interestArray = [],
+            interest,
+            interests = profile.object.interests;
 
         for (i = 0, len = interests.length; i < len; i++) {
             interest = interests[i];
-            name = getNameFromResource(interest.resource);
-            point = chart.get(name);
-
-            if (point !== undefined && point !== null) {
-                point.update(interest.weight);
-            } else {
-                chart.get('user-profile').addPoint({
-                    name: name,
-                    id: name,
-                    y: interest.weight
-                }, false);
-            }
+            name = Beancounter.getNameFromResource(interest.resource);
+            interestArray.push({
+                'name': name,
+                'weight': interest.weight * 100
+            });
         }
 
-        chart.redraw();
+        return interestArray;
     }
 
-    function updateChart() {
+    function arcTween(a) {
+        var currentArc = this.currentArc || {},
+            startAngle = currentArc.startAngle || a.startAngle,
+            endAngle = currentArc.endAngle || a.startAngle,
+            i = d3.interpolate({startAngle: startAngle, endAngle: endAngle}, a),
+            arcUpdate = d3.svg.arc()
+                            .innerRadius(innerRadius)
+                            .outerRadius(this.outerRadius || defaultOuterRadius);
+
+        this.currentArc = i(0);
+
+        return function (t) {
+            return arcUpdate(i(t));
+        };
+    }
+
+    function removeArcTween(a) {
+        var i = d3.interpolate(a, {startAngle: a.endAngle, endAngle: a.endAngle}),
+            arcUpdate = d3.svg.arc()
+                            .innerRadius(innerRadius)
+                            .outerRadius(this.outerRadius || defaultOuterRadius);
+
+        return function (t) {
+            return arcUpdate(i(t));
+        };
+    }
+
+    function handleClickOnArc(d) {
+        if (selectedArc !== undefined && selectedArc !== null) {
+            selectedArc
+                .classed("selected", false)
+                .transition()
+                .attr("d", arc)
+                .each(function (d) {
+                    this.outerRadius = defaultOuterRadius;
+                    this.currentArc = d;
+                });
+        }
+
+        selectedArc = d3.select(this);
+        selectedArc.classed("selected", true)
+            .transition()
+            .attr("d", arcHover)
+            .each(function (d) {
+                this.outerRadius = hoverOuterRadius;
+                this.currentArc = d;
+            });
+
+        pieStatsInterest
+            .text(d.data.name)
+            .style("font-size", "24px")
+            .style("font-size", function () {
+                return (2 * innerRadius - 24) / this.getComputedTextLength() * 24 + "px";
+            });
+        pieStatsWeight.text(d.value + "%");
+    }
+
+    function updatePieStats() {
+        if (selectedArc !== undefined && selectedArc !== null) {
+            if ($("g.arc path.selected").length === 0) {
+                // This is no longer one of the top interests in the user
+                // profile.
+                selectedArc = undefined;
+                pieStatsInterest.text("");
+                pieStatsWeight.text("");
+            } else {
+                selectedArc.each(function (d) {
+                    pieStatsWeight.text(d.value + "%");
+                });
+            }
+        }
+    }
+
+    function redraw(profile) {
+        var arcs, arcsEnter, arcsExit;
+
+        data = getData(profile);
+        arcs = svg.selectAll("g.arc")
+            .data(pie(data), function (d) { return d.data.name; });
+
+        arcsEnter = arcs.enter().append("g")
+            .attr("class", "arc");
+
+        arcsEnter.append("path")
+            .attr("fill", function (d, i) { return colour(i); })
+            .on("click", handleClickOnArc)
+            .transition()
+                .duration(750)
+                .attrTween("d", arcTween);
+
+        arcs.select("path").transition()
+            .duration(750)
+            .attrTween("d", arcTween);
+
+        arcsExit = arcs.exit();
+
+        arcsExit.select("path")
+            .transition()
+                .duration(750)
+                .attrTween("d", removeArcTween);
+
+        arcsExit.transition()
+            .delay(750)
+            .remove()
+            .each("end", updatePieStats);
+    }
+
+    function updatePieChart() {
         $.ajax({
             url: 'http://46.4.89.183/sally/profile-proxy.php',
             data: {
@@ -334,8 +182,8 @@ Beancounter.Pie = function (username, container) {
             dataType: 'json',
             cache: false,
             success: function (data) {
-                updateChartData($.parseJSON(data));
-                setTimeout(updateChart, 5000);
+                redraw($.parseJSON(data));
+                setTimeout(updatePieChart, 5000);
             },
             error: function (request, errorText, data) {
                 var obj = $.parseJSON(request.responseText),
@@ -345,76 +193,165 @@ Beancounter.Pie = function (username, container) {
         });
     }
 
-    options.chart.renderTo = container;
-    options.series = [{
-        type: 'pie',
-        id: 'user-profile',
-        name: 'User Profile',
-        data: []
-    }];
-
     return {
         init: function () {
-            chart = new Highcharts.Chart(options);
-            updateChart();
-        },
-
-        getChart: function () {
-            return chart;
-        },
-
-        getUsername: function () {
-            return username;
+            updatePieChart();
         }
     };
 };
 
-Beancounter.Area = function (username, container) {
-    var chart,
-        options = Beancounter.getDefaultChartOptions();
+Beancounter.StreamGraph = function (username, container) {
+    // var n = 200,
+    var n = 100,
+        stack = d3.layout.stack().offset("silhouette")
+            .values(function (d) { return d.values; })
+            .x(function (d, i) { return i; }),
+        data = [],
+        colour = d3.scale.category20b(),
+        random = d3.random.normal(0, 0.2),
+        width = 960,
+        height = 500,
+        mx = n - 1,
+        my = 100,
+        x = d3.scale.linear().range([0, width]),
+        y = d3.scale.linear().range([height, 0]),
+        area = d3.svg.area()
+            // .interpolate("basis")
+            .x(function (d, i) { return x(i); })
+            .y0(function (d) { return y(d.y0); })
+            .y1(function (d) { return y(d.y + d.y0); }),
+        svg = d3.select(container)
+            .append("svg")
+                .attr("width", width)
+                .attr("height", height);
 
-    function getNameFromResource(resource) {
-        return resource.replace(/_/g, " ")
-                .replace(/http:\/\/dbpedia\.org\/resource\/|\%28|\%29/gi, "");
+    svg.append("defs").append("clipPath")
+            .attr("id", "clip")
+        .append("rect")
+            .attr("width", width - 10)
+            .attr("height", height);
+
+    svg = svg.append("g")
+        .attr("class", "stream-graph")
+        .attr("clip-path", "url(#clip)");
+
+    function streamIndex(d) {
+        return {y: Math.max(0, d)};
     }
 
-    function updateChartData(profile) {
-        var i,
-            len,
-            interest,
-            interests = profile.object.interests,
-            time = new Date().getTime(),
-            name,
-            series,
-            doShift;
+    function getData(profile) {
+        var interests = profile.object.interests;
 
-        for (i = 0, len = interests.length; i < len; i++) {
-            interest = interests[i];
-            name = getNameFromResource(interest.resource);
-            series = chart.get(name);
+        return interests.map(function (interest) {
+            return {
+                name: Beancounter.getNameFromResource(interest.resource),
+                values: [streamIndex(interest.weight * 100)]
+                // values: [streamIndex(Math.log(interest.weight * 100))]
+            };
+        });
+    }
 
-            if (series === undefined || series === null) {
-                chart.addSeries({
-                    id: name,
-                    name: name,
-                    data: []
-                });
+    function addData(profile) {
+        var profileData = getData(profile),
+            dataIndexMap = {},
+            index,
+            dataLength = data[0].values.length,
+            maxLength = data[0].values.length,
+            prependArray;
+
+        data.forEach(function (d, i) {
+            dataIndexMap[d.name] = i;
+        });
+
+        profileData.forEach(function (interest) {
+            index = dataIndexMap[interest.name];
+            if (index !== undefined) {
+                data[index].values = data[index].values.concat(interest.values);
+
+                if (data[index].values.length > maxLength) {
+                    maxLength = data[index].values.length;
+                }
+            } else {
+                prependArray = [];
+                while (prependArray.length < dataLength) {
+                    prependArray.push(streamIndex(0));
+                }
+                interest.values = prependArray.concat(interest.values);
+                data.push(interest);
             }
+        });
 
-            series = chart.get(name);
-            doShift = series.data.length > 20;
-
-            series.addPoint({
-                name: name,
-                x: time,
-                y: interest.weight
-            }, false, doShift);
-        }
-
-        chart.redraw();
+        data.map(function (d) {
+            while (d.values.length < maxLength) {
+                d.values.push(streamIndex(0));
+            }
+        });
     }
 
-    function updateChart() {
+    function removeData(data) {
+        return data.map(function (d) {
+            d.values.shift();
+            return d;
+        });
+    }
+
+    // TODO: Currently all interests ever seen are stored in the data array.
+    // As a minimum, they should be pruned once the sliding window begins.
+    function redraw(profile) {
+        var layers;
+
+        addData(profile);
+        y.domain([0, d3.max(stack(data), function (d) {
+            return d3.max(d.values, function (d) {
+                return d.y0 + d.y;
+            });
+        })]);
+
+        layers = svg.selectAll("path").data(stack(data));
+
+        layers.enter().append("path")
+            .style("fill", function (d, i) { return colour(i); })
+            .attr("d", function (d) { return area(d.values); })
+            .on("click", function (d) {
+                // TODO.
+            })
+            .append("title")
+                .text(function (d) { return d.name; });
+
+        // TODO: Fix the jerky re-centring of the graph in the y-axis.
+        // Draw the new data outside the range of the x-axis, then update the
+        // domain of the scale and gracefully transition the new data into the
+        // container.
+        // layers.transition()
+        //     .duration(500)
+        //     .attr("d", function (d) { return area(d.values); });
+        layers.attr("d", function (d) { return area(d.values); });
+        x.domain([0, (data[0].values.length > n) ? n : data[0].values.length - 1]);
+        layers.transition()
+            .duration(1000)
+            .attr("d", function (d) { return area(d.values); });
+        // layers.transition()
+        //     .delay(500)
+        //     .duration(500)
+        //     .attr("d", function (d) {
+        //         x.domain([0, (data[0].values.length > n) ? n : data[0].values.length - 1]);
+        //         return area(d.values);
+        //     });
+
+        // If the number of samples has reached some specified threshold, start
+        // scrolling the data across the container.
+        if (data[0].values.length > n) {
+            layers.attr("transform", null)
+                .transition()
+                    .duration(1000)
+                    .ease("linear")
+                    .attr("transform", "translate(" + x(-1) + ")");
+
+            data = removeData(data);
+        }
+    }
+
+    function updateStreamGraph() {
         $.ajax({
             url: 'http://46.4.89.183/sally/profile-proxy.php',
             data: {
@@ -422,9 +359,9 @@ Beancounter.Area = function (username, container) {
             },
             dataType: 'json',
             cache: false,
-            success: function (data) {
-                updateChartData($.parseJSON(data));
-                setTimeout(updateChart, 2000);
+            success: function (profile) {
+                redraw($.parseJSON(profile));
+                setTimeout(updateStreamGraph, 1000);
             },
             error: function (request, errorText, data) {
                 var obj = $.parseJSON(request.responseText),
@@ -434,41 +371,30 @@ Beancounter.Area = function (username, container) {
         });
     }
 
-    options.chart.renderTo = container;
-    options.chart.type = 'areaspline';
-    options.xAxis = {
-        type: 'datetime',
-        tickPixelInterval: 150,
-        maxZoom: 20 * 1000
-    };
-    options.yAxis = {
-        title: {
-            text: 'Percent'
-        }
-    };
-    options.series = [];
-
     return {
         init: function () {
-            chart = new Highcharts.Chart(options);
-            updateChart();
-        },
-
-        getChart: function () {
-            return chart;
-        },
-
-        getUsername: function () {
-            return username;
+            $.ajax({
+                url: 'http://46.4.89.183/sally/profile-proxy.php',
+                data: {
+                    'username': username
+                },
+                dataType: 'json',
+                cache: false,
+                success: function (profile) {
+                    data = getData($.parseJSON(profile));
+                    updateStreamGraph();
+                },
+                error: function (request, errorText, data) {
+                    var obj = $.parseJSON(request.responseText),
+                        error = obj.message;
+                    $("#errorContainer").html('<p>' + error + '</p>');
+                }
+            });
         }
     };
 };
 
 Beancounter.TagCloud = function (username, container) {
-    function getNameFromResource(resource) {
-        return resource.replace(/_/g, " ")
-                .replace(/http:\/\/dbpedia\.org\/resource\/|\%28|\%29/gi, "");
-    }
 
     function updateTagCloudData(profile) {
         var i,
@@ -480,7 +406,7 @@ Beancounter.TagCloud = function (username, container) {
 
         for (i = 0, len = interests.length; i < len; i++) {
             interest = interests[i];
-            name = getNameFromResource(interest.resource);
+            name = Beancounter.getNameFromResource(interest.resource);
             interestArray.push({
                 text: name,
                 weight: interest.weight
