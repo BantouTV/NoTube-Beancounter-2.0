@@ -19,6 +19,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>tv.notube.commons</groupId>
+            <artifactId>configuration</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>tv.notube</groupId>
             <artifactId>activities</artifactId>
             <version>1.1-SNAPSHOT</version>

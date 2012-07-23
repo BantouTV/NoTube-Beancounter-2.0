@@ -18,6 +18,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>tv.notube.commons</groupId>
+            <artifactId>configuration</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-core</artifactId>
         </dependency>
