@@ -20,17 +20,7 @@
     <dependencies>
         <dependency>
             <groupId>tv.notube</groupId>
-            <artifactId>realtime-profiler</artifactId>
-            <version>1.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>tv.notube</groupId>
             <artifactId>activities</artifactId>
-            <version>1.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>tv.notube.filter</groupId>
-            <artifactId>filter-core</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>

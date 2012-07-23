@@ -1,50 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>tv.notube</groupId>
-    <artifactId>realtime-profiler</artifactId>
-    <version>1.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
-    <name>NoTube 2.0 Profiler</name>
-
     <parent>
-        <groupId>tv.notube</groupId>
         <artifactId>parent</artifactId>
+        <groupId>tv.notube</groupId>
         <version>1.1-SNAPSHOT</version>
     </parent>
 
+    <artifactId>realtime-profiler</artifactId>
+    <packaging>pom</packaging>
+    <name>NoTube 2.0 Profiler</name>
+
+    <modules>
+        <module>realtime-profiler-core</module>
+        <module>realtime-profiler-process</module>
+    </modules>
+
     <dependencies>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>model</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>tv.notube</groupId>
-            <artifactId>profiles</artifactId>
-            <version>1.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>tv.notube.commons</groupId>
-            <artifactId>nlp</artifactId>
-            <version>1.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>tv.notube.commons</groupId>
-            <artifactId>lupedia</artifactId>
-            <version>1.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>tv.notube.commons</groupId>
-            <artifactId>cogito</artifactId>
-            <version>1.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>tv.notube.commons</groupId>
-            <artifactId>tagdef</artifactId>
+            <artifactId>helper</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
+
 </project>

@@ -1,4 +1,4 @@
-package tv.notube.resolver;
+package tv.notube.activities;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.Assert;

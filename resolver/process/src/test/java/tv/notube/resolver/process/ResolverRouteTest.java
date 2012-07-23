@@ -33,18 +33,17 @@ public class ResolverRouteTest extends CamelTestSupport {
                 binder.bind(Resolver.class).toInstance(resolver);
                 binder.bind(ResolverRoute.class).toInstance(new ResolverRoute() {
                     @Override
-                    protected String fromKestrelEndpoint() {
+                    protected String fromEndpoint() {
                         return "direct:start";
                     }
 
                     @Override
-                    public String toTargetQueue() {
-                        return "mock:result";
+                    public String toInternalQueue() {
+                        return "mock:internal";
                     }
 
-
                     @Override
-                    public String errorEndpint() {
+                    public String errorEndpoint() {
                         return "mock:error";
                     }
                 });
@@ -60,22 +59,22 @@ public class ResolverRouteTest extends CamelTestSupport {
 
     @Test
     public void unresolvedActivitiesAreDropped() throws Exception {
-        MockEndpoint result = getMockEndpoint("mock:result");
-        result.expectedMessageCount(0);
+        MockEndpoint internal = getMockEndpoint("mock:internal");
+        internal.expectedMessageCount(0);
 
         MockEndpoint error = getMockEndpoint("mock:error");
         error.expectedMessageCount(0);
 
         template.sendBody("direct:start", anActivity());
-        result.assertIsSatisfied();
+        internal.assertIsSatisfied();
         error.assertIsSatisfied();
     }
 
 
     @Test
     public void resolvedActivitiesAreSentToTarget() throws Exception {
-        MockEndpoint result = getMockEndpoint("mock:result");
-        result.expectedMessageCount(1);
+        MockEndpoint internal = getMockEndpoint("mock:internal");
+        internal.expectedMessageCount(1);
 
         MockEndpoint error = getMockEndpoint("mock:error");
         error.expectedMessageCount(0);
@@ -83,7 +82,7 @@ public class ResolverRouteTest extends CamelTestSupport {
         when(resolver.resolve(any(Activity.class))).thenReturn(UUID.randomUUID());
 
         template.sendBody("direct:start", anActivity());
-        result.assertIsSatisfied();
+        internal.assertIsSatisfied();
         error.assertIsSatisfied();
     }
 
