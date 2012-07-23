@@ -309,8 +309,6 @@ public class ActivitiesService extends JsonService {
         return rb.build();
     }
 
-
-
     @GET
     @Path("/all/{username}")
     public Response getAllActivities(
