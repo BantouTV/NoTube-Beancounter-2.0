@@ -31,7 +31,7 @@ public class AnalyticsModule extends CamelModuleWithMatchingRoutes {
     @JndiBind("properties")
     PropertiesComponent propertiesComponent() {
         PropertiesComponent pc = new PropertiesComponent();
-        pc.setLocation("classpath:analytics.properties");
+        pc.setLocation("classpath:resolver.properties");
         return pc;
     }
 
