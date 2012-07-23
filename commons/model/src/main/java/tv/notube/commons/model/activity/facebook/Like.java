@@ -3,7 +3,6 @@ package tv.notube.commons.model.activity.facebook;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 /**
  * This class models something that could be liked on <i>Facebook</i>.

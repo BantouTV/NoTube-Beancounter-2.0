@@ -25,7 +25,7 @@ public class FacebookProfillingRuleTestCase {
 
     @Test
     public void testSimpleLike() throws ProfilingRuleException, URISyntaxException, MalformedURLException {
-        rule = new FacebookProfilingRule(
+        rule = new GenericObjectProfilingRule(
                 getSimpleLike(),
                 new LUpediaNLPEngineImpl(),
                 null
@@ -37,7 +37,7 @@ public class FacebookProfillingRuleTestCase {
 
     @Test
     public void testSimpleShare() throws ProfilingRuleException, URISyntaxException, MalformedURLException {
-        rule = new FacebookProfilingRule(
+        rule = new GenericObjectProfilingRule(
                 getSimpleFeed(),
                 new CogitoNLPEngineImpl(endpoint),
                 null
@@ -52,7 +52,7 @@ public class FacebookProfillingRuleTestCase {
 
     @Test
     public void testAnotherSimpleShare() throws ProfilingRuleException, URISyntaxException, MalformedURLException {
-        rule = new FacebookProfilingRule(
+        rule = new GenericObjectProfilingRule(
                 getAnotherSimpleFeed(),
                 new CogitoNLPEngineImpl(endpoint),
                 null
@@ -64,7 +64,7 @@ public class FacebookProfillingRuleTestCase {
 
     @Test
     public void testComplexShare() throws ProfilingRuleException, URISyntaxException, MalformedURLException {
-        rule = new FacebookProfilingRule(
+        rule = new GenericObjectProfilingRule(
                 getComplexFeed(),
                 new CogitoNLPEngineImpl(endpoint),
                 null
