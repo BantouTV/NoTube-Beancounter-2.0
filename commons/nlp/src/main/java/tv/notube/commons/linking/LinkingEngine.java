@@ -1,16 +1,26 @@
 package tv.notube.commons.linking;
 
-import java.net.URI;
-import java.util.Collection;
-import java.util.Map;
-
 /**
- * put class description here
+ * This interface defines the minimum contract a linking engine must
+ * satisfy.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 public interface LinkingEngine {
 
-    public Map<URI, Collection<URI>> link(URI uri) throws LinkingEngineException;
+    /**
+     * It provides an exact match
+     * @param source
+     * @return
+     * @throws LinkingEngineException
+     */
+    public String link(String source) throws LinkingEngineException;
+
+    /**
+     * Refreshes all the in memory mappings.
+     *
+     * @throws LinkingEngineException
+     */
+    public void refresh() throws LinkingEngineException;
 
 }

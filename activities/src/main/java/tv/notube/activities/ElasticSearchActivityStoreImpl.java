@@ -67,6 +67,7 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
 
     @Override
     public void store(UUID userId, Collection<Activity> activities) throws ActivityStoreException {
+        // TODO (low): Use the Bulk API for this.
         for (Activity activity : activities) {
             indexActivity(userId, activity, client);
         }

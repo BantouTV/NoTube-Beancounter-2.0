@@ -18,6 +18,7 @@ public enum Verb implements Serializable {
     FAVORITED,
     LIKE,
     LISTEN,
+    SONG,
     TWEET,
     WATCHED,
     CHECKIN,

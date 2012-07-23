@@ -113,7 +113,7 @@ public class ElasticSearchActivityStoreTest {
     }
 
     // TODO (high) enable this
-    @Test(enabled = false)
+    @Test
     public void storeASingleListenForAUser() throws Exception {
         clearIndex();
 
@@ -161,7 +161,7 @@ public class ElasticSearchActivityStoreTest {
     }
 
     // TODO (high) enable this
-    @Test(enabled = false)
+    @Test
     public void storeMultipleListensForAUser() throws Exception {
         clearIndex();
 
@@ -558,12 +558,12 @@ public class ElasticSearchActivityStoreTest {
         assertEquals(object.get("mbid"), song.getMbid());
         assertEquals(object.get("url"), song.getUrl().toString());
         assertEquals(object.get("name"), "My Song");
-        assertEquals(object.get("@class"), Song.class.getName());
+        assertEquals(object.get("type"), Verb.SONG.name());
         assertNull(object.get("description"));
 
         Map<String, Object> context = (Map<String, Object>) esActivity.get("context");
         Context songContext = activity.getContext();
-        assertEquals(context.size(), 3);
+        assertEquals(context.size(), 4);
         assertEquals(context.get("date"), songContext.getDate().getMillis());
         assertEquals(context.get("service"), lastFmServiceUrl);
         assertNull(context.get("mood"));
