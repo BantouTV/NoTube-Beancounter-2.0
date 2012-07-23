@@ -74,7 +74,7 @@ public class Object implements Serializable {
     @Override
     public boolean equals(java.lang.Object o) {
         if (this == o) return true;
-        if (!(o instanceof java.lang.Object)) return false;
+        if (!(o instanceof tv.notube.commons.model.activity.Object)) return false;
 
         tv.notube.commons.model.activity.Object object =
                 (tv.notube.commons.model.activity.Object)  o;
