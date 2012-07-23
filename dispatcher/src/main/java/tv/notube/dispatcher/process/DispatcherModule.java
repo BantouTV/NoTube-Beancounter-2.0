@@ -16,7 +16,7 @@ public class DispatcherModule extends CamelModuleWithMatchingRoutes {
     @Override
     protected void configure() {
         super.configure();
-        Properties properties = PropertiesHelper.readFromClasspath("/resolver.properties");
+        Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
         Names.bindProperties(binder(), properties);
         bind(DispatcherRoute.class);
     }
@@ -25,7 +25,7 @@ public class DispatcherModule extends CamelModuleWithMatchingRoutes {
     @JndiBind("properties")
     PropertiesComponent propertiesComponent() {
         PropertiesComponent pc = new PropertiesComponent();
-        pc.setLocation("classpath:resolver.properties");
+        pc.setLocation("classpath:beancounter.properties");
         return pc;
     }
 }

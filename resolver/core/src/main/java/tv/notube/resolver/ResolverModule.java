@@ -1,7 +1,6 @@
 package tv.notube.resolver;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import tv.notube.commons.helper.PropertiesHelper;
 import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
@@ -23,7 +22,7 @@ public class ResolverModule extends AbstractModule {
         Names.bindProperties(binder(), redisProperties);
         bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
 
-        Properties properties = PropertiesHelper.readFromClasspath("/resolver.properties");
+        Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
         Services services = Services.build(properties);
         bind(Services.class).toInstance(services);
         bind(Resolver.class).to(JedisResolver.class);

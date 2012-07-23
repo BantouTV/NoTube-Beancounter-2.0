@@ -37,7 +37,7 @@ public class FacebookModule extends CamelModuleWithMatchingRoutes {
         bindInstance("redisProperties", redisProperties);
         bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
 
-        Properties properties = PropertiesHelper.readFromClasspath("/resolver.properties");
+        Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
         Services services = Services.build(properties);
         bind(Services.class).toInstance(services);
         bind(Resolver.class).to(JedisResolver.class);
@@ -63,7 +63,7 @@ public class FacebookModule extends CamelModuleWithMatchingRoutes {
     @JndiBind("properties")
     PropertiesComponent propertiesComponent() {
         PropertiesComponent pc = new PropertiesComponent();
-        pc.setLocation("classpath:resolver.properties");
+        pc.setLocation("classpath:beancounter.properties");
         return pc;
     }
 
