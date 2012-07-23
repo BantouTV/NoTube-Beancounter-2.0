@@ -32,7 +32,7 @@ public class FilterModule extends CamelModuleWithMatchingRoutes {
     @JndiBind("properties")
     PropertiesComponent propertiesComponent() {
         PropertiesComponent pc = new PropertiesComponent();
-        pc.setLocation("classpath:filter.properties");
+        pc.setLocation("classpath:resolver.properties");
         return pc;
     }
 
