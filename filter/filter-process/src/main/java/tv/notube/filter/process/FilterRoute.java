@@ -74,7 +74,7 @@ public class FilterRoute extends RouteBuilder {
     }
 
     protected String fromRedis() {
-        return "redis://localhost:6379?command=SUBSCRIBE&channels=filters";
+        return "redis://localhost:6379?command=SUBSCRIBE&channels=filters&serializer=#serializer";
     }
 
 }
