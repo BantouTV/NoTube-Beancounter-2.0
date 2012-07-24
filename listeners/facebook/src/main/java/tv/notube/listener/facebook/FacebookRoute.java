@@ -62,6 +62,6 @@ public class FacebookRoute extends RouteBuilder {
     }
 
     protected String errorEndpoint() {
-        return "log:facebookRoute?level=ERROR";
+        return "log:" + getClass().getSimpleName() + "?{{camel.log.options.error}}";
     }
 }

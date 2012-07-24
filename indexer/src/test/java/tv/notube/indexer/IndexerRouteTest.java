@@ -57,6 +57,11 @@ public class IndexerRouteTest extends CamelTestSupport {
                     public String errorEndpoint() {
                         return "mock:error";
                     }
+
+                    @Override
+                    public String statisticsEndpoint() {
+                        return "log:statistics";
+                    }
                 });
             }
         });
@@ -90,7 +95,6 @@ public class IndexerRouteTest extends CamelTestSupport {
         error.assertIsSatisfied();
         verify(activityStore).store(any(UUID.class), any(Activity.class));
         List<Exchange> exchanges = error.getReceivedExchanges();
-        System.out.println(" ss"  + exchanges);
     }
 
 

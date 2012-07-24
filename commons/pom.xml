@@ -22,6 +22,7 @@
         <module>lupedia</module>
         <module>helper</module>
         <module>cogito</module>
+        <module>configuration</module>
     </modules>
 
 </project>

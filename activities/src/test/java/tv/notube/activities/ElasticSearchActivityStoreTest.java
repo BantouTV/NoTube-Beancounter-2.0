@@ -16,6 +16,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -85,14 +86,17 @@ public class ElasticSearchActivityStoreTest {
 
     @AfterTest
     public void tearDown() throws Exception {
-        ((ElasticSearchActivityStoreImpl) as).closeClient();
+        as.shutDown();
         as = null;
+    }
+
+    @BeforeMethod
+    public void beforeMethod() throws Exception {
+        clearIndex();
     }
 
     @Test
     public void storeASingleTweetForAUser() throws Exception {
-        clearIndex();
-
         UUID userId = UUID.randomUUID();
         DateTime dateTime = new DateTime();
         Activity tweetActivity = createTweetActivity(0, userId, dateTime);
@@ -112,11 +116,8 @@ public class ElasticSearchActivityStoreTest {
         assertHitEqualsTweetActivity(hit, userId, tweetActivity);
     }
 
-    // TODO (high) enable this
     @Test
     public void storeASingleListenForAUser() throws Exception {
-        clearIndex();
-
         UUID userId = UUID.randomUUID();
         DateTime dateTime = new DateTime();
         Activity lastFmActivity = createLastFmActivity(0, userId, dateTime);
@@ -138,8 +139,6 @@ public class ElasticSearchActivityStoreTest {
 
     @Test
     public void storeMultipleTweetsForAUser() throws Exception {
-        clearIndex();
-
         UUID userId = UUID.randomUUID();
         DateTime dateTime = new DateTime();
         int numTweets = 5;
@@ -160,11 +159,8 @@ public class ElasticSearchActivityStoreTest {
         assertHitsEqualTweetActivities(hits, userId, tweetActivities);
     }
 
-    // TODO (high) enable this
     @Test
     public void storeMultipleListensForAUser() throws Exception {
-        clearIndex();
-
         UUID userId = UUID.randomUUID();
         DateTime dateTime = new DateTime();
         int numListens = 5;
@@ -188,8 +184,6 @@ public class ElasticSearchActivityStoreTest {
 
     @Test
     public void getLatestTweetByAUserGivenOneUserAndTheyHaveOneTweet() throws Exception {
-        clearIndex();
-
         UUID userId = UUID.randomUUID();
         Activity activity = createTweetActivity(0, userId, new DateTime());
 
@@ -205,8 +199,6 @@ public class ElasticSearchActivityStoreTest {
 
     @Test
     public void getLatestTwoTweetsByAUserGivenOneUserAndTheyHaveTwoTweets() throws Exception {
-        clearIndex();
-
         UUID userId = UUID.randomUUID();
         int numTweets = 2;
         List<Activity> tweetActivities
@@ -226,8 +218,6 @@ public class ElasticSearchActivityStoreTest {
 
     @Test
     public void getLatestTweetByAUserGivenOneUserAndTheyHaveTwoTweets() throws Exception {
-        clearIndex();
-
         UUID userId = UUID.randomUUID();
         int numTweets = 2;
         List<Activity> tweetActivities
@@ -244,8 +234,6 @@ public class ElasticSearchActivityStoreTest {
 
     @Test
     public void getLatestTwoTweetsByAUserGivenOneUserAndTheyHaveOneTweet() throws Exception {
-        clearIndex();
-
         UUID userId = UUID.randomUUID();
         Activity activity = createTweetActivity(0, userId, new DateTime());
 
@@ -260,8 +248,6 @@ public class ElasticSearchActivityStoreTest {
 
     @Test
     public void gettingLatestTweetsOfAUserShouldReturnTheMostRecentTweets() throws Exception {
-        clearIndex();
-
         UUID userId = UUID.randomUUID();
         as.store(userId, createTweetActivities(userId, new DateTime(), 10));
 
@@ -278,8 +264,6 @@ public class ElasticSearchActivityStoreTest {
 
     @Test
     public void getLatestTweetOfAUserGivenUserHasOneTweetAndTwoTotalUsers() throws Exception {
-        clearIndex();
-
         UUID userId1 = UUID.randomUUID();
         UUID userId2 = UUID.randomUUID();
         Activity activity = createTweetActivity(0, userId1, new DateTime());
@@ -296,8 +280,6 @@ public class ElasticSearchActivityStoreTest {
 
     @Test
     public void getTweetsOfUserSpecifiedByDateRange() throws Exception {
-        clearIndex();
-
         UUID userId = UUID.randomUUID();
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
 
@@ -320,8 +302,6 @@ public class ElasticSearchActivityStoreTest {
 
     @Test
     public void getTweetsOfAllUsersSpecifiedByDateRange() throws Exception {
-        clearIndex();
-
         UUID userId1 = UUID.randomUUID();
         UUID userId2 = UUID.randomUUID();
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
@@ -356,8 +336,6 @@ public class ElasticSearchActivityStoreTest {
 
     @Test
     public void getAllTweetsOfSpecifiedUser() throws Exception {
-        clearIndex();
-
         UUID userId = UUID.randomUUID();
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
 
@@ -376,8 +354,6 @@ public class ElasticSearchActivityStoreTest {
 
     @Test
     public void getTweetOfSpecifiedUserAndSpecifiedTweet() throws Exception {
-        clearIndex();
-
         UUID userId = UUID.randomUUID();
         UUID activityId = UUID.randomUUID();
 
@@ -393,8 +369,6 @@ public class ElasticSearchActivityStoreTest {
 
     @Test
     public void getTweetsOfSpecifiedUserAndSpecifiedTweets() throws Exception {
-        clearIndex();
-
         UUID userId = UUID.randomUUID();
         Collection<UUID> activitiesIds = new ArrayList<UUID>();
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
@@ -415,6 +389,91 @@ public class ElasticSearchActivityStoreTest {
         for (int i = 0; i < activitiesRetrieved.size(); i++) {
             assertEquals(activitiesStored.get(i), activitiesRetrieved.get(i));
         }
+    }
+
+    @Test
+    public void searchForAllTweetsOfAUser() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        List<Activity> tweetsStored = (List<Activity>) createTweetActivities(userId, dateTime, 10);
+        Collection<Activity> songsStored = createLastFmActivities(userId, dateTime, 10);
+        as.store(userId, tweetsStored);
+        as.store(userId, songsStored);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved =
+                (List<Activity>) as.search("type", Verb.TWEET.name());
+
+        assertEquals(activitiesRetrieved.size(), 10);
+        for (int i = 0; i < activitiesRetrieved.size(); i++) {
+            assertEquals(activitiesRetrieved.get(i), tweetsStored.get(i));
+        }
+
+        activitiesRetrieved =
+                (List<Activity>) as.search("activity.object.type", Verb.TWEET.name());
+
+        assertEquals(activitiesRetrieved.size(), 10);
+        for (int i = 0; i < activitiesRetrieved.size(); i++) {
+            assertEquals(activitiesRetrieved.get(i), tweetsStored.get(i));
+        }
+    }
+
+    @Test
+    public void searchForAllTweetsByTwitterUsername() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        List<Activity> tweetsStored = (List<Activity>) createTweetActivities(userId, dateTime, 10);
+        Collection<Activity> songsStored = createLastFmActivities(userId, dateTime, 10);
+        as.store(userId, tweetsStored);
+        as.store(userId, songsStored);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved =
+                (List<Activity>) as.search("username", "\"twitter-username\"");
+
+        assertEquals(activitiesRetrieved.size(), 10);
+        for (int i = 0; i < activitiesRetrieved.size(); i++) {
+            assertEquals(activitiesRetrieved.get(i), tweetsStored.get(i));
+        }
+
+        activitiesRetrieved =
+                (List<Activity>) as.search("activity.context.username", "\"twitter-username\"");
+
+        assertEquals(activitiesRetrieved.size(), 10);
+        for (int i = 0; i < activitiesRetrieved.size(); i++) {
+            assertEquals(activitiesRetrieved.get(i), tweetsStored.get(i));
+        }
+    }
+
+    @Test
+    public void searchForAllTweetsYesterday() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+        long dateTimeMillis = dateTime.minusDays(1).getMillis();
+
+        List<Activity> tweetsStored =
+                (List<Activity>) createTweetActivities(userId, dateTime, 10);
+        as.store(userId, tweetsStored);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved =
+                (List<Activity>) as.search("date", String.valueOf(dateTimeMillis));
+
+        assertEquals(activitiesRetrieved.size(), 1);
+        assertEquals(activitiesRetrieved.get(0), tweetsStored.get(1));
+
+        activitiesRetrieved = (List<Activity>) as.search(
+                "activity.context.date",
+                String.valueOf(dateTimeMillis)
+        );
+
+        assertEquals(activitiesRetrieved.size(), 1);
+        assertEquals(activitiesRetrieved.get(0), tweetsStored.get(1));
     }
 
     private void refreshIndex() {
@@ -484,7 +543,7 @@ public class ElasticSearchActivityStoreTest {
         ab.setContext(
                 dateTime.withZone(DateTimeZone.UTC).minusDays(trackId),
                 lastFmServiceUrl,
-                "twitter-username"
+                "lastfm-username"
         );
 
         return ab.pop();
@@ -528,6 +587,7 @@ public class ElasticSearchActivityStoreTest {
         assertEquals(context.size(), 4);
         assertEquals(context.get("date"), tweetContext.getDate().getMillis());
         assertEquals(context.get("service"), tweetServiceUrl);
+        assertEquals(context.get("username"), "twitter-username");
         assertNull(context.get("mood"));
     }
 
@@ -566,6 +626,7 @@ public class ElasticSearchActivityStoreTest {
         assertEquals(context.size(), 4);
         assertEquals(context.get("date"), songContext.getDate().getMillis());
         assertEquals(context.get("service"), lastFmServiceUrl);
+        assertEquals(context.get("username"), "lastfm-username");
         assertNull(context.get("mood"));
     }
 
