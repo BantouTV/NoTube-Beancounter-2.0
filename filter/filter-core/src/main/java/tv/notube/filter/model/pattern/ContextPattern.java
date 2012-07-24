@@ -44,6 +44,10 @@ public class ContextPattern implements Pattern<Context> {
         this.username = username;
     }
 
+    public void setDate(DateTimePattern date) {
+        this.date = date;
+    }
+
     public DateTimePattern getDate() {
         return date;
     }

@@ -14,10 +14,13 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
 
 import tv.notube.commons.helper.PropertiesHelper;
+import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
+import tv.notube.commons.helper.jedis.JedisPoolFactory;
 import tv.notube.filter.FilterService;
 import tv.notube.filter.InMemoryFilterServiceImpl;
 import tv.notube.filter.manager.FilterManager;
 import tv.notube.filter.manager.InMemoryFilterManager;
+import tv.notube.filter.manager.JedisFilterManager;
 
 public class FilterModule extends CamelModuleWithMatchingRoutes {
 
@@ -27,8 +30,9 @@ public class FilterModule extends CamelModuleWithMatchingRoutes {
         Properties redisProperties = PropertiesHelper.readFromClasspath("/redis.properties");
         Names.bindProperties(binder(), redisProperties);
         bindInstance("redisProperties", redisProperties);
+        bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
         bind(FilterService.class).to(InMemoryFilterServiceImpl.class);
-        bind(FilterManager.class).to(InMemoryFilterManager.class);
+        bind(FilterManager.class).to(JedisFilterManager.class);
         bind(FilterRoute.class);
     }
 

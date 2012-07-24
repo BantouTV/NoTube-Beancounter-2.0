@@ -402,6 +402,7 @@ paleography=paleografia
 processors=processori
 multimedia=multimedia
 cinema=cinema
+movie=cinema
 toys=giocattoli
 health board=sanità
 entomology=entomologia

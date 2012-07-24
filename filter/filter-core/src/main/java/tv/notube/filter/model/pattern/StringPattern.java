@@ -19,6 +19,10 @@ public class StringPattern implements Pattern<String> {
         this.string = string;
     }
 
+    public void setString(String string) {
+        this.string = string;
+    }
+
     public String getString() {
         return string;
     }

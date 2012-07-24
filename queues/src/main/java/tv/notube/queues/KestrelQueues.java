@@ -41,8 +41,11 @@ public final class KestrelQueues implements Queues {
 
     @Override
     public void push(String json) throws QueuesException {
+        String queueName =  properties
+                .getProperty("kestrel.queue.internal.url")
+                .split("/")[1];
         client.set(
-                (String) properties.get("kestrel.queue.internal.url"),
+                queueName,
                 3600,
                 json
         );
