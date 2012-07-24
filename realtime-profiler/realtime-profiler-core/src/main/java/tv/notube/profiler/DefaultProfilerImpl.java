@@ -1,5 +1,7 @@
 package tv.notube.profiler;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tv.notube.commons.linking.LinkingEngine;
@@ -7,11 +9,15 @@ import tv.notube.commons.model.Interest;
 import tv.notube.commons.model.UserProfile;
 import tv.notube.commons.model.activity.*;
 import tv.notube.commons.model.activity.Object;
+import tv.notube.commons.model.activity.facebook.Like;
 import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.profiler.rules.ObjectProfilingRule;
 import tv.notube.profiler.rules.ProfilingRule;
 import tv.notube.profiler.rules.ProfilingRuleException;
 import tv.notube.profiler.rules.custom.DevNullProfilingRule;
+import tv.notube.profiler.rules.custom.FacebookLikeProfilingRule;
+import tv.notube.profiler.rules.custom.GenericObjectProfilingRule;
+import tv.notube.profiler.rules.custom.TweetProfilingRule;
 import tv.notube.profiler.utils.Utils;
 import tv.notube.profiles.Profiles;
 import tv.notube.profiles.ProfilesException;
@@ -41,11 +47,22 @@ public class DefaultProfilerImpl implements Profiler {
 
     private Properties properties;
 
-    public DefaultProfilerImpl(Profiles ps, NLPEngine nlpEng, LinkingEngine linkEng, Properties properties) {
+    @Inject
+    public DefaultProfilerImpl(
+            Profiles ps,
+            NLPEngine nlpEng,
+            LinkingEngine linkEng,
+            @Named("profilerProperties") Properties properties
+    ) throws ProfilerException {
         this.ps = ps;
         this.nlpEng = nlpEng;
         this.linkEng = linkEng;
         this.properties = properties;
+        // register custom rules
+        // TODO (make it configurable)
+        registerRule(Tweet.class, TweetProfilingRule.class);
+        registerRule(tv.notube.commons.model.activity.Object.class, GenericObjectProfilingRule.class);
+        registerRule(Like.class, FacebookLikeProfilingRule.class);
     }
 
     public void registerRule(Class<? extends tv.notube.commons.model.activity.Object> type, Class<? extends ObjectProfilingRule> rule)

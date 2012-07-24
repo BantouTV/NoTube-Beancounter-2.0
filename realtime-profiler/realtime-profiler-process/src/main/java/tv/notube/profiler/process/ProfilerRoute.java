@@ -14,6 +14,7 @@ import tv.notube.commons.model.activity.ResolvedActivity;
 import tv.notube.profiler.Profiler;
 
 public class ProfilerRoute extends RouteBuilder {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ProfilerRoute.class);
 
     @Inject
