@@ -61,7 +61,7 @@ public class ProfilerRoute extends RouteBuilder {
     }
 
     protected String errorEndpoint() {
-        return "log:indexerRoute?level=ERROR";
+        return "log:" + getClass().getSimpleName() + "?{{camel.log.options.error}}";
     }
 
 

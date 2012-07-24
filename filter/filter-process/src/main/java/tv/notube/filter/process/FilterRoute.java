@@ -70,7 +70,7 @@ public class FilterRoute extends RouteBuilder {
     }
 
     protected String errorEndpoint() {
-        return "log:filterRoute?level=ERROR";
+        return "log:" + getClass().getSimpleName() + "?{{camel.log.options.error}}";
     }
 
     protected String fromRedis() {

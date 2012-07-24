@@ -53,10 +53,15 @@ public class IndexerRouteTest extends CamelTestSupport {
                         return "direct:start";
                     }
 
-//                    @Override
-//                    public String errorEndpoint() {
-//                        return "mock:error";
-//                    }
+                    @Override
+                    public String errorEndpoint() {
+                        return "mock:error";
+                    }
+
+                    @Override
+                    public String statisticsEndpoint() {
+                        return "log:statistics";
+                    }
                 });
             }
         });
@@ -80,17 +85,16 @@ public class IndexerRouteTest extends CamelTestSupport {
 
     @Test
     public void logsErrorFromOneOfTheServices() throws Exception {
-//        MockEndpoint error = getMockEndpoint("mock:error");
-//        error.expectedMessageCount(1);
+        MockEndpoint error = getMockEndpoint("mock:error");
+        error.expectedMessageCount(1);
 
         doThrow(new RuntimeException("problem")).when(activityStore)
                 .store(any(UUID.class), any(Activity.class));
         template.sendBody("direct:start", activityAsJson());
-         Thread.sleep(10000);
-//        error.assertIsSatisfied();
+
+        error.assertIsSatisfied();
         verify(activityStore).store(any(UUID.class), any(Activity.class));
-//        List<Exchange> exchanges = error.getReceivedExchanges();
-//        System.out.println(" ss"  + exchanges);
+        List<Exchange> exchanges = error.getReceivedExchanges();
     }
 
 
