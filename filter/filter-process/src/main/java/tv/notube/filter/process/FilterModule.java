@@ -1,5 +1,6 @@
 package tv.notube.filter.process;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 import com.google.inject.Provides;
@@ -7,7 +8,10 @@ import com.google.inject.name.Names;
 
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.guice.CamelModuleWithMatchingRoutes;
+import org.apache.camel.spi.Registry;
 import org.guiceyfruit.jndi.JndiBind;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.SerializationException;
 
 import tv.notube.commons.helper.PropertiesHelper;
 import tv.notube.filter.FilterService;
@@ -36,4 +40,29 @@ public class FilterModule extends CamelModuleWithMatchingRoutes {
         return pc;
     }
 
+    @Provides
+    @JndiBind("serializer")
+    RedisSerializer redisSerializer() {
+        return new RedisSerializer<String>() {
+            private static final String CHARSET = "UTF-8";
+
+            @Override
+            public byte[] serialize(String s) throws SerializationException {
+                try {
+                    return s.getBytes(CHARSET);
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public String deserialize(byte[] bytes) throws SerializationException {
+                try {
+                    return new String(bytes, CHARSET);
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+    }
 }
