@@ -174,13 +174,13 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
     }
 
     @Override
-    public void shutDown() throws ActivityStoreException {
-        closeClient();
-    }
-
-    @Override
     public Collection<Activity> search(String path, String value) throws ActivityStoreException {
-        throw new UnsupportedOperationException("NIY");
+        SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
+                .setQuery(queryString(path + ":" + value))
+                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
+                .execute().actionGet();
+
+        return retrieveActivitiesFromSearchResponse(searchResponse);
     }
 
     // TODO (high) this will be deprecated as soon as #search will be available
@@ -194,9 +194,10 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
         return retrieveActivitiesFromSearchResponse(searchResponse);
     }
 
-    public void closeClient() throws ActivityStoreException {
+    @Override
+    public void shutDown() throws ActivityStoreException {
         try {
-        client.close();
+            client.close();
         } catch (Exception e) {
             final String errMsg = "Error while closing the client";
             throw new ActivityStoreException(errMsg, e);

@@ -104,7 +104,7 @@ public interface ActivityStore {
     ) throws ActivityStoreException;
 
     /**
-     * Releases any used resourcese.
+     * Releases any used resources.
      *
      * @throws ActivityStoreException
      */
