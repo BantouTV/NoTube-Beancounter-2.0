@@ -5,13 +5,13 @@ package tv.notube.listener.facebook.converter.custom;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class ConverterException extends Exception {
+public class UnconvertableException extends ConverterException {
 
-    public ConverterException(String message) {
+    public UnconvertableException(String message) {
         super(message);
     }
 
-    public ConverterException(String message, Exception e) {
+    public UnconvertableException(String message, Exception e) {
         super(message, e);
     }
 }

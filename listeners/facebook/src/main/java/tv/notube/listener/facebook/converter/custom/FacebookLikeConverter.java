@@ -4,6 +4,8 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tv.notube.commons.model.activity.Context;
 import tv.notube.commons.model.activity.facebook.Like;
 import tv.notube.listener.facebook.model.FacebookData;
@@ -25,6 +27,8 @@ import java.util.Map;
  */
 public class FacebookLikeConverter implements Converter<FacebookData, Like> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FacebookLikeConverter.class);
+
     private static final String SERVICE = "facebook";
 
     private ObjectMapper mapper;
@@ -43,10 +47,10 @@ public class FacebookLikeConverter implements Converter<FacebookData, Like> {
     }
 
     @Override
-    public Context getContext(FacebookData facebookData) throws ConverterException {
+    public Context getContext(FacebookData facebookData, String userId) throws ConverterException {
         Context context = new Context();
         context.setDate(new DateTime(facebookData.getCreatedTime()));
-        context.setUsername(facebookData.getId());
+        context.setUsername(userId);
         context.setService(SERVICE);
         return context;
     }
@@ -71,46 +75,62 @@ public class FacebookLikeConverter implements Converter<FacebookData, Like> {
             try {
                 getMethod.releaseConnection();
             } catch (Exception e) {
-                throw new ConverterException("error while closing the connection [" + urlStr + "]", e);
+                final String errMsg = "error while closing the connection [" + urlStr + "]";
+                LOGGER.error(errMsg);
+                throw new ConverterException(errMsg, e);
             }
-            throw new ConverterException("error while calling facebook api [" + urlStr + "]", ioe);
+            final String errMsg = "error while calling facebook api [" + urlStr + "]";
+            LOGGER.error(errMsg);
+            throw new ConverterException(errMsg, ioe);
         }
         String responseBody;
         try {
             responseBody = new String(getMethod.getResponseBody());
         } catch (IOException e) {
-            throw new ConverterException("error while getting response body from facebook api [" + urlStr + "]", e);
+            final String errMsg = "error while getting response body from facebook api [" + urlStr + "]";
+            LOGGER.error(errMsg, e);
+            throw new ConverterException(errMsg, e);
         } finally {
             try {
                 getMethod.releaseConnection();
             } catch (Exception e) {
-                throw new ConverterException("error while closing the connection [" + urlStr + "]", e);
+                final String errMsg = "error while closing the connection [" + urlStr + "]";
+                LOGGER.error(errMsg, e);
+                throw new ConverterException(errMsg, e);
             }
         }
         Object map;
         try {
             map = mapper.readValue(responseBody, Object.class);
         } catch (IOException e) {
-            throw new ConverterException("error while parsing the response [" + responseBody + "]" +
-                    "from facebook api [" + urlStr + "]", e);
+            final String errMsg = "error while parsing the response [" + responseBody + "]" +
+                    "from facebook api [" + urlStr + "]";
+            LOGGER.error(errMsg, e);
+            throw new ConverterException(errMsg, e);
         }
         return (Map<String, String>) map;
     }
 
-    private void set(Like like, String fieldName, String jsonValue) {
+    private void set(Like like, String fieldName, String jsonValue) throws ConverterException {
         Method setter;
         fieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1, fieldName.length());
         try {
             setter = like.getClass().getMethod("set" + fieldName, String.class);
         } catch (NoSuchMethodException e) {
-            throw new RuntimeException("cannot find on class Like method [set"+ fieldName + "]", e);
+            final String errMsg = "cannot find on class Like method [set"+ fieldName + "]";
+            LOGGER.error(errMsg, e);
+            throw new ConverterException(errMsg, e);
         }
         try {
             setter.invoke(like, jsonValue);
         } catch (IllegalAccessException e) {
-            throw new RuntimeException("error while invoking [set"+ fieldName + "]", e);
+            final String errMsg = "error while invoking [set"+ fieldName + "]";
+            LOGGER.error(errMsg, e);
+            throw new ConverterException(errMsg, e);
         } catch (InvocationTargetException e) {
-            throw new RuntimeException("error while invoking [set"+ fieldName + "]", e);
+            final String errMsg = "error while invoking [set"+ fieldName + "]";
+            LOGGER.error(errMsg, e);
+            throw new ConverterException(errMsg, e);
         }
     }
 
@@ -125,7 +145,9 @@ public class FacebookLikeConverter implements Converter<FacebookData, Like> {
         try {
             url = new URL(candidateUrl);
         } catch (MalformedURLException e) {
-            throw new ConverterException("[" + candidateUrl + "] is ill-formed", e);
+            final String errMsg = "[" + candidateUrl + "] is ill-formed";
+            LOGGER.error(errMsg, e);
+            throw new ConverterException(errMsg, e);
         }
         like.setUrl(url);
         return like;

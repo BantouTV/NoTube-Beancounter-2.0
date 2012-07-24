@@ -49,8 +49,8 @@ public class FacebookModule extends CamelModuleWithMatchingRoutes {
         bind(UserManager.class).to(JedisUserManagerImpl.class);
         FacebookActivityConverter fac = new FacebookActivityConverter();
         try {
-            fac.registerConverter(Post.class, Verb.SHARE, new FacebookLikeConverter());
-            fac.registerConverter(FacebookData.class, Verb.LIKE, new FacebookShareConverter());
+            fac.registerConverter(Post.class, Verb.SHARE, new FacebookShareConverter());
+            fac.registerConverter(FacebookData.class, Verb.LIKE, new FacebookLikeConverter());
         } catch (FacebookActivityConverterException e) {
             throw new RuntimeException("Error while instantiating Facebook converters", e);
         }

@@ -1,8 +1,11 @@
 package tv.notube.listener.facebook.converter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tv.notube.commons.model.activity.*;
 import tv.notube.listener.facebook.converter.custom.Converter;
 import tv.notube.listener.facebook.converter.custom.ConverterException;
+import tv.notube.listener.facebook.converter.custom.UnconvertableException;
 
 import java.lang.Object;
 import java.util.HashMap;
@@ -14,6 +17,8 @@ import java.util.Map;
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 public class FacebookActivityConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FacebookActivityConverter.class);
 
     private Map<Key, Converter> converters = new HashMap<Key, Converter>();
 
@@ -28,19 +33,38 @@ public class FacebookActivityConverter {
         }
     }
 
-    public Result convert(Object obj, Verb verb)
+    public Result convert(Object obj, Verb verb, String userId)
             throws FacebookActivityConverterException {
         Key key = new Key(obj.getClass(), verb);
+        LOGGER.debug("got key {}", key);
         Converter converter = converters.get(key);
         if(converter == null) {
-            throw new FacebookActivityConverterException("object with type [" + obj.getClass() + "] and verb [" + verb + "] is not supported");
+            final String errMsg = "object with type [" + obj.getClass() + "] and verb [" + verb + "] is not supported";
+            LOGGER.error(errMsg);
+            throw new FacebookActivityConverterException(errMsg);
         }
-        // TODO (opengraph stuff should be configurable)
+        tv.notube.commons.model.activity.Object innerObj;
         try {
-            return new Result(converter.convert(obj, true), converter.getContext(obj));
+            // TODO (enabling opengraph stuff should be configurable)
+            innerObj = converter.convert(obj, true);
+        } catch (UnconvertableException e) {
+            final String errMsg = "object with type [" + obj.getClass() + "] cannot be converted";
+            LOGGER.error(errMsg, e);
+            throw new UnconvertableFacebookActivityException(errMsg, e);
         } catch (ConverterException e) {
-            throw new FacebookActivityConverterException("error while converting object with type [" + obj.getClass() + "]", e);
+            final String errMsg = "error while converting object with type [" + obj.getClass() + "]";
+            LOGGER.error(errMsg);
+            throw new FacebookActivityConverterException(errMsg, e);
         }
+        Context convertedContext;
+        try {
+            convertedContext = converter.getContext(obj, userId);
+        } catch (ConverterException e) {
+            final String errMsg = "error while getting context for [" + obj.getClass() + "]";
+            LOGGER.error(errMsg);
+            throw new FacebookActivityConverterException(errMsg, e);
+        }
+        return new Result(innerObj, convertedContext);
     }
 
     public class Result {
@@ -89,6 +113,14 @@ public class FacebookActivityConverter {
             int result = clazz != null ? clazz.hashCode() : 0;
             result = 31 * result + (verb != null ? verb.hashCode() : 0);
             return result;
+        }
+
+        @Override
+        public String toString() {
+            return "Key{" +
+                    "clazz=" + clazz +
+                    ", verb=" + verb +
+                    '}';
         }
     }
 
