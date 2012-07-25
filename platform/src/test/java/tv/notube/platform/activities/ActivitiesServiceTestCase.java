@@ -5,14 +5,23 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.testng.Assert;
 import org.testng.annotations.*;
+import tv.notube.commons.model.activity.*;
+import tv.notube.commons.model.activity.Object;
+import tv.notube.commons.model.activity.rai.TVEvent;
 import tv.notube.platform.APIResponse;
 import tv.notube.platform.AbstractJerseyTestCase;
 import tv.notube.platform.responses.ActivitiesPlatformResponse;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * Reference test case for {@link tv.notube.platform.ActivitiesService}
@@ -87,18 +96,18 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(postMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
-        Assert.assertNotEquals(responseBody, "");
-        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        assertNotEquals(responseBody, "");
+        assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         APIResponse actual = fromJson(responseBody, APIResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "activity successfully registered",
                 "OK"
         );
-        Assert.assertEquals(actual.getMessage(), expected.getMessage());
-        Assert.assertEquals(actual.getStatus(), expected.getStatus());
-        Assert.assertNotNull(actual.getObject());
-        Assert.assertNotNull(UUID.fromString(actual.getObject()));
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus(), expected.getStatus());
+        assertNotNull(actual.getObject());
+        assertNotNull(UUID.fromString(actual.getObject()));
     }
 
     @Test
@@ -110,23 +119,33 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 username,
                 APIKEY
         );
+
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
+
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
-        Assert.assertNotEquals(responseBody, "");
+        assertNotEquals(responseBody, "");
+
         ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "user 'test-user' activities found.",
                 "OK"
         );
-        Assert.assertEquals(actual.getMessage(), expected.getMessage());
-        Assert.assertEquals(actual.getStatus().toString(), expected.getStatus());
-        Assert.assertNotNull(actual.getObject());
-        Assert.assertEquals(actual.getObject().size(), 20);
+
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus().toString(), expected.getStatus());
+
+        List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+        assertNotNull(activities);
+        assertEquals(activities.size(), 20);
+        for (int i = 0; i < activities.size(); i++) {
+            Tweet tweet = (Tweet) activities.get(i).getObject();
+            assertEquals(tweet.getText(), "Fake text #" + i);
+        }
     }
 
     @Test
@@ -138,23 +157,35 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 username,
                 APIKEY
         );
+
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
+
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
-        Assert.assertNotEquals(responseBody, "");
+        assertNotEquals(responseBody, "");
+
         ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "user 'test-user' activities found.",
                 "OK"
         );
-        Assert.assertEquals(actual.getMessage(), expected.getMessage());
-        Assert.assertEquals(actual.getStatus().toString(), expected.getStatus());
-        Assert.assertNotNull(actual.getObject());
-        Assert.assertEquals(actual.getObject().size(), 20);
+
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus().toString(), expected.getStatus());
+
+        List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+        assertNotNull(activities);
+        assertEquals(activities.size(), 20);
+
+        int i = 20;
+        for (Activity activity : activities) {
+            Tweet tweet = (Tweet) activity.getObject();
+            assertEquals(tweet.getText(), "Fake text #" + i++);
+        }
     }
 
     @Test
@@ -166,23 +197,35 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 username,
                 APIKEY
         );
+
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
+
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
-        Assert.assertNotEquals(responseBody, "");
+        assertNotEquals(responseBody, "");
+
         ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "user 'test-user' activities found.",
                 "OK"
         );
-        Assert.assertEquals(actual.getMessage(), expected.getMessage());
-        Assert.assertEquals(actual.getStatus().toString(), expected.getStatus());
-        Assert.assertNotNull(actual.getObject());
-        Assert.assertEquals(actual.getObject().size(), 10);
+
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus().toString(), expected.getStatus());
+
+        List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+        assertNotNull(activities);
+        assertEquals(activities.size(), 10);
+
+        int i = 40;
+        for (Activity activity : activities) {
+            Tweet tweet = (Tweet) activity.getObject();
+            assertEquals(tweet.getText(), "Fake text #" + i++);
+        }
     }
 
     @Test
@@ -194,25 +237,62 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 username,
                 APIKEY
         );
+
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
+
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
-        Assert.assertNotEquals(responseBody, "");
+        assertNotEquals(responseBody, "");
+
         ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
-                "user 'test-user' activities found.",
+                "user 'test-user' has no more activities.",
                 "OK"
         );
-        Assert.assertEquals(actual.getMessage(), expected.getMessage());
-        Assert.assertEquals(actual.getStatus().toString(), expected.getStatus());
-        Assert.assertNotNull(actual.getObject());
-        Assert.assertEquals(actual.getObject().size(), 0);
+
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus().toString(), expected.getStatus());
+        assertNotNull(actual.getObject());
+        assertEquals(actual.getObject().size(), 0);
     }
 
+    @Test
+    public void getAllActivitiesForUserWithNoActivities() throws IOException {
+        final String baseQuery = "activities/all/%s?apikey=%s";
+        final String username = "user-with-no-activities";
+        final String query = String.format(
+                baseQuery,
+                username,
+                APIKEY
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+
+        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                "user 'user-with-no-activities' has no activities.",
+                "OK"
+        );
+
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus().toString(), expected.getStatus());
+        assertNotNull(actual.getObject());
+        assertEquals(actual.getObject().size(), 0);
+    }
+
+    // TODO (low): Not sure if we need this test anymore.
     @Test
     public void testGetAllActivitiesDifferentPages() throws IOException {
         final String baseQuery1 = "activities/all/%s?apikey=%s";
@@ -222,8 +302,10 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 username,
                 APIKEY
         );
+
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
+
         int result = client.executeMethod(getMethod);
         String responseBody1 = new String(getMethod.getResponseBody());
         logger.info("result code: " + result);
@@ -235,20 +317,59 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 username,
                 APIKEY
         );
+
         getMethod = new GetMethod(base_uri + query2);
         client = new HttpClient();
+
         int result2 = client.executeMethod(getMethod);
         String responseBody2 = new String(getMethod.getResponseBody());
         logger.info("result code: " + result2);
         logger.info("response body: " + responseBody2);
+
         ActivitiesPlatformResponse actual1 = fromJson(responseBody1, ActivitiesPlatformResponse.class);
         ActivitiesPlatformResponse actual2 = fromJson(responseBody2, ActivitiesPlatformResponse.class);
-        Assert.assertNotEquals(actual1, actual2);
+        assertNotEquals(actual1, actual2);
+    }
+
+    @Test
+    public void searchForCustomActivity() throws Exception {
+        final String baseQuery = "activities/search?path=%s&value=%s&apikey=%s";
+        final String query = String.format(
+                baseQuery,
+                "type",
+                "RAI-CONTENT-ITEM",
+                APIKEY
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+
+        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                "search for [type=RAI-CONTENT-ITEM] found activities.",
+                "OK"
+        );
+
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus().toString(), expected.getStatus());
+
+        List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+        assertNotNull(activities);
+        assertEquals(activities.size(), 1);
+
+        TVEvent tvEvent = (TVEvent) activities.get(0).getObject();
+        assertEquals(tvEvent.getName(), "Euro 2012");
     }
 
     @Test
     public void testCustomActivityContentItem() throws IOException {
-        APIKEY = registerTestApplication().toString();
         final String baseQuery = "activities/add/%s?apikey=%s";
         final String username = "test-user";
         final String activity = "{\n" +
@@ -279,22 +400,20 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(postMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
-        Assert.assertNotEquals(responseBody, "");
-        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        assertNotEquals(responseBody, "");
+        assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         APIResponse actual = fromJson(responseBody, APIResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "activity successfully registered",
                 "OK"
         );
-        Assert.assertEquals(actual.getMessage(), expected.getMessage());
-        Assert.assertEquals(actual.getStatus(), expected.getStatus());
-        deregisterTestApplication();
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus(), expected.getStatus());
     }
 
     @Test
     public void testCustomActivityTvEvent() throws IOException {
-        APIKEY = registerTestApplication().toString();
         final String baseQuery = "activities/add/%s?apikey=%s";
         final String username = "test-user";
         final String activity = "{\n" +
@@ -325,22 +444,20 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(postMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
-        Assert.assertNotEquals(responseBody, "");
-        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        assertNotEquals(responseBody, "");
+        assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         APIResponse actual = fromJson(responseBody, APIResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "activity successfully registered",
                 "OK"
         );
-        Assert.assertEquals(actual.getMessage(), expected.getMessage());
-        Assert.assertEquals(actual.getStatus(), expected.getStatus());
-        deregisterTestApplication();
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus(), expected.getStatus());
     }
 
     @Test
     public void testCustomActivityComment() throws IOException {
-        APIKEY = registerTestApplication().toString();
         final String baseQuery = "activities/add/%s?apikey=%s";
         final String username = "test-user";
         final String activity = "{\n" +
@@ -372,17 +489,16 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(postMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
-        Assert.assertNotEquals(responseBody, "");
-        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        assertNotEquals(responseBody, "");
+        assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         APIResponse actual = fromJson(responseBody, APIResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "activity successfully registered",
                 "OK"
         );
-        Assert.assertEquals(actual.getMessage(), expected.getMessage());
-        Assert.assertEquals(actual.getStatus(), expected.getStatus());
-        deregisterTestApplication();
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus(), expected.getStatus());
     }
 
 }

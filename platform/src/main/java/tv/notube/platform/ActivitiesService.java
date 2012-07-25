@@ -191,7 +191,7 @@ public class ActivitiesService extends JsonService {
                     ApplicationsManager.Object.ACTIVITIES
             );
         } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating you application");
+            return error(e, "Error while authenticating your application");
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
@@ -281,7 +281,7 @@ public class ActivitiesService extends JsonService {
                     ApplicationsManager.Object.ACTIVITIES
             );
         } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating you application");
+            return error(e, "Error while authenticating your application");
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
@@ -294,7 +294,7 @@ public class ActivitiesService extends JsonService {
         // TODO (really high): replace this with the general one activities.search(path, value);
         Collection<Activity> activities;
         try {
-            activities = this.activities.getByOnEvent(value);
+            activities = this.activities.search(path, value);
         } catch (ActivityStoreException e) {
             return error(e, "Error while getting activities where [" + path + "=" + value +"]");
         }
@@ -302,7 +302,7 @@ public class ActivitiesService extends JsonService {
         rb.entity(
                 new ActivitiesPlatformResponse(
                         ActivitiesPlatformResponse.Status.OK,
-                        "user [" + path + "=" + value +"] activities found.",
+                        "search for [" + path + "=" + value +"] found activities.",
                         activities
                 )
         );
@@ -333,10 +333,8 @@ public class ActivitiesService extends JsonService {
             return error(e, "Your apikey is not well formed");
         }
         int page;
-        int showedActivities;
         try {
-            page = Integer.parseInt(pageString);
-            showedActivities = page * ACTIVITIES_LIMIT;
+            page = Integer.parseInt(pageString, 10);
         } catch (IllegalArgumentException e) {
             return error(e, "Your page number is not well formed");
         }
@@ -348,7 +346,7 @@ public class ActivitiesService extends JsonService {
                     ApplicationsManager.Object.ACTIVITIES
             );
         } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating you application");
+            return error(e, "Error while authenticating your application");
         }
         if (!isAuth) {
             Response.ResponseBuilder rb = Response.serverError();
@@ -374,58 +372,27 @@ public class ActivitiesService extends JsonService {
             );
             return rb.build();
         }
+
         Collection<Activity> allActivities;
         try {
-            allActivities = activities.getByUser(user.getId());
+            allActivities = activities.getByUserPaginated(user.getId(), page, ACTIVITIES_LIMIT);
         } catch (ActivityStoreException e) {
             return error(
                     e,
-                    "Error while getting activity all the activies for user [" + username + "]"
+                    "Error while getting page " + page + " of all the activities for user [" + username + "]"
             );
         }
+
         Response.ResponseBuilder rb = Response.ok();
-        if(allActivities.size()==0) {
-            rb.entity(
-                    new ActivitiesPlatformResponse(
-                            ActivitiesPlatformResponse.Status.OK,
-                            "user '" + username + "' has no activities",
-                            allActivities
-                    )
-            );
-        } else {
-            Collection<Activity> trimmedActivities = trimActivities(allActivities, showedActivities);
-            rb.entity(
-                    new ActivitiesPlatformResponse(
-                            ActivitiesPlatformResponse.Status.OK,
-                            "user '" + username + "' activities found.",
-                            trimmedActivities
-                    )
-            );
-        }
+        rb.entity(
+                new ActivitiesPlatformResponse(
+                        ActivitiesPlatformResponse.Status.OK,
+                        (allActivities.isEmpty())
+                            ? "user '" + username + "' has no " + (page != 0 ? "more " : "") + "activities."
+                            : "user '" + username + "' activities found.",
+                        allActivities
+                )
+        );
         return rb.build();
-    }
-
-    private Collection<Activity> trimActivities(Collection<Activity> activities, int page) {
-        if(activities.size() < ACTIVITIES_LIMIT) {
-            return activities;
-        }
-        List<Activity> list = new ArrayList<Activity>(activities);
-        Collections.sort(list, new ActivityComparator());
-        List<Activity> trimmed = new ArrayList<Activity>();
-        if (page < list.size()) {
-            int limit = page + ACTIVITIES_LIMIT;
-            while (page < limit && page < list.size()) {
-                trimmed.add(list.get(page));
-                page++;
-            }
-        }
-        return trimmed;
-    }
-}
-
-class ActivityComparator implements Comparator<Activity> {
-    @Override
-    public int compare(Activity a1, Activity a2) {
-        return a2.getContext().getDate().compareTo(a1.getContext().getDate());
     }
 }
