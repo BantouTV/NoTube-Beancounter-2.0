@@ -71,16 +71,6 @@ public interface ActivityStore {
     /**
      *
      * @param userId
-     * @return
-     * @throws ActivityStoreException
-     */
-    public Collection<Activity> getByUser(
-            final UUID userId
-    ) throws ActivityStoreException;
-
-    /**
-     *
-     * @param userId
      * @param activityId
      * @return
      * @throws ActivityStoreException
@@ -120,13 +110,6 @@ public interface ActivityStore {
     ) throws ActivityStoreException;
 
     /**
-     * Releases any used resources.
-     *
-     * @throws ActivityStoreException
-     */
-    public void shutDown() throws ActivityStoreException;
-
-    /**
      * Performs an exact match of the <i>value</i> parameter against the given
      * JSON path. Wildcard searches are not allowed.
      *
@@ -140,6 +123,15 @@ public interface ActivityStore {
      */
     public Collection<Activity> search(
             String path,
-            String value
+            String value,
+            int pageNumber,
+            int size
     ) throws ActivityStoreException, WildcardSearchException;
+
+    /**
+     * Releases any used resources.
+     *
+     * @throws ActivityStoreException
+     */
+    public void shutDown() throws ActivityStoreException;
 }

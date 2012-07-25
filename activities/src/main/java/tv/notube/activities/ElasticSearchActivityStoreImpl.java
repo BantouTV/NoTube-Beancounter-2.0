@@ -12,6 +12,9 @@ import org.elasticsearch.common.collect.ImmutableList;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilteredQueryBuilder;
+import org.elasticsearch.index.query.OrFilterBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortOrder;
@@ -141,68 +144,59 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
         return activitiesMap;
     }
 
-    @Override
-    public Collection<Activity> getByUser(UUID userId) throws ActivityStoreException {
-        return getByUserAndDateRange(userId, new DateTime(1), new DateTime());
-    }
-
+    // TODO (med): Surely this method should be getActivity(activityId) since
+    // we don't really care about the user?
     @Override
     public Activity getByUser(UUID userId, UUID activityId) throws ActivityStoreException {
-        Collection<Activity> activities = getByUser(userId);
-        Activity activity = null;
-        for (Activity a : activities) {
-            if (a.getId().compareTo(activityId) == 0) {
-                activity = a;
-            }
-        }
-        return activity;
+        SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
+                .setQuery(queryString("activity.id:" + activityId.toString()))
+                .setSize(1)
+                .execute().actionGet();
+
+        List<Activity> activities =
+                (List<Activity>) retrieveActivitiesFromSearchResponse(searchResponse);
+
+        return activities.size() > 0 ? activities.get(0) : null;
     }
 
     @Override
     public Collection<Activity> getByUser(UUID userId, Collection<UUID> activityIds)
             throws ActivityStoreException {
-        Collection<Activity> selectedActivities = null;
-        Collection<Activity> allActivities = getByUser(userId);
-        for (Activity a : allActivities) {
-            if (activityIds.contains(a.getId())) {
-                if (selectedActivities == null) {
-                    selectedActivities = new ArrayList<Activity>();
-                }
-                selectedActivities.add(a);
-            }
+
+        OrFilterBuilder orFilterBuilder = orFilter();
+        for (UUID id : activityIds) {
+            orFilterBuilder.add(queryFilter(queryString("activity.id:" + id.toString())));
         }
-        return selectedActivities;
+
+        FilteredQueryBuilder fqBuilder = filteredQuery(
+                queryString("userId:" + userId.toString()),
+                orFilterBuilder
+        );
+
+        SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
+                .setQuery(fqBuilder)
+                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
+                .execute().actionGet();
+
+        return retrieveActivitiesFromSearchResponse(searchResponse);
     }
 
     @Override
     public Collection<Activity> getByUserPaginated(
             UUID userId, int pageNumber, int size
     ) throws ActivityStoreException {
-        SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                .setSearchType(SearchType.QUERY_THEN_FETCH)
-                .setQuery(queryString("userId:" + userId.toString()))
-                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
-                .setFrom(pageNumber * size)
-                .setSize(size)
-                .execute().actionGet();
-
-        return retrieveActivitiesFromSearchResponse(searchResponse);
+        return searchAndPaginateResults("userId:" + userId.toString(), pageNumber, size);
     }
 
     @Override
     public Collection<Activity> search(
-            String path, String value
+            String path, String value, int pageNumber, int size
     ) throws ActivityStoreException, WildcardSearchException {
         if (path.contains("*") || value.contains("*")) {
             throw new WildcardSearchException("Wildcard searches are not allowed.");
         }
 
-        SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                .setQuery(queryString(path + ":" + value))
-                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
-                .execute().actionGet();
-
-        return retrieveActivitiesFromSearchResponse(searchResponse);
+        return searchAndPaginateResults(path + ":" + value, pageNumber, size);
     }
 
     @Override
@@ -232,6 +226,20 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
 
     private byte[] createActivityJson(ElasticSearchActivity esa) throws IOException {
         return mapper.writeValueAsBytes(esa);
+    }
+
+    private Collection<Activity> searchAndPaginateResults(
+            String query, int pageNumber, int size
+    ) throws ActivityStoreException {
+        SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
+                .setSearchType(SearchType.QUERY_THEN_FETCH)
+                .setQuery(queryString(query))
+                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
+                .setFrom(pageNumber * size)
+                .setSize(size)
+                .execute().actionGet();
+
+        return retrieveActivitiesFromSearchResponse(searchResponse);
     }
 
     private Collection<Activity> retrieveActivitiesFromSearchResponse(

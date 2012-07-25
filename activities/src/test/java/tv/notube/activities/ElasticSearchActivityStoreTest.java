@@ -336,24 +336,6 @@ public class ElasticSearchActivityStoreTest {
     }
 
     @Test
-    public void getAllTweetsOfSpecifiedUser() throws Exception {
-        UUID userId = UUID.randomUUID();
-        DateTime dateTime = new DateTime(DateTimeZone.UTC);
-
-        List<Activity> activitiesStored = (List<Activity>) createTweetActivities(userId, dateTime, 10);
-        as.store(userId, activitiesStored);
-
-        refreshIndex();
-
-        List<Activity> activitiesRetrieved = (List<Activity>) as.getByUser(userId);
-        assertEquals(activitiesRetrieved.size(), 10);
-
-        for (int i = 0; i < activitiesRetrieved.size(); i++) {
-            assertEquals(activitiesStored.get(i), activitiesRetrieved.get(i));
-        }
-    }
-
-    @Test
     public void getTweetOfSpecifiedUserAndSpecifiedTweet() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID activityId = UUID.randomUUID();
@@ -375,9 +357,9 @@ public class ElasticSearchActivityStoreTest {
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
 
         List<Activity> activitiesStored = (List<Activity>) createTweetActivities(userId, dateTime, 10);
-        for(Activity a : activitiesStored) {
+        for (int i = 0; i < activitiesStored.size() - 5; i++) {
             UUID id = UUID.randomUUID();
-            a.setId(id);
+            activitiesStored.get(i).setId(id);
             activitiesIds.add(id);
         }
         as.store(userId, activitiesStored);
@@ -385,7 +367,31 @@ public class ElasticSearchActivityStoreTest {
         refreshIndex();
 
         List<Activity> activitiesRetrieved = (List<Activity>) as.getByUser(userId, activitiesIds);
-        assertEquals(activitiesRetrieved.size(), 10);
+        assertEquals(activitiesRetrieved.size(), 5);
+
+        for (int i = 0; i < activitiesRetrieved.size(); i++) {
+            assertEquals(activitiesStored.get(i), activitiesRetrieved.get(i));
+        }
+    }
+
+    @Test(enabled = false)
+    public void getTweetsOfSpecifiedUserAndLargeNumberOfSpecifiedTweets() throws Exception {
+        UUID userId = UUID.randomUUID();
+        Collection<UUID> activitiesIds = new ArrayList<UUID>();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        List<Activity> activitiesStored = (List<Activity>) createTweetActivities(userId, dateTime, 100);
+        for (int i = 0; i < activitiesStored.size() - 50; i++) {
+            UUID id = UUID.randomUUID();
+            activitiesStored.get(i).setId(id);
+            activitiesIds.add(id);
+        }
+        as.store(userId, activitiesStored);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved = (List<Activity>) as.getByUser(userId, activitiesIds);
+        assertEquals(activitiesRetrieved.size(), 50);
 
         for (int i = 0; i < activitiesRetrieved.size(); i++) {
             assertEquals(activitiesStored.get(i), activitiesRetrieved.get(i));
@@ -461,7 +467,7 @@ public class ElasticSearchActivityStoreTest {
         refreshIndex();
 
         List<Activity> activitiesRetrieved =
-                (List<Activity>) as.search("type", Verb.TWEET.name());
+                (List<Activity>) as.search("type", Verb.TWEET.name(), 0, 10);
 
         assertEquals(activitiesRetrieved.size(), 10);
         for (int i = 0; i < activitiesRetrieved.size(); i++) {
@@ -469,7 +475,7 @@ public class ElasticSearchActivityStoreTest {
         }
 
         activitiesRetrieved =
-                (List<Activity>) as.search("activity.object.type", Verb.TWEET.name());
+                (List<Activity>) as.search("activity.object.type", Verb.TWEET.name(), 0, 10);
 
         assertEquals(activitiesRetrieved.size(), 10);
         for (int i = 0; i < activitiesRetrieved.size(); i++) {
@@ -490,7 +496,7 @@ public class ElasticSearchActivityStoreTest {
         refreshIndex();
 
         List<Activity> activitiesRetrieved =
-                (List<Activity>) as.search("username", "\"twitter-username\"");
+                (List<Activity>) as.search("username", "\"twitter-username\"", 0, 20);
 
         assertEquals(activitiesRetrieved.size(), 10);
         for (int i = 0; i < activitiesRetrieved.size(); i++) {
@@ -498,7 +504,7 @@ public class ElasticSearchActivityStoreTest {
         }
 
         activitiesRetrieved =
-                (List<Activity>) as.search("activity.context.username", "\"twitter-username\"");
+                (List<Activity>) as.search("activity.context.username", "\"twitter-username\"", 0, 20);
 
         assertEquals(activitiesRetrieved.size(), 10);
         for (int i = 0; i < activitiesRetrieved.size(); i++) {
@@ -519,14 +525,16 @@ public class ElasticSearchActivityStoreTest {
         refreshIndex();
 
         List<Activity> activitiesRetrieved =
-                (List<Activity>) as.search("date", String.valueOf(dateTimeMillis));
+                (List<Activity>) as.search("date", String.valueOf(dateTimeMillis), 0, 20);
 
         assertEquals(activitiesRetrieved.size(), 1);
         assertEquals(activitiesRetrieved.get(0), tweetsStored.get(1));
 
         activitiesRetrieved = (List<Activity>) as.search(
                 "activity.context.date",
-                String.valueOf(dateTimeMillis)
+                String.valueOf(dateTimeMillis),
+                0,
+                20
         );
 
         assertEquals(activitiesRetrieved.size(), 1);
@@ -545,8 +553,12 @@ public class ElasticSearchActivityStoreTest {
 
         refreshIndex();
 
-        List<Activity> activitiesRetrieved =
-                (List<Activity>) as.search("activity.context.username", "\"twitter-username\"");
+        List<Activity> activitiesRetrieved = (List<Activity>) as.search(
+                "activity.context.username",
+                "\"twitter-username\"",
+                0,
+                10
+        );
 
         assertEquals(activitiesRetrieved.size(), 1);
         assertEquals(activitiesRetrieved.get(0), tweetActivity);
@@ -555,7 +567,7 @@ public class ElasticSearchActivityStoreTest {
             // This should throw an exception if the correct activity was retrieved
             // since no type mapping is specified for JSON serialization in the
             // Object class for the DuplicateFieldObject class.
-            as.search("activity.object.username", "\"different-username\"");
+            as.search("activity.object.username", "\"different-username\"", 0, 10);
         } catch (ActivityStoreException ignored) {
             return;
         }
@@ -575,18 +587,18 @@ public class ElasticSearchActivityStoreTest {
         refreshIndex();
 
         try {
-            as.search("userId", "*");
+            as.search("userId", "*", 0, 10);
         } catch (WildcardSearchException expected) {}
 
         try {
-            as.search("*", "*");
+            as.search("*", "*", 0, 10);
         } catch (WildcardSearchException expected) {}
 
         try {
-            as.search("user*", "*");
+            as.search("user*", "*", 0, 10);
         } catch (WildcardSearchException expected) {}
 
-        as.search("type", "tw*er");
+        as.search("type", "tw*er", 0, 10);
     }
 
     private void refreshIndex() {

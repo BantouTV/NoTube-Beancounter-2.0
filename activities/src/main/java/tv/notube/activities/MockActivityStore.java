@@ -69,22 +69,6 @@ public class MockActivityStore implements ActivityStore {
     }
 
     @Override
-    public Collection<Activity> getByUser(UUID userId) throws ActivityStoreException {
-        if (activities == null) {
-            Collection<Activity> allActivities = new ArrayList<Activity>();
-            try {
-                for (int i = 0; i < 50; i++) {
-                    allActivities.add(createFakeActivity(i));
-                }
-            } catch (TestsException e) {
-                throw new ActivityStoreException("Error while creating fake activities!", e);
-            }
-            activities = allActivities;
-        }
-        return activities;
-    }
-
-    @Override
     public Activity getByUser(UUID userId, UUID activityId) throws ActivityStoreException {
         throw new UnsupportedOperationException("NIY");
     }
@@ -127,21 +111,38 @@ public class MockActivityStore implements ActivityStore {
 
     @Override
     public Collection<Activity> search(
-            String path, String value
+            String path, String value, int pageNumber, int size
     ) throws ActivityStoreException, WildcardSearchException {
         if (path.contains("*") || value.contains("*")) {
             throw new WildcardSearchException("Wildcard searches are not allowed.");
         }
 
-        Collection<Activity> allActivities = new ArrayList<Activity>();
+        List<Activity> allActivities = new ArrayList<Activity>();
 
-        try {
-            allActivities.add(createCustomActivity());
-        } catch (Exception ex) {
-            throw new ActivityStoreException("Error while creating fake activities!", ex);
+        if (value.equals("RAI-CONTENT-ITEM")) {
+            try {
+                allActivities.add(createCustomActivity());
+            } catch (Exception ex) {
+                throw new ActivityStoreException("Error while creating fake activities!", ex);
+            }
+        } else {
+            try {
+                for (int i = 0; i < 50; i++) {
+                    allActivities.add(createFakeActivity(i));
+                }
+            } catch (Exception ex) {
+                throw new ActivityStoreException("Error while creating fake activities!", ex);
+            }
         }
 
-        return allActivities;
+        int startAt = pageNumber * size;
+        Collection<Activity> results = new ArrayList<Activity>();
+
+        for (int i = startAt; i < startAt + size && i < allActivities.size(); i++) {
+            results.add(allActivities.get(i));
+        }
+
+        return results;
     }
 
     public Activity getLastActivity() {

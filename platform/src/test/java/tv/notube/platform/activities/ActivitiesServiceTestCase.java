@@ -371,6 +371,66 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
+    public void searchForAllTweets() throws Exception {
+        int i = 0;
+        int page = 0;
+        int tweetCount = 0;
+
+        while (true) {
+            String baseQuery = "activities/search?path=%s&value=%s&page=%d&apikey=%s";
+            String query = String.format(
+                    baseQuery,
+                    "type",
+                    Verb.TWEET.name(),
+                    page++,
+                    APIKEY
+            );
+
+            GetMethod getMethod = new GetMethod(base_uri + query);
+            HttpClient client = new HttpClient();
+
+            int result = client.executeMethod(getMethod);
+            String responseBody = new String(getMethod.getResponseBody());
+            logger.info("result code: " + result);
+            logger.info("response body: " + responseBody);
+            assertNotEquals(responseBody, "");
+
+            ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+
+            if (actual.getObject().isEmpty()) {
+                APIResponse expected = new APIResponse(
+                        null,
+                        "search for [type=TWEET] found no more activities.",
+                        "OK"
+                );
+                assertEquals(actual.getStatus().toString(), expected.getStatus());
+                assertEquals(actual.getMessage(), expected.getMessage());
+                assertNotNull(actual.getObject());
+                assertEquals(actual.getObject().size(), 0);
+                break;
+            }
+
+            APIResponse expected = new APIResponse(
+                    null,
+                    "search for [type=TWEET] found activities.",
+                    "OK"
+            );
+
+            assertEquals(actual.getMessage(), expected.getMessage());
+            assertEquals(actual.getStatus().toString(), expected.getStatus());
+
+            List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+            for (Activity activity : activities) {
+                Tweet tweet = (Tweet) activity.getObject();
+                assertEquals(tweet.getText(), "Fake text #" + i++);
+            }
+            tweetCount += activities.size();
+        }
+
+        assertEquals(tweetCount, 50);
+    }
+
+    @Test
     public void searchWithWildcardsShouldFail() throws Exception {
         final String baseQuery = "activities/search?path=%s&value=%s&apikey=%s";
         final String query = String.format(

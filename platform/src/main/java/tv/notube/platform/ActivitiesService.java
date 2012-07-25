@@ -256,6 +256,7 @@ public class ActivitiesService extends JsonService {
     public Response search(
             @QueryParam("path") String path,
             @QueryParam("value") String value,
+            @QueryParam("page") @DefaultValue("0") String pageString,
             @QueryParam("apikey") String apiKey
     ) {
         try {
@@ -264,6 +265,7 @@ public class ActivitiesService extends JsonService {
                     "search",
                     path,
                     value,
+                    pageString,
                     apiKey
             );
         } catch (ServiceException e) {
@@ -273,6 +275,12 @@ public class ActivitiesService extends JsonService {
             UUID.fromString(apiKey);
         } catch (IllegalArgumentException e) {
             return error(e, "Your apikey is not well formed");
+        }
+        int page;
+        try {
+            page = Integer.parseInt(pageString, 10);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your page number is not well formed");
         }
         boolean isAuth;
         try {
@@ -293,11 +301,12 @@ public class ActivitiesService extends JsonService {
             return rb.build();
         }
 
-        Collection<Activity> activities;
+        Collection<Activity> activitiesRetrieved;
         try {
-            activities = this.activities.search(path, value);
+            activitiesRetrieved = activities.search(path, value, page, ACTIVITIES_LIMIT);
         } catch (ActivityStoreException ase) {
-            return error(ase, "Error while getting activities where [" + path + "=" + value +"]");
+            return error(ase, "Error while getting page " + page
+                    + " of activities where [" + path + "=" + value +"]");
         } catch (WildcardSearchException wse) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(new StringPlatformResponse(
@@ -311,8 +320,11 @@ public class ActivitiesService extends JsonService {
         rb.entity(
                 new ActivitiesPlatformResponse(
                         ActivitiesPlatformResponse.Status.OK,
-                        "search for [" + path + "=" + value +"] found activities.",
-                        activities
+                        (activitiesRetrieved.isEmpty())
+                                ? "search for [" + path + "=" + value + "] found no "
+                                    + (page != 0 ? "more " : "") + "activities."
+                                : "search for [" + path + "=" + value + "] found activities.",
+                        activitiesRetrieved
                 )
         );
         return rb.build();
