@@ -102,6 +102,17 @@ public interface ActivityStore {
             final Collection<UUID> activityIds
     ) throws ActivityStoreException;
 
+    /**
+     * Retrieves a user's activities in a paginated format.
+     * Page numbering begins at 0 (for the first page).
+     *
+     * @param userId The id of the user whose activities should be returned.
+     * @param pageNumber The number of the page of results to return.
+     * @param size The number of results displayed on each page.
+     * @return <code>size</code> activities relating to the specified page.
+     * @throws ActivityStoreException Thrown if something goes wrong when
+     * converting the JSON search results to Activity objects.
+     */
     public Collection<Activity> getByUserPaginated(
             final UUID userId,
             final int pageNumber,
@@ -116,14 +127,19 @@ public interface ActivityStore {
     public void shutDown() throws ActivityStoreException;
 
     /**
-     * It performs an exact match of <i>value</i> parameter against the given
-     * json path.
+     * Performs an exact match of the <i>value</i> parameter against the given
+     * JSON path. Wildcard searches are not allowed.
      *
-     * @param path
-     * @throws ActivityStoreException
+     * @param path The JSON path to match the value to.
+     * @param value The value to search for.
+     * @return Zero or more activities which are the results of executing the
+     * search.
+     * @throws ActivityStoreException Thrown if something goes wrong when
+     * converting the JSON search results to Activity objects.
+     * @throws WildcardSearchException Thrown if a wildcard search is attempted.
      */
-    public Collection<Activity>  search(String path, String value) throws ActivityStoreException;
-
-    // TODO (high) remove as soon as #search is ready
-    public Collection<Activity> getByOnEvent(String value) throws ActivityStoreException;
+    public Collection<Activity> search(
+            String path,
+            String value
+    ) throws ActivityStoreException, WildcardSearchException;
 }

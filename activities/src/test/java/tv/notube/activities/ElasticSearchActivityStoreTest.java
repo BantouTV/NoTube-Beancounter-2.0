@@ -563,7 +563,7 @@ public class ElasticSearchActivityStoreTest {
         fail();
     }
 
-    @Test
+    @Test(expectedExceptions = WildcardSearchException.class)
     public void wildcardSearchesShouldNotBeAllowed() throws Exception {
         UUID userId1 = UUID.randomUUID();
         UUID userId2 = UUID.randomUUID();
@@ -576,23 +576,17 @@ public class ElasticSearchActivityStoreTest {
 
         try {
             as.search("userId", "*");
-        } catch (ActivityStoreException expected) {}
+        } catch (WildcardSearchException expected) {}
 
         try {
             as.search("*", "*");
-        } catch (ActivityStoreException expected) {}
+        } catch (WildcardSearchException expected) {}
 
         try {
             as.search("user*", "*");
-        } catch (ActivityStoreException expected) {}
+        } catch (WildcardSearchException expected) {}
 
-        try {
-            as.search("type", "tw*er");
-        } catch (ActivityStoreException expected) {
-            return;
-        }
-
-        fail();
+        as.search("type", "tw*er");
     }
 
     private void refreshIndex() {

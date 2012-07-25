@@ -11,6 +11,7 @@ import tv.notube.commons.model.activity.Object;
 import tv.notube.commons.model.activity.rai.TVEvent;
 import tv.notube.platform.APIResponse;
 import tv.notube.platform.AbstractJerseyTestCase;
+import tv.notube.platform.PlatformResponse;
 import tv.notube.platform.responses.ActivitiesPlatformResponse;
 
 import java.io.IOException;
@@ -22,6 +23,7 @@ import java.util.UUID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertSame;
 
 /**
  * Reference test case for {@link tv.notube.platform.ActivitiesService}
@@ -366,6 +368,37 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
         TVEvent tvEvent = (TVEvent) activities.get(0).getObject();
         assertEquals(tvEvent.getName(), "Euro 2012");
+    }
+
+    @Test
+    public void searchWithWildcardsShouldFail() throws Exception {
+        final String baseQuery = "activities/search?path=%s&value=%s&apikey=%s";
+        final String query = String.format(
+                baseQuery,
+                "*",
+                "*",
+                APIKEY
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+
+        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        ActivitiesPlatformResponse expected = new ActivitiesPlatformResponse(
+                ActivitiesPlatformResponse.Status.NOK,
+                "Wildcard searches are not allowed.",
+                null
+        );
+
+        assertEquals(actual.getStatus(), expected.getStatus());
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getObject(), expected.getObject());
     }
 
     @Test

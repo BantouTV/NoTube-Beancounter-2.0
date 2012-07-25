@@ -190,24 +190,15 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
     }
 
     @Override
-    public Collection<Activity> search(String path, String value) throws ActivityStoreException {
+    public Collection<Activity> search(
+            String path, String value
+    ) throws ActivityStoreException, WildcardSearchException {
         if (path.contains("*") || value.contains("*")) {
-            throw new ActivityStoreException("Wildcard searches are not allowed.");
+            throw new WildcardSearchException("Wildcard searches are not allowed.");
         }
 
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString(path + ":" + value))
-                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
-                .execute().actionGet();
-
-        return retrieveActivitiesFromSearchResponse(searchResponse);
-    }
-
-    // TODO (high) this will be deprecated as soon as #search will be available
-    @Override
-    public Collection<Activity> getByOnEvent(String value) throws ActivityStoreException {
-        SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                .setQuery(queryString("onEvent:" + value))
                 .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
                 .execute().actionGet();
 

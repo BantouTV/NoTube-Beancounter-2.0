@@ -126,7 +126,13 @@ public class MockActivityStore implements ActivityStore {
     public void shutDown() throws ActivityStoreException {}
 
     @Override
-    public Collection<Activity> search(String path, String value) throws ActivityStoreException {
+    public Collection<Activity> search(
+            String path, String value
+    ) throws ActivityStoreException, WildcardSearchException {
+        if (path.contains("*") || value.contains("*")) {
+            throw new WildcardSearchException("Wildcard searches are not allowed.");
+        }
+
         Collection<Activity> allActivities = new ArrayList<Activity>();
 
         try {
@@ -136,12 +142,6 @@ public class MockActivityStore implements ActivityStore {
         }
 
         return allActivities;
-
-    }
-
-    @Override
-    public List<Activity> getByOnEvent(String value) throws ActivityStoreException {
-        throw new UnsupportedOperationException("NIY");
     }
 
     public Activity getLastActivity() {

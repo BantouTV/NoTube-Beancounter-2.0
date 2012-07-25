@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import org.codehaus.jackson.map.ObjectMapper;
 import tv.notube.activities.ActivityStore;
 import tv.notube.activities.ActivityStoreException;
+import tv.notube.activities.WildcardSearchException;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
 import tv.notube.commons.model.User;
@@ -230,7 +231,7 @@ public class ActivitiesService extends JsonService {
             );
         }
         Response.ResponseBuilder rb = Response.ok();
-        if(activity == null) {
+        if (activity == null) {
             rb.entity(
                     new ActivityPlatformResponse(
                             ActivityPlatformResponse.Status.OK,
@@ -291,13 +292,21 @@ public class ActivitiesService extends JsonService {
             );
             return rb.build();
         }
-        // TODO (really high): replace this with the general one activities.search(path, value);
+
         Collection<Activity> activities;
         try {
             activities = this.activities.search(path, value);
-        } catch (ActivityStoreException e) {
-            return error(e, "Error while getting activities where [" + path + "=" + value +"]");
+        } catch (ActivityStoreException ase) {
+            return error(ase, "Error while getting activities where [" + path + "=" + value +"]");
+        } catch (WildcardSearchException wse) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    wse.getMessage())
+            );
+            return rb.build();
         }
+
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
                 new ActivitiesPlatformResponse(
