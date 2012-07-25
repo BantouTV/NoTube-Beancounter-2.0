@@ -1,14 +1,23 @@
 package tv.notube.resolver.tv.notube.filter.model.pattern;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.Context;
+import tv.notube.commons.model.activity.ResolvedActivity;
 import tv.notube.commons.model.activity.Verb;
+import tv.notube.commons.model.activity.rai.Comment;
 import tv.notube.commons.model.activity.rai.TVEvent;
+import tv.notube.filter.manager.FilterManager;
+import tv.notube.filter.manager.FilterManagerException;
+import tv.notube.filter.manager.InMemoryFilterManager;
 import tv.notube.filter.model.pattern.*;
+import tv.notube.filter.model.pattern.rai.CommentPattern;
 import tv.notube.filter.model.pattern.rai.TVEventPattern;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
@@ -158,6 +167,55 @@ public class PatternTestCase {
         // now everything should pass
         Assert.assertTrue(tvp.matches(matching));
         Assert.assertTrue(tvp.matches(unmatching));
+    }
+
+    @Test
+    public void testCommentPattern() throws FilterManagerException, IOException {
+        Activity activity = new Activity();
+        activity.setId(UUID.fromString("08912993-9fc5-4038-aba0-95c6495540d6"));
+        activity.setVerb(Verb.SHARE);
+        Comment comment = new Comment();
+        comment.setText("thisisatextofacomment");
+        comment.setInReplyTo(UUID.fromString("17efdae2-c803-4411-aac9-f6185bdf13de"));
+        comment.setOnEvent(UUID.fromString("50813b78-86af-47ef-ae85-01657c51c80c"));
+        Context context = new Context();
+        context.setDate(new DateTime().minusDays(30));
+        context.setService("rai.tv");
+        context.setUsername("dpalmisano");
+        activity.setObject(comment);
+        activity.setContext(context);
+        final ResolvedActivity actual = new ResolvedActivity(
+                UUID.fromString("4a832181-b691-4f50-ac7e-86937aa3fd03"),
+                activity
+        );
+
+        CommentPattern commentPattern = new CommentPattern();
+        commentPattern.setOnEventPattern(
+                new UUIDPattern(UUID.fromString("50813b78-86af-47ef-ae85-01657c51c80c"))
+        );
+
+        ActivityPattern activityPattern = new ActivityPattern();
+        activityPattern.setUserId(UUIDPattern.ANY);
+        activityPattern.setVerb(VerbPattern.ANY);
+        activityPattern.setContext(ContextPattern.ANY);
+        activityPattern.setObject(commentPattern);
+
+        Assert.assertTrue(commentPattern.matches(comment));
+        FilterManager fm = new InMemoryFilterManager();
+        fm.register("test-filter", "test filter", "queue", activityPattern);
+        boolean b = fm.get("test-filter").getActivityPattern().matches(actual);
+        Assert.assertTrue(b);
+
+        // let's change the onEvent UUID
+        commentPattern = new CommentPattern();
+        commentPattern.setOnEventPattern(
+                new UUIDPattern(UUID.fromString("0813b78-86af-47ef-ae85-01657c51c80c"))
+        );
+        activityPattern.setObject(commentPattern);
+        fm.delete("test-filter");
+        fm.register("test-filter", "test filter", "queue", activityPattern);
+        b = fm.get("test-filter").getActivityPattern().matches(actual);
+        Assert.assertFalse(b);
     }
 
 }

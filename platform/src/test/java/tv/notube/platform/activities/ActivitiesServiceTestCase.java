@@ -351,8 +351,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 "        \"name\": \"test-name\",\n" +
                 "        \"description\": \"test-description\",\n" +
                 "        \"text\": \"this is a text of a comment\",\n" +
-                "        \"inReplyTo\": \"17efdae2-c803-4411-aac9-f6185bdf13de\",\n" +
-                "        \"id\": \"17efdae2-c803-4411-aac9-f6185bdf13de\"\n" +
+                "        \"inReplyTo\": \"17efdae2-c803-4411-aac9-f6185bdf13de\"\n" +
                 "    },\n" +
                 "    \"context\": {\n" +
                 "        \"date\": 1342456531059,\n" +
