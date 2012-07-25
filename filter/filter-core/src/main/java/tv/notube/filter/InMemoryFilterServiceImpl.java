@@ -56,6 +56,9 @@ public class InMemoryFilterServiceImpl implements FilterService {
             LOGGER.error(errMsg, e);
             throw new FilterServiceException(errMsg, e);
         }
+        if(filter == null) {
+            return;
+        }
         if (filter.isActive()) {
             filters.add(filter);
         } else {
@@ -65,9 +68,11 @@ public class InMemoryFilterServiceImpl implements FilterService {
 
     @Override
     public Set<String> processActivity(ResolvedActivity resolvedActivity) {
+        LOGGER.debug("processing activity {}", resolvedActivity);
         Set<String> result = new HashSet<String>();
         for(Filter filter : filters) {
             if(filter.getActivityPattern().matches(resolvedActivity)) {
+                LOGGER.debug("activity {} filtered", resolvedActivity);
                 result.add(filter.getQueue());
             }
         }
