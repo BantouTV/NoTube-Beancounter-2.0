@@ -30,7 +30,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <camel.version>2.10-SNAPSHOT</camel.version>
+        <camel.version>2.10.0</camel.version>
         <guice.version>2.0</guice.version>
         <slf4j-api.version>1.6.1</slf4j-api.version>
         <log4j.version>1.2.16</log4j.version>
@@ -379,8 +379,18 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        <repository>
+          <id>apache.releases</id>
+          <name>Apache Development Releases Repository</name>
+          <url>https://repository.apache.org/content/repositories/releases/</url>
+          <releases>
+              <enabled>true</enabled>
+          </releases>
+          <snapshots>
+              <enabled>false</enabled>
+          </snapshots>
+      </repository>
     </repositories>
-
     <developers>
         <developer>
             <id>dpalmisano</id>
