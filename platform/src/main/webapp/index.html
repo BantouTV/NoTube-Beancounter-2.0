@@ -555,7 +555,7 @@
                     Description: it register a new filter if the provided name has not been taken already
                     <br>
                     Example: with curl<br><br>
-                    curl -d "description=test-description&queue=social&pattern={\"userId\":{\"uuid\":null},\"verb\":{\"verb\":\"ANY\"},\"object\":{\"type\":\"tv.notube.filter.model.pattern.rai.TVEventPattern\",\"typePattern\":{\"string\":\"tv.notube.filter.model.pattern.rai.TVEventPattern\"},\"url\":{\"url\":null},\"uuidPattern\":{\"uuid\":\"2590fd3d-97ea-49bb-b7ec-04da7553bb0a\"}},\"context\":{\"date\":{\"date\":1342530815683,\"bool\":\"BEFORE\"},\"service\":{\"string\":\"\"},\"mood\":{\"string\":\"\"},\"username\":{\"string\":\"\"}}}" http://api.beancounter.io/rest/filters/register/test-filter?apikey=your-app-key
+                    curl -d "description=test-description&queue=testqueue&pattern={\"userId\":{\"uuid\":null},\"verb\":{\"verb\":\"ANY\"},\"object\":{\"type\":\"tv.notube.filter.model.pattern.rai.CommentPattern\",\"typePattern\":{\"string\":\"tv.notube.filter.model.pattern.rai.CommentPattern\"},\"url\":{\"url\":null},\"onEventPattern\":{\"uuid\":\"50813b78-86af-47ef-ae85-01657c51c80c\"}},\"context\":{\"date\":{\"date\":1,\"bool\":\"AFTER\"},\"service\":{\"string\":\"\"},\"mood\":{\"string\":\"\"},\"username\":{\"string\":\"\"}}}" http://api.beancounter.io/rest/filters/register/test-filter?apikey=your-api-key
                     <br><br>
 
                 <pre><code>
@@ -571,42 +571,41 @@
                     <br/>
 
                     <pre><code>
-    {
-    "activityPattern": {
-            "userId": {
-                "uuid": null     <i>if a userId is specified here, only that user's activity will be matched</i>
-            },
-            "verb": {
-                "verb": "ANY" <i>ANY means that evey verb is matched. You can specify one, i.e: TWEET</i>
-            },
-            "object": {
-                "type": "tv.notube.filter.model.pattern.rai.TVEventPattern",
-                "typePattern": {
-                    "string": "tv.notube.filter.model.pattern.rai.TVEventPattern" <i>this matched only this kind of events</i>
-                },
-                "url": {
-                    "url": null
-                },
-                "uuidPattern": {
-                    "uuid": "2590fd3d-97ea-49bb-b7ec-04da7553bb0a"
-                }
-            },
-            "context": {
-                "date": {
-                    "date": 1342530815683,
-                    "bool": "BEFORE"
-                },
-                "service": {
-                    "string": ""
-                },
-                "mood": {
-                    "string": ""
-                },
-                "username": {
-                    "string": ""
-                }
+                        {
+    "userId": {
+        "uuid": null
+    },
+    "verb": {
+        "verb": "ANY"
+    },
+    "object": {
+        "type": "tv.notube.filter.model.pattern.rai.CommentPattern",
+        "typePattern": {
+            "string": "tv.notube.filter.model.pattern.rai.CommentPattern"
+        },
+        "url": {
+            "url": null
+        },
+        "onEventPattern": {
+            "uuid": "50813b78-86af-47ef-ae85-01657c51c80c"
+        }
+    },
+    "context": {
+        "date": {
+            "date": 1,
+            "bool": "AFTER"
+        },
+        "service": {
+            "string": ""
+        },
+        "mood": {
+            "string": ""
+        },
+        "username": {
+            "string": ""
+        }
     }
-    }
+}
                     </code></pre>
 
                 </article>

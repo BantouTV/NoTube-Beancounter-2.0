@@ -43,7 +43,9 @@ public class MockUserManager implements UserManager {
             } catch (TestsException e) {
                 throw new UserManagerException("Error while building random user with username [" + username + "]");
             }
-            user.setId(UUID.randomUUID());
+            user.setId("user-with-no-activities".equals(username)
+                    ? UUID.fromString("0ad77722-1338-4c32-9209-5b952530959d")
+                    : UUID.randomUUID());
             user.addService("fake-oauth-service", new OAuthAuth("fake-session", "fake-secret"));
             user.addService("fake-simple-service", new SimpleAuth("fake-session", "fake-username"));
             Collection<Service> services = new ArrayList<Service>();

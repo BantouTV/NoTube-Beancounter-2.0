@@ -12,10 +12,6 @@ import java.util.UUID;
  */
 public class Comment extends tv.notube.commons.model.activity.Object {
 
-    private final static String BASE_URL = "http://www.rai.tv/dl/RaiTV/programmi/media/Comment-";
-
-    private UUID id;
-
     private String text;
 
     private UUID inReplyTo;
@@ -26,17 +22,9 @@ public class Comment extends tv.notube.commons.model.activity.Object {
         super();
     }
 
-    public Comment(UUID id, String text) throws MalformedURLException {
-        super(new URL(BASE_URL + id + ".html"));
+    public Comment(URL url, String text) throws MalformedURLException {
+        super(url);
         this.text = text;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     public String getText() {
@@ -90,8 +78,7 @@ public class Comment extends tv.notube.commons.model.activity.Object {
     @Override
     public String toString() {
         return "Comment{" +
-                "id=" + id +
-                ", text='" + text + '\'' +
+                "text='" + text + '\'' +
                 ", inReplyTo=" + inReplyTo +
                 ", onEvent=" + onEvent +
                 '}';

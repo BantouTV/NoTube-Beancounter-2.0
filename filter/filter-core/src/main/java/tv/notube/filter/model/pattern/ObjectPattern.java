@@ -2,6 +2,7 @@ package tv.notube.filter.model.pattern;
 
 import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
+import tv.notube.filter.model.pattern.rai.CommentPattern;
 import tv.notube.filter.model.pattern.rai.TVEventPattern;
 
 /**
@@ -11,7 +12,9 @@ import tv.notube.filter.model.pattern.rai.TVEventPattern;
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include= JsonTypeInfo.As.PROPERTY, property="type")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = TVEventPattern.class, name = "tv.notube.filter.model.pattern.rai.TVEventPattern")
+        @JsonSubTypes.Type(value = TVEventPattern.class, name = "tv.notube.filter.model.pattern.rai.TVEventPattern"),
+        @JsonSubTypes.Type(value = CommentPattern.class, name = "tv.notube.filter.model.pattern.rai.CommentPattern")
+
 })
 public class ObjectPattern implements Pattern<tv.notube.commons.model.activity.Object> {
 

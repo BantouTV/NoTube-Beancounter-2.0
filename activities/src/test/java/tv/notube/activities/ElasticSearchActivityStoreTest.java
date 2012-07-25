@@ -39,6 +39,7 @@ import java.util.UUID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 import static tv.notube.activities.ElasticSearchActivityStoreImpl.INDEX_NAME;
 import static tv.notube.activities.ElasticSearchActivityStoreImpl.INDEX_TYPE;
 
@@ -392,6 +393,62 @@ public class ElasticSearchActivityStoreTest {
     }
 
     @Test
+    public void getFirstPageOfResultsOfTweetsForSpecifiedUser() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        List<Activity> activitiesStored = (List<Activity>) createTweetActivities(userId, dateTime, 25);
+        as.store(userId, activitiesStored);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved = (List<Activity>) as.getByUserPaginated(userId, 0, 10);
+        assertEquals(activitiesRetrieved.size(), 10);
+
+        for (int i = 0; i < activitiesRetrieved.size(); i++) {
+            assertEquals(activitiesStored.get(i), activitiesRetrieved.get(i));
+        }
+    }
+
+    @Test
+    public void getSecondPageOfResultsOfTweetsForSpecifiedUser() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        List<Activity> activitiesStored = (List<Activity>) createTweetActivities(userId, dateTime, 25);
+        as.store(userId, activitiesStored);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved = (List<Activity>) as.getByUserPaginated(userId, 1, 10);
+        assertEquals(activitiesRetrieved.size(), 10);
+
+        int i = 10;
+        for (Activity activity : activitiesRetrieved) {
+            assertEquals(activitiesStored.get(i++), activity);
+        }
+    }
+
+    @Test
+    public void getPageOfResultsOfTweetsForSpecifiedUserWhenThereAreLessThanPageSizeActivities() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        List<Activity> activitiesStored = (List<Activity>) createTweetActivities(userId, dateTime, 25);
+        as.store(userId, activitiesStored);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved = (List<Activity>) as.getByUserPaginated(userId, 2, 10);
+        assertEquals(activitiesRetrieved.size(), 5);
+
+        int i = 20;
+        for (Activity activity : activitiesRetrieved) {
+            assertEquals(activitiesStored.get(i++), activity);
+        }
+    }
+
+    @Test
     public void searchForAllTweetsOfAUser() throws Exception {
         UUID userId = UUID.randomUUID();
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
@@ -474,6 +531,68 @@ public class ElasticSearchActivityStoreTest {
 
         assertEquals(activitiesRetrieved.size(), 1);
         assertEquals(activitiesRetrieved.get(0), tweetsStored.get(1));
+    }
+
+    @Test
+    public void searchWhenSpecifiedFieldIsSameAsAnotherField() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+        Activity activity = createDuplicateFieldActivity();
+        Activity tweetActivity = createTweetActivity(0, userId, dateTime);
+
+        as.store(userId, activity);
+        as.store(userId, tweetActivity);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved =
+                (List<Activity>) as.search("activity.context.username", "\"twitter-username\"");
+
+        assertEquals(activitiesRetrieved.size(), 1);
+        assertEquals(activitiesRetrieved.get(0), tweetActivity);
+
+        try {
+            // This should throw an exception if the correct activity was retrieved
+            // since no type mapping is specified for JSON serialization in the
+            // Object class for the DuplicateFieldObject class.
+            as.search("activity.object.username", "\"different-username\"");
+        } catch (ActivityStoreException ignored) {
+            return;
+        }
+
+        fail();
+    }
+
+    @Test
+    public void wildcardSearchesShouldNotBeAllowed() throws Exception {
+        UUID userId1 = UUID.randomUUID();
+        UUID userId2 = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        as.store(userId1, createTweetActivities(userId1, dateTime, 5));
+        as.store(userId2, createTweetActivities(userId2, dateTime, 5));
+
+        refreshIndex();
+
+        try {
+            as.search("userId", "*");
+        } catch (ActivityStoreException expected) {}
+
+        try {
+            as.search("*", "*");
+        } catch (ActivityStoreException expected) {}
+
+        try {
+            as.search("user*", "*");
+        } catch (ActivityStoreException expected) {}
+
+        try {
+            as.search("type", "tw*er");
+        } catch (ActivityStoreException expected) {
+            return;
+        }
+
+        fail();
     }
 
     private void refreshIndex() {
@@ -559,6 +678,28 @@ public class ElasticSearchActivityStoreTest {
         }
 
         return activities;
+    }
+
+    private Activity createDuplicateFieldActivity() throws Exception {
+        ActivityBuilder ab = new DefaultActivityBuilder();
+
+        ab.push();
+        ab.setVerb(Verb.TWEET);
+        Map<String, Object> fields = new HashMap<String, Object>();
+        fields.put("setUsername", "different-username");
+        ab.setObject(
+                DuplicateFieldObject.class,
+                new URL("http://duplica.te/test-user/"),
+                "Test",
+                fields
+        );
+        ab.setContext(
+                new DateTime(DateTimeZone.UTC),
+                "http://duplica.te",
+                "dummy-username"
+        );
+
+        return ab.pop();
     }
 
     @SuppressWarnings("unchecked")

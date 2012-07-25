@@ -46,6 +46,14 @@ public class DateTimePattern implements Pattern<DateTime> {
         return bool;
     }
 
+    public void setDate(DateTime date) {
+        this.date = date;
+    }
+
+    public void setBool(Bool bool) {
+        this.bool = bool;
+    }
+
     @Override
     public boolean matches(DateTime dateTime) {
         long millis = dateTime.getMillis();
