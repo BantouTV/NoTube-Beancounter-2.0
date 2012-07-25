@@ -1,7 +1,5 @@
 package tv.notube.listener.facebook.model;
 
-import tv.notube.listener.facebook.model.FacebookChange;
-
 import java.util.List;
 
 /**

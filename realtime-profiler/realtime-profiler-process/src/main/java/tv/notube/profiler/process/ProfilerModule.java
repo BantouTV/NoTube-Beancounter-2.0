@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
 
@@ -11,19 +12,23 @@ import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.guice.CamelModuleWithMatchingRoutes;
 import org.guiceyfruit.jndi.JndiBind;
 
+import tv.notube.commons.cogito.CogitoNLPEngineImpl;
 import tv.notube.commons.helper.PropertiesHelper;
 import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
 import tv.notube.commons.helper.jedis.JedisPoolFactory;
 import tv.notube.commons.linking.FacebookCogitoLinkingEngine;
+import tv.notube.commons.linking.LinkingEngine;
 import tv.notube.commons.lupedia.LUpediaNLPEngineImpl;
 import tv.notube.commons.model.activity.Tweet;
 import tv.notube.commons.model.activity.facebook.Like;
+import tv.notube.commons.nlp.NLPEngine;
 import tv.notube.profiler.DefaultProfilerImpl;
 import tv.notube.profiler.Profiler;
 import tv.notube.profiler.ProfilerException;
 import tv.notube.profiler.rules.custom.FacebookLikeProfilingRule;
 import tv.notube.profiler.rules.custom.GenericObjectProfilingRule;
 import tv.notube.profiler.rules.custom.TweetProfilingRule;
+import tv.notube.profiles.JedisProfilesImpl;
 import tv.notube.profiles.Profiles;
 
 public class ProfilerModule extends CamelModuleWithMatchingRoutes {
@@ -34,39 +39,26 @@ public class ProfilerModule extends CamelModuleWithMatchingRoutes {
         Properties redisProperties = PropertiesHelper.readFromClasspath("/redis.properties");
         Names.bindProperties(binder(), redisProperties);
         bindInstance("redisProperties", redisProperties);
-        bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
         Properties profilerProperties = PropertiesHelper.readFromClasspath("/profiler.properties");
-        try {
-            bind(Profiler.class).toInstance(createProfiler(profilerProperties));
-        } catch (ProfilerException e) {
-            final String errMsg = "Error while building profiler";
-            throw new RuntimeException(errMsg, e);
-        }
+        bindInstance("profilerProperties", profilerProperties);
+        bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
+        bind(Profiles.class).to(JedisProfilesImpl.class);
+
+        // bind NLP and linking engine
+        bind(NLPEngine.class).to(LUpediaNLPEngineImpl.class);
+        bind(LinkingEngine.class).toInstance(new FacebookCogitoLinkingEngine());
+
+        // bind profiler
+        bind(Profiler.class).to(DefaultProfilerImpl.class);
 
         bind(ProfilerRoute.class);
     }
-
-    private Profiler createProfiler(Properties properties) throws ProfilerException {
-        Injector injector = Guice.createInjector(new ProfilerModule());
-        Profiles profiles = injector.getInstance(Profiles.class);
-        Profiler profiler = new DefaultProfilerImpl(
-                profiles,
-                new LUpediaNLPEngineImpl(),
-                new FacebookCogitoLinkingEngine(),
-                properties
-        );
-        profiler.registerRule(Tweet.class, TweetProfilingRule.class);
-        profiler.registerRule(tv.notube.commons.model.activity.Object.class, GenericObjectProfilingRule.class);
-        profiler.registerRule(Like.class, FacebookLikeProfilingRule.class);
-        return profiler;
-    }
-
 
     @Provides
     @JndiBind("properties")
     PropertiesComponent propertiesComponent() {
         PropertiesComponent pc = new PropertiesComponent();
-        pc.setLocation("classpath:profiler.properties");
+        pc.setLocation("classpath:beancounter.properties");
         return pc;
     }
 

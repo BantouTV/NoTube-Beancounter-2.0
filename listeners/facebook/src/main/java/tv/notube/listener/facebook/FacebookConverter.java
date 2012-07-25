@@ -15,6 +15,7 @@ import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.Verb;
 import tv.notube.listener.facebook.converter.FacebookActivityConverter;
 import tv.notube.listener.facebook.converter.FacebookActivityConverterException;
+import tv.notube.listener.facebook.converter.UnconvertableFacebookActivityException;
 import tv.notube.listener.facebook.model.FacebookChange;
 import tv.notube.listener.facebook.model.FacebookData;
 import tv.notube.listener.facebook.model.FacebookNotification;
@@ -23,7 +24,12 @@ import tv.notube.resolver.ResolverException;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.UserManagerException;
 
-public class FacebookConverter implements ActivityConverter {
+/**
+ * In-memory implementation of {@link ActivityConverter}.
+ *
+ * @author Davide Palmisano ( dpalmisano@gmail.com )
+ */
+public final class FacebookConverter implements ActivityConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FacebookConverter.class);
 
@@ -38,7 +44,8 @@ public class FacebookConverter implements ActivityConverter {
     @Inject
     private FacebookActivityConverter converter;
 
-    public List<Activity> getActivities(FacebookNotification notification) {
+    public List<Activity> getActivities(FacebookNotification notification)
+            throws ActivityConverterException{
         List<Activity> activities = new ArrayList<Activity>();
         Set<String> excludedUsers = new HashSet<String>();
         for (FacebookChange change : notification.getEntry()) {
@@ -56,6 +63,7 @@ public class FacebookConverter implements ActivityConverter {
                 Collection<java.lang.Object> fetchedObjs;
                 Class<?> facebookClass = getFacebookClass(field);
                 try {
+                    LOGGER.debug("fetching {} {}", facebookClass.getName(), field);
                     fetchedObjs = fetch(facebookClass, client, field);
                 } catch (FacebookOAuthException e) {
                     String username = getUsername(userId);
@@ -66,7 +74,7 @@ public class FacebookConverter implements ActivityConverter {
                     } catch (UserManagerException e1) {
                         final String errMgs = "error while voiding the OAuth token for user [" + user.getUsername() + "] on service [" + SERVICE + "]";
                         LOGGER.error(errMgs, e1);
-                        throw new RuntimeException(errMgs, e1);
+                        throw new ActivityConverterException(errMgs, e1);
                     }
                     excludedUsers.add(userId);
                     continue;
@@ -75,18 +83,23 @@ public class FacebookConverter implements ActivityConverter {
                     Verb verb = fromFieldToVerb(field);
                     FacebookActivityConverter.Result result;
                     try {
-                        result = converter.convert(fetchedObj, fromFieldToVerb(field));
+                        LOGGER.debug("converting {} to {}", fetchedObj, fromFieldToVerb(field));
+                        result = converter.convert(fetchedObj, fromFieldToVerb(field), userId);
+                    } catch (UnconvertableFacebookActivityException e) {
+                        LOGGER.debug("skipping an unconvertable object");
+                        continue;
                     } catch (FacebookActivityConverterException e) {
                         final String errMgs = "Error while converting Facebook object " +
                                 "[" + fetchedObj.toString() + "] for field [" + field + "]";
                         LOGGER.error(errMgs, e);
-                        throw new RuntimeException(errMgs, e);
+                        throw new ActivityConverterException(errMgs, e);
                     }
                     Activity activity = toActivity(result, verb);
                     activities.add(activity);
                 }
             }
         }
+        LOGGER.debug("returning activities {}", activities);
         return activities;
     }
 
@@ -128,17 +141,18 @@ public class FacebookConverter implements ActivityConverter {
         for (T t : connection.getData()) {
             result.add(t);
         }
+        LOGGER.debug("returning result");
         return result;
     }
 
-    private String getAccessToken(String identifier) {
+    private String getAccessToken(String identifier) throws ActivityConverterException {
         String username;
         try {
             username = resolver.resolveUsername(identifier, SERVICE);
         } catch (ResolverException e) {
             final String errMsg = "Error while resolving username [" + identifier + "] on facebook";
             LOGGER.error(errMsg, e);
-            throw new RuntimeException(errMsg, e);
+            throw new ActivityConverterException(errMsg, e);
         }
         User userObj;
         try {
@@ -146,30 +160,30 @@ public class FacebookConverter implements ActivityConverter {
         } catch (UserManagerException e) {
             final String errMsg = "Error while getting user with username [" + username + "]";
             LOGGER.error(errMsg, e);
-            throw new RuntimeException(errMsg, e);
+            throw new ActivityConverterException(errMsg, e);
         }
         return userObj.getServices().get(SERVICE).getSession();
     }
 
-    private String getUsername(String identifier) {
+    private String getUsername(String identifier) throws ActivityConverterException {
         String username;
         try {
             username = resolver.resolveUsername(identifier, SERVICE);
         } catch (ResolverException e) {
             final String errMsg = "Error while resolving username [" + identifier + "] on facebook";
             LOGGER.error(errMsg, e);
-            throw new RuntimeException(errMsg, e);
+            throw new ActivityConverterException(errMsg, e);
         }
         return username;
     }
 
-    private User getUser(String username) {
+    private User getUser(String username) throws ActivityConverterException {
         try {
             return userManager.getUser(username);
         } catch (UserManagerException e) {
             final String errMsg = "Error while getting user [" + username + "]";
             LOGGER.error(errMsg, e);
-            throw new RuntimeException(errMsg, e);
+            throw new ActivityConverterException(errMsg, e);
         }
     }
 }

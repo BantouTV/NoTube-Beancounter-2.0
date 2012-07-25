@@ -24,6 +24,9 @@ public class IndexerRoute extends RouteBuilder {
         errorHandler(deadLetterChannel(errorEndpoint()));
 
         from(fromKestrel())
+
+                .to(statisticsEndpoint())
+
                 .unmarshal().json(JsonLibrary.Jackson, ResolvedActivity.class)
                 .process(new Processor() {
                     @Override
@@ -39,8 +42,10 @@ public class IndexerRoute extends RouteBuilder {
                         }
                     }
                 });
+    }
 
-
+    protected String statisticsEndpoint() {
+        return "log:indexerRouteStatistics?{{camel.log.options.statistics}}";
     }
 
     protected String fromKestrel() {
@@ -48,7 +53,6 @@ public class IndexerRoute extends RouteBuilder {
     }
 
     protected String errorEndpoint() {
-        return "log:indexerRoute?level=ERROR";
+        return "log:" + getClass().getSimpleName() + "?{{camel.log.options.error}}";
     }
-
 }

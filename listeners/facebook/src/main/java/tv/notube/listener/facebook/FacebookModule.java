@@ -37,7 +37,7 @@ public class FacebookModule extends CamelModuleWithMatchingRoutes {
         bindInstance("redisProperties", redisProperties);
         bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
 
-        Properties properties = PropertiesHelper.readFromClasspath("/facebook.properties");
+        Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
         Services services = Services.build(properties);
         bind(Services.class).toInstance(services);
         bind(Resolver.class).to(JedisResolver.class);
@@ -49,8 +49,8 @@ public class FacebookModule extends CamelModuleWithMatchingRoutes {
         bind(UserManager.class).to(JedisUserManagerImpl.class);
         FacebookActivityConverter fac = new FacebookActivityConverter();
         try {
-            fac.registerConverter(Post.class, Verb.SHARE, new FacebookLikeConverter());
-            fac.registerConverter(FacebookData.class, Verb.LIKE, new FacebookShareConverter());
+            fac.registerConverter(Post.class, Verb.SHARE, new FacebookShareConverter());
+            fac.registerConverter(FacebookData.class, Verb.LIKE, new FacebookLikeConverter());
         } catch (FacebookActivityConverterException e) {
             throw new RuntimeException("Error while instantiating Facebook converters", e);
         }
@@ -63,7 +63,7 @@ public class FacebookModule extends CamelModuleWithMatchingRoutes {
     @JndiBind("properties")
     PropertiesComponent propertiesComponent() {
         PropertiesComponent pc = new PropertiesComponent();
-        pc.setLocation("classpath:facebook.properties");
+        pc.setLocation("classpath:beancounter.properties");
         return pc;
     }
 

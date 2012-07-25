@@ -3,7 +3,6 @@ package tv.notube.commons.helper.resolver;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import tv.notube.commons.helper.PropertiesHelper;
-import tv.notube.commons.helper.es.ElasticSearchConfiguration;
 
 import java.util.Properties;
 
@@ -16,7 +15,7 @@ public class ServicesTestCase {
 
     @Test
     public void test() {
-        Properties properties = PropertiesHelper.readFromClasspath("/resolver.properties");
+        Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
         Services services = Services.build(properties);
         Assert.assertNotNull(services);
     }

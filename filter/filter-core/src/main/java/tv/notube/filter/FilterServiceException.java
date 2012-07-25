@@ -1,6 +1,5 @@
 package tv.notube.filter;
 
-
 /**
  * put class description here
  *

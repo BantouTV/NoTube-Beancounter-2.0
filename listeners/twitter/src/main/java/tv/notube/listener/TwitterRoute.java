@@ -45,7 +45,7 @@ public class TwitterRoute extends RouteBuilder {
     }
 
     protected String errorEndpoint() {
-        return "log:twitterRoute?level=ERROR";
+        return "log:" + getClass().getSimpleName() + "?{{camel.log.options.error}}";
     }
 
     protected String toEndpoint() {

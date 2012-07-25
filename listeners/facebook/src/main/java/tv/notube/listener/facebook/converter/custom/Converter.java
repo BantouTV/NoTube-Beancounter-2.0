@@ -23,10 +23,12 @@ public interface Converter<T, M extends tv.notube.commons.model.activity.Object>
     /**
      * It wraps with a {@link Context} all the needed metadata coming from facebook.
      *
+     *
      * @param t
+     * @param userId
      * @return
      * @throws ConverterException
      */
-    public Context getContext(T t) throws ConverterException;
+    public Context getContext(T t, String userId) throws ConverterException;
 
 }

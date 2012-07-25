@@ -62,6 +62,6 @@ public class ResolverRoute extends RouteBuilder {
     }
 
     protected String errorEndpoint() {
-        return "log:resolverRoute?level=ERROR";
+        return "log:" + getClass().getSimpleName() + "?{{camel.log.options.error}}";
     }
 }

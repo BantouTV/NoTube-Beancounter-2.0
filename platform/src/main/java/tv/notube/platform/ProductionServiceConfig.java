@@ -81,7 +81,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 ServiceAuthorizationManager sam = DefaultServiceAuthorizationManager.build(samProperties);
                 bind(ServiceAuthorizationManager.class).toInstance(sam);
 
-                Properties properties = PropertiesHelper.readFromClasspath("/resolver.properties");
+                Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
                 Services services = Services.build(properties);
                 bind(Services.class).toInstance(services);
                 bind(Resolver.class).to(JedisResolver.class);
@@ -89,7 +89,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(UserManager.class).to(JedisUserManagerImpl.class).asEagerSingleton();
                 bind(Profiles.class).to(JedisProfilesImpl.class);
                 bind(ActivityStore.class).toInstance(getElasticSearch());
-                bind(Queues.class).toInstance(getKestrelQueue());
+                bind(Queues.class).toInstance(new KestrelQueues(properties));
                 bind(FilterManager.class).to(JedisFilterManager.class);
                 // add bindings for Jackson
                 bind(JacksonJaxbJsonProvider.class).asEagerSingleton();
@@ -103,11 +103,6 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
 
             private ActivityStore getElasticSearch() {
                 return ElasticSearchActivityStoreFactory.getInstance().build();
-            }
-
-            private Queues getKestrelQueue() {
-                Properties properties = PropertiesHelper.readFromClasspath("/kestrel.properties");
-                return new KestrelQueues(properties);
             }
         });
     }

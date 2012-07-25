@@ -19,8 +19,8 @@ public final class KestrelQueues implements Queues {
 
     public KestrelQueues(Properties properties) {
         this.properties = properties;
-        String host = this.properties.getProperty("host");
-        int port = Integer.parseInt(this.properties.getProperty("port"));
+        String host = this.properties.getProperty("kestrel.process.host");
+        int port = Integer.parseInt(this.properties.getProperty("kestrel.process.port"));
         try {
             client = new MemcachedClient(new InetSocketAddress(host, port));
         } catch (IOException e) {
@@ -41,8 +41,11 @@ public final class KestrelQueues implements Queues {
 
     @Override
     public void push(String json) throws QueuesException {
+        String queueName =  properties
+                .getProperty("kestrel.queue.internal.url")
+                .split("/")[1];
         client.set(
-                (String) properties.get("queue"),
+                queueName,
                 3600,
                 json
         );
