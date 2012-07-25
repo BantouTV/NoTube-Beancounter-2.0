@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.node.DiscoveryNode;
@@ -174,7 +175,26 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
     }
 
     @Override
+    public Collection<Activity> getByUserPaginated(
+            UUID userId, int pageNumber, int size
+    ) throws ActivityStoreException {
+        SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
+                .setSearchType(SearchType.QUERY_THEN_FETCH)
+                .setQuery(queryString("userId:" + userId.toString()))
+                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
+                .setFrom(pageNumber * size)
+                .setSize(size)
+                .execute().actionGet();
+
+        return retrieveActivitiesFromSearchResponse(searchResponse);
+    }
+
+    @Override
     public Collection<Activity> search(String path, String value) throws ActivityStoreException {
+        if (path.contains("*") || value.contains("*")) {
+            throw new ActivityStoreException("Wildcard searches are not allowed.");
+        }
+
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString(path + ":" + value))
                 .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)

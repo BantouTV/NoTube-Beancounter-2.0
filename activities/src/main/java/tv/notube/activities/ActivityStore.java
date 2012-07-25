@@ -4,7 +4,6 @@ import org.joda.time.DateTime;
 import tv.notube.commons.model.activity.Activity;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -101,6 +100,12 @@ public interface ActivityStore {
     public Collection<Activity> getByUser(
             final UUID userId,
             final Collection<UUID> activityIds
+    ) throws ActivityStoreException;
+
+    public Collection<Activity> getByUserPaginated(
+            final UUID userId,
+            final int pageNumber,
+            final int size
     ) throws ActivityStoreException;
 
     /**

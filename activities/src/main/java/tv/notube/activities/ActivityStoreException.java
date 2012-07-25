@@ -7,6 +7,10 @@ package tv.notube.activities;
  */
 public class ActivityStoreException extends Exception {
 
+    public ActivityStoreException(String message) {
+        super(message);
+    }
+
     public ActivityStoreException(String message, Exception e) {
         super(message, e);
     }
