@@ -41,14 +41,8 @@ public final class KestrelQueues implements Queues {
 
     @Override
     public void push(String json) throws QueuesException {
-        String queueName =  properties
-                .getProperty("kestrel.queue.internal.url")
-                .split("/")[1];
-        client.set(
-                queueName,
-                3600,
-                json
-        );
+        String queueName =  properties.getProperty("kestrel.process.queue");
+        client.set(queueName, 3600, json);
     }
 
 }
