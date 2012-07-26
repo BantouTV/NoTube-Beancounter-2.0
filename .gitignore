@@ -12,3 +12,5 @@ target/
 
 # elasticsearch
 data/
+**/**/logs/
+**/logs/
