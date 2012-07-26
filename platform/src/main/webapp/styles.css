@@ -362,10 +362,15 @@ aside section ul li a:hover {
 pre {
 	margin-top: 20px;
 	margin-bottom: 20px;
+	padding: 5px;
 	background: rgba(255, 252, 221, 0.8);
 	-moz-border-radius: 10px;
 	-webkit-border-radius: 10px;
-	}
+	white-space: pre-wrap;
+	white-space: -moz-pre-wrap !important;
+	white-space: -pre-wrap;
+	white-space: -o-pre-wrap;
+}
 
 /* top title */
 .topTitle {

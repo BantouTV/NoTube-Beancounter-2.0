@@ -5,25 +5,25 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.testng.annotations.*;
-import tv.notube.commons.model.activity.*;
-import tv.notube.commons.model.activity.Object;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import tv.notube.commons.model.activity.Activity;
+import tv.notube.commons.model.activity.Tweet;
+import tv.notube.commons.model.activity.Verb;
 import tv.notube.commons.model.activity.rai.TVEvent;
 import tv.notube.platform.APIResponse;
 import tv.notube.platform.AbstractJerseyTestCase;
-import tv.notube.platform.PlatformResponse;
 import tv.notube.platform.responses.ActivitiesPlatformResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertSame;
 
 /**
  * Reference test case for {@link tv.notube.platform.ActivitiesService}

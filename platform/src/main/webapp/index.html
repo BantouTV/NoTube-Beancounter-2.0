@@ -17,6 +17,7 @@
 			<li class="selected"><a href="#">Home</a></li>
 			<li><a href="#Authentication API">Authentication API</a></li>
             <li><a href="#User API">User API</a></li>
+            <li><a href="#Activities API">Activities API</a></li>
             <li><a href="#Filter API">Filter API</a></li>
             <li><a href="#Utils API">Utils API</a></li>
 		</ul>
@@ -39,13 +40,15 @@
 			<pre><code>
 	{
 		"status": OK | NOK ,
-		"message": <i>a success of error message</i>,
+		"message": <i>a success or error message</i>,
 		"object": <i>an optional object that may be returned</i>
 	}
 			</code></pre>
 						</p>
 						<p>
-    						<strong>DISCLAIMER: responses are going to change frequently. Be aware and ofter refer to this page</strong>
+    						<strong>
+                                DISCLAIMER: responses are going to change frequently. Be aware and refer often to this page
+                            </strong>
 						</p><br>
 
 				</article>
@@ -223,120 +226,17 @@
 				
 				</article>
 				
-				
 				<article class="articlecontent">
 					
 					<header>
-						<h2>5) Get user activities</h2>
-					</header>
-					
-					Path: /user/{username}/activities<br>
-					Method: GET<br>
-					Parameters: <br>
-					- {username} the Beancounter username<br>
-					- apikey <br>
-					Description: it returns all the user activites on the sources he's
-					subscribed to.<br>
-					Example:<br><br>
-
-					GET http://api.beancounter.io/rest/user/dpalmisano/activities?apikey=your-api-key<br><br>
-					
-				</article>
-
-
-				<article class="articlecontent">
-
-					<header>
-						<h2>6) Push activity</h2>
-					</header>
-
-					Path: /activities/add/{username}<br>
-					Method: POST<br>
-					Parameters: <br>
-					- {username} the Beancounter username<br>
-                    - activity, the activity in JSON format<br/>
-					- apikey <br>
-					Description: It pushes the activity to the User.<br>
-					Example with curl:<br><br>
-
-                    curl -d "activity={\"verb\":\"TWEET\",\"object\":{\"type\":\"TWEET\",\"url\":\"http://twitter.com/username/my_tweeet\",\"name\":null,\"description\":null,\"text\":\"A fake text\",\"hashTags\":[\"testingBeancounter\"],\"urls\":[]},\"context\":{\"date\":1340702105000,\"service\":\"http://twitter.com\",\"mood\":null}}" http://api.beancounter.io/rest/activities/add/dpalmisano?apikey=your-api-key<br><br>
-
-                    A "basic" JSON activity is made from an "object", a "context" and a "verb".
-                    <br/>
-
-                    <pre><code>
-        {
-                "object":
-                {
-                        "type":         <i>the type of the activity,</i>
-                        "name":         <i>the username of the user for the service,</i>
-                        "description":  <i>a simple description of the activity,</i>
-                        "url":          <i>the url for the activity</i>
-                },
-                "context":
-                {
-                         "date":        <i>the date of the activity,</i>
-                         "service":     <i>the service of the activity,</i>
-                         "mood":        <i>the mood of the user</i>
-                },
-                "verb":                  <i>the kind of activity</i>
-        }
-
-                    </code></pre>
-
-                    At the moment the possible "type" is "TWEET".
-                    <br/>
-                    The available verb are "TWEET", "FOLLOWING" and "FAVORITED".
-                    <br/><br/>
-
-                    <h4> TWEET </h4>
-                    A TWEET has additional fields, as "text", "hashTags" and "urls".<br/>
-                    The "text" is for text of the tweet.<br/>
-                    "hashTags" is a list of strings of the tags in the tweet.<br/>
-                    "urls" is a list of strings of the urls in the tweet.<br/>
-                    <br/>
-                    <strong>TWEET Example</strong>
-
-
-                    <pre><code>
-        {
-                "object":
-                {
-                        "type":"TWEET",
-                        "text":"Just a fake tweet!",
-                        "hashTags":["testingBeancounter"],
-                        "urls":["http://fakeUrl.io"],
-                        "name":"tweet_name",
-                        "description":"A fake description",
-                        "url":"http://twitter.com"
-                },
-                "context":
-                {
-                        "date":null,
-                        "service":null,
-                        "mood":null
-                },
-                "verb":"TWEET"
-        }
-                    </code></pre>
-
-                    <br><br>
-
-
-				</article>
-
-
-				<article class="articlecontent">
-					
-					<header>
-						<h2>7) Delete a user</h2>
+						<h2>5) Delete a user</h2>
 					</header>
 					
 					Path: /user/{username}<br>
 					Method: DELETE<br>
 					Parameters: <br>
 					- {username} the Beancounter username<br>
-					- apikey <>br
+					- apikey <br>
 					Description: it deletes all the user data and activities.<br>
 					Example: with curl<br><br>
 
@@ -349,7 +249,7 @@
 				<article class="articlecontent">
 					
 					<header>
-						<h2>8) Authenticate a user</h2>
+						<h2>6) Authenticate a user</h2>
 					</header>
 					
 					Path: /user/{username}/authenticate<br>
@@ -369,7 +269,7 @@
 				<article class="articlecontent">
 					
 					<header>
-						<h2>9) Get a user profile</h2>
+						<h2>7) Get a user profile</h2>
 					</header>
 					
 					Path: /user/{username}/profile<br>
@@ -389,7 +289,7 @@
 				<article class="articlecontent">
 					
 					<header>
-						<h2>10) Add a source (twitter, facebook) to a user</h2>
+						<h2>8) Add a source (twitter, facebook) to a user</h2>
 					</header>
 					
 					Beancounter.io APIs support only those services which are
@@ -424,7 +324,7 @@
 				<article class="articlecontent">
 					
 					<header>
-						<h2>11) Remove a source (twitter, facebook) to a user</h2>
+						<h2>9) Remove a source (twitter, facebook) to a user</h2>
 					</header>
 					
 					Path: /user/source/{username}/{service}<br>
@@ -443,54 +343,10 @@
 				
 				</article>
 
-
                 <article class="articlecontent">
 
                     <header>
-                        <h2>12) Get single activity</h2>
-                    </header>
-
-                    Path: /activities/get/{username}/{activityId}<br>
-                    Method: GET<br>
-                    Parameters: <br>
-                    - {username} the Beancounter username<br>
-                    - {activityId} the activityId of one of the user's activities<br>
-                    - apikey <br>
-                    Description: it retrieves a single specified activity of the specified user
-                    <br>
-                    Example: with curl<br><br>
-
-                    curl http://api.beancounter.io/rest/activities/get/dpalmisano/550e8400-e29b-41d4-a716-446655440000?apikey=your-api-key
-                    <br><br>
-
-                </article>
-
-
-                <article class="articlecontent">
-
-                    <header>
-                        <h2>13) Get multiple activities</h2>
-                    </header>
-
-                    Path: /activities/all/{username}/<br>
-                    Method: GET<br>
-                    Parameters: <br>
-                    - {username} the Beancounter username<br>
-                    - apikey <br>
-                    Description: it retrieves all the user activities paginated by a limit
-                    <br>
-                    Example: with curl<br><br>
-
-                    curl http://api.beancounter.io/rest/activities/all/dpalmisano?apikey=your-api-key
-                    <br><br>
-
-                </article>
-
-
-                <article class="articlecontent">
-
-                    <header>
-                        <h2>14) Check token validity</h2>
+                        <h2>10) Check token validity</h2>
                     </header>
 
                     Path: /user/{username}/{service}/check<br>
@@ -517,7 +373,238 @@
 
                 </article>
 
-<hr>
+    <hr>
+
+    <article class="articlecontent">
+        <header id="Activities API">
+            <h2 class="centered">Activities API</h2>
+        </header>
+    </article>
+
+    <article class="articlecontent">
+        <header>
+            <h2>11) Add an activity</h2>
+        </header>
+
+        Path: /activities/add/{username}<br>
+        Method: POST<br>
+        Parameters: <br>
+        - <b>{username}</b> the Beancounter username<br>
+        - <b>activity</b> : the activity in JSON format<br/>
+        - <b>apikey</b> <br>
+        Description: It pushes the activity to the User.<br>
+        Example with curl:
+
+        <pre><code>
+    $ curl -d "activity={\"verb\":\"TWEET\",\"object\":{\"type\":\"TWEET\",\"url\":\"http://twitter.com/username/my_tweeet\",\"name\":null,\"description\":null,\"text\":\"A fake text\",\"hashTags\":[\"testingBeancounter\"],\"urls\":[]},\"context\":{\"date\":1340702105000,\"service\":\"http://twitter.com\",\"mood\":null}}" http://api.beancounter.io/rest/activities/add/dpalmisano?apikey=your-api-key
+        </code></pre>
+
+        A "basic" JSON activity is made from an "object", a "context" and a "verb".
+        <br/>
+
+        <pre><code>
+    {
+        "object":
+        {
+            "type":         <i>the type of the activity,</i>
+            "name":         <i>the name of the activity,</i>
+            "description":  <i>a simple description of the activity,</i>
+            "url":          <i>the url for the activity</i>
+        },
+        "context":
+        {
+            "date":        <i>the date of the activity,</i>
+            "service":     <i>the service of the activity,</i>
+            "mood":        <i>the mood of the user</i>
+        },
+        "verb":            <i>the kind of activity</i>
+    }
+            </code></pre>
+
+        At the moment the only possible "type" is "TWEET".
+        <br/>
+        The available verbs are "TWEET", "FOLLOWING" and "FAVORITED".
+        <br/><br/>
+
+        <p>
+            <h4>TWEET</h4>
+            A TWEET has additional fields, as "text", "hashTags" and "urls".<br/>
+            The "text" is for text of the tweet.<br/>
+            "hashTags" is a list of strings of the tags in the tweet.<br/>
+            "urls" is a list of strings of the urls in the tweet.<br/>
+        </p>
+
+        <strong>TWEET Example</strong>
+
+        <pre><code>
+    {
+        "object":
+        {
+            "type": "TWEET",
+            "text": "Just a fake tweet!",
+            "hashTags": ["testingBeancounter"],
+            "urls": ["http://fakeUrl.io"],
+            "name": "tweet_name",
+            "description": "A fake description",
+            "url": "http://twitter.com"
+        },
+        "context":
+        {
+            "date": null,
+            "service": null,
+            "mood": null
+        },
+        "verb": "TWEET"
+    }
+        </code></pre>
+
+        <h3>Responses</h3>
+
+        If the activity was successfully added:
+        <pre><code>
+    {
+        "status": "OK",
+        "message": "activity successfully registered",
+        "object": <i>the id of the activity</i>
+    }
+        </code></pre>
+    </article>
+
+    <article class="articlecontent">
+        <header>
+            <h2>12) Get a single activity of a user</h2>
+        </header>
+
+        Path: /activities/get/{username}/{activityId}<br>
+        Method: GET<br>
+        Parameters: <br>
+        - <b>{username}</b> the Beancounter username<br>
+        - <b>{activityId}</b> the activityId of one of the user's activities<br>
+        - <b>apikey</b> <br>
+        Description: it retrieves a single specified activity of the specified user
+        <br>
+        Example: with curl
+
+        <pre><code>
+    $ curl http://api.beancounter.io/rest/activities/get/dpalmisano/550e8400-e29b-41d4-a716-446655440000?apikey=your-api-key
+        </code></pre>
+
+        <h3>Responses</h3>
+
+        If the activity was successfully retrieved:
+        <pre><code>
+    {
+        "status": "OK",
+        "message": "user '<b>{username}</b>' activity with id [<b>{activityId}</b>] found",
+        "object": <i>the activity in JSON format</i>
+    }
+        </code></pre>
+
+        If the activity does not exist:
+        <pre><code>
+    {
+        "status": "OK",
+        "message": "user '<b>{username}</b>' has no activity with id [<b>{activityId}</b>]"
+    }
+        </code></pre>
+    </article>
+
+    <article class="articlecontent">
+        <header>
+            <h2>13) Get all activities of a user</h2>
+        </header>
+
+        Path: /activities/all/{username}/<br>
+        Method: GET<br>
+        Parameters: <br>
+        - <b>{username}</b> the Beancounter username<br>
+        - <b>page</b> : the page of results to return (default is 0)<br>
+        - <b>apikey</b> <br>
+        Description: retrieves all the activities of the specified user in a 
+        paginated format where page 0 is the first page. If the <b>page</b>
+        parameter is omitted, it will be set to 0 by default. Each page 
+        contains up to 20 activities.
+        <br>
+        Example: with curl
+
+        <pre><code>
+    $ curl http://api.beancounter.io/rest/activities/all/dpalmisano?apikey=your-api-key
+        </code></pre>
+
+        <h3>Responses</h3>
+
+        If the specified user has no activities:
+        <pre><code>
+    {
+        "status": "OK",
+        "message": "user '<b>{username}</b>' has no activities."
+    }
+        </code></pre>
+
+        If the specified user has activities for that page number:
+        <pre><code>
+    {
+        "status": "OK",
+        "message": "user '<b>{username}</b>' activities found.",
+        "object": [<i>list of up to 20 activities</i>]
+    }
+        </code></pre>
+
+        If the specified user has no activities for that page number:
+        <pre><code>
+    {
+        "status": "OK",
+        "message": "user '<b>{username}</b>' has no more activities."
+    }
+        </code></pre>
+    </article>
+
+    <article class="articlecontent">
+        <header>
+            <h2>14) Search for activities</h2>
+        </header>
+
+        Path: /activities/search<br>
+        Method: GET<br>
+        Parameters: <br>
+        - <b>path</b> : the JSON path to search on<br>
+        - <b>value</b> : the value to search for<br>
+        - <b>page</b> : the page of results to return (default is 0, the first page)<br>
+        - <b>apikey</b> <br>
+        Description: searches all activities looking for a JSON path with the 
+        specified value. Wildcard searches using '*' are not permitted.
+
+        If the <b>page</b> parameter is omitted, it will be set to 0 by default. 
+        Each page contains up to 20 activities.
+        <br>
+        Example: with curl
+
+        <pre><code>
+    $ curl http://api.beancounter.io/rest/activities/search?path=activity.type&value=TWEET&page=3&apikey=your-api-key
+        </code></pre>
+
+        <h3>Responses</h3>
+
+        If the search found at least one matching activity for the specified
+        page number:
+        <pre><code>
+    {
+        "status": "OK",
+        "message": "search for [<b>path</b>=<b>value</b>] found activities.",
+        "object": [<i>list of up to 20 activities</i>]
+    }
+        </code></pre>
+
+        If the search found no matching activities:
+        <pre><code>
+    {
+        "status": "OK",
+        "message": "search for [<b>path</b>=<b>value</b>] found no activities."
+    }
+        </code></pre>
+    </article>
+
+    <hr>
 
     <article class="articlecontent">
 
@@ -782,7 +869,7 @@
     <article class="articlecontent">
 
                     <header>
-                        <h2>20) Check Beancounter.io service</h2>
+                        <h2>21) Check Beancounter.io service</h2>
                     </header>
 
                     Path: /api/check<br>
@@ -806,7 +893,7 @@
     <article class="articlecontent">
 
                     <header>
-                        <h2>21) Get beancounter.io version</h2>
+                        <h2>22) Get beancounter.io version</h2>
                     </header>
 
                     Path: /api/version<br>
