@@ -16,6 +16,7 @@ import tv.notube.commons.model.auth.AuthenticatedUser;
 import tv.notube.commons.model.auth.OAuthAuth;
 import tv.notube.resolver.Resolver;
 import tv.notube.resolver.ResolverException;
+import tv.notube.resolver.ResolverMappingNotFoundException;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManagerException;
 
@@ -204,31 +205,56 @@ public class JedisUserManagerImpl implements UserManager {
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         }
-        // now that the user grant the permission, we should ask for its username
+        // authorize the user
         AuthenticatedUser auser;
         try {
             auser = authHandler.auth(
                     verifier
             );
         } catch (AuthHandlerException e) {
-            final String errMsg = "Error while getting auth manager for service '" + serviceName + "'";
+            final String errMsg = "Error while getting auth manager for service [" + serviceName + "]";
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         }
+
+        // check if the user already exists
+        String candidateUsername;
+        User user;
         try {
-            resolver.store(
+            candidateUsername = resolver.resolveUsername(
                     auser.getUserId(),
-                    authHandler.getService(),
-                    auser.getUser().getId(),
-                    auser.getUser().getUsername()
+                    authHandler.getService()
             );
+        } catch (ResolverMappingNotFoundException e) {
+            // ok, this is the first access from this user so just add record
+            // to the resolver and return
+            user = auser.getUser();
+            try {
+                resolver.store(
+                        auser.getUserId(),
+                        authHandler.getService(),
+                        user.getId(),
+                        user.getUsername()
+                );
+            } catch (ResolverException e1) {
+                final String errMsg = "Error while storing mapping for user [" + auser.getUser().getUsername() + "] with identifier [" + auser.getUserId() + "] on service [" + authHandler.getService() + "]";
+                LOGGER.error(errMsg, e1);
+                throw new UserManagerException(errMsg, e1);
+            }
+            storeUser(user);
+            return user.getUsername();
         } catch (ResolverException e) {
-            final String errMsg = "Error while storing user [" + auser.getUser().getUsername() + "] on service [" + serviceName + "]";
+            final String errMsg = "Error while asking mapping for user [" + auser.getUser().getUsername() + "] with identifier [" + auser.getUserId() + "] on service [" + authHandler.getService() + "]";
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         }
-        storeUser(auser.getUser());
-        return auser.getUser().getUsername();
+        user = getUser(candidateUsername);
+        user.addService(
+                authHandler.getService(),
+                auser.getUser().getAuth(authHandler.getService())
+        );
+        storeUser(user);
+        return user.getUsername();
     }
 
     @Override
@@ -389,7 +415,7 @@ public class JedisUserManagerImpl implements UserManager {
     @Override
     public synchronized void voidOAuthToken(User user, String service) throws UserManagerException {
         OAuthAuth auth = (OAuthAuth) user.getAuth(service);
-        if(auth == null) {
+        if (auth == null) {
             throw new UserManagerException("it seems there is no auth for service [" + service + "] on user [" + user.getUsername() + "]");
         }
         auth.setExpired(true);

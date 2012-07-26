@@ -511,12 +511,10 @@ public class UserService extends JsonService {
         return rb.build();
     }
 
-    // TODO (high) to be checked
     @GET
     @Path("/register/{service}")
     public Response signUpWithService(
-            @PathParam("service") String service,
-            @QueryParam("redirect") String finalRedirect
+            @PathParam("service") String service
     ) {
         // get a token for an anonymous user
         OAuthToken oAuthToken;
@@ -528,26 +526,7 @@ public class UserService extends JsonService {
                     "Error while getting token from [" + service + "]"
             );
         }
-        // set the final redirect
-        URL finalRedirectUrl;
-        try {
-            finalRedirectUrl = new URL(finalRedirect);
-        } catch (MalformedURLException e) {
-            return error(
-                    e,
-                    "Final redirect URL [" + finalRedirect + "] is ill-formed"
-            );
-        }
-        // set a temporary id, let's try with the millisecs
-        String tempId = String.valueOf(System.currentTimeMillis());
-        try {
-            userManager.setUserFinalRedirect(tempId, finalRedirectUrl);
-        } catch (UserManagerException e) {
-            return error(
-                    e,
-                    "Error while setting temporary final redirect URL [" + finalRedirectUrl + "] for service [" + service + "]"
-            );
-        }
+        // token asked, let's redirect
         URL redirect = oAuthToken.getRedirectPage();
         try {
             return Response.temporaryRedirect(redirect.toURI()).build();
@@ -612,20 +591,21 @@ public class UserService extends JsonService {
     }
 
     @GET
-    @Path("/oauth/callback/facebook/atomic/")
+    @Path("/oauth/callback/{service}/atomic/")
     public Response handleAtomicFacebookAuthCallback(
+            @PathParam("service") String service,
             @QueryParam("code") String verifier
     ) {
         String userName;
         try {
-            userName = userManager.storeUserFromOAuth("facebook", verifier);
+            userName = userManager.storeUserFromOAuth(service, verifier);
         } catch (UserManagerException e) {
-            return error(e, "Error while OAuth-like exchange for service: [facebook]");
+            return error(e, "Error while OAuth-like exchange for service: [" + service + "]");
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new StringPlatformResponse(
                 StringPlatformResponse.Status.OK,
-                "user [" + userName + "] registered and authorized on facebook")
+                "user [" + userName + "] registered and authorized on [" + service + "]")
         );
         return rb.build();
     }

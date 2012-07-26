@@ -124,7 +124,7 @@ public class JedisResolver implements Resolver {
         if (username == null) {
             final String errmsg = "User [" + identifier + "] not found for [" + service + "]";
             LOGGER.error(errmsg);
-            throw new ResolverException(errmsg);
+            throw new ResolverMappingNotFoundException(errmsg);
         }
         return username;
     }

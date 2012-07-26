@@ -130,7 +130,7 @@
     </dependencies>
 
     <build>
-        <finalName>beancounter</finalName>
+        <finalName>notube-platform</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
