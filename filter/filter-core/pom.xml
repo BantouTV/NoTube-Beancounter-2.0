@@ -17,12 +17,12 @@
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>configuration</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>model</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

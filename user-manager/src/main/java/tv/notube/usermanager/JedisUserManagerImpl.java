@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * put class description here
+ * <i>REDIS</i>-based implementation of {@link UserManager}.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
@@ -153,6 +153,85 @@ public class JedisUserManagerImpl implements UserManager {
     }
 
     @Override
+    public OAuthToken getOAuthToken(String serviceName) throws UserManagerException {
+        try {
+            if (sam.getService(serviceName) == null) {
+                final String errMsg = "Service '" + serviceName + "' is not supported.";
+                LOGGER.error(errMsg);
+                throw new UserManagerException(errMsg);
+            }
+        } catch (ServiceAuthorizationManagerException e) {
+            final String errMsg = "Error while getting service '" + serviceName + "'";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        AuthHandler authHandler;
+        try {
+            authHandler = sam.getHandler(serviceName);
+        } catch (ServiceAuthorizationManagerException e) {
+            final String errMsg = "Error while getting auth manager for service '" + serviceName + "'";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        try {
+            return authHandler.getToken();
+        } catch (AuthHandlerException e) {
+            final String errMsg = "Error while getting auth manager for service '" + serviceName + "'";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+    }
+
+    @Override
+    public synchronized String storeUserFromOAuth(String serviceName, String verifier)
+            throws UserManagerException {
+        try {
+            if (sam.getService(serviceName) == null) {
+                final String errMsg = "Service '" + serviceName + "' is not supported.";
+                LOGGER.error(errMsg);
+                throw new UserManagerException(errMsg);
+            }
+        } catch (ServiceAuthorizationManagerException e) {
+            final String errMsg = "Error while getting service '" + serviceName + "'";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        AuthHandler authHandler;
+        try {
+            authHandler = sam.getHandler(serviceName);
+        } catch (ServiceAuthorizationManagerException e) {
+            final String errMsg = "Error while getting AuthHandler for service [" + serviceName + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        // now that the user grant the permission, we should ask for its username
+        AuthenticatedUser auser;
+        try {
+            auser = authHandler.auth(
+                    verifier
+            );
+        } catch (AuthHandlerException e) {
+            final String errMsg = "Error while getting auth manager for service '" + serviceName + "'";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        try {
+            resolver.store(
+                    auser.getUserId(),
+                    authHandler.getService(),
+                    auser.getUser().getId(),
+                    auser.getUser().getUsername()
+            );
+        } catch (ResolverException e) {
+            final String errMsg = "Error while storing user [" + auser.getUser().getUsername() + "] on service [" + serviceName + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        storeUser(auser.getUser());
+        return auser.getUser().getUsername();
+    }
+
+    @Override
     public OAuthToken getOAuthToken(String serviceName, String username, URL callback)
             throws UserManagerException {
         try {
@@ -241,7 +320,7 @@ public class JedisUserManagerImpl implements UserManager {
         try {
             authHandler = sam.getHandler(serviceName);
         } catch (ServiceAuthorizationManagerException e) {
-            final String errMsg = "Error while authenticating user '" + user.getUsername() + "' to service '" + serviceName + "'";
+            final String errMsg = "Error while getting AuthHandler for service [" + serviceName + "]";
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         }
@@ -318,4 +397,5 @@ public class JedisUserManagerImpl implements UserManager {
         user.addService(service, auth);
         this.storeUser(user);
     }
+
 }

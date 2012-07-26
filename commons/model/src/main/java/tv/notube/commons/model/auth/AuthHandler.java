@@ -37,6 +37,13 @@ public interface AuthHandler {
 
     /**
      *
+     * @return
+     * @throws AuthHandlerException
+     */
+    public OAuthToken getToken() throws AuthHandlerException;
+
+    /**
+     *
      * @param username
      * @param callback a custom callback, which overrides the {@link tv
      * .notube.commons.model.Service} one.
@@ -52,4 +59,10 @@ public interface AuthHandler {
      */
     public String getService();
 
+    /**
+     * To handle anonymous <i>OAuth</i> callbacks.
+     * @param verifier
+     * @return
+     */
+    public AuthenticatedUser auth(String verifier) throws AuthHandlerException;
 }

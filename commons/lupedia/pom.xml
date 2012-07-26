@@ -11,14 +11,13 @@
 
     <groupId>tv.notube.commons</groupId>
     <artifactId>lupedia</artifactId>
-    <version>1.2-SNAPSHOT</version>
     <name>NoTube 2.0 Commons: LUpedia NLP implementation</name>
 
     <dependencies>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>nlp</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>

@@ -128,4 +128,14 @@ public class MockUserManager implements UserManager {
         throw new UnsupportedOperationException("nah, niy");
     }
 
+    @Override
+    public OAuthToken getOAuthToken(String service) throws UserManagerException {
+        throw new UnsupportedOperationException("nah, niy");
+    }
+
+    @Override
+    public String storeUserFromOAuth(String service, String verifier) throws UserManagerException {
+        throw new UnsupportedOperationException("nah, niy");
+    }
+
 }

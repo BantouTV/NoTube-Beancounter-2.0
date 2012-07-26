@@ -76,6 +76,11 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
     }
 
     @Override
+    public OAuthToken getToken() throws AuthHandlerException {
+        throw new UnsupportedOperationException("not implemented yet");
+    }
+
+    @Override
     public OAuthToken getToken(String username, URL callback) throws AuthHandlerException {
         throw new UnsupportedOperationException("nah, NIY.");
     }
@@ -83,6 +88,11 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
     @Override
     public String getService() {
         return SERVICE;
+    }
+
+    @Override
+    public AuthenticatedUser auth(String verifier) {
+        throw new UnsupportedOperationException("nah, NIY.");
     }
 
 }

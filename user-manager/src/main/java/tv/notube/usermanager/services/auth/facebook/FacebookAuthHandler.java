@@ -42,17 +42,17 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
             String token,
             String verifier
     ) throws AuthHandlerException {
-        if(verifier == null) {
+        if (verifier == null) {
             auth(user, token);
         }
         Verifier v = new Verifier(verifier);
         OAuthService facebookOAuth = new ServiceBuilder()
-                           .provider(FacebookApi.class)
-                           .apiKey(service.getApikey())
-                           .apiSecret(service.getSecret())
-                           .scope("read_stream,user_likes,user_location,user_interests,user_activities")
-                           .callback(service.getOAuthCallback() + user.getUsername())
-                           .build();
+                .provider(FacebookApi.class)
+                .apiKey(service.getApikey())
+                .apiSecret(service.getSecret())
+                .scope("read_stream,user_likes,user_location,user_interests,user_activities")
+                .callback(service.getOAuthCallback() + user.getUsername())
+                .build();
         Token requestToken = null;
         Token accessToken = facebookOAuth.getAccessToken(requestToken, v);
         user.addService(
@@ -71,12 +71,34 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
 
     public OAuthToken getToken(String username) throws AuthHandlerException {
         OAuthService facebookOAuth = new ServiceBuilder()
-                           .provider(FacebookApi.class)
-                           .apiKey(service.getApikey())
-                           .apiSecret(service.getSecret())
-                           .scope("read_stream,user_likes,user_location,user_interests,user_activities")
-                           .callback(service.getOAuthCallback() + username)
-                           .build();
+                .provider(FacebookApi.class)
+                .apiKey(service.getApikey())
+                .apiSecret(service.getSecret())
+                .scope("read_stream,user_likes,user_location,user_interests,user_activities")
+                .callback(service.getOAuthCallback() + username)
+                .build();
+        Token token = null;
+        String redirectUrl = facebookOAuth.getAuthorizationUrl(token);
+        try {
+            return new OAuthToken(new URL(redirectUrl));
+        } catch (MalformedURLException e) {
+            throw new AuthHandlerException(
+                    "The redirect url is not well formed",
+                    e
+            );
+        }
+    }
+
+    @Override
+    public OAuthToken getToken() throws AuthHandlerException {
+        // TODO (high) what if a user is called atomic? use a different callback property
+        OAuthService facebookOAuth = new ServiceBuilder()
+                .provider(FacebookApi.class)
+                .apiKey(service.getApikey())
+                .apiSecret(service.getSecret())
+                .scope("read_stream,user_likes,user_location,user_interests,user_activities")
+                .callback(service.getOAuthCallback() + "atomic")
+                .build();
         Token token = null;
         String redirectUrl = facebookOAuth.getAuthorizationUrl(token);
         try {
@@ -109,6 +131,40 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                     e
             );
         }
+    }
+
+    @Override
+    public AuthenticatedUser auth(String verifier) throws AuthHandlerException {
+        if (verifier == null) {
+            auth(null, null);
+        }
+        // TODO (high) what if a user is called atomic? use a different callback property
+        Verifier v = new Verifier(verifier);
+        OAuthService facebookOAuth = new ServiceBuilder()
+                .provider(FacebookApi.class)
+                .apiKey(service.getApikey())
+                .apiSecret(service.getSecret())
+                .scope("read_stream,user_likes,user_location,user_interests,user_activities")
+                .callback(service.getOAuthCallback() + "atomic")
+                .build();
+        Token requestToken = null;
+        Token accessToken = facebookOAuth.getAccessToken(requestToken, v);
+        String facebookUserId = getUserId(accessToken.getToken());
+        User user = createNewUser(facebookUserId);
+        user.addService(
+                service.getName(),
+                new OAuthAuth(accessToken.getToken(), accessToken.getSecret())
+        );
+        return new AuthenticatedUser(facebookUserId, user);
+    }
+
+    private User createNewUser(String facebookUserId) {
+        // users created in this way will have beanocunter username equals
+        // to the facebook one.
+        // TODO (high) implement a retry policy to be sure it's unique
+        User user = new User();
+        user.setUsername(String.valueOf(facebookUserId));
+        return user;
     }
 
     @Override

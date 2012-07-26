@@ -137,4 +137,24 @@ public interface UserManager {
      * @param service
      */
     public void voidOAuthToken(User user, String service) throws UserManagerException;;
+
+    /**
+     * This method asks for an {@link OAuthToken} without the needs of a
+     * {@link User} username.
+     *
+     * @param service
+     * @return
+     * @throws UserManagerException
+     */
+    public OAuthToken getOAuthToken(String service) throws UserManagerException;
+
+    /**
+     * This method creates a user from scratch, handles the <i>OAuth exchange</i>
+     * for it give the input verifier and stores it with a random username.
+     *
+     * @param service
+     * @param verifier
+     * @return the beancounter generated user username
+     */
+    public String storeUserFromOAuth(String service, String verifier) throws UserManagerException;
 }
