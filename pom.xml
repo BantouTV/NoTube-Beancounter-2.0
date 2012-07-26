@@ -97,11 +97,6 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>tv.notube.resolver</groupId>
-                <artifactId>core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>tv.notube</groupId>
                 <artifactId>profiles</artifactId>
                 <version>${project.version}</version>
