@@ -11,14 +11,12 @@
 
     <groupId>tv.notube.commons</groupId>
     <artifactId>cogito</artifactId>
-    <version>1.2-SNAPSHOT</version>
     <name>NoTube 2.0 Commons: Cogito NLP implementation</name>
 
     <dependencies>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>nlp</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>xerces</groupId>

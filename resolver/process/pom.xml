@@ -16,7 +16,6 @@
         <dependency>
             <groupId>tv.notube.resolver</groupId>
             <artifactId>core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>

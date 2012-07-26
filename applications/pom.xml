@@ -15,17 +15,14 @@
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>configuration</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>model</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>helper</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

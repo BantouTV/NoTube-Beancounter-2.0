@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>tv.notube</groupId>
@@ -29,7 +30,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.version>1.2-SNAPSHOT</project.version>
         <camel.version>2.10.0</camel.version>
         <guice.version>2.0</guice.version>
         <slf4j-api.version>1.6.1</slf4j-api.version>
@@ -76,6 +76,101 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>tv.notube.commons</groupId>
+                <artifactId>model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube.resolver</groupId>
+                <artifactId>core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube.commons</groupId>
+                <artifactId>helper</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube.commons</groupId>
+                <artifactId>configuration</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube.resolver</groupId>
+                <artifactId>core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube</groupId>
+                <artifactId>profiles</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube.commons</groupId>
+                <artifactId>nlp</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube.commons</groupId>
+                <artifactId>lupedia</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube.commons</groupId>
+                <artifactId>cogito</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube.commons</groupId>
+                <artifactId>tagdef</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube</groupId>
+                <artifactId>camel-redis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube</groupId>
+                <artifactId>activities</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube</groupId>
+                <artifactId>realtime-profiler-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube</groupId>
+                <artifactId>realtime-profiler-process</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube</groupId>
+                <artifactId>user-manager</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube</groupId>
+                <artifactId>applications</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube</groupId>
+                <artifactId>queues</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube.filter</groupId>
+                <artifactId>filter-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube.commons</groupId>
+                <artifactId>tests</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
@@ -344,7 +439,8 @@
 
     <scm>
         <connection>scm:git:https://github.com/dpalmisano/NoTube-Beancounter-2.0.git</connection>
-        <developerConnection>scm:git:https://github.com/dpalmisano/NoTube-Beancounter-2.0.git</developerConnection>
+        <developerConnection>scm:git:https://github.com/dpalmisano/NoTube-Beancounter-2.0.git
+        </developerConnection>
     </scm>
 
     <repositories>
@@ -380,16 +476,16 @@
             </snapshots>
         </repository>
         <repository>
-          <id>apache.releases</id>
-          <name>Apache Development Releases Repository</name>
-          <url>https://repository.apache.org/content/repositories/releases/</url>
-          <releases>
-              <enabled>true</enabled>
-          </releases>
-          <snapshots>
-              <enabled>false</enabled>
-          </snapshots>
-      </repository>
+            <id>apache.releases</id>
+            <name>Apache Development Releases Repository</name>
+            <url>https://repository.apache.org/content/repositories/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
     </repositories>
     <developers>
         <developer>

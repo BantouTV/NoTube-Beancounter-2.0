@@ -15,22 +15,18 @@
         <dependency>
             <groupId>tv.notube.resolver</groupId>
             <artifactId>core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>tv.notube</groupId>
             <artifactId>user-manager</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>model</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>tests</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

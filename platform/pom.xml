@@ -27,12 +27,10 @@
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>configuration</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>tv.notube</groupId>
             <artifactId>user-manager</artifactId>
-            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>tv.notube.commons</groupId>
@@ -43,12 +41,10 @@
         <dependency>
             <groupId>tv.notube</groupId>
             <artifactId>profiles</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>tv.notube</groupId>
             <artifactId>applications</artifactId>
-            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>tv.notube.commons</groupId>
@@ -59,7 +55,6 @@
         <dependency>
             <groupId>tv.notube</groupId>
             <artifactId>activities</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
@@ -109,12 +104,10 @@
         <dependency>
             <groupId>tv.notube</groupId>
             <artifactId>queues</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>tv.notube.filter</groupId>
             <artifactId>filter-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sun.grizzly</groupId>

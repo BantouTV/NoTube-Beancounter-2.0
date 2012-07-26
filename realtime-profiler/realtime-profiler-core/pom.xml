@@ -13,32 +13,26 @@
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>model</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>tv.notube</groupId>
             <artifactId>profiles</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>nlp</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>lupedia</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>cogito</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>tagdef</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

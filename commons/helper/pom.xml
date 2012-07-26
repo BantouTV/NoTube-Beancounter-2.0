@@ -11,14 +11,12 @@
 
     <groupId>tv.notube.commons</groupId>
     <artifactId>helper</artifactId>
-    <packaging>jar</packaging>
     <name>NoTube 2.0 Commons: Helper</name>
 
     <dependencies>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>configuration</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>redis.clients</groupId>
