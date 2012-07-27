@@ -78,6 +78,8 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
 
                 Properties samProperties = PropertiesHelper.readFromClasspath("/sam.properties");
+                Names.bindProperties(binder(), samProperties);
+
                 ServiceAuthorizationManager sam = DefaultServiceAuthorizationManager.build(samProperties);
                 bind(ServiceAuthorizationManager.class).toInstance(sam);
 
