@@ -134,7 +134,7 @@ public class MockUserManager implements UserManager {
     }
 
     @Override
-    public String storeUserFromOAuth(String service, String verifier) throws UserManagerException {
+    public AtomicSignUp storeUserFromOAuth(String service, String verifier) throws UserManagerException {
         throw new UnsupportedOperationException("nah, niy");
     }
 

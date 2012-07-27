@@ -16,7 +16,7 @@ public class Comment extends tv.notube.commons.model.activity.Object {
 
     private UUID inReplyTo;
 
-    private UUID onEvent;
+    private String onEvent;
 
     public Comment() {
         super();
@@ -43,11 +43,11 @@ public class Comment extends tv.notube.commons.model.activity.Object {
         this.inReplyTo = inReplyTo;
     }
 
-    public UUID getOnEvent() {
+    public String getOnEvent() {
         return onEvent;
     }
 
-    public void setOnEvent(UUID onEvent) {
+    public void setOnEvent(String onEvent) {
         this.onEvent = onEvent;
     }
 

@@ -1,6 +1,5 @@
 package tv.notube.resolver.tv.notube.filter.model.pattern;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -177,7 +176,7 @@ public class PatternTestCase {
         Comment comment = new Comment();
         comment.setText("thisisatextofacomment");
         comment.setInReplyTo(UUID.fromString("17efdae2-c803-4411-aac9-f6185bdf13de"));
-        comment.setOnEvent(UUID.fromString("50813b78-86af-47ef-ae85-01657c51c80c"));
+        comment.setOnEvent("ContentSet-07499e81-1058-4ea0-90f7-77f0fc17eade");
         Context context = new Context();
         context.setDate(new DateTime().minusDays(30));
         context.setService("rai.tv");
@@ -191,7 +190,7 @@ public class PatternTestCase {
 
         CommentPattern commentPattern = new CommentPattern();
         commentPattern.setOnEventPattern(
-                new UUIDPattern(UUID.fromString("50813b78-86af-47ef-ae85-01657c51c80c"))
+                new StringPattern("ContentSet-07499e81-1058-4ea0-90f7-77f0fc17eade")
         );
 
         ActivityPattern activityPattern = new ActivityPattern();
@@ -209,7 +208,7 @@ public class PatternTestCase {
         // let's change the onEvent UUID
         commentPattern = new CommentPattern();
         commentPattern.setOnEventPattern(
-                new UUIDPattern(UUID.fromString("0813b78-86af-47ef-ae85-01657c51c80c"))
+                new StringPattern("ContentSet-17499e81-1058-4ea0-90f7-77f0fc17eade")
         );
         activityPattern.setObject(commentPattern);
         fm.delete("test-filter");

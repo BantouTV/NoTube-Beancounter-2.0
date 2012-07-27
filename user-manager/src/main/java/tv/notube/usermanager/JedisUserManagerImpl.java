@@ -184,7 +184,7 @@ public class JedisUserManagerImpl implements UserManager {
     }
 
     @Override
-    public synchronized String storeUserFromOAuth(String serviceName, String verifier)
+    public synchronized AtomicSignUp storeUserFromOAuth(String serviceName, String verifier)
             throws UserManagerException {
         try {
             if (sam.getService(serviceName) == null) {
@@ -242,7 +242,7 @@ public class JedisUserManagerImpl implements UserManager {
                 throw new UserManagerException(errMsg, e1);
             }
             storeUser(user);
-            return user.getUsername();
+            return new AtomicSignUp(user.getUsername(), false, authHandler.getService());
         } catch (ResolverException e) {
             final String errMsg = "Error while asking mapping for user [" + auser.getUser().getUsername() + "] with identifier [" + auser.getUserId() + "] on service [" + authHandler.getService() + "]";
             LOGGER.error(errMsg, e);
@@ -254,7 +254,7 @@ public class JedisUserManagerImpl implements UserManager {
                 auser.getUser().getAuth(authHandler.getService())
         );
         storeUser(user);
-        return user.getUsername();
+        return new AtomicSignUp(user.getUsername(), true, authHandler.getService());
     }
 
     @Override

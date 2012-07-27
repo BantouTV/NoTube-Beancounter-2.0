@@ -91,13 +91,12 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
 
     @Override
     public OAuthToken getToken() throws AuthHandlerException {
-        // TODO (high) what if a user is called atomic? use a different callback property
         OAuthService facebookOAuth = new ServiceBuilder()
                 .provider(FacebookApi.class)
                 .apiKey(service.getApikey())
                 .apiSecret(service.getSecret())
                 .scope("read_stream,user_likes,user_location,user_interests,user_activities")
-                .callback(service.getOAuthCallback() + "atomic")
+                .callback(service.getAtomicOAuthCallback().toString())
                 .build();
         Token token = null;
         String redirectUrl = facebookOAuth.getAuthorizationUrl(token);
@@ -138,14 +137,13 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
         if (verifier == null) {
             auth(null, null);
         }
-        // TODO (high) what if a user is called atomic? use a different callback property
         Verifier v = new Verifier(verifier);
         OAuthService facebookOAuth = new ServiceBuilder()
                 .provider(FacebookApi.class)
                 .apiKey(service.getApikey())
                 .apiSecret(service.getSecret())
                 .scope("read_stream,user_likes,user_location,user_interests,user_activities")
-                .callback(service.getOAuthCallback() + "atomic")
+                .callback(service.getAtomicOAuthCallback().toString())
                 .build();
         Token requestToken = null;
         Token accessToken = facebookOAuth.getAccessToken(requestToken, v);

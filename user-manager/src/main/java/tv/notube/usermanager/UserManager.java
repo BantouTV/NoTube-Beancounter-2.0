@@ -154,7 +154,7 @@ public interface UserManager {
      *
      * @param service
      * @param verifier
-     * @return the beancounter generated user username
+     * @return {@link AtomicSignUp} with all needed information
      */
-    public String storeUserFromOAuth(String service, String verifier) throws UserManagerException;
+    public AtomicSignUp storeUserFromOAuth(String service, String verifier) throws UserManagerException;
 }
