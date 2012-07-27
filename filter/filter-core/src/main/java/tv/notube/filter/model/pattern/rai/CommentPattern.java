@@ -12,18 +12,18 @@ public class CommentPattern extends ObjectPattern {
 
     public static CommentPattern ANY = new CommentPattern();
 
-    private UUIDPattern onEventPattern;
+    private StringPattern onEventPattern;
 
     private String type;
 
     public CommentPattern() {
         super(new StringPattern(CommentPattern.class.getName()), URLPattern.ANY);
-        onEventPattern = UUIDPattern.ANY;
+        onEventPattern = StringPattern.ANY.ANY;
         type = CommentPattern.class.getName();
     }
 
     public CommentPattern(
-            UUIDPattern onEventPattern,
+            StringPattern onEventPattern,
             URLPattern url
     ) {
         super(new StringPattern(CommentPattern.class.getName()), url);
@@ -31,11 +31,11 @@ public class CommentPattern extends ObjectPattern {
         type = CommentPattern.class.getName();
     }
 
-    public UUIDPattern getOnEventPattern() {
+    public StringPattern getOnEventPattern() {
         return onEventPattern;
     }
 
-    public void setOnEventPattern(UUIDPattern onEventPattern) {
+    public void setOnEventPattern(StringPattern onEventPattern) {
         this.onEventPattern = onEventPattern;
     }
 
