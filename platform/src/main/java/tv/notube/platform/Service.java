@@ -121,7 +121,7 @@ public abstract class Service {
         Class<?> types[] = m.getParameterTypes();
         Map<String, Class> result = new HashMap<String, Class>();
         int i = 0;
-        for (Annotation a[] : annotations) {
+        for (Annotation[] a : annotations) {
             for (Annotation aa : a) {
                 if (
                         aa.annotationType().equals(FormParam.class) ||

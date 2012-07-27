@@ -197,6 +197,8 @@ public class UserService extends JsonService {
         return rb.build();
     }
 
+    // TODO (med): Remove this API since it is now redundant and has been
+    // replaced by the /activities/all API.
     @GET
     @Path("/{username}/activities")
     public Response getActivities(
