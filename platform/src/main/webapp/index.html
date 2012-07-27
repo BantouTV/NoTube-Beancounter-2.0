@@ -642,7 +642,8 @@
                     Description: it register a new filter if the provided name has not been taken already
                     <br>
                     Example: with curl<br><br>
-                    curl -d "description=test-description&queue=testqueue&pattern={"userId":{"uuid":null},"verb":{"verb":"ANY"},"object":{"type":"tv.notube.filter.model.pattern.rai.CommentPattern","typePattern":{"string":"tv.notube.filter.model.pattern.rai.CommentPattern"},"url":{"url":null},"onEventPattern":{"string":"ContentSet-07499e81-1058-4ea0-90f7-77f0fc17eade"}},"context":{"date":{"date":1,"bool":"AFTER"},"service":{"string":""},"mood":{"string":""},"username":{"string":""}}}" http://api.beancounter.io/rest/filters/register/test-filter?apikey=your-api-key
+curl -d "description=test-description&queue=testqueue&pattern={"userId":{"uuid":null},"verb":{"verb":"ANY"},"object":{"type":"tv.notube.filter.model.pattern.rai.CommentPattern",
+        "typePattern":{"string":"tv.notube.filter.model.pattern.rai.CommentPattern"},"url":{"url":null},"onEventPattern":{"string":"ContentSet-07499e81-1058-4ea0-90f7-77f0fc17eade"}},"context":{"date":{"date":1,"bool":"AFTER"},"service":{"string":""},"mood":{"string":""},"username":{"string":""}}}" http://api.beancounter.io/rest/filters/register/test-filter?apikey=your-api-key
                     <br><br>
 
                 <pre><code>

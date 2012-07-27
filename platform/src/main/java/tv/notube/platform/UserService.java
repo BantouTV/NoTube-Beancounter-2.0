@@ -14,6 +14,7 @@ import tv.notube.commons.model.auth.OAuthAuth;
 import tv.notube.platform.responses.*;
 import tv.notube.profiles.Profiles;
 import tv.notube.profiles.ProfilesException;
+import tv.notube.usermanager.AtomicSignUp;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.UserManagerException;
 
@@ -591,21 +592,24 @@ public class UserService extends JsonService {
     }
 
     @GET
-    @Path("/oauth/callback/{service}/atomic/")
+    @Path("/oauth/atomic/callback/{service}/")
     public Response handleAtomicFacebookAuthCallback(
             @PathParam("service") String service,
             @QueryParam("code") String verifier
     ) {
-        String userName;
+        AtomicSignUp signUp;
         try {
-            userName = userManager.storeUserFromOAuth(service, verifier);
+            signUp = userManager.storeUserFromOAuth(service, verifier);
         } catch (UserManagerException e) {
             return error(e, "Error while OAuth-like exchange for service: [" + service + "]");
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new StringPlatformResponse(
-                StringPlatformResponse.Status.OK,
-                "user [" + userName + "] registered and authorized on [" + service + "]")
+        rb.entity(
+                new AtomicSignUpResponse(
+                        PlatformResponse.Status.OK,
+                        "user with user name [" + signUp.getUsername() + "] logged in with service [" + signUp.getService() + "]",
+                        signUp
+                )
         );
         return rb.build();
     }

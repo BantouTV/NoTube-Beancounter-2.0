@@ -7,6 +7,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
+ * This class models all the data of an external service, <i>beancounter.io</i>
+ * could connect to.
+ *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 public class Service implements Serializable {
@@ -28,6 +31,8 @@ public class Service implements Serializable {
     private URL sessionEndpoint;
 
     private URL OAuthCallback;
+
+    private URL atomicOAuthCallback;
 
     @Random(names = {"name", "description", "secret", "authRequest"})
     public Service(String name, String description, String secret, String authRequest) {
@@ -81,6 +86,10 @@ public class Service implements Serializable {
         this.secret = secret;
     }
 
+    public URL getAtomicOAuthCallback() {
+        return atomicOAuthCallback;
+    }
+
     public URL getAuthRequest() {
         try {
             return new URL(String.format(authRequest, apikey));
@@ -107,6 +116,10 @@ public class Service implements Serializable {
 
     public void setOAuthCallback(URL OAuthCallback) {
         this.OAuthCallback = OAuthCallback;
+    }
+
+    public void setAtomicOAuthCallback(URL atomicOAuthCallback) {
+        this.atomicOAuthCallback = atomicOAuthCallback;
     }
 
     @Override
@@ -138,6 +151,7 @@ public class Service implements Serializable {
                 ", authRequest='" + authRequest + '\'' +
                 ", sessionEndpoint=" + sessionEndpoint +
                 ", OAuthCallback=" + OAuthCallback +
+                ", atomicOAuthCallback=" + atomicOAuthCallback +
                 '}';
     }
 }
