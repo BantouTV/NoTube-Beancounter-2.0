@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <artifactId>filter</artifactId>
@@ -13,6 +14,14 @@
     <name>NoTube 2.0 Filter Camel Process</name>
 
     <dependencies>
+        <dependency>
+            <groupId>tv.notube</groupId>
+            <artifactId>camel-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-guice</artifactId>
+        </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>configuration</artifactId>
@@ -36,15 +45,6 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jackson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>tv.notube</groupId>
-            <artifactId>camel-redis</artifactId>
-            <version>1.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-guice</artifactId>
         </dependency>
 
         <!-- testing-->
@@ -74,7 +74,7 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <finalName>filter-1.1-SNAPSHOT</finalName>
+                    <finalName>filter-${project.version}</finalName>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
