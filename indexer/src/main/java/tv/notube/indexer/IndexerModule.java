@@ -9,7 +9,7 @@ import org.apache.camel.guice.CamelModuleWithMatchingRoutes;
 import org.guiceyfruit.jndi.JndiBind;
 
 import tv.notube.activities.ActivityStore;
-import tv.notube.activities.ElasticSearchActivityStoreImpl;
+import tv.notube.activities.ElasticSearchActivityStore;
 import tv.notube.commons.helper.PropertiesHelper;
 import tv.notube.commons.helper.es.ElasticSearchConfiguration;
 
@@ -26,7 +26,7 @@ public class IndexerModule extends CamelModuleWithMatchingRoutes {
         Properties esProperties = PropertiesHelper.readFromClasspath("/es.properties");
         bindInstance("esConfiguration", ElasticSearchConfiguration.build(esProperties));
 
-        bind(ActivityStore.class).to(ElasticSearchActivityStoreImpl.class);
+        bind(ActivityStore.class).to(ElasticSearchActivityStore.class);
         bind(IndexerRoute.class);
     }
 

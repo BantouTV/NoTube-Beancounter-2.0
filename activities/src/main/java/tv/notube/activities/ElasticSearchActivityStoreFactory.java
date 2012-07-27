@@ -27,7 +27,7 @@ public class ElasticSearchActivityStoreFactory implements ActivityStoreFactory {
     public ElasticSearchActivityStoreFactory() {
         Properties properties = PropertiesHelper.readFromClasspath(ELASTICSEARCH_CONF);
         ElasticSearchConfiguration configuration = ElasticSearchConfiguration.build(properties);
-        activityStore = new ElasticSearchActivityStoreImpl(configuration);
+        activityStore = new ElasticSearchActivityStore(configuration);
     }
 
     @Override

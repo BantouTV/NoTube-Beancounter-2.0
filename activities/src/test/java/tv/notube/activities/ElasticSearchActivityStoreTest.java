@@ -6,6 +6,7 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
@@ -28,6 +29,8 @@ import tv.notube.commons.model.activity.Song;
 import tv.notube.commons.model.activity.Tweet;
 import tv.notube.commons.model.activity.Verb;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,8 +43,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
-import static tv.notube.activities.ElasticSearchActivityStoreImpl.INDEX_NAME;
-import static tv.notube.activities.ElasticSearchActivityStoreImpl.INDEX_TYPE;
+import static tv.notube.activities.ElasticSearchActivityStore.INDEX_NAME;
+import static tv.notube.activities.ElasticSearchActivityStore.INDEX_TYPE;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
@@ -55,10 +58,15 @@ public class ElasticSearchActivityStoreTest {
     private Client client;
     private final String tweetServiceUrl = "http://twitter.com";
     private final String lastFmServiceUrl = "http://last.fm";
+    private final String esDirectory = "es";
 
     @BeforeSuite
     public void beforeSuite() throws Exception {
-        node = NodeBuilder.nodeBuilder().node();
+        node = NodeBuilder.nodeBuilder()
+                .settings(ImmutableSettings.settingsBuilder()
+                        .put("path.home", esDirectory)
+                )
+                .node();
         client = node.client();
 
         try {
@@ -77,7 +85,8 @@ public class ElasticSearchActivityStoreTest {
     @AfterSuite
     public void afterSuite() throws Exception {
         node.close();
-        // TODO (mid): Remove the ES data dir
+        delete(new File(esDirectory));
+        delete(new File("logs"));
     }
 
     @BeforeTest
@@ -786,6 +795,22 @@ public class ElasticSearchActivityStoreTest {
         for (int i = 0; i < numListens; i++) {
             SearchHit hit = hits.getAt(i);
             assertHitEqualsLastFmActivity(hit, userId, activities.get(i));
+        }
+    }
+
+    private void delete(File file) throws IOException {
+        if (!file.exists()) {
+            return;
+        }
+
+        if (file.isDirectory()) {
+            for (File f : file.listFiles()) {
+                delete(f);
+            }
+        }
+
+        if (!file.delete()) {
+            throw new IOException("Unable to delete file " + file + ".");
         }
     }
 }

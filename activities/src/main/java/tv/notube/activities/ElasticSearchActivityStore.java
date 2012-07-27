@@ -42,7 +42,7 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  * @author Alex Cowell ( alxcwll@gmail.com )
  */
-public class ElasticSearchActivityStoreImpl implements ActivityStore {
+public class ElasticSearchActivityStore implements ActivityStore {
 
     public static final String INDEX_NAME = "beancounter";
 
@@ -55,7 +55,7 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
     private Client client;
 
     @Inject
-    public ElasticSearchActivityStoreImpl(
+    public ElasticSearchActivityStore(
             @Named("esConfiguration") ElasticSearchConfiguration configuration
     ) {
         this.configuration = configuration;
@@ -275,18 +275,18 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
         Settings settings = ImmutableSettings.settingsBuilder()
                 .put("client.transport.sniff", true)
                 .build();
-        TransportClient client = new TransportClient(settings);
+        TransportClient transportClient = new TransportClient(settings);
         for (NodeInfo node : configuration.getNodes()) {
-            client.addTransportAddress(
+            transportClient.addTransportAddress(
                     new InetSocketTransportAddress(node.getHost(), node.getPort())
             );
         }
-        ImmutableList<DiscoveryNode> nodes = client.connectedNodes();
+        ImmutableList<DiscoveryNode> nodes = transportClient.connectedNodes();
         if (nodes.isEmpty()) {
-            client.close();
+            transportClient.close();
             throw new RuntimeException("Could not connect to elasticsearch cluster."
                     + " Please check the elasticsearch-configuration.xml file.");
         }
-        return client;
+        return transportClient;
     }
 }
