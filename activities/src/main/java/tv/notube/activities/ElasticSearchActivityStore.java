@@ -48,6 +48,8 @@ public class ElasticSearchActivityStore implements ActivityStore {
 
     public static final String INDEX_TYPE = "activity";
 
+    private static final String dateJsonPath = INDEX_TYPE + ".activity.context.date";
+
     private ObjectMapper mapper;
 
     private ElasticSearchConfiguration configuration;
@@ -80,7 +82,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
     public Collection<Activity> getByUser(UUID uuidId, int max) throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString("userId:" + uuidId.toString()))
-                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
+                .addSort(dateJsonPath, SortOrder.DESC)
                 .setSize(max)
                 .execute().actionGet();
         return retrieveActivitiesFromSearchResponse(searchResponse);
@@ -91,8 +93,8 @@ public class ElasticSearchActivityStore implements ActivityStore {
             throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString("userId:" + uuid.toString()))
-                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
-                .setFilter(numericRangeFilter(INDEX_TYPE + ".activity.context.date")
+                .addSort(dateJsonPath, SortOrder.DESC)
+                .setFilter(numericRangeFilter(dateJsonPath)
                         .from(from.getMillis())
                         .to(to.getMillis())
                 ).execute().actionGet();
@@ -105,8 +107,8 @@ public class ElasticSearchActivityStore implements ActivityStore {
             throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(QueryBuilders.matchAllQuery())
-                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
-                .setFilter(numericRangeFilter(INDEX_TYPE + ".activity.context.date")
+                .addSort(dateJsonPath, SortOrder.DESC)
+                .setFilter(numericRangeFilter(dateJsonPath)
                         .from(from.getMillis())
                         .to(to.getMillis())
                 ).execute().actionGet();
@@ -174,7 +176,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
 
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(fqBuilder)
-                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
+                .addSort(dateJsonPath, SortOrder.DESC)
                 .execute().actionGet();
 
         return retrieveActivitiesFromSearchResponse(searchResponse);
@@ -182,20 +184,20 @@ public class ElasticSearchActivityStore implements ActivityStore {
 
     @Override
     public Collection<Activity> getByUserPaginated(
-            UUID userId, int pageNumber, int size
-    ) throws ActivityStoreException {
-        return searchAndPaginateResults("userId:" + userId.toString(), pageNumber, size);
+            UUID userId, int pageNumber, int size, String order
+    ) throws ActivityStoreException, InvalidOrderException {
+        return searchAndPaginateResults("userId:" + userId.toString(), pageNumber, size, order);
     }
 
     @Override
     public Collection<Activity> search(
             String path, String value, int pageNumber, int size
-    ) throws ActivityStoreException, WildcardSearchException {
+    ) throws ActivityStoreException, WildcardSearchException, InvalidOrderException {
         if (path.contains("*") || value.contains("*")) {
             throw new WildcardSearchException("Wildcard searches are not allowed.");
         }
 
-        return searchAndPaginateResults(path + ":" + value, pageNumber, size);
+        return searchAndPaginateResults(path + ":" + value, pageNumber, size, SortOrder.DESC.toString());
     }
 
     @Override
@@ -228,12 +230,19 @@ public class ElasticSearchActivityStore implements ActivityStore {
     }
 
     private Collection<Activity> searchAndPaginateResults(
-            String query, int pageNumber, int size
-    ) throws ActivityStoreException {
+            String query, int pageNumber, int size, String order
+    ) throws ActivityStoreException, InvalidOrderException {
+        SortOrder sortOrder;
+        try {
+            sortOrder = SortOrder.valueOf(order.toUpperCase());
+        } catch (Exception ex) {
+            throw new InvalidOrderException(order + " is not a valid sort order.");
+        }
+
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setSearchType(SearchType.QUERY_THEN_FETCH)
                 .setQuery(queryString(query))
-                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
+                .addSort(dateJsonPath, sortOrder)
                 .setFrom(pageNumber * size)
                 .setSize(size)
                 .execute().actionGet();

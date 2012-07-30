@@ -56,6 +56,8 @@ public class ElasticSearchActivityStoreTest {
 
     private Node node;
     private Client client;
+    private static String ascOrder = SortOrder.ASC.toString();
+    private static String descOrder = SortOrder.DESC.toString();
     private final String tweetServiceUrl = "http://twitter.com";
     private final String lastFmServiceUrl = "http://last.fm";
     private final String esDirectory = "es";
@@ -408,7 +410,7 @@ public class ElasticSearchActivityStoreTest {
     }
 
     @Test
-    public void getFirstPageOfResultsOfTweetsForSpecifiedUser() throws Exception {
+    public void getFirstPageOfResultsOfTweetsForSpecifiedUserDescending() throws Exception {
         UUID userId = UUID.randomUUID();
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
 
@@ -417,16 +419,17 @@ public class ElasticSearchActivityStoreTest {
 
         refreshIndex();
 
-        List<Activity> activitiesRetrieved = (List<Activity>) as.getByUserPaginated(userId, 0, 10);
+        List<Activity> activitiesRetrieved =
+                (List<Activity>) as.getByUserPaginated(userId, 0, 10, descOrder);
         assertEquals(activitiesRetrieved.size(), 10);
 
         for (int i = 0; i < activitiesRetrieved.size(); i++) {
-            assertEquals(activitiesStored.get(i), activitiesRetrieved.get(i));
+            assertEquals(activitiesRetrieved.get(i), activitiesStored.get(i));
         }
     }
 
     @Test
-    public void getSecondPageOfResultsOfTweetsForSpecifiedUser() throws Exception {
+    public void getSecondPageOfResultsOfTweetsForSpecifiedUserDescending() throws Exception {
         UUID userId = UUID.randomUUID();
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
 
@@ -435,17 +438,18 @@ public class ElasticSearchActivityStoreTest {
 
         refreshIndex();
 
-        List<Activity> activitiesRetrieved = (List<Activity>) as.getByUserPaginated(userId, 1, 10);
+        List<Activity> activitiesRetrieved =
+                (List<Activity>) as.getByUserPaginated(userId, 1, 10, descOrder);
         assertEquals(activitiesRetrieved.size(), 10);
 
         int i = 10;
         for (Activity activity : activitiesRetrieved) {
-            assertEquals(activitiesStored.get(i++), activity);
+            assertEquals(activity, activitiesStored.get(i++));
         }
     }
 
     @Test
-    public void getPageOfResultsOfTweetsForSpecifiedUserWhenThereAreLessThanPageSizeActivities() throws Exception {
+    public void getPageOfResultsOfTweetsForSpecifiedUserWhenThereAreLessThanPageSizeActivitiesDescending() throws Exception {
         UUID userId = UUID.randomUUID();
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
 
@@ -454,13 +458,87 @@ public class ElasticSearchActivityStoreTest {
 
         refreshIndex();
 
-        List<Activity> activitiesRetrieved = (List<Activity>) as.getByUserPaginated(userId, 2, 10);
+        List<Activity> activitiesRetrieved =
+                (List<Activity>) as.getByUserPaginated(userId, 2, 10, descOrder);
         assertEquals(activitiesRetrieved.size(), 5);
 
         int i = 20;
         for (Activity activity : activitiesRetrieved) {
-            assertEquals(activitiesStored.get(i++), activity);
+            assertEquals(activity, activitiesStored.get(i++));
         }
+    }
+
+    @Test
+    public void getFirstPageOfResultsOfTweetsForSpecifiedUserAscending() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        List<Activity> activitiesStored = (List<Activity>) createTweetActivities(userId, dateTime, 25);
+        as.store(userId, activitiesStored);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved =
+                (List<Activity>) as.getByUserPaginated(userId, 0, 10, ascOrder);
+        assertEquals(activitiesRetrieved.size(), 10);
+
+        for (int i = 0; i < activitiesRetrieved.size(); i++) {
+            assertEquals(
+                    activitiesRetrieved.get(i),
+                    activitiesStored.get(activitiesStored.size() - 1 - i)
+            );
+        }
+    }
+
+    @Test
+    public void getSecondPageOfResultsOfTweetsForSpecifiedUserAscending() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        List<Activity> activitiesStored = (List<Activity>) createTweetActivities(userId, dateTime, 25);
+        as.store(userId, activitiesStored);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved =
+                (List<Activity>) as.getByUserPaginated(userId, 1, 10, ascOrder);
+        assertEquals(activitiesRetrieved.size(), 10);
+
+        int i = 10;
+        for (Activity activity : activitiesRetrieved) {
+            assertEquals(
+                    activity,
+                    activitiesStored.get(activitiesStored.size() - 1 - i++)
+            );
+        }
+    }
+
+    @Test
+    public void getPageOfResultsOfTweetsForSpecifiedUserWhenThereAreLessThanPageSizeActivitiesAscending() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        List<Activity> activitiesStored = (List<Activity>) createTweetActivities(userId, dateTime, 25);
+        as.store(userId, activitiesStored);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved =
+                (List<Activity>) as.getByUserPaginated(userId, 2, 10, ascOrder);
+        assertEquals(activitiesRetrieved.size(), 5);
+
+        int i = 20;
+        for (Activity activity : activitiesRetrieved) {
+            assertEquals(
+                    activity,
+                    activitiesStored.get(activitiesStored.size() - 1 - i++)
+            );
+        }
+    }
+
+    @Test(expectedExceptions = InvalidOrderException.class)
+    public void invalidSortOrderShouldThrowException() throws Exception {
+        as.getByUserPaginated(UUID.randomUUID(), 0, 10, "not-an-order");
     }
 
     @Test
