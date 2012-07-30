@@ -601,7 +601,7 @@ public class UserService extends JsonService {
         try {
             signUp = userManager.storeUserFromOAuth(service, verifier);
         } catch (UserManagerException e) {
-            return error(e, "Error while OAuth-like exchange for service: [" + service + "]");
+            return error(e, "Error while OAuth exchange for service: [" + service + "]");
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(

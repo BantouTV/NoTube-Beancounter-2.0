@@ -212,11 +212,10 @@ public class JedisUserManagerImpl implements UserManager {
                     verifier
             );
         } catch (AuthHandlerException e) {
-            final String errMsg = "Error while getting auth manager for service [" + serviceName + "]";
+            final String errMsg = "Error authorizing anonymous user for service [" + serviceName + "]";
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         }
-
         // check if the user already exists
         String candidateUsername;
         User user;

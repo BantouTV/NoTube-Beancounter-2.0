@@ -63,7 +63,7 @@ public class LUpediaNLPEngineImplTestCase {
         Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/Cardiff")));
     }
 
-    @Test(enabled = false)
+    @Test
     public void testUrlBigText() throws NLPEngineException, URISyntaxException, MalformedURLException {
         final URL url = new URL("http://www.teamgb.com/news/eighteen-gymnasts-selected-team-gb-london-2012");
         NLPEngineResult result = nlpEngine.enrich(url);
@@ -100,17 +100,6 @@ public class LUpediaNLPEngineImplTestCase {
                     "Error while creating the new url for the redirect [/hotel/superPage.jsp?startDate=06%2F22%2F2012&encDealHash=MTAwOjE3MzAyNjo4OTcxOTo0LjA6NDkuOTk5OTk2Olk6WTpZ&rid=r-69820702248&wid=w-3&xid=x-103&rs=20500&endDate=06%2F24%2F2012]"
             );
         }
-    }
-
-    // boiler plate error! enable this when we pass to boilerpipe directly the text
-    @Test(enabled = false)
-    public void testTinyUrlThree() throws NLPEngineException, URISyntaxException, MalformedURLException {
-        final URL url = new URL("http://tpt.to/a2Cp9h3");
-        NLPEngineResult result = nlpEngine.enrich(url);
-        Set<Entity> entities = result.getEntities();
-        Assert.assertEquals(entities.size(), 0);
-        Set<URI> actual = toURISet(entities);
-        Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/Google")));
     }
 
     @Test
