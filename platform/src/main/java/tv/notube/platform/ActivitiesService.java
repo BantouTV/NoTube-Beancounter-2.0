@@ -2,8 +2,10 @@ package tv.notube.platform;
 
 import com.google.inject.Inject;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.elasticsearch.search.sort.SortOrder;
 import tv.notube.activities.ActivityStore;
 import tv.notube.activities.ActivityStoreException;
+import tv.notube.activities.InvalidOrderException;
 import tv.notube.activities.WildcardSearchException;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
@@ -257,6 +259,7 @@ public class ActivitiesService extends JsonService {
             @QueryParam("path") String path,
             @QueryParam("value") String value,
             @QueryParam("page") @DefaultValue("0") String pageString,
+            @QueryParam("order") @DefaultValue("desc") String order,
             @QueryParam("apikey") String apiKey
     ) {
         try {
@@ -266,6 +269,7 @@ public class ActivitiesService extends JsonService {
                     path,
                     value,
                     pageString,
+                    order,
                     apiKey
             );
         } catch (ServiceException e) {
@@ -303,7 +307,7 @@ public class ActivitiesService extends JsonService {
 
         Collection<Activity> activitiesRetrieved;
         try {
-            activitiesRetrieved = activities.search(path, value, page, ACTIVITIES_LIMIT);
+            activitiesRetrieved = activities.search(path, value, page, ACTIVITIES_LIMIT, order);
         } catch (ActivityStoreException ase) {
             return error(ase, "Error while getting page " + page
                     + " of activities where [" + path + "=" + value +"]");
@@ -312,6 +316,13 @@ public class ActivitiesService extends JsonService {
             rb.entity(new StringPlatformResponse(
                     StringPlatformResponse.Status.NOK,
                     wse.getMessage())
+            );
+            return rb.build();
+        } catch (InvalidOrderException ioe) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    ioe.getMessage())
             );
             return rb.build();
         }
@@ -335,6 +346,7 @@ public class ActivitiesService extends JsonService {
     public Response getAllActivities(
             @PathParam("username") String username,
             @QueryParam("page") @DefaultValue("0") String pageString,
+            @QueryParam("order") @DefaultValue("desc") String order,
             @QueryParam("apikey") String apiKey
     ) {
         try {
@@ -343,6 +355,7 @@ public class ActivitiesService extends JsonService {
                     "getAllActivities",
                     username,
                     pageString,
+                    order,
                     apiKey
             );
         } catch (ServiceException e) {
@@ -396,12 +409,19 @@ public class ActivitiesService extends JsonService {
 
         Collection<Activity> allActivities;
         try {
-            allActivities = activities.getByUserPaginated(user.getId(), page, ACTIVITIES_LIMIT);
+            allActivities = activities.getByUserPaginated(user.getId(), page, ACTIVITIES_LIMIT, order);
         } catch (ActivityStoreException e) {
             return error(
                     e,
                     "Error while getting page " + page + " of all the activities for user [" + username + "]"
             );
+        } catch (InvalidOrderException ioe) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    ioe.getMessage())
+            );
+            return rb.build();
         }
 
         Response.ResponseBuilder rb = Response.ok();

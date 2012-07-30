@@ -42,11 +42,13 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  * @author Alex Cowell ( alxcwll@gmail.com )
  */
-public class ElasticSearchActivityStoreImpl implements ActivityStore {
+public class ElasticSearchActivityStore implements ActivityStore {
 
     public static final String INDEX_NAME = "beancounter";
 
     public static final String INDEX_TYPE = "activity";
+
+    private static final String dateJsonPath = INDEX_TYPE + ".activity.context.date";
 
     private ObjectMapper mapper;
 
@@ -55,7 +57,7 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
     private Client client;
 
     @Inject
-    public ElasticSearchActivityStoreImpl(
+    public ElasticSearchActivityStore(
             @Named("esConfiguration") ElasticSearchConfiguration configuration
     ) {
         this.configuration = configuration;
@@ -80,7 +82,7 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
     public Collection<Activity> getByUser(UUID uuidId, int max) throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString("userId:" + uuidId.toString()))
-                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
+                .addSort(dateJsonPath, SortOrder.DESC)
                 .setSize(max)
                 .execute().actionGet();
         return retrieveActivitiesFromSearchResponse(searchResponse);
@@ -91,8 +93,8 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
             throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString("userId:" + uuid.toString()))
-                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
-                .setFilter(numericRangeFilter(INDEX_TYPE + ".activity.context.date")
+                .addSort(dateJsonPath, SortOrder.DESC)
+                .setFilter(numericRangeFilter(dateJsonPath)
                         .from(from.getMillis())
                         .to(to.getMillis())
                 ).execute().actionGet();
@@ -105,8 +107,8 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
             throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(QueryBuilders.matchAllQuery())
-                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
-                .setFilter(numericRangeFilter(INDEX_TYPE + ".activity.context.date")
+                .addSort(dateJsonPath, SortOrder.DESC)
+                .setFilter(numericRangeFilter(dateJsonPath)
                         .from(from.getMillis())
                         .to(to.getMillis())
                 ).execute().actionGet();
@@ -174,7 +176,7 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
 
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(fqBuilder)
-                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
+                .addSort(dateJsonPath, SortOrder.DESC)
                 .execute().actionGet();
 
         return retrieveActivitiesFromSearchResponse(searchResponse);
@@ -182,20 +184,20 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
 
     @Override
     public Collection<Activity> getByUserPaginated(
-            UUID userId, int pageNumber, int size
-    ) throws ActivityStoreException {
-        return searchAndPaginateResults("userId:" + userId.toString(), pageNumber, size);
+            UUID userId, int pageNumber, int size, String order
+    ) throws ActivityStoreException, InvalidOrderException {
+        return searchAndPaginateResults("userId:" + userId.toString(), pageNumber, size, order);
     }
 
     @Override
     public Collection<Activity> search(
-            String path, String value, int pageNumber, int size
-    ) throws ActivityStoreException, WildcardSearchException {
+            String path, String value, int pageNumber, int size, String order
+    ) throws ActivityStoreException, WildcardSearchException, InvalidOrderException {
         if (path.contains("*") || value.contains("*")) {
             throw new WildcardSearchException("Wildcard searches are not allowed.");
         }
 
-        return searchAndPaginateResults(path + ":" + value, pageNumber, size);
+        return searchAndPaginateResults(path + ":" + value, pageNumber, size, order);
     }
 
     @Override
@@ -228,12 +230,19 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
     }
 
     private Collection<Activity> searchAndPaginateResults(
-            String query, int pageNumber, int size
-    ) throws ActivityStoreException {
+            String query, int pageNumber, int size, String order
+    ) throws ActivityStoreException, InvalidOrderException {
+        SortOrder sortOrder;
+        try {
+            sortOrder = SortOrder.valueOf(order.toUpperCase());
+        } catch (Exception ex) {
+            throw new InvalidOrderException(order + " is not a valid sort order.");
+        }
+
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setSearchType(SearchType.QUERY_THEN_FETCH)
                 .setQuery(queryString(query))
-                .addSort(INDEX_TYPE + ".activity.context.date", SortOrder.DESC)
+                .addSort(dateJsonPath, sortOrder)
                 .setFrom(pageNumber * size)
                 .setSize(size)
                 .execute().actionGet();
@@ -275,18 +284,18 @@ public class ElasticSearchActivityStoreImpl implements ActivityStore {
         Settings settings = ImmutableSettings.settingsBuilder()
                 .put("client.transport.sniff", true)
                 .build();
-        TransportClient client = new TransportClient(settings);
+        TransportClient transportClient = new TransportClient(settings);
         for (NodeInfo node : configuration.getNodes()) {
-            client.addTransportAddress(
+            transportClient.addTransportAddress(
                     new InetSocketTransportAddress(node.getHost(), node.getPort())
             );
         }
-        ImmutableList<DiscoveryNode> nodes = client.connectedNodes();
+        ImmutableList<DiscoveryNode> nodes = transportClient.connectedNodes();
         if (nodes.isEmpty()) {
-            client.close();
+            transportClient.close();
             throw new RuntimeException("Could not connect to elasticsearch cluster."
                     + " Please check the elasticsearch-configuration.xml file.");
         }
-        return client;
+        return transportClient;
     }
 }

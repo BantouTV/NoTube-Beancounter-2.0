@@ -519,6 +519,9 @@
         Parameters: <br>
         - <b>{username}</b> the Beancounter username<br>
         - <b>page</b> : the page of results to return (default is 0)<br>
+        - <b>order</b> : the order the results should be returned in; either
+        "asc" for ascending (earliest activities first) or "desc" for descending
+        (latest activities first). The default is "desc".<br>
         - <b>apikey</b> <br>
         Description: retrieves all the activities of the specified user in a 
         paginated format where page 0 is the first page. If the <b>page</b>
@@ -570,6 +573,9 @@
         - <b>path</b> : the JSON path to search on<br>
         - <b>value</b> : the value to search for<br>
         - <b>page</b> : the page of results to return (default is 0, the first page)<br>
+        - <b>order</b> : the order the results should be returned in; either
+        "asc" for ascending (earliest activities first) or "desc" for descending
+        (latest activities first). The default is "desc".<br>
         - <b>apikey</b> <br>
         Description: searches all activities looking for a JSON path with the 
         specified value. Wildcard searches using '*' are not permitted.
@@ -580,7 +586,7 @@
         Example: with curl
 
         <pre><code>
-    $ curl http://api.beancounter.io/rest/activities/search?path=activity.type&value=TWEET&page=3&apikey=your-api-key
+    $ curl http://api.beancounter.io/rest/activities/search?path=activity.type&value=TWEET&page=3&order=asc&apikey=your-api-key
         </code></pre>
 
         <h3>Responses</h3>

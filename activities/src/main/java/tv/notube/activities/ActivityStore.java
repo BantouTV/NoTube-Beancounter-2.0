@@ -99,34 +99,49 @@ public interface ActivityStore {
      * @param userId The id of the user whose activities should be returned.
      * @param pageNumber The number of the page of results to return.
      * @param size The number of results displayed on each page.
+     * @param order The order in which the results should be given. Either "asc"
+     * for ascending (earliest activities first) or "desc" for descending
+     * (latest activities first).
      * @return <code>size</code> activities relating to the specified page.
      * @throws ActivityStoreException Thrown if something goes wrong when
      * converting the JSON search results to Activity objects.
+     * @throws InvalidOrderException When the specified order is invalid (ie.
+     * not "asc" or "desc").
      */
     public Collection<Activity> getByUserPaginated(
-            final UUID userId,
-            final int pageNumber,
-            final int size
-    ) throws ActivityStoreException;
+            UUID userId,
+            int pageNumber,
+            int size,
+            String order
+    ) throws ActivityStoreException, InvalidOrderException;
 
     /**
      * Performs an exact match of the <i>value</i> parameter against the given
-     * JSON path. Wildcard searches are not allowed.
+     * JSON path and provides results in a paginated format. Wildcard searches
+     * are not allowed.
      *
      * @param path The JSON path to match the value to.
      * @param value The value to search for.
+     * @param pageNumber The number of the page of results to return.
+     * @param size The number of results displayed on each page.
+     * @param order The order in which the results should be given. Either "asc"
+     * for ascending (earliest activities first) or "desc" for descending
+     * (latest activities first).
      * @return Zero or more activities which are the results of executing the
      * search.
      * @throws ActivityStoreException Thrown if something goes wrong when
      * converting the JSON search results to Activity objects.
      * @throws WildcardSearchException Thrown if a wildcard search is attempted.
+     * @throws InvalidOrderException When the specified order is invalid (ie.
+     * not "asc" or "desc").
      */
     public Collection<Activity> search(
             String path,
             String value,
             int pageNumber,
-            int size
-    ) throws ActivityStoreException, WildcardSearchException;
+            int size,
+            String order
+    ) throws ActivityStoreException, WildcardSearchException, InvalidOrderException;
 
     /**
      * Releases any used resources.

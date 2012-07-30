@@ -113,7 +113,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    public void testGetAllActivitiesDefault() throws IOException {
+    public void testGetAllActivitiesDescendingDefault() throws IOException {
         final String baseQuery = "activities/all/%s?apikey=%s";
         final String username = "test-user";
         final String query = String.format(
@@ -151,7 +151,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    public void testGetAllActivitiesNormal() throws IOException {
+    public void testGetAllActivitiesDescendingNormal() throws IOException {
         final String baseQuery = "activities/all/%s?page=1&apikey=%s";
         final String username = "test-user";
         final String query = String.format(
@@ -191,12 +191,13 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    public void testGetAllActivitiesMore() throws IOException {
-        final String baseQuery = "activities/all/%s?page=2&apikey=%s";
+    public void testGetAllActivitiesDescendingMore() throws IOException {
+        final String baseQuery = "activities/all/%s?page=2&order=%s&apikey=%s";
         final String username = "test-user";
         final String query = String.format(
                 baseQuery,
                 username,
+                "desc",
                 APIKEY
         );
 
@@ -231,7 +232,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    public void testGetAllActivitiesTooMany() throws IOException {
+    public void testGetAllActivitiesDescendingTooMany() throws IOException {
         final String baseQuery = "activities/all/%s?page=3&apikey=%s";
         final String username = "test-user";
         final String query = String.format(
@@ -294,6 +295,160 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual.getObject().size(), 0);
     }
 
+    @Test
+    public void testGetAllActivitiesAscendingDefault() throws IOException {
+        final String baseQuery = "activities/all/%s?apikey=%s&order=%s";
+        final String username = "test-user";
+        final String query = String.format(
+                baseQuery,
+                username,
+                APIKEY,
+                "asc"
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+
+        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                "user '" + username + "' activities found.",
+                "OK"
+        );
+
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus().toString(), expected.getStatus());
+
+        List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+        assertNotNull(activities);
+        assertEquals(activities.size(), 20);
+        for (int i = 0; i < activities.size(); i++) {
+            Tweet tweet = (Tweet) activities.get(i).getObject();
+            assertEquals(tweet.getText(), "Fake text #" + (49 - i));
+        }
+    }
+
+    @Test
+    public void testGetAllActivitiesAscendingNormal() throws IOException {
+        final String baseQuery = "activities/all/%s?page=1&order=%s&apikey=%s";
+        final String username = "test-user";
+        final String query = String.format(
+                baseQuery,
+                username,
+                "asc",
+                APIKEY
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+
+        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                "user 'test-user' activities found.",
+                "OK"
+        );
+
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus().toString(), expected.getStatus());
+
+        List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+        assertNotNull(activities);
+        assertEquals(activities.size(), 20);
+
+        int i = 20;
+        for (Activity activity : activities) {
+            Tweet tweet = (Tweet) activity.getObject();
+            assertEquals(tweet.getText(), "Fake text #" + (49 - i++));
+        }
+    }
+
+    @Test
+    public void testGetAllActivitiesAscendingMore() throws IOException {
+        final String baseQuery = "activities/all/%s?page=2&order=%s&apikey=%s";
+        final String username = "test-user";
+        final String query = String.format(
+                baseQuery,
+                username,
+                "asc",
+                APIKEY
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+
+        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                "user 'test-user' activities found.",
+                "OK"
+        );
+
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus().toString(), expected.getStatus());
+
+        List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+        assertNotNull(activities);
+        assertEquals(activities.size(), 10);
+
+        int i = 40;
+        for (Activity activity : activities) {
+            Tweet tweet = (Tweet) activity.getObject();
+            assertEquals(tweet.getText(), "Fake text #" + (49 - i++));
+        }
+    }
+
+    @Test
+    public void getAllUserActivitiesWithInvalidSortOrderParameterReturnsErrorResponse() throws Exception {
+        final String baseQuery = "activities/all/%s?order=%s&apikey=%s";
+        final String username = "test-user";
+        final String order = "invalid-order";
+        final String query = String.format(
+                baseQuery,
+                username,
+                order,
+                APIKEY
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+
+        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                order + " is not a valid sort order.",
+                "NOK"
+        );
+
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus().toString(), expected.getStatus());
+        assertEquals(actual.getObject(), expected.getObject());
+    }
+
     // TODO (low): Not sure if we need this test anymore.
     @Test
     public void testGetAllActivitiesDifferentPages() throws IOException {
@@ -335,11 +490,12 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void searchForCustomActivity() throws Exception {
-        final String baseQuery = "activities/search?path=%s&value=%s&apikey=%s";
+        final String baseQuery = "activities/search?path=%s&value=%s&order=%s&apikey=%s";
         final String query = String.format(
                 baseQuery,
                 "type",
                 "RAI-CONTENT-ITEM",
+                "desc",
                 APIKEY
         );
 
@@ -371,7 +527,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    public void searchForAllTweets() throws Exception {
+    public void searchForAllTweetsMostRecentFirst() throws Exception {
         int i = 0;
         int page = 0;
         int tweetCount = 0;
@@ -428,6 +584,100 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         }
 
         assertEquals(tweetCount, 50);
+    }
+
+    @Test
+    public void searchForAllTweetsEarliestFirst() throws Exception {
+        int i = 0;
+        int page = 0;
+        int tweetCount = 0;
+
+        while (true) {
+            String baseQuery = "activities/search?path=%s&value=%s&page=%d&order=%s&apikey=%s";
+            String query = String.format(
+                    baseQuery,
+                    "type",
+                    Verb.TWEET.name(),
+                    page++,
+                    "asc",
+                    APIKEY
+            );
+
+            GetMethod getMethod = new GetMethod(base_uri + query);
+            HttpClient client = new HttpClient();
+
+            int result = client.executeMethod(getMethod);
+            String responseBody = new String(getMethod.getResponseBody());
+            logger.info("result code: " + result);
+            logger.info("response body: " + responseBody);
+            assertNotEquals(responseBody, "");
+
+            ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+
+            if (actual.getObject().isEmpty()) {
+                APIResponse expected = new APIResponse(
+                        null,
+                        "search for [type=TWEET] found no more activities.",
+                        "OK"
+                );
+                assertEquals(actual.getStatus().toString(), expected.getStatus());
+                assertEquals(actual.getMessage(), expected.getMessage());
+                assertNotNull(actual.getObject());
+                assertEquals(actual.getObject().size(), 0);
+                break;
+            }
+
+            APIResponse expected = new APIResponse(
+                    null,
+                    "search for [type=TWEET] found activities.",
+                    "OK"
+            );
+
+            assertEquals(actual.getMessage(), expected.getMessage());
+            assertEquals(actual.getStatus().toString(), expected.getStatus());
+
+            List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+            for (Activity activity : activities) {
+                Tweet tweet = (Tweet) activity.getObject();
+                assertEquals(tweet.getText(), "Fake text #" + (49 - i++));
+            }
+            tweetCount += activities.size();
+        }
+
+        assertEquals(tweetCount, 50);
+    }
+
+    @Test
+    public void searchingWithInvalidSortOrderParameterReturnsErrorResponse() throws Exception {
+        final String baseQuery = "activities/all/%s?order=%s&apikey=%s";
+        final String username = "test-user";
+        final String order = "invalid-order";
+        final String query = String.format(
+                baseQuery,
+                username,
+                order,
+                APIKEY
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+
+        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                order + " is not a valid sort order.",
+                "NOK"
+        );
+
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus().toString(), expected.getStatus());
+        assertEquals(actual.getObject(), expected.getObject());
     }
 
     @Test
