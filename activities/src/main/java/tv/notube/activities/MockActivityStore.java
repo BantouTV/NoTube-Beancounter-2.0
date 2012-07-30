@@ -120,7 +120,7 @@ public class MockActivityStore implements ActivityStore {
 
     @Override
     public Collection<Activity> search(
-            String path, String value, int pageNumber, int size
+            String path, String value, int pageNumber, int size, String order
     ) throws ActivityStoreException, WildcardSearchException {
         if (path.contains("*") || value.contains("*")) {
             throw new WildcardSearchException("Wildcard searches are not allowed.");
@@ -136,8 +136,16 @@ public class MockActivityStore implements ActivityStore {
             }
         } else {
             try {
-                for (int i = 0; i < 50; i++) {
-                    allActivities.add(createFakeActivity(i));
+                if (SortOrder.DESC.toString().equals(order)) {
+                    for (int i = 0; i < 50; i++) {
+                        allActivities.add(createFakeActivity(i));
+                    }
+                } else if (SortOrder.ASC.toString().equals(order)) {
+                    for (int i = 49; i >= 0; i--) {
+                        allActivities.add(createFakeActivity(i));
+                    }
+                } else {
+                    throw new InvalidOrderException(order + " is not a valid sort order.");
                 }
             } catch (Exception ex) {
                 throw new ActivityStoreException("Error while creating fake activities!", ex);

@@ -537,12 +537,12 @@ public class ElasticSearchActivityStoreTest {
     }
 
     @Test(expectedExceptions = InvalidOrderException.class)
-    public void invalidSortOrderShouldThrowException() throws Exception {
+    public void getByUserWithInvalidSortOrderShouldThrowException() throws Exception {
         as.getByUserPaginated(UUID.randomUUID(), 0, 10, "not-an-order");
     }
 
     @Test
-    public void searchForAllTweetsOfAUser() throws Exception {
+    public void searchForAllTweetsOfAUserDescending() throws Exception {
         UUID userId = UUID.randomUUID();
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
 
@@ -553,16 +553,26 @@ public class ElasticSearchActivityStoreTest {
 
         refreshIndex();
 
-        List<Activity> activitiesRetrieved =
-                (List<Activity>) as.search("type", Verb.TWEET.name(), 0, 10);
+        List<Activity> activitiesRetrieved = (List<Activity>) as.search(
+                "type",
+                Verb.TWEET.name(),
+                0,
+                10,
+                descOrder
+        );
 
         assertEquals(activitiesRetrieved.size(), 10);
         for (int i = 0; i < activitiesRetrieved.size(); i++) {
             assertEquals(activitiesRetrieved.get(i), tweetsStored.get(i));
         }
 
-        activitiesRetrieved =
-                (List<Activity>) as.search("activity.object.type", Verb.TWEET.name(), 0, 10);
+        activitiesRetrieved = (List<Activity>) as.search(
+                "activity.object.type",
+                Verb.TWEET.name(),
+                0,
+                10,
+                descOrder
+        );
 
         assertEquals(activitiesRetrieved.size(), 10);
         for (int i = 0; i < activitiesRetrieved.size(); i++) {
@@ -571,7 +581,7 @@ public class ElasticSearchActivityStoreTest {
     }
 
     @Test
-    public void searchForAllTweetsByTwitterUsername() throws Exception {
+    public void searchForAllTweetsByTwitterUsernameDescending() throws Exception {
         UUID userId = UUID.randomUUID();
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
 
@@ -582,16 +592,25 @@ public class ElasticSearchActivityStoreTest {
 
         refreshIndex();
 
-        List<Activity> activitiesRetrieved =
-                (List<Activity>) as.search("username", "\"twitter-username\"", 0, 20);
+        List<Activity> activitiesRetrieved = (List<Activity>) as.search(
+                "username",
+                "\"twitter-username\"",
+                0,
+                20,
+                descOrder
+        );
 
         assertEquals(activitiesRetrieved.size(), 10);
         for (int i = 0; i < activitiesRetrieved.size(); i++) {
             assertEquals(activitiesRetrieved.get(i), tweetsStored.get(i));
         }
 
-        activitiesRetrieved =
-                (List<Activity>) as.search("activity.context.username", "\"twitter-username\"", 0, 20);
+        activitiesRetrieved = (List<Activity>) as.search(
+                "activity.context.username",
+                "\"twitter-username\"",
+                0,
+                20,
+                descOrder);
 
         assertEquals(activitiesRetrieved.size(), 10);
         for (int i = 0; i < activitiesRetrieved.size(); i++) {
@@ -600,7 +619,7 @@ public class ElasticSearchActivityStoreTest {
     }
 
     @Test
-    public void searchForAllTweetsYesterday() throws Exception {
+    public void searchForAllTweetsYesterdayDescending() throws Exception {
         UUID userId = UUID.randomUUID();
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
         long dateTimeMillis = dateTime.minusDays(1).getMillis();
@@ -611,8 +630,13 @@ public class ElasticSearchActivityStoreTest {
 
         refreshIndex();
 
-        List<Activity> activitiesRetrieved =
-                (List<Activity>) as.search("date", String.valueOf(dateTimeMillis), 0, 20);
+        List<Activity> activitiesRetrieved = (List<Activity>) as.search(
+                "date",
+                String.valueOf(dateTimeMillis),
+                0,
+                20,
+                descOrder
+        );
 
         assertEquals(activitiesRetrieved.size(), 1);
         assertEquals(activitiesRetrieved.get(0), tweetsStored.get(1));
@@ -621,7 +645,8 @@ public class ElasticSearchActivityStoreTest {
                 "activity.context.date",
                 String.valueOf(dateTimeMillis),
                 0,
-                20
+                20,
+                descOrder
         );
 
         assertEquals(activitiesRetrieved.size(), 1);
@@ -629,7 +654,7 @@ public class ElasticSearchActivityStoreTest {
     }
 
     @Test
-    public void searchWhenSpecifiedFieldIsSameAsAnotherField() throws Exception {
+    public void searchWhenSpecifiedFieldIsSameAsAnotherFieldDescending() throws Exception {
         UUID userId = UUID.randomUUID();
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
         Activity activity = createDuplicateFieldActivity();
@@ -644,7 +669,8 @@ public class ElasticSearchActivityStoreTest {
                 "activity.context.username",
                 "\"twitter-username\"",
                 0,
-                10
+                10,
+                descOrder
         );
 
         assertEquals(activitiesRetrieved.size(), 1);
@@ -654,12 +680,141 @@ public class ElasticSearchActivityStoreTest {
             // This should throw an exception if the correct activity was retrieved
             // since no type mapping is specified for JSON serialization in the
             // Object class for the DuplicateFieldObject class.
-            as.search("activity.object.username", "\"different-username\"", 0, 10);
+            as.search(
+                    "activity.object.username",
+                    "\"different-username\"",
+                    0,
+                    10,
+                    descOrder);
         } catch (ActivityStoreException ignored) {
             return;
         }
 
         fail();
+    }
+
+    @Test
+    public void searchForAllTweetsOfAUserAscending() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        List<Activity> tweetsStored = (List<Activity>) createTweetActivities(userId, dateTime, 10);
+        Collection<Activity> songsStored = createLastFmActivities(userId, dateTime, 10);
+        as.store(userId, tweetsStored);
+        as.store(userId, songsStored);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved = (List<Activity>) as.search(
+                "type",
+                Verb.TWEET.name(),
+                0,
+                10,
+                ascOrder
+        );
+
+        assertEquals(activitiesRetrieved.size(), 10);
+        for (int i = 0; i < activitiesRetrieved.size(); i++) {
+            assertEquals(
+                    activitiesRetrieved.get(i),
+                    tweetsStored.get(tweetsStored.size() - 1 - i)
+            );
+        }
+
+        activitiesRetrieved = (List<Activity>) as.search(
+                "activity.object.type",
+                Verb.TWEET.name(),
+                0,
+                10,
+                ascOrder
+        );
+
+        assertEquals(activitiesRetrieved.size(), 10);
+        for (int i = 0; i < activitiesRetrieved.size(); i++) {
+            assertEquals(
+                    activitiesRetrieved.get(i),
+                    tweetsStored.get(tweetsStored.size() - 1 - i)
+            );
+        }
+    }
+
+    @Test
+    public void searchForAllTweetsByTwitterUsernameAscending() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        List<Activity> tweetsStored = (List<Activity>) createTweetActivities(userId, dateTime, 10);
+        Collection<Activity> songsStored = createLastFmActivities(userId, dateTime, 10);
+        as.store(userId, tweetsStored);
+        as.store(userId, songsStored);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved = (List<Activity>) as.search(
+                "username",
+                "\"twitter-username\"",
+                0,
+                20,
+                ascOrder
+        );
+
+        assertEquals(activitiesRetrieved.size(), 10);
+        for (int i = 0; i < activitiesRetrieved.size(); i++) {
+            assertEquals(
+                    activitiesRetrieved.get(i),
+                    tweetsStored.get(tweetsStored.size() - 1 - i)
+            );
+        }
+
+        activitiesRetrieved = (List<Activity>) as.search(
+                "activity.context.username",
+                "\"twitter-username\"",
+                0,
+                20,
+                ascOrder);
+
+        assertEquals(activitiesRetrieved.size(), 10);
+        for (int i = 0; i < activitiesRetrieved.size(); i++) {
+            assertEquals(
+                    activitiesRetrieved.get(i),
+                    tweetsStored.get(tweetsStored.size() - 1 - i)
+            );
+        }
+    }
+
+    @Test
+    public void searchForAllTweetsYesterdayAscending() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+        long dateTimeMillis = dateTime.minusDays(1).getMillis();
+
+        List<Activity> tweetsStored =
+                (List<Activity>) createTweetActivities(userId, dateTime, 10);
+        as.store(userId, tweetsStored);
+
+        refreshIndex();
+
+        List<Activity> activitiesRetrieved = (List<Activity>) as.search(
+                "date",
+                String.valueOf(dateTimeMillis),
+                0,
+                20,
+                ascOrder
+        );
+
+        assertEquals(activitiesRetrieved.size(), 1);
+        assertEquals(activitiesRetrieved.get(0), tweetsStored.get(1));
+
+        activitiesRetrieved = (List<Activity>) as.search(
+                "activity.context.date",
+                String.valueOf(dateTimeMillis),
+                0,
+                20,
+                ascOrder
+        );
+
+        assertEquals(activitiesRetrieved.size(), 1);
+        assertEquals(activitiesRetrieved.get(0), tweetsStored.get(1));
     }
 
     @Test(expectedExceptions = WildcardSearchException.class)
@@ -674,18 +829,23 @@ public class ElasticSearchActivityStoreTest {
         refreshIndex();
 
         try {
-            as.search("userId", "*", 0, 10);
+            as.search("userId", "*", 0, 10, descOrder);
         } catch (WildcardSearchException expected) {}
 
         try {
-            as.search("*", "*", 0, 10);
+            as.search("*", "*", 0, 10, descOrder);
         } catch (WildcardSearchException expected) {}
 
         try {
-            as.search("user*", "*", 0, 10);
+            as.search("user*", "*", 0, 10, ascOrder);
         } catch (WildcardSearchException expected) {}
 
-        as.search("type", "tw*er", 0, 10);
+        as.search("type", "tw*er", 0, 10, ascOrder);
+    }
+
+    @Test(expectedExceptions = InvalidOrderException.class)
+    public void searchingWithInvalidSortOrderShouldThrowException() throws Exception {
+        as.search("type", "TWEET", 0, 10, "not-an-order");
     }
 
     private void refreshIndex() {

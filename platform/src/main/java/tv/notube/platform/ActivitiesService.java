@@ -307,7 +307,7 @@ public class ActivitiesService extends JsonService {
 
         Collection<Activity> activitiesRetrieved;
         try {
-            activitiesRetrieved = activities.search(path, value, page, ACTIVITIES_LIMIT);
+            activitiesRetrieved = activities.search(path, value, page, ACTIVITIES_LIMIT, order);
         } catch (ActivityStoreException ase) {
             return error(ase, "Error while getting page " + page
                     + " of activities where [" + path + "=" + value +"]");

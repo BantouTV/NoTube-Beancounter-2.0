@@ -191,13 +191,13 @@ public class ElasticSearchActivityStore implements ActivityStore {
 
     @Override
     public Collection<Activity> search(
-            String path, String value, int pageNumber, int size
+            String path, String value, int pageNumber, int size, String order
     ) throws ActivityStoreException, WildcardSearchException, InvalidOrderException {
         if (path.contains("*") || value.contains("*")) {
             throw new WildcardSearchException("Wildcard searches are not allowed.");
         }
 
-        return searchAndPaginateResults(path + ":" + value, pageNumber, size, SortOrder.DESC.toString());
+        return searchAndPaginateResults(path + ":" + value, pageNumber, size, order);
     }
 
     @Override
