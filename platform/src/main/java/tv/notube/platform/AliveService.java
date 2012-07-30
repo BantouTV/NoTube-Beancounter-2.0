@@ -1,6 +1,8 @@
 package tv.notube.platform;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import tv.notube.platform.responses.*;
 
 import javax.ws.rs.*;
@@ -13,6 +15,10 @@ import javax.ws.rs.core.Response;
 @Path("rest/api")
 @Produces(MediaType.APPLICATION_JSON)
 public class AliveService extends JsonService {
+
+    @Inject
+    @Named("beancounter.app.version")
+    String appVersion;
 
     @Inject
     public AliveService() {}
@@ -37,7 +43,7 @@ public class AliveService extends JsonService {
         rb.entity(new StringPlatformResponse(
                 UUIDPlatformResponse.Status.OK,
                 "beancounter.io version",
-                "1.1")
+                appVersion)
         );
         return rb.build();
     }

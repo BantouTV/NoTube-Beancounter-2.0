@@ -59,6 +59,13 @@ public final class DefaultServiceAuthorizationManager
                 throw new RuntimeException("service [" + service + "] oauth callback endpoint is not a valid URL", e);
             }
             try {
+                serviceObj.setAtomicOAuthCallback(
+                        new URL(property(properties, service, "atomicoauth"))
+                );
+            } catch (MalformedURLException e) {
+                throw new RuntimeException("service [" + service + "] oauth callback endpoint is not a valid URL", e);
+            }
+            try {
                 sam.addHandler(
                         serviceObj,
                         buildHandler(serviceObj, property(

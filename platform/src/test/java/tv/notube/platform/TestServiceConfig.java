@@ -2,6 +2,7 @@ package tv.notube.platform;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.name.Names;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
@@ -11,6 +12,7 @@ import tv.notube.activities.ActivityStore;
 import tv.notube.activities.MockActivityStore;
 import tv.notube.applications.MockApplicationsManager;
 import tv.notube.applications.ApplicationsManager;
+import tv.notube.commons.helper.PropertiesHelper;
 import tv.notube.filter.manager.FilterManager;
 import tv.notube.filter.manager.InMemoryFilterManager;
 import tv.notube.profiles.MockProfiles;
@@ -24,6 +26,7 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  *
@@ -48,6 +51,10 @@ public class TestServiceConfig extends GuiceServletContextListener {
                 bind(ApplicationService.class);
                 bind(UserService.class);
                 bind(ActivitiesService.class);
+
+                Properties samProperties = PropertiesHelper.readFromClasspath("/sam.properties");
+                Names.bindProperties(binder(), samProperties);
+
                 bind(AliveService.class);
                 bind(FilterService.class);
                 // add bindings for Jackson
