@@ -144,6 +144,16 @@ public interface ActivityStore {
     ) throws ActivityStoreException, WildcardSearchException, InvalidOrderException;
 
     /**
+     * This method sets an internal {@link Activity} <code>boolean</code> flag to make
+     * it no longer visible (or to make it visible) in all the other search methods.
+     *
+     * @param activityId
+     * @param visible
+     * @throws ActivityStoreException
+     */
+    public void setVisible(final UUID activityId, boolean visible) throws ActivityStoreException;
+
+    /**
      * Releases any used resources.
      *
      * @throws ActivityStoreException

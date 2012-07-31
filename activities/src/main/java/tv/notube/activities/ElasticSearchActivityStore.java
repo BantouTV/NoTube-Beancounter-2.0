@@ -18,6 +18,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortOrder;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tv.notube.activities.model.activity.ElasticSearchActivity;
 import tv.notube.commons.helper.es.ElasticSearchConfiguration;
 import tv.notube.commons.helper.es.NodeInfo;
@@ -43,6 +45,8 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
  * @author Alex Cowell ( alxcwll@gmail.com )
  */
 public class ElasticSearchActivityStore implements ActivityStore {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(ElasticSearchActivityStore.class);
 
     public static final String INDEX_NAME = "beancounter";
 
@@ -198,6 +202,12 @@ public class ElasticSearchActivityStore implements ActivityStore {
         }
 
         return searchAndPaginateResults(path + ":" + value, pageNumber, size, order);
+    }
+
+    @Override
+    public void setVisible(UUID activityId, boolean visible) throws ActivityStoreException {
+        // TODO (it does nothing for the moment, see issue 23)
+        LOGGER.debug("activity {} visibility set to {}", activityId, visible);
     }
 
     @Override

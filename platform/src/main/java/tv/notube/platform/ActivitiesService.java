@@ -158,6 +158,74 @@ public class ActivitiesService extends JsonService {
         return mapper.readValue(jsonActivity, Activity.class);
     }
 
+    @DELETE
+    @Path("/{activityId}/visibility")
+    public Response setVisibility(
+            @PathParam("activityId") String activityId,
+            @QueryParam("visibility") String visibility,
+            @QueryParam("apikey") String apiKey
+    ) {
+        try {
+            check(
+                    this.getClass(),
+                    "setVisibility",
+                    activityId,
+                    visibility,
+                    apiKey
+            );
+        } catch (ServiceException e) {
+            return error(e, "Error while checking parameters");
+        }
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
+        }
+        UUID activityIdObj;
+        try {
+            activityIdObj = UUID.fromString(activityId);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your activityId is not well formed");
+        }
+        boolean isAuth;
+        try {
+            isAuth = applicationsManager.isAuthorized(
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.DELETE,
+                    ApplicationsManager.Object.ACTIVITIES
+            );
+        } catch (ApplicationsManagerException e) {
+            return error(e, "Error while authenticating your application");
+        }
+        if (!isAuth) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    "Sorry. You're not allowed to do that.")
+            );
+            return rb.build();
+        }
+        boolean vObj;
+        try {
+            vObj = Boolean.valueOf(visibility);
+        } catch (Exception e) {
+            return error(e, "visibility parameter must be {true, false} and not [" + visibility + "]");
+        }
+        try {
+            activities.setVisible(activityIdObj, vObj);
+        } catch (ActivityStoreException e) {
+            return error(e, "Error modifying the visibility of activity with id [" + activityId + "]");
+        }
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(
+                new ActivitiesPlatformResponse(
+                        ActivitiesPlatformResponse.Status.OK,
+                        "activity [" + activityId + "] visibility has been modified to [" + vObj + "]"
+                )
+        );
+        return rb.build();
+    }
+
     @GET
     @Path("/get/{username}/{activityId}")
     public Response getActivity(
@@ -423,7 +491,6 @@ public class ActivitiesService extends JsonService {
             );
             return rb.build();
         }
-
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
                 new ActivitiesPlatformResponse(

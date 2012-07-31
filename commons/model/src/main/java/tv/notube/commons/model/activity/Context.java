@@ -18,12 +18,23 @@ public class Context implements Serializable {
 
     private static final long serialVersionUID = 325277757335L;
 
+    /**
+     * Date of when the activity occurred.
+     */
     private DateTime date;
 
+    /**
+     * On which service, es: Facebook, Twitter ...
+     */
     private String service;
 
     private String mood;
 
+    /**
+     * username or identifier of the user on that given service.
+     * Es: if the activity has been performed on facebook, here you should put
+     * its facebook identifier.
+     */
     private String username;
 
     public Context() {}

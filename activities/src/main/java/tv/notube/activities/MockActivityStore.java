@@ -162,6 +162,11 @@ public class MockActivityStore implements ActivityStore {
         return results;
     }
 
+    @Override
+    public void setVisible(UUID activityId, boolean visible) throws ActivityStoreException {
+        throw new UnsupportedOperationException();
+    }
+
     public Activity getLastActivity() {
         return lastActivity;
     }
