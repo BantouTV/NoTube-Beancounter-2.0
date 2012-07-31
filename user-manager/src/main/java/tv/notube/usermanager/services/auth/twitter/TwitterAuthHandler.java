@@ -6,6 +6,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 import tv.notube.commons.model.*;
+import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.auth.AuthHandlerException;
 import tv.notube.commons.model.auth.AuthenticatedUser;
 import tv.notube.commons.model.auth.DefaultAuthHandler;
@@ -14,6 +15,7 @@ import tv.notube.commons.model.auth.OAuthAuth;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 /**
  * put class description here
@@ -92,6 +94,12 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
 
     @Override
     public AuthenticatedUser auth(String verifier) {
+        throw new UnsupportedOperationException("nah, NIY.");
+    }
+
+    @Override
+    public List<Activity> grabActivities(String secret, String username, int limit)
+            throws AuthHandlerException {
         throw new UnsupportedOperationException("nah, NIY.");
     }
 

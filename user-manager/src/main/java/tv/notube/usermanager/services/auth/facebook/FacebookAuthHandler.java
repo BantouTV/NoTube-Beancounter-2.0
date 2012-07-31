@@ -3,6 +3,7 @@ package tv.notube.usermanager.services.auth.facebook;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
+import com.restfb.types.Post;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.model.Token;
@@ -12,16 +13,23 @@ import tv.notube.commons.helper.reflection.ReflectionHelper;
 import tv.notube.commons.helper.reflection.ReflectionHelperException;
 import tv.notube.commons.model.*;
 import tv.notube.commons.model.User;
+import tv.notube.commons.model.activity.*;
+import tv.notube.commons.model.activity.Object;
 import tv.notube.commons.model.auth.AuthenticatedUser;
 import tv.notube.commons.model.auth.DefaultAuthHandler;
 import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.auth.AuthHandlerException;
 import tv.notube.commons.model.auth.OAuthAuth;
+import tv.notube.listener.facebook.core.FacebookUtils;
+import tv.notube.listener.facebook.core.converter.custom.ConverterException;
+import tv.notube.listener.facebook.core.converter.custom.FacebookLikeConverter;
+import tv.notube.listener.facebook.core.converter.custom.FacebookShareConverter;
+import tv.notube.listener.facebook.core.model.*;
+import tv.notube.listener.facebook.core.model.FacebookData;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * put class description here
@@ -165,6 +173,62 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
         return new AuthenticatedUser(data.get("facebook.user.id"), user);
     }
 
+    @Override
+    public List<Activity> grabActivities(String token, String identifier, int limit)
+            throws AuthHandlerException {
+        FacebookClient client = new DefaultFacebookClient(token);
+        // grab shares
+        Collection<Post> posts = FacebookUtils.fetch(Post.class, client, "feed", limit);
+        FacebookShareConverter shareConverter = new FacebookShareConverter();
+        List<Activity> result = new ArrayList<Activity>();
+        for (Post post : posts) {
+            tv.notube.commons.model.activity.Object object;
+            Context context;
+            try {
+                object = shareConverter.convert(post, true);
+                context = shareConverter.getContext(post, identifier);
+            } catch (ConverterException e) {
+                // just skip
+                continue;
+                // TODO (med) should log
+            }
+            Activity activity = toActivity(object, Verb.SHARE);
+            activity.setContext(context);
+            result.add(activity);
+        }
+        // grab likes
+        Collection<FacebookData> likes = FacebookUtils.fetch(
+                FacebookData.class,
+                client,
+                "likes",
+                limit
+        );
+        FacebookLikeConverter likeConverter = new FacebookLikeConverter();
+        for (FacebookData like : likes) {
+            tv.notube.commons.model.activity.Object object;
+            Context context;
+            try {
+                object = likeConverter.convert(like, true);
+                context = likeConverter.getContext(like, identifier);
+            } catch (ConverterException e) {
+                // just skip
+                continue;
+                // TODO (med) should log
+            }
+            Activity activity = toActivity(object, Verb.LIKE);
+            activity.setContext(context);
+            result.add(activity);
+        }
+        return result;
+    }
+
+    private Activity toActivity(Object object, Verb verb) {
+        Activity activity = new Activity();
+        activity.setVerb(verb);
+        activity.setObject(object);
+        return activity;
+    }
+
     private Map<String, String> getUserData(String token) throws AuthHandlerException {
         FacebookClient client = new DefaultFacebookClient(token);
         CustomFacebookUser user = client.fetchObject(
@@ -202,8 +266,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
         String candindateBCUsername = String.valueOf(data.get("facebook.user.id"));
         User user = new User();
         user.setUsername(candindateBCUsername);
-        for(String k : data.keySet()) {
-            System.out.println("got data [" + k + "," + data.get(k) + "]");
+        for (String k : data.keySet()) {
             user.addMetadata(k, data.get(k));
         }
         return user;

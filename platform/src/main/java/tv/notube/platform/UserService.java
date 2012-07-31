@@ -1,6 +1,7 @@
 package tv.notube.platform;
 
 import com.google.inject.Inject;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
 import tv.notube.activities.ActivityStore;
 import tv.notube.activities.ActivityStoreException;
@@ -10,10 +11,13 @@ import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.UserProfile;
 import tv.notube.commons.model.activity.Activity;
+import tv.notube.commons.model.activity.ResolvedActivity;
 import tv.notube.commons.model.auth.OAuthAuth;
 import tv.notube.platform.responses.*;
 import tv.notube.profiles.Profiles;
 import tv.notube.profiles.ProfilesException;
+import tv.notube.queues.Queues;
+import tv.notube.queues.QueuesException;
 import tv.notube.usermanager.AtomicSignUp;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.UserManagerException;
@@ -21,6 +25,7 @@ import tv.notube.usermanager.UserManagerException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.util.*;
@@ -40,17 +45,21 @@ public class UserService extends JsonService {
 
     private Profiles profiles;
 
+    private Queues queues;
+
     @Inject
     public UserService(
             final ApplicationsManager am,
             final UserManager um,
             final ActivityStore activities,
-            final Profiles ps
+            final Profiles ps,
+            final Queues queues
     ) {
         this.applicationsManager = am;
         this.userManager = um;
         this.activities = activities;
         this.profiles = ps;
+        this.queues = queues;
     }
 
     @POST
@@ -604,6 +613,42 @@ public class UserService extends JsonService {
             signUp = userManager.storeUserFromOAuth(service, verifier);
         } catch (UserManagerException e) {
             return error(e, "Error while OAuth exchange for service: [" + service + "]");
+        }
+        User user;
+        try {
+            user = userManager.getUser(signUp.getUsername());
+        } catch (UserManagerException e) {
+            return error(e, "Error while retrieving user: [" + signUp.getUsername() + "]");
+        }
+        final int LIMIT = 40;
+        List<Activity> activities;
+        try {
+            activities = userManager.grabUserActivities(
+                    user,
+                    signUp.getIdentifier(),
+                    signUp.getService(),
+                    LIMIT
+            );
+        } catch (UserManagerException e) {
+            return error(e, "Error while retrieving user: [" + signUp.getUsername() + "] initial activities");
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        for(Activity activity : activities) {
+            ResolvedActivity ra = new ResolvedActivity();
+            ra.setActivity(activity);
+            ra.setUserId(signUp.getUserId());
+            String raJson;
+            try {
+                raJson = mapper.writeValueAsString(ra);
+            } catch (IOException e) {
+                // just skip this one
+                continue;
+            }
+            try {
+                queues.push(raJson);
+            } catch (QueuesException e) {
+                return error(e, "Error while pushing down json resolved activity: [" + raJson + "] for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
+            }
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(

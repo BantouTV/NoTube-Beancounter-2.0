@@ -9,6 +9,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
+import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.auth.AuthHandler;
 import tv.notube.commons.model.auth.AuthHandlerException;
 import tv.notube.commons.helper.jedis.JedisPoolFactory;
@@ -23,6 +24,7 @@ import tv.notube.usermanager.services.auth.ServiceAuthorizationManagerException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -241,7 +243,13 @@ public class JedisUserManagerImpl implements UserManager {
                 throw new UserManagerException(errMsg, e1);
             }
             storeUser(user);
-            return new AtomicSignUp(user.getUsername(), false, authHandler.getService());
+            return new AtomicSignUp(
+                    user.getId(),
+                    user.getUsername(),
+                    false,
+                    authHandler.getService(),
+                    auser.getUserId()
+            );
         } catch (ResolverException e) {
             final String errMsg = "Error while asking mapping for user [" + auser.getUser().getUsername() + "] with identifier [" + auser.getUserId() + "] on service [" + authHandler.getService() + "]";
             LOGGER.error(errMsg, e);
@@ -253,7 +261,53 @@ public class JedisUserManagerImpl implements UserManager {
                 auser.getUser().getAuth(authHandler.getService())
         );
         storeUser(user);
-        return new AtomicSignUp(user.getUsername(), true, authHandler.getService());
+        return new AtomicSignUp(user.getId(), user.getUsername(), true, authHandler.getService(), auser.getUserId());
+    }
+
+    @Override
+    public List<Activity> grabUserActivities(
+            User user,
+            String identifier,
+            String serviceName,
+            int limit
+    ) throws UserManagerException {
+        try {
+            if (sam.getService(serviceName) == null) {
+                final String errMsg = "Service '" + serviceName + "' is not supported.";
+                LOGGER.error(errMsg);
+                throw new UserManagerException(errMsg);
+            }
+        } catch (ServiceAuthorizationManagerException e) {
+            final String errMsg = "Error while getting service '" + serviceName + "'";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        AuthHandler authHandler;
+        try {
+            authHandler = sam.getHandler(serviceName);
+        } catch (ServiceAuthorizationManagerException e) {
+            final String errMsg = "Error while getting auth manager for service '" + serviceName + "'";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        OAuthAuth auth = (OAuthAuth) user.getAuth(serviceName);
+        if (auth == null) {
+            final String errMsg = "it seems there is no auth for service [" + serviceName + "] on user [" + user.getUsername() + "]";
+            LOGGER.error(errMsg);
+            throw new UserManagerException(errMsg);
+        }
+        if(auth.isExpired()) {
+            final String errMsg = "OAuth token for [" + serviceName + "] on user [" + user.getUsername() + "] is expired";
+            LOGGER.error(errMsg);
+            throw new UserManagerException(errMsg);
+        }
+        try {
+            return authHandler.grabActivities(auth.getSession(), identifier, limit);
+        } catch (AuthHandlerException e) {
+            final String errMsg = "OAuth toke for [" + serviceName + "] on user [" + user.getUsername() + "] is expired";
+            LOGGER.error(errMsg);
+            throw new UserManagerException(errMsg);
+        }
     }
 
     @Override

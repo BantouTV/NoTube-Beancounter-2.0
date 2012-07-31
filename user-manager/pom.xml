@@ -25,8 +25,16 @@
             <artifactId>httpclient</artifactId>
         </dependency>
         <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+        </dependency>
+        <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>helper</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube.listeners.facebook</groupId>
+            <artifactId>facebook-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.scribe</groupId>

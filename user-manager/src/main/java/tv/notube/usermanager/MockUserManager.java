@@ -3,6 +3,7 @@ package tv.notube.usermanager;
 import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.Service;
 import tv.notube.commons.model.User;
+import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.auth.OAuthAuth;
 import tv.notube.commons.model.auth.SimpleAuth;
 import tv.notube.commons.tests.RandomBean;
@@ -135,6 +136,11 @@ public class MockUserManager implements UserManager {
 
     @Override
     public AtomicSignUp storeUserFromOAuth(String service, String verifier) throws UserManagerException {
+        throw new UnsupportedOperationException("nah, niy");
+    }
+
+    @Override
+    public List<Activity> grabUserActivities(User user, String identifier, String service, int limit) throws UserManagerException {
         throw new UnsupportedOperationException("nah, niy");
     }
 

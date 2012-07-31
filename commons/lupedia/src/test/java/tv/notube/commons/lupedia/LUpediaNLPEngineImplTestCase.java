@@ -117,7 +117,7 @@ public class LUpediaNLPEngineImplTestCase {
         }
     }
 
-    @Test
+    @Test(enabled = false)
     public void testDifferentErrorUrl() throws NLPEngineException, URISyntaxException, MalformedURLException {
         final URL url = new URL("http://api.beancounter.io/rest/user/ndkcee?apikey=14fb6663");
         NLPEngineResult result;

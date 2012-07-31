@@ -2,8 +2,10 @@ package tv.notube.commons.model.auth;
 
 import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
+import tv.notube.commons.model.activity.Activity;
 
 import java.net.URL;
+import java.util.List;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
@@ -65,4 +67,17 @@ public interface AuthHandler {
      * @return
      */
     public AuthenticatedUser auth(String verifier) throws AuthHandlerException;
+
+
+    /**
+     * To grab an initial bunch of user activities.
+     *
+     * @param secret
+     * @param identifier
+     * @param limit
+     * @return
+     * @throws AuthHandlerException
+     */
+    public List<Activity> grabActivities(String secret, String identifier, int limit)
+            throws AuthHandlerException;
 }

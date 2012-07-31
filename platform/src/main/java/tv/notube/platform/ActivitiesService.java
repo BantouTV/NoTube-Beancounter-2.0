@@ -2,7 +2,6 @@ package tv.notube.platform;
 
 import com.google.inject.Inject;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.elasticsearch.search.sort.SortOrder;
 import tv.notube.activities.ActivityStore;
 import tv.notube.activities.ActivityStoreException;
 import tv.notube.activities.InvalidOrderException;
@@ -28,7 +27,8 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * put class description here
+ * This service implments all the <i>REST</i> APIs needed to manage
+ * user's activities.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */

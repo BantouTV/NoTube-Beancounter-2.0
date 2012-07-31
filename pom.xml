@@ -24,8 +24,6 @@
         <module>filter</module>
         <module>dispatcher</module>
         <module>camel-redis</module>
-        <!-- analytics out of release 1.0 -->
-        <!-- <module>analytics</module> -->
     </modules>
 
     <properties>
@@ -164,6 +162,36 @@
             <dependency>
                 <groupId>tv.notube.commons</groupId>
                 <artifactId>tests</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube</groupId>
+                <artifactId>listeners</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube.listeners</groupId>
+                <artifactId>facebook</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube</groupId>
+                <artifactId>listeners-commons</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tv.notube.listeners</groupId>
+                <artifactId>twitter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <artifactId>facebook-core</artifactId>
+                <groupId>tv.notube.listeners.facebook</groupId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <artifactId>facebook-process</artifactId>
+                <groupId>tv.notube.listeners.facebook</groupId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

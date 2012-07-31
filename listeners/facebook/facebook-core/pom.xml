@@ -3,25 +3,41 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>listeners</artifactId>
-        <groupId>tv.notube</groupId>
+        <artifactId>facebook</artifactId>
+        <groupId>tv.notube.listeners</groupId>
         <version>1.2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>facebook</artifactId>
-    <groupId>tv.notube.listeners</groupId>
-    <packaging>pom</packaging>
-    <name>NoTube 2.0 Facebook</name>
-
-    <modules>
-        <module>facebook-core</module>
-        <module>facebook-process</module>
-    </modules>
+    <artifactId>facebook-core</artifactId>
+    <groupId>tv.notube.listeners.facebook</groupId>
+    <packaging>jar</packaging>
+    <name>NoTube 2.0 Facebook Core</name>
 
     <dependencies>
         <dependency>
-            <groupId>tv.notube</groupId>
-            <artifactId>listeners-commons</artifactId>
+            <groupId>tv.notube.resolver</groupId>
+            <artifactId>core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube.commons</groupId>
+            <artifactId>model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube.commons</groupId>
+            <artifactId>tests</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.restfb</groupId>
+            <artifactId>restfb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
         </dependency>
     </dependencies>
 
