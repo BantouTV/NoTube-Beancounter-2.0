@@ -13,8 +13,11 @@ import tv.notube.commons.model.activity.*;
 import java.lang.Object;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static org.testng.AssertJUnit.assertEquals;
 
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )
@@ -81,6 +84,20 @@ public class JedisResolverIntegrationTest {
         unsupportedActivity.setVerb(Verb.CHECKIN);
         UUID resolved = resolver.resolve(unsupportedActivity);
         Assert.assertNull(resolved);
+    }
+
+    @Test
+    public void findsUserIdsForTwitterService() throws Exception {
+        jedis.select(3);
+        String serviceName = "twitter";
+        jedis.rpush(serviceName, "121");
+        jedis.rpush(serviceName, "122");
+        jedis.rpush(serviceName, "120");
+
+        List<String> userIds = resolver.getUserIdsFor(serviceName, 0, 10);
+        assertEquals(userIds.get(0), "121");
+        assertEquals(userIds.get(1), "122");
+        assertEquals(userIds.get(2), "120");
     }
 
     private Activity getTweetActivity() throws Exception {

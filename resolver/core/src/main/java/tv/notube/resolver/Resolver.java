@@ -2,6 +2,7 @@ package tv.notube.resolver;
 
 import tv.notube.commons.model.activity.Activity;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -10,7 +11,8 @@ import java.util.UUID;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public interface Resolver {
+public interface
+        Resolver {
 
     /**
      * Given an anonymous {@link Activity}, it will be able to give the
@@ -58,5 +60,18 @@ public interface Resolver {
             UUID userId,
             String username
     ) throws ResolverException;
+
+
+    /**
+     *
+     * @param serviceName
+     * @param start the starting index inclusive
+     * @param stop the ending index inclusive
+     * @return list of userIds
+     */
+    public List<String> getUserIdsFor(String serviceName, int start, int stop)
+            throws ResolverException;
+
+
 
 }

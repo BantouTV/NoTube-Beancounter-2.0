@@ -1,16 +1,19 @@
 package tv.notube.resolver;
 
+import java.util.List;
+import java.util.UUID;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import tv.notube.commons.helper.jedis.JedisPoolFactory;
 import tv.notube.commons.helper.resolver.Services;
 import tv.notube.commons.model.activity.Activity;
-
-import java.util.UUID;
 
 /**
  * <i>Redis</i>-based implementation of {@link Resolver}.
@@ -151,6 +154,29 @@ public class JedisResolver implements Resolver {
         try {
             jedis.hset(identifier, "uuid", userId.toString());
             jedis.hset(identifier, "username", username);
+            long numberOfElements = jedis.rpush(service, userId.toString());
+            jedis.hset(identifier, "index", "" + (--numberOfElements));
+
+        } finally {
+            pool.returnResource(jedis);
+        }
+    }
+
+    @Override
+    public List<String> getUserIdsFor(String serviceName, int start, int stop) throws ResolverException {
+        Jedis jedis;
+        try {
+            int database = services.get(serviceName);
+            jedis = pool.getResource();
+            jedis.select(database);
+        } catch (Exception e) {
+            final String errMsg = "Service [" + serviceName + "] not supported";
+            LOGGER.error(errMsg, e);
+            throw new ResolverException(errMsg, e);
+        }
+
+        try {
+            return jedis.lrange(serviceName, start, stop);
         } finally {
             pool.returnResource(jedis);
         }
