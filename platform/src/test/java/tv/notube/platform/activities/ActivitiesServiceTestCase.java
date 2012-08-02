@@ -649,12 +649,12 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void searchingWithInvalidSortOrderParameterReturnsErrorResponse() throws Exception {
-        final String baseQuery = "activities/all/%s?order=%s&apikey=%s";
-        final String username = "test-user";
+        final String baseQuery = "activities/search?path=%s&value=%s&order=%s&apikey=%s";
         final String order = "invalid-order";
         final String query = String.format(
                 baseQuery,
-                username,
+                "type",
+                "TWEET",
                 order,
                 APIKEY
         );

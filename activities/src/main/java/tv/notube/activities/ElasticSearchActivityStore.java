@@ -48,7 +48,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
 
     public static final String INDEX_TYPE = "activity";
 
-    private static final String dateJsonPath = INDEX_TYPE + ".activity.context.date";
+    private static final String DATE_PATH = INDEX_TYPE + ".activity.context.date";
 
     private ObjectMapper mapper;
 
@@ -82,7 +82,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
     public Collection<Activity> getByUser(UUID uuidId, int max) throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString("userId:" + uuidId.toString()))
-                .addSort(dateJsonPath, SortOrder.DESC)
+                .addSort(DATE_PATH, SortOrder.DESC)
                 .setSize(max)
                 .execute().actionGet();
         return retrieveActivitiesFromSearchResponse(searchResponse);
@@ -93,8 +93,8 @@ public class ElasticSearchActivityStore implements ActivityStore {
             throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString("userId:" + uuid.toString()))
-                .addSort(dateJsonPath, SortOrder.DESC)
-                .setFilter(numericRangeFilter(dateJsonPath)
+                .addSort(DATE_PATH, SortOrder.DESC)
+                .setFilter(numericRangeFilter(DATE_PATH)
                         .from(from.getMillis())
                         .to(to.getMillis())
                 ).execute().actionGet();
@@ -107,8 +107,8 @@ public class ElasticSearchActivityStore implements ActivityStore {
             throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(QueryBuilders.matchAllQuery())
-                .addSort(dateJsonPath, SortOrder.DESC)
-                .setFilter(numericRangeFilter(dateJsonPath)
+                .addSort(DATE_PATH, SortOrder.DESC)
+                .setFilter(numericRangeFilter(DATE_PATH)
                         .from(from.getMillis())
                         .to(to.getMillis())
                 ).execute().actionGet();
@@ -176,7 +176,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
 
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(fqBuilder)
-                .addSort(dateJsonPath, SortOrder.DESC)
+                .addSort(DATE_PATH, SortOrder.DESC)
                 .execute().actionGet();
 
         return retrieveActivitiesFromSearchResponse(searchResponse);
@@ -242,7 +242,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setSearchType(SearchType.QUERY_THEN_FETCH)
                 .setQuery(queryString(query))
-                .addSort(dateJsonPath, sortOrder)
+                .addSort(DATE_PATH, sortOrder)
                 .setFrom(pageNumber * size)
                 .setSize(size)
                 .execute().actionGet();

@@ -24,6 +24,7 @@
         <module>filter</module>
         <module>dispatcher</module>
         <module>camel-redis</module>
+        <module>facebook-publisher</module>
         <!-- analytics out of release 1.0 -->
         <!-- <module>analytics</module> -->
     </modules>

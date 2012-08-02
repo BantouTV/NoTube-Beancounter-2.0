@@ -2,7 +2,6 @@ package tv.notube.platform;
 
 import com.google.inject.Inject;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.elasticsearch.search.sort.SortOrder;
 import tv.notube.activities.ActivityStore;
 import tv.notube.activities.ActivityStoreException;
 import tv.notube.activities.InvalidOrderException;

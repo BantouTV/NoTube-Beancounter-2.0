@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <artifactId>parent</artifactId>
@@ -9,17 +12,25 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>dispatcher</artifactId>
-    <name>NoTube 2.0 Dispatcher Camel Process</name>
+    <artifactId>facebook-publisher</artifactId>
+    <name>NoTube 2.0 Facebook Timeline Publisher</name>
 
     <dependencies>
         <dependency>
             <groupId>tv.notube.commons</groupId>
-            <artifactId>configuration</artifactId>
+            <artifactId>model</artifactId>
         </dependency>
         <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>helper</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube.resolver</groupId>
+            <artifactId>core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tv.notube</groupId>
+            <artifactId>user-manager</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
@@ -34,18 +45,21 @@
             <artifactId>camel-guice</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.restfb</groupId>
+            <artifactId>restfb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-testng</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-testng</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -55,7 +69,7 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <finalName>dispatcher-${project.version}</finalName>
+                    <finalName>facebook-publisher-${project.version}</finalName>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
