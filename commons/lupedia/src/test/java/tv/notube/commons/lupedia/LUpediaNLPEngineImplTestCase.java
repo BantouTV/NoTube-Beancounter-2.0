@@ -63,7 +63,7 @@ public class LUpediaNLPEngineImplTestCase {
         Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/Cardiff")));
     }
 
-    @Test(enabled = false)
+    @Test
     public void testUrlBigText() throws NLPEngineException, URISyntaxException, MalformedURLException {
         final URL url = new URL("http://www.teamgb.com/news/eighteen-gymnasts-selected-team-gb-london-2012");
         NLPEngineResult result = nlpEngine.enrich(url);
@@ -102,17 +102,6 @@ public class LUpediaNLPEngineImplTestCase {
         }
     }
 
-    // boiler plate error! enable this when we pass to boilerpipe directly the text
-    @Test(enabled = false)
-    public void testTinyUrlThree() throws NLPEngineException, URISyntaxException, MalformedURLException {
-        final URL url = new URL("http://tpt.to/a2Cp9h3");
-        NLPEngineResult result = nlpEngine.enrich(url);
-        Set<Entity> entities = result.getEntities();
-        Assert.assertEquals(entities.size(), 0);
-        Set<URI> actual = toURISet(entities);
-        Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/Google")));
-    }
-
     @Test
     public void testNotFoundUrl() throws NLPEngineException, URISyntaxException, MalformedURLException {
         final URL url = new URL("http://www.cedarsummit.com/error");
@@ -128,7 +117,7 @@ public class LUpediaNLPEngineImplTestCase {
         }
     }
 
-    @Test
+    @Test(enabled = false)
     public void testDifferentErrorUrl() throws NLPEngineException, URISyntaxException, MalformedURLException {
         final URL url = new URL("http://api.beancounter.io/rest/user/ndkcee?apikey=14fb6663");
         NLPEngineResult result;

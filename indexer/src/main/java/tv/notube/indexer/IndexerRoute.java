@@ -33,7 +33,7 @@ public class IndexerRoute extends RouteBuilder {
                     public void process(Exchange exchange) throws Exception {
                         ResolvedActivity resolvedActivity = exchange.getIn().getBody(ResolvedActivity.class);
                         try {
-                            activityStore.store(resolvedActivity.getUserId(), resolvedActivity.getActivity());
+                            activityStore.store(resolvedActivity.getUserId(), resolvedActivity);
                         } catch (Exception e) {
                             final String errMsg = "Error while storing " + "resolved activity for user ["
                                     + resolvedActivity.getUserId() + "]";

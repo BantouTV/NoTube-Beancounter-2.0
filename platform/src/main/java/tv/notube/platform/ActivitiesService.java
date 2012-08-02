@@ -11,8 +11,8 @@ import tv.notube.applications.ApplicationsManagerException;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.ResolvedActivity;
-import tv.notube.platform.responses.ActivitiesPlatformResponse;
-import tv.notube.platform.responses.ActivityPlatformResponse;
+import tv.notube.platform.responses.ResolvedActivitiesPlatformResponse;
+import tv.notube.platform.responses.ResolvedActivityPlatformResponse;
 import tv.notube.platform.responses.StringPlatformResponse;
 import tv.notube.platform.responses.UUIDPlatformResponse;
 import tv.notube.queues.Queues;
@@ -27,7 +27,8 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * put class description here
+ * This service implements all the <i>REST</i> APIs needed to manage
+ * user's activities.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
@@ -124,7 +125,7 @@ public class ActivitiesService extends JsonService {
             final String errMsg = "Error: cannot parse your input json";
             return error(e, errMsg);
         }
-        ResolvedActivity resolvedActivity = new ResolvedActivity(user.getId(), activity);
+        ResolvedActivity resolvedActivity = new ResolvedActivity(user.getId(), activity, user);
         String jsonResolvedActivity;
         try {
             jsonResolvedActivity = parseResolvedActivity(resolvedActivity);
@@ -155,6 +156,74 @@ public class ActivitiesService extends JsonService {
     private Activity parse(String jsonActivity) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(jsonActivity, Activity.class);
+    }
+
+    @DELETE
+    @Path("/{activityId}/visibility")
+    public Response setVisibility(
+            @PathParam("activityId") String activityId,
+            @QueryParam("visibility") String visibility,
+            @QueryParam("apikey") String apiKey
+    ) {
+        try {
+            check(
+                    this.getClass(),
+                    "setVisibility",
+                    activityId,
+                    visibility,
+                    apiKey
+            );
+        } catch (ServiceException e) {
+            return error(e, "Error while checking parameters");
+        }
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
+        }
+        UUID activityIdObj;
+        try {
+            activityIdObj = UUID.fromString(activityId);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your activityId is not well formed");
+        }
+        boolean isAuth;
+        try {
+            isAuth = applicationsManager.isAuthorized(
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.DELETE,
+                    ApplicationsManager.Object.ACTIVITIES
+            );
+        } catch (ApplicationsManagerException e) {
+            return error(e, "Error while authenticating your application");
+        }
+        if (!isAuth) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    "Sorry. You're not allowed to do that.")
+            );
+            return rb.build();
+        }
+        boolean vObj;
+        try {
+            vObj = Boolean.valueOf(visibility);
+        } catch (Exception e) {
+            return error(e, "visibility parameter must be {true, false} and not [" + visibility + "]");
+        }
+        try {
+            activities.setVisible(activityIdObj, vObj);
+        } catch (ActivityStoreException e) {
+            return error(e, "Error modifying the visibility of activity with id [" + activityId + "]");
+        }
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(
+                new ResolvedActivitiesPlatformResponse(
+                        ResolvedActivitiesPlatformResponse.Status.OK,
+                        "activity [" + activityId + "] visibility has been modified to [" + vObj + "]"
+                )
+        );
+        return rb.build();
     }
 
     @GET
@@ -219,7 +288,7 @@ public class ActivitiesService extends JsonService {
             );
             return rb.build();
         }
-        Activity activity;
+        ResolvedActivity activity;
         try {
             activity = activities.getByUser(
                     user.getId(),
@@ -234,16 +303,16 @@ public class ActivitiesService extends JsonService {
         Response.ResponseBuilder rb = Response.ok();
         if (activity == null) {
             rb.entity(
-                    new ActivityPlatformResponse(
-                            ActivityPlatformResponse.Status.OK,
+                    new ResolvedActivityPlatformResponse(
+                            ResolvedActivityPlatformResponse.Status.OK,
                             "user '" + username + "' has no activity with id [" + activityId + "]",
                             activity
                     )
             );
         } else {
             rb.entity(
-                    new ActivityPlatformResponse(
-                            ActivityPlatformResponse.Status.OK,
+                    new ResolvedActivityPlatformResponse(
+                            ResolvedActivityPlatformResponse.Status.OK,
                             "user '" + username + "' activity with id [" + activityId + "] found",
                             activity
                     )
@@ -304,7 +373,7 @@ public class ActivitiesService extends JsonService {
             return rb.build();
         }
 
-        Collection<Activity> activitiesRetrieved;
+        Collection<ResolvedActivity> activitiesRetrieved;
         try {
             activitiesRetrieved = activities.search(path, value, page, ACTIVITIES_LIMIT, order);
         } catch (ActivityStoreException ase) {
@@ -325,11 +394,10 @@ public class ActivitiesService extends JsonService {
             );
             return rb.build();
         }
-
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
-                new ActivitiesPlatformResponse(
-                        ActivitiesPlatformResponse.Status.OK,
+                new ResolvedActivitiesPlatformResponse(
+                        ResolvedActivitiesPlatformResponse.Status.OK,
                         (activitiesRetrieved.isEmpty())
                                 ? "search for [" + path + "=" + value + "] found no "
                                     + (page != 0 ? "more " : "") + "activities."
@@ -406,7 +474,7 @@ public class ActivitiesService extends JsonService {
             return rb.build();
         }
 
-        Collection<Activity> allActivities;
+        Collection<ResolvedActivity> allActivities;
         try {
             allActivities = activities.getByUserPaginated(user.getId(), page, ACTIVITIES_LIMIT, order);
         } catch (ActivityStoreException e) {
@@ -422,11 +490,10 @@ public class ActivitiesService extends JsonService {
             );
             return rb.build();
         }
-
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
-                new ActivitiesPlatformResponse(
-                        ActivitiesPlatformResponse.Status.OK,
+                new ResolvedActivitiesPlatformResponse(
+                        ResolvedActivitiesPlatformResponse.Status.OK,
                         (allActivities.isEmpty())
                             ? "user '" + username + "' has no " + (page != 0 ? "more " : "") + "activities."
                             : "user '" + username + "' activities found.",

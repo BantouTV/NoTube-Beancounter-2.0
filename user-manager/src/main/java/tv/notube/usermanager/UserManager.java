@@ -2,9 +2,11 @@ package tv.notube.usermanager;
 
 import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.User;
+import tv.notube.commons.model.activity.Activity;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
 
 import java.net.URL;
+import java.util.List;
 
 /**
  * Defines main responsabilities of a class handling users in
@@ -157,4 +159,16 @@ public interface UserManager {
      * @return {@link AtomicSignUp} with all needed information
      */
     public AtomicSignUp storeUserFromOAuth(String service, String verifier) throws UserManagerException;
+
+    /**
+     * This method grabs the latest activities a user performed on a service.
+     *
+     * @param user
+     * @param identifier
+     * @param service
+     * @param limit
+     * @return
+     */
+    public List<Activity> grabUserActivities(User user, String identifier, String service, int limit)
+            throws UserManagerException;
 }

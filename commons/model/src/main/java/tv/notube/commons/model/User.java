@@ -28,16 +28,10 @@ public class User implements Serializable {
 
     private String username;
 
+    private Map<String, String> metadata = new HashMap<String, String>();
+
     public User() {
         id = UUID.randomUUID();
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public UUID getId() {
-        return id;
     }
 
     @Random(names = {"name", "surname", "username", "password"})
@@ -47,6 +41,14 @@ public class User implements Serializable {
         this.surname = surname;
         this.username = username;
         this.password = password;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public String getName() {
@@ -101,6 +103,22 @@ public class User implements Serializable {
         return username;
     }
 
+    public void addMetadata(String key, String value) {
+        metadata.put(key, value);
+    }
+
+    public String getMetadata(String key) {
+        return metadata.get(key);
+    }
+
+    public Map<String, String> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Map<String, String> metadata) {
+        this.metadata = metadata;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -122,12 +140,13 @@ public class User implements Serializable {
     @Override
     public String toString() {
         return "User{" +
-                "name='" + name + '\'' +
+                "id=" + id +
+                ", name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
                 ", services=" + services +
                 ", password='" + password + '\'' +
                 ", username='" + username + '\'' +
-                "} " + super.toString();
+                ", metadata=" + metadata +
+                '}';
     }
-
 }

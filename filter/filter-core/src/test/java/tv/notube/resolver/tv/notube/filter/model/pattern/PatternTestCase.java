@@ -3,12 +3,14 @@ package tv.notube.resolver.tv.notube.filter.model.pattern;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.Context;
 import tv.notube.commons.model.activity.ResolvedActivity;
 import tv.notube.commons.model.activity.Verb;
 import tv.notube.commons.model.activity.rai.Comment;
 import tv.notube.commons.model.activity.rai.TVEvent;
+import tv.notube.commons.model.auth.OAuthAuth;
 import tv.notube.filter.manager.FilterManager;
 import tv.notube.filter.manager.FilterManagerException;
 import tv.notube.filter.manager.InMemoryFilterManager;
@@ -22,7 +24,7 @@ import java.net.URL;
 import java.util.UUID;
 
 /**
- * put class description here
+ * Reference test case for {@link Pattern}.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
@@ -183,9 +185,18 @@ public class PatternTestCase {
         context.setUsername("dpalmisano");
         activity.setObject(comment);
         activity.setContext(context);
+
+        User user = new User();
+        user.setName("test-name");
+        user.setSurname("test-surname");
+        user.setPassword("test-pwd");
+        user.setUsername("test-username");
+        user.addService("test-service", new OAuthAuth("se", "sc"));
+
         final ResolvedActivity actual = new ResolvedActivity(
                 UUID.fromString("4a832181-b691-4f50-ac7e-86937aa3fd03"),
-                activity
+                activity,
+                user
         );
 
         CommentPattern commentPattern = new CommentPattern();

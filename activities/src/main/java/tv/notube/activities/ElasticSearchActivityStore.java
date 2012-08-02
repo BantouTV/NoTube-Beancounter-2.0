@@ -18,6 +18,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortOrder;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tv.notube.activities.model.activity.ElasticSearchActivity;
 import tv.notube.commons.helper.es.ElasticSearchConfiguration;
 import tv.notube.commons.helper.es.NodeInfo;
@@ -44,6 +46,8 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
  */
 public class ElasticSearchActivityStore implements ActivityStore {
 
+    private static Logger LOGGER = LoggerFactory.getLogger(ElasticSearchActivityStore.class);
+
     public static final String INDEX_NAME = "beancounter";
 
     public static final String INDEX_TYPE = "activity";
@@ -66,20 +70,20 @@ public class ElasticSearchActivityStore implements ActivityStore {
     }
 
     @Override
-    public void store(UUID userId, Activity activity) throws ActivityStoreException {
+    public void store(UUID userId, ResolvedActivity activity) throws ActivityStoreException {
         indexActivity(userId, activity, client);
     }
 
     @Override
-    public void store(UUID userId, Collection<Activity> activities) throws ActivityStoreException {
+    public void store(UUID userId, Collection<ResolvedActivity> activities) throws ActivityStoreException {
         // TODO (low): Use the Bulk API for this.
-        for (Activity activity : activities) {
+        for (ResolvedActivity activity : activities) {
             indexActivity(userId, activity, client);
         }
     }
 
     @Override
-    public Collection<Activity> getByUser(UUID uuidId, int max) throws ActivityStoreException {
+    public Collection<ResolvedActivity> getByUser(UUID uuidId, int max) throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString("userId:" + uuidId.toString()))
                 .addSort(DATE_PATH, SortOrder.DESC)
@@ -89,7 +93,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
     }
 
     @Override
-    public Collection<Activity> getByUserAndDateRange(UUID uuid, DateTime from, DateTime to)
+    public Collection<ResolvedActivity> getByUserAndDateRange(UUID uuid, DateTime from, DateTime to)
             throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString("userId:" + uuid.toString()))
@@ -103,7 +107,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
     }
 
     @Override
-    public Map<UUID, Collection<Activity>> getByDateRange(DateTime from, DateTime to)
+    public Map<UUID, Collection<ResolvedActivity>> getByDateRange(DateTime from, DateTime to)
             throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(QueryBuilders.matchAllQuery())
@@ -113,19 +117,18 @@ public class ElasticSearchActivityStore implements ActivityStore {
                         .to(to.getMillis())
                 ).execute().actionGet();
 
-        Map<UUID, Collection<Activity>> activitiesMap = new HashMap<UUID, Collection<Activity>>();
+        Map<UUID, Collection<ResolvedActivity>> activitiesMap =
+                new HashMap<UUID, Collection<ResolvedActivity>>();
 
         // TODO: Use facets or some type of grouping to avoid populating the map
         // manually.
         for (SearchHit hit : searchResponse.getHits()) {
             UUID userId = UUID.fromString((String) hit.getSource().get("userId"));
-            @SuppressWarnings("unchecked")
-            Map<String, Object> activity =
-                    (Map<String, Object>) hit.getSource().get("activity");
+            Map<String, Object> activity = hit.getSource();
             if (activitiesMap.get(userId) == null) {
-                activitiesMap.put(userId, new ArrayList<Activity>());
+                activitiesMap.put(userId, new ArrayList<ResolvedActivity>());
             }
-            List<Activity> activities = (List<Activity>) activitiesMap.get(userId);
+            List<ResolvedActivity> activities = (List<ResolvedActivity>) activitiesMap.get(userId);
             byte[] bytes;
             try {
                 bytes = mapper.writeValueAsBytes(activity);
@@ -133,14 +136,14 @@ public class ElasticSearchActivityStore implements ActivityStore {
                 final String errMsg = "Error while serializing as bytes [" + activity + "]";
                 throw new ActivityStoreException(errMsg, e);
             }
-            Activity activityObj;
+            ElasticSearchActivity activityObj;
             try {
-                activityObj = mapper.readValue(bytes, Activity.class);
+                activityObj = mapper.readValue(bytes, ElasticSearchActivity.class);
             } catch (IOException ioe) {
                 final String errMsg = "Error while deserializing [" + activity + "]";
                 throw new ActivityStoreException(errMsg, ioe);
             }
-            activities.add(activityObj);
+            activities.add(toResolvedActivity(activityObj));
         }
         return activitiesMap;
     }
@@ -148,20 +151,20 @@ public class ElasticSearchActivityStore implements ActivityStore {
     // TODO (med): Surely this method should be getActivity(activityId) since
     // we don't really care about the user?
     @Override
-    public Activity getByUser(UUID userId, UUID activityId) throws ActivityStoreException {
+    public ResolvedActivity getByUser(UUID userId, UUID activityId) throws ActivityStoreException {
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setQuery(queryString("activity.id:" + activityId.toString()))
                 .setSize(1)
                 .execute().actionGet();
 
-        List<Activity> activities =
-                (List<Activity>) retrieveActivitiesFromSearchResponse(searchResponse);
+        List<ResolvedActivity> activities =
+                (List<ResolvedActivity>) retrieveActivitiesFromSearchResponse(searchResponse);
 
         return activities.size() > 0 ? activities.get(0) : null;
     }
 
     @Override
-    public Collection<Activity> getByUser(UUID userId, Collection<UUID> activityIds)
+    public Collection<ResolvedActivity> getByUser(UUID userId, Collection<UUID> activityIds)
             throws ActivityStoreException {
 
         OrFilterBuilder orFilterBuilder = orFilter();
@@ -183,14 +186,14 @@ public class ElasticSearchActivityStore implements ActivityStore {
     }
 
     @Override
-    public Collection<Activity> getByUserPaginated(
+    public Collection<ResolvedActivity> getByUserPaginated(
             UUID userId, int pageNumber, int size, String order
     ) throws ActivityStoreException, InvalidOrderException {
         return searchAndPaginateResults("userId:" + userId.toString(), pageNumber, size, order);
     }
 
     @Override
-    public Collection<Activity> search(
+    public Collection<ResolvedActivity> search(
             String path, String value, int pageNumber, int size, String order
     ) throws ActivityStoreException, WildcardSearchException, InvalidOrderException {
         if (path.contains("*") || value.contains("*")) {
@@ -198,6 +201,12 @@ public class ElasticSearchActivityStore implements ActivityStore {
         }
 
         return searchAndPaginateResults(path + ":" + value, pageNumber, size, order);
+    }
+
+    @Override
+    public void setVisible(UUID activityId, boolean visible) throws ActivityStoreException {
+        // TODO (it does nothing for the moment, see issue 23)
+        LOGGER.debug("activity {} visibility set to {}", activityId, visible);
     }
 
     @Override
@@ -210,9 +219,13 @@ public class ElasticSearchActivityStore implements ActivityStore {
         }
     }
 
-    private void indexActivity(UUID userId, Activity activity, Client client)
+    private void indexActivity(UUID userId, ResolvedActivity activity, Client client)
             throws ActivityStoreException {
-        ElasticSearchActivity esa = new ElasticSearchActivity(userId, activity);
+        ElasticSearchActivity esa = new ElasticSearchActivity(
+                userId,
+                activity.getActivity(),
+                activity.getUser()
+        );
         byte[] jsonActivity;
         try {
             jsonActivity = createActivityJson(esa);
@@ -229,7 +242,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
         return mapper.writeValueAsBytes(esa);
     }
 
-    private Collection<Activity> searchAndPaginateResults(
+    private Collection<ResolvedActivity> searchAndPaginateResults(
             String query, int pageNumber, int size, String order
     ) throws ActivityStoreException, InvalidOrderException {
         SortOrder sortOrder;
@@ -250,14 +263,12 @@ public class ElasticSearchActivityStore implements ActivityStore {
         return retrieveActivitiesFromSearchResponse(searchResponse);
     }
 
-    private Collection<Activity> retrieveActivitiesFromSearchResponse(
+    private Collection<ResolvedActivity> retrieveActivitiesFromSearchResponse(
             SearchResponse searchResponse
     ) throws ActivityStoreException {
-        Collection<Activity> activities = new ArrayList<Activity>();
+        Collection<ResolvedActivity> activities = new ArrayList<ResolvedActivity>();
         for (SearchHit hit : searchResponse.getHits()) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> activity =
-                    (Map<String, Object>) hit.getSource().get("activity");
+            Map<String, Object> activity = hit.getSource();
             byte[] jsonActivity;
             try {
                 jsonActivity = mapper.writeValueAsBytes(activity);
@@ -265,19 +276,27 @@ public class ElasticSearchActivityStore implements ActivityStore {
                 final String errMsg = "Error while serializing to json [" + activity + "]";
                 throw new ActivityStoreException(errMsg, e);
             }
-            Activity activityObj;
+            ElasticSearchActivity activityObj;
             try {
                 activityObj = mapper.readValue(
                         jsonActivity,
-                        Activity.class
+                        ElasticSearchActivity.class
                 );
             } catch (IOException e) {
-                final String errMsg = "Error while serializing to json [" + activity + "]";
+                final String errMsg = "Error while deserializing from json [" + activity + "]";
                 throw new ActivityStoreException(errMsg, e);
             }
-            activities.add(activityObj);
+            activities.add(toResolvedActivity(activityObj));
         }
         return activities;
+    }
+
+    private ResolvedActivity toResolvedActivity(ElasticSearchActivity activityObj) {
+        return new ResolvedActivity(
+                activityObj.getUserId(),
+                activityObj.getActivity(),
+                activityObj.getUser()
+        );
     }
 
     private Client getClient() {

@@ -2,6 +2,7 @@ package tv.notube.activities;
 
 import org.joda.time.DateTime;
 import tv.notube.commons.model.activity.Activity;
+import tv.notube.commons.model.activity.ResolvedActivity;
 
 import java.util.Collection;
 import java.util.Map;
@@ -22,7 +23,7 @@ public interface ActivityStore {
      * @param activity
      * @throws ActivityStoreException
      */
-    public void store(final UUID userId, final Activity activity) throws ActivityStoreException;
+    public void store(final UUID userId, final ResolvedActivity activity) throws ActivityStoreException;
 
     /**
      * Stores a bulk of {@link Activity} committing them all.
@@ -31,7 +32,7 @@ public interface ActivityStore {
      * @param activities
      * @throws ActivityStoreException
      */
-    public void store(final UUID userId, final Collection<Activity> activities) throws ActivityStoreException;
+    public void store(final UUID userId, final Collection<ResolvedActivity> activities) throws ActivityStoreException;
 
     /**
      *
@@ -40,7 +41,7 @@ public interface ActivityStore {
      * @return
      * @throws ActivityStoreException
      */
-    public Collection<Activity> getByUser(final UUID uuidId, final int max) throws ActivityStoreException;
+    public Collection<ResolvedActivity> getByUser(final UUID uuidId, final int max) throws ActivityStoreException;
 
     /**
      *
@@ -50,7 +51,7 @@ public interface ActivityStore {
      * @return
      * @throws ActivityStoreException
      */
-    public Collection<Activity> getByUserAndDateRange(
+    public Collection<ResolvedActivity> getByUserAndDateRange(
             final UUID uuid,
             final DateTime from,
             final DateTime to
@@ -63,7 +64,7 @@ public interface ActivityStore {
      * @return
      * @throws ActivityStoreException
      */
-    public Map<UUID, Collection<Activity>> getByDateRange(
+    public Map<UUID, Collection<ResolvedActivity>> getByDateRange(
             final DateTime from,
             final DateTime to
     ) throws ActivityStoreException;
@@ -75,7 +76,7 @@ public interface ActivityStore {
      * @return
      * @throws ActivityStoreException
      */
-    public Activity getByUser(
+    public ResolvedActivity getByUser(
             final UUID userId,
             final UUID activityId
     ) throws ActivityStoreException;
@@ -87,7 +88,7 @@ public interface ActivityStore {
      * @return
      * @throws ActivityStoreException
      */
-    public Collection<Activity> getByUser(
+    public Collection<ResolvedActivity> getByUser(
             final UUID userId,
             final Collection<UUID> activityIds
     ) throws ActivityStoreException;
@@ -108,7 +109,7 @@ public interface ActivityStore {
      * @throws InvalidOrderException When the specified order is invalid (ie.
      * not "asc" or "desc").
      */
-    public Collection<Activity> getByUserPaginated(
+    public Collection<ResolvedActivity> getByUserPaginated(
             UUID userId,
             int pageNumber,
             int size,
@@ -135,13 +136,23 @@ public interface ActivityStore {
      * @throws InvalidOrderException When the specified order is invalid (ie.
      * not "asc" or "desc").
      */
-    public Collection<Activity> search(
+    public Collection<ResolvedActivity> search(
             String path,
             String value,
             int pageNumber,
             int size,
             String order
     ) throws ActivityStoreException, WildcardSearchException, InvalidOrderException;
+
+    /**
+     * This method sets an internal {@link Activity} <code>boolean</code> flag to make
+     * it no longer visible (or to make it visible) in all the other search methods.
+     *
+     * @param activityId
+     * @param visible
+     * @throws ActivityStoreException
+     */
+    public void setVisible(final UUID activityId, boolean visible) throws ActivityStoreException;
 
     /**
      * Releases any used resources.

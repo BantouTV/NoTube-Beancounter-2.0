@@ -1,7 +1,7 @@
 package tv.notube.profiler;
 
 /**
- * put class description here
+ * Raised if something goes wrong within {@link Profiler}.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */

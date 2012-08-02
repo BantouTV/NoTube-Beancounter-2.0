@@ -10,7 +10,7 @@ import tv.notube.commons.helper.resolver.Services;
 import java.util.Properties;
 
 /**
- * put class description here
+ * <i>Guice</i> module for {@link Resolver}.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */

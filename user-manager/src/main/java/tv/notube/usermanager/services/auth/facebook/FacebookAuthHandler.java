@@ -2,23 +2,34 @@ package tv.notube.usermanager.services.auth.facebook;
 
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
+import com.restfb.Parameter;
+import com.restfb.types.Post;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
+import tv.notube.commons.helper.reflection.ReflectionHelper;
+import tv.notube.commons.helper.reflection.ReflectionHelperException;
 import tv.notube.commons.model.*;
 import tv.notube.commons.model.User;
+import tv.notube.commons.model.activity.*;
+import tv.notube.commons.model.activity.Object;
 import tv.notube.commons.model.auth.AuthenticatedUser;
 import tv.notube.commons.model.auth.DefaultAuthHandler;
 import tv.notube.commons.model.OAuthToken;
 import tv.notube.commons.model.auth.AuthHandlerException;
 import tv.notube.commons.model.auth.OAuthAuth;
+import tv.notube.listener.facebook.core.FacebookUtils;
+import tv.notube.listener.facebook.core.converter.custom.ConverterException;
+import tv.notube.listener.facebook.core.converter.custom.FacebookLikeConverter;
+import tv.notube.listener.facebook.core.converter.custom.FacebookShareConverter;
+import tv.notube.listener.facebook.core.model.*;
+import tv.notube.listener.facebook.core.model.FacebookData;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * put class description here
@@ -147,21 +158,117 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                 .build();
         Token requestToken = null;
         Token accessToken = facebookOAuth.getAccessToken(requestToken, v);
-        String facebookUserId = getUserId(accessToken.getToken());
-        User user = createNewUser(facebookUserId);
+        Map<String, String> data;
+        try {
+            data = getUserData(accessToken.getToken());
+        } catch (Exception e) {
+            final String errMsg = "Error while getting data for anonymous user";
+            throw new AuthHandlerException(errMsg, e);
+        }
+        User user = createNewUser(data);
         user.addService(
                 service.getName(),
                 new OAuthAuth(accessToken.getToken(), accessToken.getSecret())
         );
-        return new AuthenticatedUser(facebookUserId, user);
+        return new AuthenticatedUser(data.get("facebook.user.id"), user);
     }
 
-    private User createNewUser(String facebookUserId) {
+    @Override
+    public List<Activity> grabActivities(String token, String identifier, int limit)
+            throws AuthHandlerException {
+        FacebookClient client = new DefaultFacebookClient(token);
+        // grab shares
+        Collection<Post> posts = FacebookUtils.fetch(Post.class, client, "feed", limit);
+        FacebookShareConverter shareConverter = new FacebookShareConverter();
+        List<Activity> result = new ArrayList<Activity>();
+        for (Post post : posts) {
+            tv.notube.commons.model.activity.Object object;
+            Context context;
+            try {
+                object = shareConverter.convert(post, true);
+                context = shareConverter.getContext(post, identifier);
+            } catch (ConverterException e) {
+                // just skip
+                continue;
+                // TODO (med) should log
+            }
+            Activity activity = toActivity(object, Verb.SHARE);
+            activity.setContext(context);
+            result.add(activity);
+        }
+        // grab likes
+        Collection<FacebookData> likes = FacebookUtils.fetch(
+                FacebookData.class,
+                client,
+                "likes",
+                limit
+        );
+        FacebookLikeConverter likeConverter = new FacebookLikeConverter();
+        for (FacebookData like : likes) {
+            tv.notube.commons.model.activity.Object object;
+            Context context;
+            try {
+                object = likeConverter.convert(like, true);
+                context = likeConverter.getContext(like, identifier);
+            } catch (ConverterException e) {
+                // just skip
+                continue;
+                // TODO (med) should log
+            }
+            Activity activity = toActivity(object, Verb.LIKE);
+            activity.setContext(context);
+            result.add(activity);
+        }
+        return result;
+    }
+
+    private Activity toActivity(Object object, Verb verb) {
+        Activity activity = new Activity();
+        activity.setVerb(verb);
+        activity.setObject(object);
+        return activity;
+    }
+
+    private Map<String, String> getUserData(String token) throws AuthHandlerException {
+        FacebookClient client = new DefaultFacebookClient(token);
+        CustomFacebookUser user = client.fetchObject(
+                "me",
+                CustomFacebookUser.class,
+                Parameter.with("fields", "id, first_name, last_name, picture, gender")
+        );
+        ReflectionHelper.Access[] fields;
+        try {
+            // let's grab only primitives and String
+            fields = ReflectionHelper.getGetters(CustomFacebookUser.class, true, String.class);
+        } catch (ReflectionHelperException e) {
+            final String errMsg = "Error while getting getters from [" + CustomFacebookUser.class.getName() + "]";
+            throw new AuthHandlerException(errMsg, e);
+        }
+        Map<String, String> data = new HashMap<String, String>();
+        for (ReflectionHelper.Access field : fields) {
+            String key = "facebook.user." + field.getField();
+            String value;
+            try {
+                value = ReflectionHelper.invokeAndCast(field.getMethod(), user, String.class);
+            } catch (ReflectionHelperException e) {
+                final String errMsg = "Error while invoking [" + field.getMethod() + "] from [" + CustomFacebookUser.class.getName() + "]";
+                throw new AuthHandlerException(errMsg, e);
+            }
+            data.put(key, value);
+        }
+        return data;
+    }
+
+    private User createNewUser(Map<String, String> data) {
         // users created in this way will have beanocunter username equals
         // to the facebook one.
         // TODO (high) implement a retry policy to be sure it's unique
+        String candindateBCUsername = String.valueOf(data.get("facebook.user.id"));
         User user = new User();
-        user.setUsername(String.valueOf(facebookUserId));
+        user.setUsername(candindateBCUsername);
+        for (String k : data.keySet()) {
+            user.addMetadata(k, data.get(k));
+        }
         return user;
     }
 

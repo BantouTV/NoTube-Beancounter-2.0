@@ -5,6 +5,8 @@ import java.util.Set;
 import tv.notube.commons.model.activity.ResolvedActivity;
 
 /**
+ * This interface defines an engine able to execute {@link tv.notube.filter.model.Filter}.
+ *
  * @author Bilgin Ibryam
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
@@ -34,5 +36,6 @@ public interface FilterService {
      * @return
      * @throws FilterServiceException
      */
-    public Set<String> processActivity(ResolvedActivity resolvedActivity) throws FilterServiceException;
+    public Set<String> processActivity(ResolvedActivity resolvedActivity)
+            throws FilterServiceException;
 }

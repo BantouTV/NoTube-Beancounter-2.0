@@ -9,53 +9,20 @@
     </parent>
 
     <artifactId>facebook</artifactId>
+    <groupId>tv.notube.listeners</groupId>
+    <packaging>pom</packaging>
     <name>NoTube 2.0 Facebook</name>
+
+    <modules>
+        <module>facebook-core</module>
+        <module>facebook-process</module>
+    </modules>
 
     <dependencies>
         <dependency>
-            <groupId>tv.notube.resolver</groupId>
-            <artifactId>core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>tv.notube</groupId>
-            <artifactId>user-manager</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>tv.notube.commons</groupId>
-            <artifactId>model</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>tv.notube.commons</groupId>
-            <artifactId>tests</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-kestrel</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-jetty</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-jackson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.restfb</groupId>
-            <artifactId>restfb</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
+            <artifactId>listeners-commons</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

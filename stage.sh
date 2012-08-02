@@ -3,9 +3,9 @@
 # script configuration
 URL=46.4.89.183
 USER=root
-VERSION=1.1-SNAPSHOT
+VERSION=1.2-SNAPSHOT
 BASEPATH=/root
-PROCESSES="listeners/facebook resolver/process dispatcher realtime-profiler/realtime-profiler-process filter/filter-process indexer"
+PROCESSES="listeners/facebook/facebook-process resolver/process dispatcher realtime-profiler/realtime-profiler-process filter/filter-process indexer"
 
 #functions
 function build()

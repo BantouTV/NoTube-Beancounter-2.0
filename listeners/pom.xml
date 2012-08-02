@@ -13,6 +13,7 @@
     <name>NoTube 2.0 Listeners</name>
 
     <modules>
+        <module>listeners-commons</module>
         <module>twitter</module>
         <module>facebook</module>
     </modules>

@@ -13,16 +13,24 @@ import org.apache.camel.testng.CamelTestSupport;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.Activity;
+import tv.notube.commons.model.auth.OAuthAuth;
 import tv.notube.resolver.Resolver;
+import tv.notube.usermanager.UserManager;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ResolverRouteTest extends CamelTestSupport {
+
     private Injector injector;
+
     private Resolver resolver;
+
+    private UserManager userManager;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -30,6 +38,8 @@ public class ResolverRouteTest extends CamelTestSupport {
             @Override
             public void configure(Binder binder) {
                 resolver = mock(Resolver.class);
+                userManager = mock(UserManager.class);
+                binder.bind(UserManager.class).toInstance(userManager);
                 binder.bind(Resolver.class).toInstance(resolver);
                 binder.bind(ResolverRoute.class).toInstance(new ResolverRoute() {
                     @Override
@@ -80,6 +90,8 @@ public class ResolverRouteTest extends CamelTestSupport {
         error.expectedMessageCount(0);
 
         when(resolver.resolve(any(Activity.class))).thenReturn(UUID.randomUUID());
+        when(resolver.resolveUsername(anyString(), anyString())).thenReturn("test-username");
+        when(userManager.getUser(any(String.class))).thenReturn(getRandomUser());
 
         template.sendBody("direct:start", anActivity());
         internal.assertIsSatisfied();
@@ -88,6 +100,16 @@ public class ResolverRouteTest extends CamelTestSupport {
 
     private String anActivity() {
         return "{\"id\":\"891aed77-7f8b-4a28-991f-34683a281ead\",\"verb\":\"TWEET\",\"object\":{\"type\":\"TWEET\",\"url\":\"http://twitter.com/ElliottWilson/status/220164023340118017\",\"name\":\"ElliottWilson\",\"description\":null,\"text\":\"RT @RapRadar3: RAPRADAR: New Mixtape: Theophilus London Rose Island Vol. 1 http://t.co/BynRjPJm\",\"hashTags\":[],\"urls\":[\"http://bit.ly/P5Tzc1\"]},\"context\":{\"date\":1341326168000,\"service\":\"http://sally.beancounter.io\",\"mood\":null}}";
+    }
+
+    private User getRandomUser() {
+        User user = new User();
+        user.setName("test-name");
+        user.setSurname("test-surname");
+        user.setPassword("test-pwd");
+        user.setUsername("test-username");
+        user.addService("facebook", new OAuthAuth("s", "c"));
+        return user;
     }
 }
 

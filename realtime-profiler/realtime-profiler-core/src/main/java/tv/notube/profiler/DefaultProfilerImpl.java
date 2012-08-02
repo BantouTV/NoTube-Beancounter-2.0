@@ -23,16 +23,15 @@ import tv.notube.profiles.Profiles;
 import tv.notube.profiles.ProfilesException;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.*;
 
 /**
- * put class description here
+ * In-memory, default implementation of {@link Profiler}.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class DefaultProfilerImpl implements Profiler {
+public final class DefaultProfilerImpl implements Profiler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(DefaultProfilerImpl.class);
 
