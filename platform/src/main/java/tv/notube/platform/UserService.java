@@ -268,7 +268,7 @@ public class UserService extends JsonService {
         // configurable as a query parameter
         DateTime today = org.joda.time.DateTime.now();
         DateTime yesterday = today.minusDays(1);
-        Collection<Activity> userActivities;
+        Collection<ResolvedActivity> userActivities;
         try {
             userActivities = activities.getByUserAndDateRange(
                     user.getId(),
@@ -284,16 +284,16 @@ public class UserService extends JsonService {
         Response.ResponseBuilder rb = Response.ok();
         if (userActivities.size() == 0) {
             rb.entity(
-                    new ActivitiesPlatformResponse(
-                            ActivitiesPlatformResponse.Status.OK,
+                    new ResolvedActivitiesPlatformResponse(
+                            ResolvedActivitiesPlatformResponse.Status.OK,
                             "user '" + username + "' has no activities",
                             userActivities
                     )
             );
         } else {
             rb.entity(
-                    new ActivitiesPlatformResponse(
-                            ActivitiesPlatformResponse.Status.OK,
+                    new ResolvedActivitiesPlatformResponse(
+                            ResolvedActivitiesPlatformResponse.Status.OK,
                             "user '" + username + "' activities found",
                             userActivities
                     )

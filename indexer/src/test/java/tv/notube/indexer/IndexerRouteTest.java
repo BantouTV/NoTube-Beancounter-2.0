@@ -18,8 +18,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import tv.notube.activities.ActivityStore;
+import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.ResolvedActivity;
+import tv.notube.commons.model.auth.OAuthAuth;
 import tv.notube.commons.model.randomisers.VerbRandomizer;
 import tv.notube.commons.tests.TestsBuilder;
 import tv.notube.commons.tests.TestsException;
@@ -29,8 +31,14 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+/**
+ * Reference test case for {@link IndexerRoute}.
+ *
+ */
 public class IndexerRouteTest extends CamelTestSupport {
+
     private Injector injector;
+
     private ActivityStore activityStore;
 
     @Override
@@ -75,12 +83,12 @@ public class IndexerRouteTest extends CamelTestSupport {
         MockEndpoint error = getMockEndpoint("mock:error");
         error.expectedMessageCount(0);
 
-        String json = activityAsJson();
+        String json = resolvedActivityAsJson();
 
         template.sendBody("direct:start", json);
 
         error.assertIsSatisfied();
-        verify(activityStore).store(any(UUID.class), any(Activity.class));
+        verify(activityStore).store(any(UUID.class), any(ResolvedActivity.class));
     }
 
     @Test
@@ -89,19 +97,25 @@ public class IndexerRouteTest extends CamelTestSupport {
         error.expectedMessageCount(1);
 
         doThrow(new RuntimeException("problem")).when(activityStore)
-                .store(any(UUID.class), any(Activity.class));
-        template.sendBody("direct:start", activityAsJson());
+                .store(any(UUID.class), any(ResolvedActivity.class));
+        template.sendBody("direct:start", resolvedActivityAsJson());
 
         error.assertIsSatisfied();
-        verify(activityStore).store(any(UUID.class), any(Activity.class));
+        verify(activityStore).store(any(UUID.class), any(ResolvedActivity.class));
         List<Exchange> exchanges = error.getReceivedExchanges();
     }
 
 
-    private String activityAsJson() throws TestsException, IOException {
+    private String resolvedActivityAsJson() throws TestsException, IOException {
         UUID userId = UUID.randomUUID();
         Activity activity = anActivity();
-        ResolvedActivity resolvedActivity = new ResolvedActivity(userId, activity);
+        User user = new User();
+        user.setName("test-name");
+        user.setPassword("abracadabra");
+        user.setSurname("test-surname");
+        user.setUsername("test-username");
+        user.addService("facebook", new OAuthAuth("test-session", "test-secret"));
+        ResolvedActivity resolvedActivity = new ResolvedActivity(userId, activity, user);
 
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(resolvedActivity);

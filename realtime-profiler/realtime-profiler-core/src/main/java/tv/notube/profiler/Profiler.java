@@ -12,7 +12,8 @@ import tv.notube.profiler.rules.ProfilingRule;
 import tv.notube.profiles.Profiles;
 
 /**
- * put class description here
+ * This interface models the minimum functionalities of a <i>beancounter.io</i>
+ * realtime profiler.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */

@@ -16,7 +16,7 @@ import tv.notube.commons.tests.TestsException;
 import tv.notube.platform.APIResponse;
 import tv.notube.platform.AbstractJerseyTestCase;
 import tv.notube.platform.PlatformResponse;
-import tv.notube.platform.responses.ActivitiesPlatformResponse;
+import tv.notube.platform.responses.ResolvedActivitiesPlatformResponse;
 import tv.notube.platform.responses.UserPlatformResponse;
 
 import java.io.IOException;
@@ -238,7 +238,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
         Assert.assertEquals(actual.getMessage(), "user '" + name + "' activities found");
         Assert.assertEquals(actual.getStatus(), PlatformResponse.Status.OK);
         Assert.assertNotNull(actual.getObject());

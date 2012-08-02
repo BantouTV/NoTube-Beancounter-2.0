@@ -15,9 +15,11 @@ import java.net.URL;
 import java.util.Collection;
 
 /**
+ * Reference test case for {@link GenericObjectProfilingRule}.
+ *
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-public class FacebookProfillingRuleTestCase {
+public class FacebookProfilingRuleTestCase {
 
     private static final String endpoint = "http://test.expertsystem.it/IPTC_ITA/EssexWS.asmx/ESSEXIndexdata";
 
@@ -59,7 +61,7 @@ public class FacebookProfillingRuleTestCase {
         );
         rule.run(null);
         Collection<URI> actual = rule.getResult();
-        Assert.assertEquals(actual.size(), 0);
+        Assert.assertEquals(actual.size(), 4);
     }
 
     @Test
@@ -95,9 +97,9 @@ public class FacebookProfillingRuleTestCase {
 
     private tv.notube.commons.model.activity.Object getAnotherSimpleFeed() throws MalformedURLException {
         tv.notube.commons.model.activity.Object o = new Object();
-        o.setDescription("A website dedicated to the fascinating world of mathematics and programming");
-        o.setUrl(new URL("http://9gag.com/gag/4431839"));
-        o.setName("Barney being awesome!");
+        o.setDescription("Get this all-star, easy-to-follow Food Network Fettuccine Alfredo recipe from Giada De Laurentiis.");
+        o.setUrl(new URL("http://www.foodnetwork.com/recipes/giada-de-laurentiis/fettuccine-alfredo-recipe/index.html"));
+        o.setName("Fettuccine Alfredo Recipe : Giada De Laurentiis : Recipes : Food Network");
         return o;
     }
 

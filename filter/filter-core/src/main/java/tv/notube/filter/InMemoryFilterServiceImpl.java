@@ -12,7 +12,12 @@ import tv.notube.filter.manager.FilterManager;
 import tv.notube.filter.manager.FilterManagerException;
 import tv.notube.filter.model.Filter;
 
-public class InMemoryFilterServiceImpl implements FilterService {
+/**
+ * In-memory, default implementation of {@link FilterService}.
+ *
+ * @author Davide Palmisano ( dpalmisano@gmail.com )
+ */
+public final class InMemoryFilterServiceImpl implements FilterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryFilterServiceImpl.class);
 

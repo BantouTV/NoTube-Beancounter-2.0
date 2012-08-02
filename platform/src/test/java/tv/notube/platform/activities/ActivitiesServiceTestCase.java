@@ -9,12 +9,13 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import tv.notube.commons.model.activity.Activity;
+import tv.notube.commons.model.activity.ResolvedActivity;
 import tv.notube.commons.model.activity.Tweet;
 import tv.notube.commons.model.activity.Verb;
 import tv.notube.commons.model.activity.rai.TVEvent;
 import tv.notube.platform.APIResponse;
 import tv.notube.platform.AbstractJerseyTestCase;
-import tv.notube.platform.responses.ActivitiesPlatformResponse;
+import tv.notube.platform.responses.ResolvedActivitiesPlatformResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -131,7 +132,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
 
-        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "user 'test-user' activities found.",
@@ -141,11 +142,11 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual.getMessage(), expected.getMessage());
         assertEquals(actual.getStatus().toString(), expected.getStatus());
 
-        List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+        List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(actual.getObject());
         assertNotNull(activities);
         assertEquals(activities.size(), 20);
         for (int i = 0; i < activities.size(); i++) {
-            Tweet tweet = (Tweet) activities.get(i).getObject();
+            Tweet tweet = (Tweet) activities.get(i).getActivity().getObject();
             assertEquals(tweet.getText(), "Fake text #" + i);
         }
     }
@@ -169,7 +170,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
 
-        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "user 'test-user' activities found.",
@@ -179,13 +180,13 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual.getMessage(), expected.getMessage());
         assertEquals(actual.getStatus().toString(), expected.getStatus());
 
-        List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+        List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(actual.getObject());
         assertNotNull(activities);
         assertEquals(activities.size(), 20);
 
         int i = 20;
-        for (Activity activity : activities) {
-            Tweet tweet = (Tweet) activity.getObject();
+        for (ResolvedActivity activity : activities) {
+            Tweet tweet = (Tweet) activity.getActivity().getObject();
             assertEquals(tweet.getText(), "Fake text #" + i++);
         }
     }
@@ -210,7 +211,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
 
-        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "user 'test-user' activities found.",
@@ -220,13 +221,13 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual.getMessage(), expected.getMessage());
         assertEquals(actual.getStatus().toString(), expected.getStatus());
 
-        List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+        List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(actual.getObject());
         assertNotNull(activities);
         assertEquals(activities.size(), 10);
 
         int i = 40;
-        for (Activity activity : activities) {
-            Tweet tweet = (Tweet) activity.getObject();
+        for (ResolvedActivity activity : activities) {
+            Tweet tweet = (Tweet) activity.getActivity().getObject();
             assertEquals(tweet.getText(), "Fake text #" + i++);
         }
     }
@@ -250,7 +251,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
 
-        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "user 'test-user' has no more activities.",
@@ -282,7 +283,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
 
-        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "user 'user-with-no-activities' has no activities.",
@@ -315,7 +316,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
 
-        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "user '" + username + "' activities found.",
@@ -325,11 +326,11 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual.getMessage(), expected.getMessage());
         assertEquals(actual.getStatus().toString(), expected.getStatus());
 
-        List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+        List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(actual.getObject());
         assertNotNull(activities);
         assertEquals(activities.size(), 20);
         for (int i = 0; i < activities.size(); i++) {
-            Tweet tweet = (Tweet) activities.get(i).getObject();
+            Tweet tweet = (Tweet) activities.get(i).getActivity().getObject();
             assertEquals(tweet.getText(), "Fake text #" + (49 - i));
         }
     }
@@ -354,7 +355,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
 
-        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "user 'test-user' activities found.",
@@ -364,13 +365,13 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual.getMessage(), expected.getMessage());
         assertEquals(actual.getStatus().toString(), expected.getStatus());
 
-        List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+        List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(actual.getObject());
         assertNotNull(activities);
         assertEquals(activities.size(), 20);
 
         int i = 20;
-        for (Activity activity : activities) {
-            Tweet tweet = (Tweet) activity.getObject();
+        for (ResolvedActivity activity : activities) {
+            Tweet tweet = (Tweet) activity.getActivity().getObject();
             assertEquals(tweet.getText(), "Fake text #" + (49 - i++));
         }
     }
@@ -395,7 +396,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
 
-        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "user 'test-user' activities found.",
@@ -405,13 +406,13 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual.getMessage(), expected.getMessage());
         assertEquals(actual.getStatus().toString(), expected.getStatus());
 
-        List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+        List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(actual.getObject());
         assertNotNull(activities);
         assertEquals(activities.size(), 10);
 
         int i = 40;
-        for (Activity activity : activities) {
-            Tweet tweet = (Tweet) activity.getObject();
+        for (ResolvedActivity activity : activities) {
+            Tweet tweet = (Tweet) activity.getActivity().getObject();
             assertEquals(tweet.getText(), "Fake text #" + (49 - i++));
         }
     }
@@ -437,7 +438,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
 
-        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 order + " is not a valid sort order.",
@@ -483,8 +484,8 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result2);
         logger.info("response body: " + responseBody2);
 
-        ActivitiesPlatformResponse actual1 = fromJson(responseBody1, ActivitiesPlatformResponse.class);
-        ActivitiesPlatformResponse actual2 = fromJson(responseBody2, ActivitiesPlatformResponse.class);
+        ResolvedActivitiesPlatformResponse actual1 = fromJson(responseBody1, ResolvedActivitiesPlatformResponse.class);
+        ResolvedActivitiesPlatformResponse actual2 = fromJson(responseBody2, ResolvedActivitiesPlatformResponse.class);
         assertNotEquals(actual1, actual2);
     }
 
@@ -508,7 +509,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
 
-        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 "search for [type=RAI-CONTENT-ITEM] found activities.",
@@ -518,11 +519,11 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual.getMessage(), expected.getMessage());
         assertEquals(actual.getStatus().toString(), expected.getStatus());
 
-        List<Activity> activities = new ArrayList<Activity>(actual.getObject());
+        List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(actual.getObject());
         assertNotNull(activities);
         assertEquals(activities.size(), 1);
 
-        TVEvent tvEvent = (TVEvent) activities.get(0).getObject();
+        TVEvent tvEvent = (TVEvent) activities.get(0).getActivity().getObject();
         assertEquals(tvEvent.getName(), "Euro 2012");
     }
 
@@ -551,7 +552,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
             logger.info("response body: " + responseBody);
             assertNotEquals(responseBody, "");
 
-            ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+            ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
 
             if (actual.getObject().isEmpty()) {
                 APIResponse expected = new APIResponse(
@@ -575,9 +576,9 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
             assertEquals(actual.getMessage(), expected.getMessage());
             assertEquals(actual.getStatus().toString(), expected.getStatus());
 
-            List<Activity> activities = new ArrayList<Activity>(actual.getObject());
-            for (Activity activity : activities) {
-                Tweet tweet = (Tweet) activity.getObject();
+            List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(actual.getObject());
+            for (ResolvedActivity activity : activities) {
+                Tweet tweet = (Tweet) activity.getActivity().getObject();
                 assertEquals(tweet.getText(), "Fake text #" + i++);
             }
             tweetCount += activities.size();
@@ -612,7 +613,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
             logger.info("response body: " + responseBody);
             assertNotEquals(responseBody, "");
 
-            ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+            ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
 
             if (actual.getObject().isEmpty()) {
                 APIResponse expected = new APIResponse(
@@ -636,9 +637,9 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
             assertEquals(actual.getMessage(), expected.getMessage());
             assertEquals(actual.getStatus().toString(), expected.getStatus());
 
-            List<Activity> activities = new ArrayList<Activity>(actual.getObject());
-            for (Activity activity : activities) {
-                Tweet tweet = (Tweet) activity.getObject();
+            List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(actual.getObject());
+            for (ResolvedActivity activity : activities) {
+                Tweet tweet = (Tweet) activity.getActivity().getObject();
                 assertEquals(tweet.getText(), "Fake text #" + (49 - i++));
             }
             tweetCount += activities.size();
@@ -668,7 +669,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
 
-        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
+        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
         APIResponse expected = new APIResponse(
                 null,
                 order + " is not a valid sort order.",
@@ -699,9 +700,9 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
 
-        ActivitiesPlatformResponse actual = fromJson(responseBody, ActivitiesPlatformResponse.class);
-        ActivitiesPlatformResponse expected = new ActivitiesPlatformResponse(
-                ActivitiesPlatformResponse.Status.NOK,
+        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
+        ResolvedActivitiesPlatformResponse expected = new ResolvedActivitiesPlatformResponse(
+                ResolvedActivitiesPlatformResponse.Status.NOK,
                 "Wildcard searches are not allowed.",
                 null
         );

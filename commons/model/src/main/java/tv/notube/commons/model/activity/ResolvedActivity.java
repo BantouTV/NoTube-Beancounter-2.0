@@ -1,25 +1,40 @@
 package tv.notube.commons.model.activity;
 
+import tv.notube.commons.model.User;
+
 import java.lang.*;
 import java.lang.Object;
 import java.util.UUID;
 
 /**
- * put class description here
+ * This class wraps an {@link Activity} with the <i>beancounter.io</i> user
+ * identifier.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 public class ResolvedActivity {
 
+    /**
+     * The <i>beancounter.io</i> user identifier
+     */
     private UUID userId;
 
+    /**
+     * The activity the user performed
+     */
     private Activity activity;
+
+    /**
+     * The {@link tv.notube.commons.model.User} owner of this activity.
+     */
+    private User user;
 
     public ResolvedActivity() {}
 
-    public ResolvedActivity(UUID userId, Activity activity) {
+    public ResolvedActivity(UUID userId, Activity activity, User user) {
         this.userId = userId;
         this.activity = activity;
+        this.user = user;
     }
 
     public UUID getUserId() {
@@ -38,11 +53,20 @@ public class ResolvedActivity {
         this.activity = activity;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     @Override
     public String toString() {
         return "ResolvedActivity{" +
                 "userId=" + userId +
                 ", activity=" + activity +
+                ", user=" + user +
                 '}';
     }
 

@@ -1,0 +1,52 @@
+[INFO] Scanning for projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building NoTube 2.0 Web REST API 1.2-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:2.4.1:clean (default-clean) @ platform ---
+[INFO] Deleting /Users/dpalmisano/Documents/Sourcesense/beancounter.io/NoTube-Beancounter-2.0/platform/target
+[INFO] 
+[INFO] --- maven-clean-plugin:2.4.1:clean (auto-clean) @ platform ---
+[INFO] 
+[INFO] --- maven-resources-plugin:2.2:resources (default-resources) @ platform ---
+[INFO] Using encoding: 'UTF-8' to copy filtered resources.
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.3.2:compile (default-compile) @ platform ---
+[INFO] Compiling 23 source files to /Users/dpalmisano/Documents/Sourcesense/beancounter.io/NoTube-Beancounter-2.0/platform/target/classes
+[INFO] 
+[INFO] --- maven-resources-plugin:2.2:testResources (default-testResources) @ platform ---
+[INFO] Using encoding: 'UTF-8' to copy filtered resources.
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.3.2:testCompile (default-testCompile) @ platform ---
+[INFO] Compiling 8 source files to /Users/dpalmisano/Documents/Sourcesense/beancounter.io/NoTube-Beancounter-2.0/platform/target/test-classes
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.12:test (default-test) @ platform ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- maven-war-plugin:2.1:war (default-war) @ platform ---
+[INFO] Packaging webapp
+[INFO] Assembling webapp [platform] in [/Users/dpalmisano/Documents/Sourcesense/beancounter.io/NoTube-Beancounter-2.0/platform/target/notube-platform]
+[INFO] Processing war project
+[INFO] Copying webapp resources [/Users/dpalmisano/Documents/Sourcesense/beancounter.io/NoTube-Beancounter-2.0/platform/src/main/webapp]
+[INFO] Webapp assembled in [1143 msecs]
+[INFO] Building war: /Users/dpalmisano/Documents/Sourcesense/beancounter.io/NoTube-Beancounter-2.0/platform/target/notube-platform.war
+[INFO] WEB-INF/web.xml already added, skipping
+[INFO] 
+[INFO] --- cargo-maven2-plugin:1.2.2:deploy (default-cli) @ platform ---
+[INFO] [edDeployerDeployMojo] Resolved container artifact org.codehaus.cargo:cargo-core-container-tomcat:jar:1.2.2 for container tomcat7x
+[INFO] [mcat7xRemoteDeployer] Deploying [/Users/dpalmisano/Documents/Sourcesense/beancounter.io/NoTube-Beancounter-2.0/platform/target/notube-platform.war]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 2:27.063s
+[INFO] Finished at: Thu Aug 02 13:05:33 CEST 2012
+[INFO] Final Memory: 20M/81M
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.codehaus.cargo:cargo-maven2-plugin:1.2.2:deploy (default-cli) on project platform: Execution default-cli of goal org.codehaus.cargo:cargo-maven2-plugin:1.2.2:deploy failed: Failed to deploy [/Users/dpalmisano/Documents/Sourcesense/beancounter.io/NoTube-Beancounter-2.0/platform/target/notube-platform.war]: FAIL - Application already exists at path /notube-platform -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginExecutionException

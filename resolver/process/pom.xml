@@ -18,6 +18,10 @@
             <artifactId>core</artifactId>
         </dependency>
         <dependency>
+            <groupId>tv.notube</groupId>
+            <artifactId>user-manager</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-core</artifactId>
         </dependency>
@@ -55,7 +59,7 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <finalName>resolver--${project.version}</finalName>
+                    <finalName>resolver-${project.version}</finalName>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>

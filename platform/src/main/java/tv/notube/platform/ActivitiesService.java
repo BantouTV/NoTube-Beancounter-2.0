@@ -11,8 +11,8 @@ import tv.notube.applications.ApplicationsManagerException;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.ResolvedActivity;
-import tv.notube.platform.responses.ActivitiesPlatformResponse;
-import tv.notube.platform.responses.ActivityPlatformResponse;
+import tv.notube.platform.responses.ResolvedActivitiesPlatformResponse;
+import tv.notube.platform.responses.ResolvedActivityPlatformResponse;
 import tv.notube.platform.responses.StringPlatformResponse;
 import tv.notube.platform.responses.UUIDPlatformResponse;
 import tv.notube.queues.Queues;
@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * This service implments all the <i>REST</i> APIs needed to manage
+ * This service implements all the <i>REST</i> APIs needed to manage
  * user's activities.
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
@@ -125,7 +125,7 @@ public class ActivitiesService extends JsonService {
             final String errMsg = "Error: cannot parse your input json";
             return error(e, errMsg);
         }
-        ResolvedActivity resolvedActivity = new ResolvedActivity(user.getId(), activity);
+        ResolvedActivity resolvedActivity = new ResolvedActivity(user.getId(), activity, user);
         String jsonResolvedActivity;
         try {
             jsonResolvedActivity = parseResolvedActivity(resolvedActivity);
@@ -218,8 +218,8 @@ public class ActivitiesService extends JsonService {
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
-                new ActivitiesPlatformResponse(
-                        ActivitiesPlatformResponse.Status.OK,
+                new ResolvedActivitiesPlatformResponse(
+                        ResolvedActivitiesPlatformResponse.Status.OK,
                         "activity [" + activityId + "] visibility has been modified to [" + vObj + "]"
                 )
         );
@@ -288,7 +288,7 @@ public class ActivitiesService extends JsonService {
             );
             return rb.build();
         }
-        Activity activity;
+        ResolvedActivity activity;
         try {
             activity = activities.getByUser(
                     user.getId(),
@@ -303,16 +303,16 @@ public class ActivitiesService extends JsonService {
         Response.ResponseBuilder rb = Response.ok();
         if (activity == null) {
             rb.entity(
-                    new ActivityPlatformResponse(
-                            ActivityPlatformResponse.Status.OK,
+                    new ResolvedActivityPlatformResponse(
+                            ResolvedActivityPlatformResponse.Status.OK,
                             "user '" + username + "' has no activity with id [" + activityId + "]",
                             activity
                     )
             );
         } else {
             rb.entity(
-                    new ActivityPlatformResponse(
-                            ActivityPlatformResponse.Status.OK,
+                    new ResolvedActivityPlatformResponse(
+                            ResolvedActivityPlatformResponse.Status.OK,
                             "user '" + username + "' activity with id [" + activityId + "] found",
                             activity
                     )
@@ -373,7 +373,7 @@ public class ActivitiesService extends JsonService {
             return rb.build();
         }
 
-        Collection<Activity> activitiesRetrieved;
+        Collection<ResolvedActivity> activitiesRetrieved;
         try {
             activitiesRetrieved = activities.search(path, value, page, ACTIVITIES_LIMIT, order);
         } catch (ActivityStoreException ase) {
@@ -394,11 +394,10 @@ public class ActivitiesService extends JsonService {
             );
             return rb.build();
         }
-
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
-                new ActivitiesPlatformResponse(
-                        ActivitiesPlatformResponse.Status.OK,
+                new ResolvedActivitiesPlatformResponse(
+                        ResolvedActivitiesPlatformResponse.Status.OK,
                         (activitiesRetrieved.isEmpty())
                                 ? "search for [" + path + "=" + value + "] found no "
                                     + (page != 0 ? "more " : "") + "activities."
@@ -475,7 +474,7 @@ public class ActivitiesService extends JsonService {
             return rb.build();
         }
 
-        Collection<Activity> allActivities;
+        Collection<ResolvedActivity> allActivities;
         try {
             allActivities = activities.getByUserPaginated(user.getId(), page, ACTIVITIES_LIMIT, order);
         } catch (ActivityStoreException e) {
@@ -493,8 +492,8 @@ public class ActivitiesService extends JsonService {
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
-                new ActivitiesPlatformResponse(
-                        ActivitiesPlatformResponse.Status.OK,
+                new ResolvedActivitiesPlatformResponse(
+                        ResolvedActivitiesPlatformResponse.Status.OK,
                         (allActivities.isEmpty())
                             ? "user '" + username + "' has no " + (page != 0 ? "more " : "") + "activities."
                             : "user '" + username + "' activities found.",

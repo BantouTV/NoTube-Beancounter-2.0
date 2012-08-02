@@ -43,8 +43,7 @@ public class FacebookModule extends CamelModuleWithMatchingRoutes {
         bind(Services.class).toInstance(services);
         bind(Resolver.class).to(JedisResolver.class);
 
-        Properties samProperties = PropertiesHelper.readFromClasspath("/sam.properties");
-        ServiceAuthorizationManager sam = DefaultServiceAuthorizationManager.build(samProperties);
+        ServiceAuthorizationManager sam = DefaultServiceAuthorizationManager.build(properties);
 
         bind(ServiceAuthorizationManager.class).toInstance(sam);
         bind(UserManager.class).to(JedisUserManagerImpl.class);

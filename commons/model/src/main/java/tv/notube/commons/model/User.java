@@ -34,14 +34,6 @@ public class User implements Serializable {
         id = UUID.randomUUID();
     }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
     @Random(names = {"name", "surname", "username", "password"})
     public User(String name, String surname, String username, String password) {
         this();
@@ -49,6 +41,14 @@ public class User implements Serializable {
         this.surname = surname;
         this.username = username;
         this.password = password;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public String getName() {

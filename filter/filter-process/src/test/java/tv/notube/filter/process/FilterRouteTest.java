@@ -18,8 +18,10 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.ResolvedActivity;
+import tv.notube.commons.model.auth.OAuthAuth;
 import tv.notube.commons.model.randomisers.VerbRandomizer;
 import tv.notube.commons.tests.TestsBuilder;
 import tv.notube.commons.tests.TestsException;
@@ -138,7 +140,14 @@ public class FilterRouteTest extends CamelTestSupport {
     private String activityAsJson() throws TestsException, IOException {
         UUID userId = UUID.randomUUID();
         Activity activity = anActivity();
-        ResolvedActivity resolvedActivity = new ResolvedActivity(userId, activity);
+        User user = new User();
+        user.setUsername("test-username");
+        user.setName("test-name");
+        user.setPassword("test-pwd");
+        user.setSurname("test-surname");
+        user.addService("test-service", new OAuthAuth("s", "c"));
+
+        ResolvedActivity resolvedActivity = new ResolvedActivity(userId, activity, user);
 
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(resolvedActivity);

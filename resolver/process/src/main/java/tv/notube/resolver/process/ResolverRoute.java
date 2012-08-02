@@ -11,11 +11,15 @@ import org.apache.camel.model.dataformat.JsonLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.ResolvedActivity;
 import tv.notube.resolver.Resolver;
+import tv.notube.usermanager.UserManager;
 
 /**
+ * This class is the <i>Camel</i> route which orchestrates all the resolver flow.
+ *
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class ResolverRoute extends RouteBuilder {
@@ -24,6 +28,9 @@ public class ResolverRoute extends RouteBuilder {
 
     @Inject
     private Resolver resolver;
+
+    @Inject
+    UserManager userManager;
 
     public void configure() {
         errorHandler(deadLetterChannel(errorEndpoint()));
@@ -38,10 +45,16 @@ public class ResolverRoute extends RouteBuilder {
                         Activity activity = exchange.getIn().getBody(Activity.class);
                         LOGGER.debug("Resolving username {}.", activity);
                         UUID userId = resolver.resolve(activity);
-                        if (userId == null) {
+                        String username = resolver.resolveUsername(
+                                activity.getContext().getUsername(),
+                                activity.getContext().getService()
+                        );
+                        if (userId == null || username == null) {
                             exchange.getIn().setBody(null);
                         } else {
-                            exchange.getIn().setBody(new ResolvedActivity(userId, activity)
+                            User user = userManager.getUser(username);
+                            exchange.getIn().setBody(
+                                    new ResolvedActivity(userId, activity, user)
                             );
                         }
                         LOGGER.debug("resolved username [{}-{}].", activity.getContext().getUsername(), userId);
