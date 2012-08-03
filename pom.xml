@@ -5,7 +5,7 @@
     <groupId>tv.notube</groupId>
     <artifactId>parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.2</version>
+    <version>1.4-SNAPSHOT</version>
     <name>NoTube 2.0 Parent</name>
 
     <modules>
@@ -79,92 +79,92 @@
             <dependency>
                 <groupId>tv.notube.commons</groupId>
                 <artifactId>model</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube.resolver</groupId>
                 <artifactId>core</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube.commons</groupId>
                 <artifactId>helper</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube.commons</groupId>
                 <artifactId>configuration</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube</groupId>
                 <artifactId>profiles</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube.commons</groupId>
                 <artifactId>nlp</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube.commons</groupId>
                 <artifactId>lupedia</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube.commons</groupId>
                 <artifactId>cogito</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube.commons</groupId>
                 <artifactId>tagdef</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube</groupId>
                 <artifactId>camel-redis</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube</groupId>
                 <artifactId>activities</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube</groupId>
                 <artifactId>realtime-profiler-core</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube</groupId>
                 <artifactId>realtime-profiler-process</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube</groupId>
                 <artifactId>user-manager</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube</groupId>
                 <artifactId>applications</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube</groupId>
                 <artifactId>queues</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube.filter</groupId>
                 <artifactId>filter-core</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tv.notube.commons</groupId>
                 <artifactId>tests</artifactId>
-                <version>${project.version}</version>
+                <version>1.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.google.inject</groupId>
