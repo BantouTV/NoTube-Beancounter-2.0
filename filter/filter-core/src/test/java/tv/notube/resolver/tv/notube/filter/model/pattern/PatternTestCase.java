@@ -174,11 +174,11 @@ public class PatternTestCase {
     public void testCommentPattern() throws FilterManagerException, IOException {
         Activity activity = new Activity();
         activity.setId(UUID.fromString("08912993-9fc5-4038-aba0-95c6495540d6"));
-        activity.setVerb(Verb.SHARE);
+        activity.setVerb(Verb.COMMENT);
         Comment comment = new Comment();
         comment.setText("thisisatextofacomment");
         comment.setInReplyTo(UUID.fromString("17efdae2-c803-4411-aac9-f6185bdf13de"));
-        comment.setOnEvent("ContentSet-07499e81-1058-4ea0-90f7-77f0fc17eade");
+        comment.setOnEvent("ContentSet_06161120_2dd3_4225_9ad7_1b3c972410e9_BC");
         Context context = new Context();
         context.setDate(new DateTime().minusDays(30));
         context.setService("rai.tv");
@@ -201,12 +201,12 @@ public class PatternTestCase {
 
         CommentPattern commentPattern = new CommentPattern();
         commentPattern.setOnEventPattern(
-                new StringPattern("ContentSet-07499e81-1058-4ea0-90f7-77f0fc17eade")
+                new StringPattern("ContentSet_06161120_2dd3_4225_9ad7_1b3c972410e9_BC")
         );
 
         ActivityPattern activityPattern = new ActivityPattern();
         activityPattern.setUserId(UUIDPattern.ANY);
-        activityPattern.setVerb(VerbPattern.ANY);
+        activityPattern.setVerb(new VerbPattern(Verb.COMMENT));
         activityPattern.setContext(ContextPattern.ANY);
         activityPattern.setObject(commentPattern);
 
@@ -219,7 +219,7 @@ public class PatternTestCase {
         // let's change the onEvent UUID
         commentPattern = new CommentPattern();
         commentPattern.setOnEventPattern(
-                new StringPattern("ContentSet-17499e81-1058-4ea0-90f7-77f0fc17eade")
+                new StringPattern("ANOTHERContentSet_06161120_2dd3_4225_9ad7_1b3c972410e9_BC")
         );
         activityPattern.setObject(commentPattern);
         fm.delete("test-filter");

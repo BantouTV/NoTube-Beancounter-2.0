@@ -17,6 +17,8 @@ public class ActivityToJmsConverter {
             Comment comment = (Comment)object;
             String event = comment.getOnEvent();
             if (event != null && event.length() > 0) {
+                System.out.println("event dequeued: " + event);
+                System.out.println("event json: " + json);
                 return new LightstreamerDTO(event, json, TYPE);
             }
         }

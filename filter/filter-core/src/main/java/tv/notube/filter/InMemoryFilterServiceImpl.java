@@ -45,9 +45,7 @@ public final class InMemoryFilterServiceImpl implements FilterService {
                 LOGGER.error(errMsg, e);
                 throw new FilterServiceException(errMsg, e);
             }
-            if (filterObj.isActive()) {
-                this.filters.add(filterObj);
-            }
+            this.filters.add(filterObj);
         }
     }
 

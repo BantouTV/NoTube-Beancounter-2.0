@@ -31,12 +31,16 @@ public class FilterRoute extends RouteBuilder {
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
+                        // TODO (this was never called)
+                        filterService.refresh();
                         ResolvedActivity resolvedActivity = exchange.getIn().getBody(ResolvedActivity.class);
                         Set<String> targets = filterService.processActivity(resolvedActivity);
                         targets = appendTargetPrefix(targets);
                         exchange.getIn().setHeader(ENDPOINTS_HEADER, targets);
                     }
                 })
+
+                .marshal().json(JsonLibrary.Jackson, ResolvedActivity.class)
 
                 .filter(header(ENDPOINTS_HEADER).isNotNull())
 

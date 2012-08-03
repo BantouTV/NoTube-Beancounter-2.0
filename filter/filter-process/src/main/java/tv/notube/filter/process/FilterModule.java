@@ -31,8 +31,8 @@ public class FilterModule extends CamelModuleWithMatchingRoutes {
         Names.bindProperties(binder(), redisProperties);
         bindInstance("redisProperties", redisProperties);
         bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
-        bind(FilterService.class).to(InMemoryFilterServiceImpl.class);
         bind(FilterManager.class).to(JedisFilterManager.class);
+        bind(FilterService.class).to(InMemoryFilterServiceImpl.class);
         bind(FilterRoute.class);
     }
 
