@@ -5,7 +5,7 @@
     <parent>
         <artifactId>facebook</artifactId>
         <groupId>tv.notube.listeners</groupId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2</version>
     </parent>
 
     <artifactId>facebook-core</artifactId>
