@@ -186,6 +186,38 @@ public class JedisUserManagerImpl implements UserManager {
     }
 
     @Override
+    public OAuthToken getOAuthToken(String serviceName, URL finalRedirectUrl)
+            throws UserManagerException {
+        try {
+            if (sam.getService(serviceName) == null) {
+                final String errMsg = "Service '" + serviceName + "' is not supported.";
+                LOGGER.error(errMsg);
+                throw new UserManagerException(errMsg);
+            }
+        } catch (ServiceAuthorizationManagerException e) {
+            final String errMsg = "Error while getting service '" + serviceName + "'";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        AuthHandler authHandler;
+        try {
+            authHandler = sam.getHandler(serviceName);
+        } catch (ServiceAuthorizationManagerException e) {
+            final String errMsg = "Error while getting auth manager for service '" + serviceName + "'";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        try {
+            return authHandler.getToken(finalRedirectUrl);
+        } catch (AuthHandlerException e) {
+            final String errMsg = "Error while getting auth manager for service '" + serviceName + "'";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+    }
+
+
+    @Override
     public synchronized AtomicSignUp storeUserFromOAuth(String serviceName, String verifier)
             throws UserManagerException {
         try {
@@ -212,6 +244,89 @@ public class JedisUserManagerImpl implements UserManager {
         try {
             auser = authHandler.auth(
                     verifier
+            );
+        } catch (AuthHandlerException e) {
+            final String errMsg = "Error authorizing anonymous user for service [" + serviceName + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        // check if the user already exists
+        String candidateUsername;
+        User user;
+        try {
+            candidateUsername = resolver.resolveUsername(
+                    auser.getUserId(),
+                    authHandler.getService()
+            );
+        } catch (ResolverMappingNotFoundException e) {
+            // ok, this is the first access from this user so just add record
+            // to the resolver and return
+            user = auser.getUser();
+            try {
+                resolver.store(
+                        auser.getUserId(),
+                        authHandler.getService(),
+                        user.getId(),
+                        user.getUsername()
+                );
+            } catch (ResolverException e1) {
+                final String errMsg = "Error while storing mapping for user [" + auser.getUser().getUsername() + "] with identifier [" + auser.getUserId() + "] on service [" + authHandler.getService() + "]";
+                LOGGER.error(errMsg, e1);
+                throw new UserManagerException(errMsg, e1);
+            }
+            storeUser(user);
+            return new AtomicSignUp(
+                    user.getId(),
+                    user.getUsername(),
+                    false,
+                    authHandler.getService(),
+                    auser.getUserId()
+            );
+        } catch (ResolverException e) {
+            final String errMsg = "Error while asking mapping for user [" + auser.getUser().getUsername() + "] with identifier [" + auser.getUserId() + "] on service [" + authHandler.getService() + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        user = getUser(candidateUsername);
+        user.addService(
+                authHandler.getService(),
+                auser.getUser().getAuth(authHandler.getService())
+        );
+        storeUser(user);
+        return new AtomicSignUp(user.getId(), user.getUsername(), true, authHandler.getService(), auser.getUserId());
+    }
+
+    @Override
+    public AtomicSignUp storeUserFromOAuth(
+            String serviceName,
+            String verifier,
+            String decodedFinalRedirect
+    ) throws UserManagerException {
+        try {
+            if (sam.getService(serviceName) == null) {
+                final String errMsg = "Service '" + serviceName + "' is not supported.";
+                LOGGER.error(errMsg);
+                throw new UserManagerException(errMsg);
+            }
+        } catch (ServiceAuthorizationManagerException e) {
+            final String errMsg = "Error while getting service '" + serviceName + "'";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        AuthHandler authHandler;
+        try {
+            authHandler = sam.getHandler(serviceName);
+        } catch (ServiceAuthorizationManagerException e) {
+            final String errMsg = "Error while getting AuthHandler for service [" + serviceName + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        // authorize the user
+        AuthenticatedUser auser;
+        try {
+            auser = authHandler.auth(
+                    verifier,
+                    decodedFinalRedirect
             );
         } catch (AuthHandlerException e) {
             final String errMsg = "Error authorizing anonymous user for service [" + serviceName + "]";
@@ -296,7 +411,7 @@ public class JedisUserManagerImpl implements UserManager {
             LOGGER.error(errMsg);
             throw new UserManagerException(errMsg);
         }
-        if(auth.isExpired()) {
+        if (auth.isExpired()) {
             final String errMsg = "OAuth token for [" + serviceName + "] on user [" + user.getUsername() + "] is expired";
             LOGGER.error(errMsg);
             throw new UserManagerException(errMsg);

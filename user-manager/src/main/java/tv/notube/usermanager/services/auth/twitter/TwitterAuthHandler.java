@@ -83,6 +83,11 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
     }
 
     @Override
+    public OAuthToken getToken(URL finalRedirectUrl) throws AuthHandlerException {
+        throw new UnsupportedOperationException("nah, niy");
+    }
+
+    @Override
     public OAuthToken getToken(String username, URL callback) throws AuthHandlerException {
         throw new UnsupportedOperationException("nah, NIY.");
     }
@@ -101,6 +106,11 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
     public List<Activity> grabActivities(String secret, String username, int limit)
             throws AuthHandlerException {
         throw new UnsupportedOperationException("nah, NIY.");
+    }
+
+    @Override
+    public AuthenticatedUser auth(String verifier, String finalRedirect) throws AuthHandlerException {
+        throw new UnsupportedOperationException("nah, niy");
     }
 
 }

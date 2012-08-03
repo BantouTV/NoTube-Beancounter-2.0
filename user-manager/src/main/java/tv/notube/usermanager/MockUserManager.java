@@ -135,7 +135,17 @@ public class MockUserManager implements UserManager {
     }
 
     @Override
+    public OAuthToken getOAuthToken(String service, URL finalRedirectUrl) throws UserManagerException {
+        throw new UnsupportedOperationException("nah, niy");
+    }
+
+    @Override
     public AtomicSignUp storeUserFromOAuth(String service, String verifier) throws UserManagerException {
+        throw new UnsupportedOperationException("nah, niy");
+    }
+
+    @Override
+    public AtomicSignUp storeUserFromOAuth(String service, String verifier, String decodedFinalRedirect) throws UserManagerException {
         throw new UnsupportedOperationException("nah, niy");
     }
 

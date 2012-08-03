@@ -30,7 +30,6 @@ public interface AuthHandler {
     ) throws AuthHandlerException;
 
     /**
-     *
      * @param username
      * @return
      * @throws AuthHandlerException
@@ -38,17 +37,24 @@ public interface AuthHandler {
     public OAuthToken getToken(String username) throws AuthHandlerException;
 
     /**
-     *
      * @return
      * @throws AuthHandlerException
      */
     public OAuthToken getToken() throws AuthHandlerException;
 
     /**
+     * Totally equivalent to OAuthToken getToken() but it allows a final redirect url.
      *
+     * @param finalRedirectUrl
+     * @return
+     * @throws AuthHandlerException
+     */
+    public OAuthToken getToken(URL finalRedirectUrl) throws AuthHandlerException;
+
+    /**
      * @param username
      * @param callback a custom callback, which overrides the {@link tv
-     * .notube.commons.model.Service} one.
+     *                 .notube.commons.model.Service} one.
      * @return
      * @throws AuthHandlerException
      */
@@ -63,6 +69,7 @@ public interface AuthHandler {
 
     /**
      * To handle anonymous <i>OAuth</i> callbacks.
+     *
      * @param verifier
      * @return
      */
@@ -79,5 +86,16 @@ public interface AuthHandler {
      * @throws AuthHandlerException
      */
     public List<Activity> grabActivities(String secret, String identifier, int limit)
+            throws AuthHandlerException;
+
+    /**
+     * Totally equivalent to auth(String verifier) but it allows custom redirect url.
+     *
+     * @param verifier
+     * @param finalRedirect
+     * @return
+     * @throws AuthHandlerException
+     */
+    public AuthenticatedUser auth(String verifier, String finalRedirect)
             throws AuthHandlerException;
 }

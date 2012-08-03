@@ -27,8 +27,10 @@ import tv.notube.listener.facebook.core.converter.custom.FacebookShareConverter;
 import tv.notube.listener.facebook.core.model.*;
 import tv.notube.listener.facebook.core.model.FacebookData;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -121,6 +123,33 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
         }
     }
 
+    public OAuthToken getToken(URL finalRedirectUrl) throws AuthHandlerException {
+        String encodedRedirect;
+        try {
+            encodedRedirect = URLEncoder.encode(finalRedirectUrl.toString(), "UTF-8");
+            encodedRedirect = URLEncoder.encode(encodedRedirect, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new AuthHandlerException("", e);
+        }
+        OAuthService facebookOAuth = new ServiceBuilder()
+                .provider(FacebookApi.class)
+                .apiKey(service.getApikey())
+                .apiSecret(service.getSecret())
+                .scope("read_stream,user_likes,user_location,user_interests,user_activities")
+                .callback(service.getAtomicOAuthCallback().toString() + "web/" + encodedRedirect)
+                .build();
+        Token token = null;
+        String redirectUrl = facebookOAuth.getAuthorizationUrl(token);
+        try {
+            return new OAuthToken(new URL(redirectUrl));
+        } catch (MalformedURLException e) {
+            throw new AuthHandlerException(
+                    "The redirect url is not well formed",
+                    e
+            );
+        }
+    }
+
     @Override
     public OAuthToken getToken(String username, URL callback) throws AuthHandlerException {
         OAuthService facebookOAuth;
@@ -146,7 +175,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
     @Override
     public AuthenticatedUser auth(String verifier) throws AuthHandlerException {
         if (verifier == null) {
-            auth(null, null);
+            auth((User) null, null);
         }
         Verifier v = new Verifier(verifier);
         OAuthService facebookOAuth = new ServiceBuilder()
@@ -155,6 +184,44 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                 .apiSecret(service.getSecret())
                 .scope("read_stream,user_likes,user_location,user_interests,user_activities")
                 .callback(service.getAtomicOAuthCallback().toString())
+                .build();
+        Token requestToken = null;
+        Token accessToken = facebookOAuth.getAccessToken(requestToken, v);
+        Map<String, String> data;
+        try {
+            data = getUserData(accessToken.getToken());
+        } catch (Exception e) {
+            final String errMsg = "Error while getting data for anonymous user";
+            throw new AuthHandlerException(errMsg, e);
+        }
+        User user = createNewUser(data);
+        user.addService(
+                service.getName(),
+                new OAuthAuth(accessToken.getToken(), accessToken.getSecret())
+        );
+        return new AuthenticatedUser(data.get("facebook.user.id"), user);
+    }
+
+    @Override
+    public AuthenticatedUser auth(String verifier, String finalRedirect)
+            throws AuthHandlerException {
+        if (verifier == null) {
+            auth((User) null, null);
+        }
+        String encodedRedirect;
+        try {
+            encodedRedirect = URLEncoder.encode(finalRedirect, "UTF-8");
+            encodedRedirect = URLEncoder.encode(encodedRedirect, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new AuthHandlerException("", e);
+        }
+        Verifier v = new Verifier(verifier);
+        OAuthService facebookOAuth = new ServiceBuilder()
+                .provider(FacebookApi.class)
+                .apiKey(service.getApikey())
+                .apiSecret(service.getSecret())
+                .scope("read_stream,user_likes,user_location,user_interests,user_activities")
+                .callback(service.getAtomicOAuthCallback().toString() + "web/" + encodedRedirect)
                 .build();
         Token requestToken = null;
         Token accessToken = facebookOAuth.getAccessToken(requestToken, v);

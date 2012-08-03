@@ -428,7 +428,7 @@ public class UserService extends JsonService {
             return rb.build();
         }
         OAuthAuth auth = (OAuthAuth) user.getAuth(service);
-        if(auth == null) {
+        if (auth == null) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(new StringPlatformResponse(
                     StringPlatformResponse.Status.NOK,
@@ -524,14 +524,61 @@ public class UserService extends JsonService {
     }
 
     @GET
-    @Path("/register/{service}")
-    public Response signUpWithService(
+    @Path("/register/{service}/mobile")
+    public Response signUpWithServiceMobile(
             @PathParam("service") String service
     ) {
         // get a token for an anonymous user
         OAuthToken oAuthToken;
         try {
             oAuthToken = userManager.getOAuthToken(service);
+        } catch (UserManagerException e) {
+            return error(
+                    e,
+                    "Error while getting token from [" + service + "]"
+            );
+        }
+        try {
+            oAuthToken = userManager.getOAuthToken(service);
+        } catch (UserManagerException e) {
+            return error(
+                    e,
+                    "Error while getting token from [" + service + "]"
+            );
+        }
+        // token asked, let's redirect
+        URL redirect = oAuthToken.getRedirectPage();
+        try {
+            return Response.temporaryRedirect(redirect.toURI()).build();
+        } catch (URISyntaxException e) {
+            return error(e, "Malformed redirect URL");
+        }
+    }
+
+    @GET
+    @Path("/register/{service}/web")
+    public Response signUpWithServiceWeb(
+            @PathParam("service") String service,
+            @QueryParam("redirect") String finalRedirect
+    ) {
+        // get a token for an anonymous user
+        OAuthToken oAuthToken;
+        try {
+            oAuthToken = userManager.getOAuthToken(service);
+        } catch (UserManagerException e) {
+            return error(
+                    e,
+                    "Error while getting token from [" + service + "]"
+            );
+        }
+        URL finalRedirectURL;
+        try {
+            finalRedirectURL = new URL(finalRedirect);
+        } catch (MalformedURLException e) {
+            return error(e, "[" + finalRedirect + "] is not a valid URL");
+        }
+        try {
+            oAuthToken = userManager.getOAuthToken(service, finalRedirectURL);
         } catch (UserManagerException e) {
             return error(
                     e,
@@ -601,10 +648,75 @@ public class UserService extends JsonService {
             return error(e, "Malformed redirect URL");
         }
     }
+              //  /rest/user/oauth/atomic/callback/facebook/web/
+    @GET
+    @Path("/oauth/atomic/callback/{service}/web/{redirect}")
+    public Response handleAtomicAuthCallbackWeb(
+        @PathParam("service") String service,
+        @PathParam("redirect") String finalRedirect,
+        @QueryParam("code") String verifier
+    ) {
+        String decodedFinalRedirect;
+        try {
+            decodedFinalRedirect = URLDecoder.decode(finalRedirect, "UTF-8");
+            decodedFinalRedirect = URLDecoder.decode(decodedFinalRedirect, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return error(e, "error while url decoding [" + finalRedirect + "]");
+        }
+        AtomicSignUp signUp;
+        try {
+            signUp = userManager.storeUserFromOAuth(service, verifier, decodedFinalRedirect);
+        } catch (UserManagerException e) {
+            return error(e, "Error while OAuth exchange for service: [" + service + "]");
+        }
+        User user;
+        try {
+            user = userManager.getUser(signUp.getUsername());
+        } catch (UserManagerException e) {
+            return error(e, "Error while retrieving user: [" + signUp.getUsername() + "]");
+        }
+        final int LIMIT = 40;
+        List<Activity> activities;
+        try {
+            activities = userManager.grabUserActivities(
+                    user,
+                    signUp.getIdentifier(),
+                    signUp.getService(),
+                    LIMIT
+            );
+        } catch (UserManagerException e) {
+            return error(e, "Error while retrieving user: [" + signUp.getUsername() + "] initial activities");
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        for (Activity activity : activities) {
+            ResolvedActivity ra = new ResolvedActivity();
+            ra.setActivity(activity);
+            ra.setUserId(signUp.getUserId());
+            String raJson;
+            try {
+                raJson = mapper.writeValueAsString(ra);
+            } catch (IOException e) {
+                // just skip this one
+                continue;
+            }
+            try {
+                queues.push(raJson);
+            } catch (QueuesException e) {
+                return error(e, "Error while pushing down json resolved activity: [" + raJson + "] for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
+            }
+        }
+        URI finalRedirectUri;
+        try {
+            finalRedirectUri = new URI(decodedFinalRedirect + "?username=" + signUp.getUsername());
+        } catch (URISyntaxException e) {
+            return error(e, "Malformed redirect URL");
+        }
+        return Response.temporaryRedirect(finalRedirectUri).build();
+    }
 
     @GET
     @Path("/oauth/atomic/callback/{service}/")
-    public Response handleAtomicFacebookAuthCallback(
+    public Response handleAtomicAuthCallbackMobile(
             @PathParam("service") String service,
             @QueryParam("code") String verifier
     ) {
@@ -633,7 +745,7 @@ public class UserService extends JsonService {
             return error(e, "Error while retrieving user: [" + signUp.getUsername() + "] initial activities");
         }
         ObjectMapper mapper = new ObjectMapper();
-        for(Activity activity : activities) {
+        for (Activity activity : activities) {
             ResolvedActivity ra = new ResolvedActivity();
             ra.setActivity(activity);
             ra.setUserId(signUp.getUserId());
@@ -651,14 +763,14 @@ public class UserService extends JsonService {
             }
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(
-                new AtomicSignUpResponse(
-                        PlatformResponse.Status.OK,
-                        "user with user name [" + signUp.getUsername() + "] logged in with service [" + signUp.getService() + "]",
-                        signUp
-                )
-        );
-        return rb.build();
+            rb.entity(
+                    new AtomicSignUpResponse(
+                            PlatformResponse.Status.OK,
+                            "user with user name [" + signUp.getUsername() + "] logged in with service [" + signUp.getService() + "]",
+                            signUp
+                    )
+            );
+            return rb.build();
     }
 
     @GET

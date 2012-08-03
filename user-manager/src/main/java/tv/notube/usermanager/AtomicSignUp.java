@@ -18,7 +18,6 @@ public class AtomicSignUp {
 
     /**
      * the <i>beancounter.io</i> username
-     *
      */
     private String username;
 
@@ -27,11 +26,11 @@ public class AtomicSignUp {
      */
     private boolean returning = false;
 
+    private String service;
+
     /**
      * The user identifier on the specified <i>service</i>
      */
-    private String service;
-
     private String identifier;
 
     public AtomicSignUp() {}
