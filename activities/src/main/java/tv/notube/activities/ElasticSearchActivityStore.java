@@ -20,7 +20,6 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tv.notube.activities.model.activity.ElasticSearchActivity;
 import tv.notube.commons.helper.es.ElasticSearchConfiguration;
 import tv.notube.commons.helper.es.NodeInfo;
 import tv.notube.commons.model.activity.*;
@@ -130,20 +129,23 @@ public class ElasticSearchActivityStore implements ActivityStore {
             }
             List<ResolvedActivity> activities = (List<ResolvedActivity>) activitiesMap.get(userId);
             byte[] bytes;
+
             try {
                 bytes = mapper.writeValueAsBytes(activity);
             } catch (IOException e) {
                 final String errMsg = "Error while serializing as bytes [" + activity + "]";
                 throw new ActivityStoreException(errMsg, e);
             }
-            ElasticSearchActivity activityObj;
+
+            ResolvedActivity activityObj;
             try {
-                activityObj = mapper.readValue(bytes, ElasticSearchActivity.class);
+                activityObj = mapper.readValue(bytes, ResolvedActivity.class);
             } catch (IOException ioe) {
                 final String errMsg = "Error while deserializing [" + activity + "]";
                 throw new ActivityStoreException(errMsg, ioe);
             }
-            activities.add(toResolvedActivity(activityObj));
+
+            activities.add(activityObj);
         }
         return activitiesMap;
     }
@@ -221,16 +223,14 @@ public class ElasticSearchActivityStore implements ActivityStore {
 
     private void indexActivity(UUID userId, ResolvedActivity activity, Client client)
             throws ActivityStoreException {
-        ElasticSearchActivity esa = new ElasticSearchActivity(
-                userId,
-                activity.getActivity(),
-                activity.getUser()
-        );
+        // TODO (high): is this needed or does the ResolvedActivity already
+        // have the correct userId?
+        activity.setUserId(userId);
         byte[] jsonActivity;
         try {
-            jsonActivity = createActivityJson(esa);
+            jsonActivity = createActivityJson(activity);
         } catch (IOException e) {
-            final String errMsg = "Error while serializing to json [" + esa + "]";
+            final String errMsg = "Error while serializing to json [" + activity + "]";
             throw new ActivityStoreException(errMsg, e);
         }
         client.prepareIndex(INDEX_NAME, INDEX_TYPE)
@@ -238,8 +238,8 @@ public class ElasticSearchActivityStore implements ActivityStore {
                 .execute().actionGet();
     }
 
-    private byte[] createActivityJson(ElasticSearchActivity esa) throws IOException {
-        return mapper.writeValueAsBytes(esa);
+    private byte[] createActivityJson(ResolvedActivity activity) throws IOException {
+        return mapper.writeValueAsBytes(activity);
     }
 
     private Collection<ResolvedActivity> searchAndPaginateResults(
@@ -270,33 +270,28 @@ public class ElasticSearchActivityStore implements ActivityStore {
         for (SearchHit hit : searchResponse.getHits()) {
             Map<String, Object> activity = hit.getSource();
             byte[] jsonActivity;
+
             try {
                 jsonActivity = mapper.writeValueAsBytes(activity);
             } catch (IOException e) {
                 final String errMsg = "Error while serializing to json [" + activity + "]";
                 throw new ActivityStoreException(errMsg, e);
             }
-            ElasticSearchActivity activityObj;
+
+            ResolvedActivity activityObj;
             try {
                 activityObj = mapper.readValue(
                         jsonActivity,
-                        ElasticSearchActivity.class
+                        ResolvedActivity.class
                 );
             } catch (IOException e) {
                 final String errMsg = "Error while deserializing from json [" + activity + "]";
                 throw new ActivityStoreException(errMsg, e);
             }
-            activities.add(toResolvedActivity(activityObj));
+
+            activities.add(activityObj);
         }
         return activities;
-    }
-
-    private ResolvedActivity toResolvedActivity(ElasticSearchActivity activityObj) {
-        return new ResolvedActivity(
-                activityObj.getUserId(),
-                activityObj.getActivity(),
-                activityObj.getUser()
-        );
     }
 
     private Client getClient() {
