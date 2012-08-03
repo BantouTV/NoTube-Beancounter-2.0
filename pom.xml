@@ -23,6 +23,7 @@
         <module>resolver</module>
         <module>filter</module>
         <module>dispatcher</module>
+        <module>jms-publisher</module>
         <module>camel-redis</module>
         <module>facebook-publisher</module>
     </modules>
@@ -30,6 +31,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <camel.version>2.10.0</camel.version>
+        <activemq-core.version>5.6.0</activemq-core.version>
         <guice.version>2.0</guice.version>
         <slf4j-api.version>1.6.1</slf4j-api.version>
         <log4j.version>1.2.16</log4j.version>
@@ -294,6 +296,16 @@
                 <groupId>org.apache.camel</groupId>
                 <artifactId>camel-twitter</artifactId>
                 <version>${camel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.camel</groupId>
+                <artifactId>camel-jms</artifactId>
+                <version>${camel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>activemq-core</artifactId>
+                <version>${activemq-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.camel</groupId>
