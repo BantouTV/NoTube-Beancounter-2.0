@@ -42,7 +42,7 @@ public class JmsPublisherRoute extends RouteBuilder {
     }
 
     protected String toEndpoint() {
-        return "jms:topic:Activities";
+        return "jms:topic:{{jms.broker.queue}}?testConnectionOnStartup=true";
     }
 
     protected String fromEndpoint() {
