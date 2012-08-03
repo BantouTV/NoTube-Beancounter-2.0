@@ -3,7 +3,7 @@
 # script configuration
 URL=46.4.89.183
 USER=root
-VERSION=1.2-SNAPSHOT
+VERSION=1.3-SNAPSHOT
 BASEPATH=/root
 PROCESSES="listeners/facebook/facebook-process resolver/process dispatcher realtime-profiler/realtime-profiler-process filter/filter-process indexer"
 
