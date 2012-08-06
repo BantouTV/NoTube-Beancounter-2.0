@@ -23,8 +23,8 @@ public class UserManagerModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        Properties samProperties = PropertiesHelper.readFromClasspath("/sam.properties");
-        ServiceAuthorizationManager sam = DefaultServiceAuthorizationManager.build(samProperties);
+        Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
+        ServiceAuthorizationManager sam = DefaultServiceAuthorizationManager.build(properties);
 
         Properties redisProperties = PropertiesHelper.readFromClasspath("/redis.properties");
         Names.bindProperties(binder(), redisProperties);

@@ -52,8 +52,8 @@ public class TestServiceConfig extends GuiceServletContextListener {
                 bind(UserService.class);
                 bind(ActivitiesService.class);
 
-                Properties samProperties = PropertiesHelper.readFromClasspath("/sam.properties");
-                Names.bindProperties(binder(), samProperties);
+                Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
+                Names.bindProperties(binder(), properties);
 
                 bind(AliveService.class);
                 bind(FilterService.class);

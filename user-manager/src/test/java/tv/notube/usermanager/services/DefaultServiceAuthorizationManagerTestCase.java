@@ -17,7 +17,7 @@ public class DefaultServiceAuthorizationManagerTestCase {
 
     @Test
     public void test() {
-        Properties properties = PropertiesHelper.readFromClasspath("/sam.properties");
+        Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
         ServiceAuthorizationManager sam = DefaultServiceAuthorizationManager.build(properties);
         Assert.assertNotNull(sam);
     }
