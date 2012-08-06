@@ -1,9 +1,6 @@
 package tv.notube.commons.model.activity;
 
 import tv.notube.commons.model.User;
-
-import java.lang.*;
-import java.lang.Object;
 import java.util.UUID;
 
 /**
@@ -71,7 +68,7 @@ public class ResolvedActivity {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(java.lang.Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 

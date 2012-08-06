@@ -18,6 +18,8 @@ public class ContentItem extends tv.notube.commons.model.activity.Object {
 
     private UUID id;
 
+    private String onEvent;
+
     public ContentItem() {
         super();
     }
@@ -35,6 +37,14 @@ public class ContentItem extends tv.notube.commons.model.activity.Object {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public String getOnEvent() {
+        return onEvent;
+    }
+
+    public void setOnEvent(String onEvent) {
+        this.onEvent = onEvent;
     }
 
     @Override
@@ -61,6 +71,7 @@ public class ContentItem extends tv.notube.commons.model.activity.Object {
     public String toString() {
         return "ContentItem{" +
                 "id=" + id +
+                ", onEvent=" + onEvent +
                 '}';
     }
 }
