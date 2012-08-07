@@ -23,9 +23,8 @@
         <module>resolver</module>
         <module>filter</module>
         <module>dispatcher</module>
-        <module>jms-publisher</module>
+        <module>publishers</module>
         <module>camel-redis</module>
-        <module>facebook-publisher</module>
     </modules>
 
     <properties>
