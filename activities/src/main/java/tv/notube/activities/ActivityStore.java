@@ -23,7 +23,7 @@ public interface ActivityStore {
      * @param activity
      * @throws ActivityStoreException
      */
-    public void store(final UUID userId, final ResolvedActivity activity) throws ActivityStoreException;
+    void store(final UUID userId, final ResolvedActivity activity) throws ActivityStoreException;
 
     /**
      * Stores a bulk of {@link Activity} committing them all.
@@ -32,7 +32,7 @@ public interface ActivityStore {
      * @param activities
      * @throws ActivityStoreException
      */
-    public void store(final UUID userId, final Collection<ResolvedActivity> activities) throws ActivityStoreException;
+    void store(final UUID userId, final Collection<ResolvedActivity> activities) throws ActivityStoreException;
 
     /**
      *
@@ -41,7 +41,7 @@ public interface ActivityStore {
      * @return
      * @throws ActivityStoreException
      */
-    public Collection<ResolvedActivity> getByUser(final UUID uuidId, final int max) throws ActivityStoreException;
+    Collection<ResolvedActivity> getByUser(final UUID uuidId, final int max) throws ActivityStoreException;
 
     /**
      *
@@ -51,7 +51,7 @@ public interface ActivityStore {
      * @return
      * @throws ActivityStoreException
      */
-    public Collection<ResolvedActivity> getByUserAndDateRange(
+    Collection<ResolvedActivity> getByUserAndDateRange(
             final UUID uuid,
             final DateTime from,
             final DateTime to
@@ -64,7 +64,7 @@ public interface ActivityStore {
      * @return
      * @throws ActivityStoreException
      */
-    public Map<UUID, Collection<ResolvedActivity>> getByDateRange(
+    Map<UUID, Collection<ResolvedActivity>> getByDateRange(
             final DateTime from,
             final DateTime to
     ) throws ActivityStoreException;
@@ -76,7 +76,7 @@ public interface ActivityStore {
      * @return
      * @throws ActivityStoreException
      */
-    public ResolvedActivity getByUser(
+    ResolvedActivity getByUser(
             final UUID userId,
             final UUID activityId
     ) throws ActivityStoreException;
@@ -88,7 +88,7 @@ public interface ActivityStore {
      * @return
      * @throws ActivityStoreException
      */
-    public Collection<ResolvedActivity> getByUser(
+    Collection<ResolvedActivity> getByUser(
             final UUID userId,
             final Collection<UUID> activityIds
     ) throws ActivityStoreException;
@@ -109,7 +109,7 @@ public interface ActivityStore {
      * @throws InvalidOrderException When the specified order is invalid (ie.
      * not "asc" or "desc").
      */
-    public Collection<ResolvedActivity> getByUserPaginated(
+    Collection<ResolvedActivity> getByUserPaginated(
             UUID userId,
             int pageNumber,
             int size,
@@ -136,7 +136,7 @@ public interface ActivityStore {
      * @throws InvalidOrderException When the specified order is invalid (ie.
      * not "asc" or "desc").
      */
-    public Collection<ResolvedActivity> search(
+    Collection<ResolvedActivity> search(
             String path,
             String value,
             int pageNumber,
@@ -152,12 +152,12 @@ public interface ActivityStore {
      * @param visible
      * @throws ActivityStoreException
      */
-    public void setVisible(final UUID activityId, boolean visible) throws ActivityStoreException;
+    void setVisible(final UUID activityId, boolean visible) throws ActivityStoreException;
 
     /**
      * Releases any used resources.
      *
      * @throws ActivityStoreException
      */
-    public void shutDown() throws ActivityStoreException;
+    void shutDown() throws ActivityStoreException;
 }

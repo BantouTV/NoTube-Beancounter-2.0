@@ -26,6 +26,12 @@ public class ResolvedActivity {
      */
     private User user;
 
+    /**
+     * Specifies whether this activity is to be included in searches etc.
+     * Default is true (visible).
+     */
+    private boolean visible = true;
+
     public ResolvedActivity() {}
 
     public ResolvedActivity(UUID userId, Activity activity, User user) {
@@ -56,6 +62,14 @@ public class ResolvedActivity {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 
     @Override

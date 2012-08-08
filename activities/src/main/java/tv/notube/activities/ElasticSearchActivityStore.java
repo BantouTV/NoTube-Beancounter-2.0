@@ -12,6 +12,7 @@ import org.elasticsearch.common.collect.ImmutableList;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.index.query.AndFilterBuilder;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.OrFilterBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -82,20 +83,37 @@ public class ElasticSearchActivityStore implements ActivityStore {
     }
 
     @Override
-    public Collection<ResolvedActivity> getByUser(UUID uuidId, int max) throws ActivityStoreException {
+    public Collection<ResolvedActivity> getByUser(UUID userId, int max) throws ActivityStoreException {
+        AndFilterBuilder visibilityFilter = andFilter()
+                .add(termFilter("visible", true));
+
+        FilteredQueryBuilder fq = filteredQuery(
+                queryString("userId:" + userId.toString()),
+                visibilityFilter
+        );
+
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                .setQuery(queryString("userId:" + uuidId.toString()))
+                .setQuery(fq)
                 .addSort(DATE_PATH, SortOrder.DESC)
                 .setSize(max)
                 .execute().actionGet();
+
         return retrieveActivitiesFromSearchResponse(searchResponse);
     }
 
     @Override
-    public Collection<ResolvedActivity> getByUserAndDateRange(UUID uuid, DateTime from, DateTime to)
+    public Collection<ResolvedActivity> getByUserAndDateRange(UUID userId, DateTime from, DateTime to)
             throws ActivityStoreException {
+        AndFilterBuilder visibilityFilter = andFilter()
+                .add(termFilter("visible", true));
+
+        FilteredQueryBuilder fq = filteredQuery(
+                queryString("userId:" + userId.toString()),
+                visibilityFilter
+        );
+
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                .setQuery(queryString("userId:" + uuid.toString()))
+                .setQuery(fq)
                 .addSort(DATE_PATH, SortOrder.DESC)
                 .setFilter(numericRangeFilter(DATE_PATH)
                         .from(from.getMillis())
@@ -108,8 +126,16 @@ public class ElasticSearchActivityStore implements ActivityStore {
     @Override
     public Map<UUID, Collection<ResolvedActivity>> getByDateRange(DateTime from, DateTime to)
             throws ActivityStoreException {
+        AndFilterBuilder visibilityFilter = andFilter()
+                .add(termFilter("visible", true));
+
+        FilteredQueryBuilder fq = filteredQuery(
+                matchAllQuery(),
+                visibilityFilter
+        );
+
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                .setQuery(QueryBuilders.matchAllQuery())
+                .setQuery(fq)
                 .addSort(DATE_PATH, SortOrder.DESC)
                 .setFilter(numericRangeFilter(DATE_PATH)
                         .from(from.getMillis())
@@ -119,7 +145,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
         Map<UUID, Collection<ResolvedActivity>> activitiesMap =
                 new HashMap<UUID, Collection<ResolvedActivity>>();
 
-        // TODO: Use facets or some type of grouping to avoid populating the map
+        // TODO (low): Use facets or some type of grouping to avoid populating the map
         // manually.
         for (SearchHit hit : searchResponse.getHits()) {
             UUID userId = UUID.fromString((String) hit.getSource().get("userId"));
@@ -154,8 +180,16 @@ public class ElasticSearchActivityStore implements ActivityStore {
     // we don't really care about the user?
     @Override
     public ResolvedActivity getByUser(UUID userId, UUID activityId) throws ActivityStoreException {
+        AndFilterBuilder visibilityFilter = andFilter()
+                .add(termFilter("visible", true));
+
+        FilteredQueryBuilder fq = filteredQuery(
+                queryString("activity.id:" + activityId.toString()),
+                visibilityFilter
+        );
+
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                .setQuery(queryString("activity.id:" + activityId.toString()))
+                .setQuery(fq)
                 .setSize(1)
                 .execute().actionGet();
 
@@ -168,15 +202,19 @@ public class ElasticSearchActivityStore implements ActivityStore {
     @Override
     public Collection<ResolvedActivity> getByUser(UUID userId, Collection<UUID> activityIds)
             throws ActivityStoreException {
+        AndFilterBuilder visibilityFilter = andFilter()
+                .add(termFilter("visible", true));
 
-        OrFilterBuilder orFilterBuilder = orFilter();
+        OrFilterBuilder idFilter = orFilter();
         for (UUID id : activityIds) {
-            orFilterBuilder.add(queryFilter(queryString("activity.id:" + id.toString())));
+            idFilter.add(queryFilter(queryString("activity.id:" + id.toString())));
         }
+
+        AndFilterBuilder combinedFilters = andFilter(visibilityFilter, idFilter);
 
         FilteredQueryBuilder fqBuilder = filteredQuery(
                 queryString("userId:" + userId.toString()),
-                orFilterBuilder
+                combinedFilters
         );
 
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
@@ -252,9 +290,17 @@ public class ElasticSearchActivityStore implements ActivityStore {
             throw new InvalidOrderException(order + " is not a valid sort order.");
         }
 
+        AndFilterBuilder visibilityFilter = andFilter()
+                .add(termFilter("visible", true));
+
+        FilteredQueryBuilder fq = filteredQuery(
+                queryString(query),
+                visibilityFilter
+        );
+
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setSearchType(SearchType.QUERY_THEN_FETCH)
-                .setQuery(queryString(query))
+                .setQuery(fq)
                 .addSort(DATE_PATH, sortOrder)
                 .setFrom(pageNumber * size)
                 .setSize(size)

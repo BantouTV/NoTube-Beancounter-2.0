@@ -344,7 +344,7 @@ public class ElasticSearchActivityStoreTest {
     }
 
     @Test
-    public void getTweetOfSpecifiedUserAndSpecifiedTweet() throws Exception {
+    public void getSpecificTweetOfSpecifiedUser() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID activityId = UUID.randomUUID();
 
@@ -846,6 +846,140 @@ public class ElasticSearchActivityStoreTest {
         as.search("type", "TWEET", 0, 10, "not-an-order");
     }
 
+    @Test
+    public void hiddenActivityShouldNotBeIncludedInSearchResults() throws Exception {
+        ResolvedActivity hiddenActivity = createTweetActivity(0, UUID.randomUUID(), new DateTime());
+        hiddenActivity.setVisible(false);
+
+        as.store(UUID.randomUUID(), hiddenActivity);
+        refreshIndex();
+
+        List<ResolvedActivity> activitiesRetrieved = (List<ResolvedActivity>) as.search(
+                "type",
+                Verb.TWEET.name(),
+                0,
+                10,
+                descOrder
+        );
+
+        assertTrue(activitiesRetrieved.isEmpty());
+    }
+
+    @Test
+    public void hiddenActivityShouldNotBeIncludedInPaginatedUserActivities() throws Exception {
+        UUID userId = UUID.randomUUID();
+        ResolvedActivity hiddenActivity = createTweetActivity(0, userId, new DateTime());
+        hiddenActivity.setVisible(false);
+
+        as.store(userId, hiddenActivity);
+        refreshIndex();
+
+        List<ResolvedActivity> activitiesRetrieved =
+                (List<ResolvedActivity>) as.getByUserPaginated(userId, 0, 10, descOrder);
+
+        assertTrue(activitiesRetrieved.isEmpty());
+    }
+
+    @Test
+    public void hiddenActivityShouldNotBeIncludedInAUsersLatestActivities() throws Exception {
+        UUID userId = UUID.randomUUID();
+        ResolvedActivity hiddenActivity = createTweetActivity(0, userId, new DateTime());
+        hiddenActivity.setVisible(false);
+
+        as.store(userId, hiddenActivity);
+        refreshIndex();
+
+        List<ResolvedActivity> activitiesRetrieved =
+                (List<ResolvedActivity>) as.getByUser(userId, 10);
+
+        assertTrue(activitiesRetrieved.isEmpty());
+    }
+
+    @Test
+    public void hiddenActivityShouldNotBeIncludedInDateRangeOfUserActivities() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        ResolvedActivity hiddenActivity = createTweetActivity(0, userId, dateTime.minusDays(2));
+        hiddenActivity.setVisible(false);
+
+        as.store(userId, hiddenActivity);
+        refreshIndex();
+
+        List<ResolvedActivity> activitiesRetrieved =
+                (List<ResolvedActivity>) as.getByUserAndDateRange(userId, dateTime.minusDays(4), dateTime);
+
+        assertTrue(activitiesRetrieved.isEmpty());
+    }
+
+    @Test
+    public void hiddenActivityShouldNotBeIncludedInResultsOfDateRangeQuery() throws Exception {
+        UUID userId1 = UUID.randomUUID();
+        UUID userId2 = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        ResolvedActivity hiddenActivity = createTweetActivity(0, userId1, dateTime.minusDays(2));
+        hiddenActivity.setVisible(false);
+
+        as.store(userId1, createTweetActivities(userId1, dateTime, 10));
+        as.store(userId1, hiddenActivity);
+        as.store(userId2, createTweetActivities(userId2, dateTime, 10));
+
+        refreshIndex();
+
+        Map<UUID, Collection<ResolvedActivity>> allActivity
+                = as.getByDateRange(dateTime.minusDays(5), dateTime);
+        assertEquals(allActivity.size(), 2);
+
+        List<ResolvedActivity> activities = (List<ResolvedActivity>) allActivity.get(userId1);
+        assertEquals(activities.size(), 5);
+
+        activities = (List<ResolvedActivity>) allActivity.get(userId2);
+        assertEquals(activities.size(), 5);
+    }
+
+    @Test
+    public void gettingASingleHiddenActivityShouldReturnNull() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID activityId = UUID.randomUUID();
+
+        ResolvedActivity hiddenActivity = createTweetActivity(0, userId, DateTime.now());
+        hiddenActivity.setVisible(false);
+        hiddenActivity.getActivity().setId(activityId);
+
+        as.store(userId, hiddenActivity);
+        refreshIndex();
+
+        assertNull(as.getByUser(userId, activityId));
+    }
+
+    @Test
+    public void hiddenActivityShouldNotBeIncludedInResultsOfActivityIdsQuery() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID activityId = UUID.randomUUID();
+        Collection<UUID> activitiesIds = new ArrayList<UUID>();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        ResolvedActivity hiddenActivity = createTweetActivity(13, userId, DateTime.now());
+        hiddenActivity.setVisible(false);
+        hiddenActivity.getActivity().setId(activityId);
+        activitiesIds.add(activityId);
+
+        List<ResolvedActivity> activitiesStored = (List<ResolvedActivity>) createTweetActivities(userId, dateTime, 10);
+        for (int i = 0; i < activitiesStored.size() - 5; i++) {
+            UUID id = UUID.randomUUID();
+            activitiesStored.get(i).getActivity().setId(id);
+            activitiesIds.add(id);
+        }
+        as.store(userId, activitiesStored);
+        as.store(userId, hiddenActivity);
+
+        refreshIndex();
+
+        List<ResolvedActivity> activitiesRetrieved = (List<ResolvedActivity>) as.getByUser(userId, activitiesIds);
+        assertEquals(activitiesRetrieved.size(), 5);
+    }
+
     private void refreshIndex() {
         // Refresh so we're looking at the latest version of the index.
         client.admin().indices().refresh(new RefreshRequest(INDEX_NAME)).actionGet();
@@ -859,6 +993,16 @@ public class ElasticSearchActivityStoreTest {
         // Wait for shards to settle (return to idle state).
         refreshIndex();
         client.admin().cluster().health(new ClusterHealthRequest(INDEX_NAME).waitForYellowStatus()).actionGet();
+    }
+
+    private User getUser() {
+        User user = new User();
+        user.setName("test-name");
+        user.setSurname("test-surname");
+        user.setPassword("test-pwd");
+        user.setUsername("test-username");
+        user.addService("test-service", new OAuthAuth("s", "c"));
+        return user;
     }
 
     private ResolvedActivity createTweetActivity(
@@ -886,16 +1030,6 @@ public class ElasticSearchActivityStoreTest {
         );
         Activity activity = ab.pop();
         return new ResolvedActivity(userId, activity, getUser());
-    }
-
-    private User getUser() {
-        User user = new User();
-        user.setName("test-name");
-        user.setSurname("test-surname");
-        user.setPassword("test-pwd");
-        user.setUsername("test-username");
-        user.addService("test-service", new OAuthAuth("s", "c"));
-        return user;
     }
 
     private Collection<ResolvedActivity> createTweetActivities(
