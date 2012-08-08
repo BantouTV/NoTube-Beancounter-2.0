@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
@@ -978,6 +979,52 @@ public class ElasticSearchActivityStoreTest {
 
         List<ResolvedActivity> activitiesRetrieved = (List<ResolvedActivity>) as.getByUser(userId, activitiesIds);
         assertEquals(activitiesRetrieved.size(), 5);
+    }
+
+    @Test
+    public void aVisibleActivityCanBeHidden() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID activityId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        ResolvedActivity activity = createTweetActivity(0, userId, dateTime);
+        activity.getActivity().setId(activityId);
+
+        as.store(userId, activity);
+        refreshIndex();
+
+        assertNotNull(as.getByUser(userId, activityId));
+
+        as.setVisible(activityId, false);
+        refreshIndex();
+
+        assertNull(as.getByUser(userId, activityId));
+    }
+
+    @Test
+    public void aHiddenActivityCanBeMadeVisible() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID activityId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        ResolvedActivity hiddenActivity = createTweetActivity(0, userId, dateTime);
+        hiddenActivity.getActivity().setId(activityId);
+        hiddenActivity.setVisible(false);
+
+        as.store(userId, hiddenActivity);
+        refreshIndex();
+
+        assertNull(as.getByUser(userId, activityId));
+
+        as.setVisible(activityId, true);
+        refreshIndex();
+
+        assertNotNull(as.getByUser(userId, activityId));
+    }
+
+    @Test(expectedExceptions = ActivityStoreException.class)
+    public void attemptingToSetTheVisibilityOfANonExistentActivityThrowsException() throws Exception {
+        as.setVisible(UUID.randomUUID(), false);
     }
 
     private void refreshIndex() {

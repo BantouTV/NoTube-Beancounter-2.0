@@ -3,6 +3,7 @@ package tv.notube.activities;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
@@ -245,8 +246,18 @@ public class ElasticSearchActivityStore implements ActivityStore {
 
     @Override
     public void setVisible(UUID activityId, boolean visible) throws ActivityStoreException {
-        // TODO (it does nothing for the moment, see issue 23)
-        LOGGER.debug("activity {} visibility set to {}", activityId, visible);
+        try {
+            client.prepareUpdate(INDEX_NAME, INDEX_TYPE, activityId.toString())
+                    .addScriptParam("visible", visible)
+                    .setScript("ctx._source.visible = visible")
+                    .execute().actionGet();
+
+            LOGGER.debug("activity {} visibility set to {}", activityId, visible);
+        } catch (ElasticSearchException ese) {
+            String message = "Error setting the visibility of activity "
+                    + activityId.toString();
+            throw new ActivityStoreException(message, ese);
+        }
     }
 
     @Override
@@ -273,6 +284,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
         }
         client.prepareIndex(INDEX_NAME, INDEX_TYPE)
                 .setSource(jsonActivity)
+                .setId(activity.getActivity().getId().toString())
                 .execute().actionGet();
     }
 
