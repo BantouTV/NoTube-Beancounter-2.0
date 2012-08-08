@@ -23,7 +23,7 @@ public final class DefaultServiceAuthorizationManager
         ServiceAuthorizationManager sam = new DefaultServiceAuthorizationManager();
         String declaredServices = properties.getProperty("services");
         if(declaredServices == null) {
-            throw new RuntimeException("your sam.properties does not declare any service");
+            throw new RuntimeException("your properties does not declare any service");
         }
         String[] services = declaredServices.split(",");
         for(String service : services) {
