@@ -9,7 +9,7 @@ import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import tv.notube.activities.ActivityStore;
-import tv.notube.activities.MockActivityStore;
+import tv.notube.platform.activities.MockActivityStore;
 import tv.notube.applications.MockApplicationsManager;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.commons.helper.PropertiesHelper;

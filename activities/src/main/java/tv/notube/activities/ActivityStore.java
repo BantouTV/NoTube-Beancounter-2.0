@@ -72,18 +72,6 @@ public interface ActivityStore {
     /**
      *
      * @param userId
-     * @param activityId
-     * @return
-     * @throws ActivityStoreException
-     */
-    ResolvedActivity getByUser(
-            final UUID userId,
-            final UUID activityId
-    ) throws ActivityStoreException;
-
-    /**
-     *
-     * @param userId
      * @param activityIds
      * @return
      * @throws ActivityStoreException
@@ -143,6 +131,18 @@ public interface ActivityStore {
             int size,
             String order
     ) throws ActivityStoreException, WildcardSearchException, InvalidOrderException;
+
+    /**
+     * Get an activity given its id. Only visible activities will be returned.
+     * If the specified activity exists but is hidden, <tt>null</tt> will be
+     * returned.
+     *
+     * @param activityId The id of the activity to retrieve.
+     * @return The activity if it exists. <tt>null</tt> otherwise.
+     * @throws ActivityStoreException If the JSON response couldn't be converted
+     * to a ResolvedActivity.
+     */
+    ResolvedActivity getActivity(UUID activityId) throws ActivityStoreException;
 
     /**
      * This method sets an internal {@link Activity} <code>boolean</code> flag to make

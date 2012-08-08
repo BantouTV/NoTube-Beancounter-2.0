@@ -355,7 +355,7 @@ public class ElasticSearchActivityStoreTest {
 
         refreshIndex();
 
-        ResolvedActivity activityRetrieved = as.getByUser(userId, activityId);
+        ResolvedActivity activityRetrieved = as.getActivity(activityId);
         assertEquals(activityRetrieved, activityStored);
     }
 
@@ -951,7 +951,7 @@ public class ElasticSearchActivityStoreTest {
         as.store(userId, hiddenActivity);
         refreshIndex();
 
-        assertNull(as.getByUser(userId, activityId));
+        assertNull(as.getActivity(activityId));
     }
 
     @Test
@@ -993,12 +993,12 @@ public class ElasticSearchActivityStoreTest {
         as.store(userId, activity);
         refreshIndex();
 
-        assertNotNull(as.getByUser(userId, activityId));
+        assertNotNull(as.getActivity(activityId));
 
         as.setVisible(activityId, false);
         refreshIndex();
 
-        assertNull(as.getByUser(userId, activityId));
+        assertNull(as.getActivity(activityId));
     }
 
     @Test
@@ -1014,12 +1014,12 @@ public class ElasticSearchActivityStoreTest {
         as.store(userId, hiddenActivity);
         refreshIndex();
 
-        assertNull(as.getByUser(userId, activityId));
+        assertNull(as.getActivity(activityId));
 
         as.setVisible(activityId, true);
         refreshIndex();
 
-        assertNotNull(as.getByUser(userId, activityId));
+        assertNotNull(as.getActivity(activityId));
     }
 
     @Test(expectedExceptions = ActivityStoreException.class)
