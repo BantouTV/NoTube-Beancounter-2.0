@@ -226,6 +226,7 @@ public class ActivitiesService extends JsonService {
         return rb.build();
     }
 
+    // TODO (med): This no longer requires the username, just the activityId.
     @GET
     @Path("/get/{username}/{activityId}")
     public Response getActivity(
@@ -290,10 +291,7 @@ public class ActivitiesService extends JsonService {
         }
         ResolvedActivity activity;
         try {
-            activity = activities.getByUser(
-                    user.getId(),
-                    UUID.fromString(activityId)
-            );
+            activity = activities.getActivity(UUID.fromString(activityId));
         } catch (ActivityStoreException e) {
             return error(
                     e,

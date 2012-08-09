@@ -3,6 +3,8 @@ package tv.notube.activities;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.elasticsearch.ElasticSearchException;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
@@ -12,9 +14,10 @@ import org.elasticsearch.common.collect.ImmutableList;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.index.query.AndFilterBuilder;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.OrFilterBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortOrder;
 import org.joda.time.DateTime;
@@ -25,7 +28,6 @@ import tv.notube.commons.helper.es.NodeInfo;
 import tv.notube.commons.model.activity.*;
 
 import java.io.IOException;
-import java.lang.Object;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,13 +47,15 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
  */
 public class ElasticSearchActivityStore implements ActivityStore {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(ElasticSearchActivityStore.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchActivityStore.class);
 
     public static final String INDEX_NAME = "beancounter";
 
     public static final String INDEX_TYPE = "activity";
 
     private static final String DATE_PATH = INDEX_TYPE + ".activity.context.date";
+
+    private static final String VISIBLE = "visible";
 
     private ObjectMapper mapper;
 
@@ -82,20 +86,37 @@ public class ElasticSearchActivityStore implements ActivityStore {
     }
 
     @Override
-    public Collection<ResolvedActivity> getByUser(UUID uuidId, int max) throws ActivityStoreException {
+    public Collection<ResolvedActivity> getByUser(UUID userId, int max) throws ActivityStoreException {
+        AndFilterBuilder visibilityFilter = andFilter()
+                .add(termFilter(VISIBLE, true));
+
+        QueryBuilder query = filteredQuery(
+                queryString("userId:" + userId.toString()),
+                visibilityFilter
+        );
+
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                .setQuery(queryString("userId:" + uuidId.toString()))
+                .setQuery(query)
                 .addSort(DATE_PATH, SortOrder.DESC)
                 .setSize(max)
                 .execute().actionGet();
+
         return retrieveActivitiesFromSearchResponse(searchResponse);
     }
 
     @Override
-    public Collection<ResolvedActivity> getByUserAndDateRange(UUID uuid, DateTime from, DateTime to)
+    public Collection<ResolvedActivity> getByUserAndDateRange(UUID userId, DateTime from, DateTime to)
             throws ActivityStoreException {
+        AndFilterBuilder visibilityFilter = andFilter()
+                .add(termFilter(VISIBLE, true));
+
+        QueryBuilder query = filteredQuery(
+                queryString("userId:" + userId.toString()),
+                visibilityFilter
+        );
+
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                .setQuery(queryString("userId:" + uuid.toString()))
+                .setQuery(query)
                 .addSort(DATE_PATH, SortOrder.DESC)
                 .setFilter(numericRangeFilter(DATE_PATH)
                         .from(from.getMillis())
@@ -108,8 +129,16 @@ public class ElasticSearchActivityStore implements ActivityStore {
     @Override
     public Map<UUID, Collection<ResolvedActivity>> getByDateRange(DateTime from, DateTime to)
             throws ActivityStoreException {
+        AndFilterBuilder visibilityFilter = andFilter()
+                .add(termFilter(VISIBLE, true));
+
+        QueryBuilder query = filteredQuery(
+                matchAllQuery(),
+                visibilityFilter
+        );
+
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                .setQuery(QueryBuilders.matchAllQuery())
+                .setQuery(query)
                 .addSort(DATE_PATH, SortOrder.DESC)
                 .setFilter(numericRangeFilter(DATE_PATH)
                         .from(from.getMillis())
@@ -119,68 +148,50 @@ public class ElasticSearchActivityStore implements ActivityStore {
         Map<UUID, Collection<ResolvedActivity>> activitiesMap =
                 new HashMap<UUID, Collection<ResolvedActivity>>();
 
-        // TODO: Use facets or some type of grouping to avoid populating the map
+        // TODO (low): Use facets or some type of grouping to avoid populating the map
         // manually.
         for (SearchHit hit : searchResponse.getHits()) {
             UUID userId = UUID.fromString((String) hit.getSource().get("userId"));
-            Map<String, Object> activity = hit.getSource();
+
             if (activitiesMap.get(userId) == null) {
                 activitiesMap.put(userId, new ArrayList<ResolvedActivity>());
             }
             List<ResolvedActivity> activities = (List<ResolvedActivity>) activitiesMap.get(userId);
-            byte[] bytes;
 
+            ResolvedActivity activity;
             try {
-                bytes = mapper.writeValueAsBytes(activity);
-            } catch (IOException e) {
-                final String errMsg = "Error while serializing as bytes [" + activity + "]";
-                throw new ActivityStoreException(errMsg, e);
-            }
-
-            ResolvedActivity activityObj;
-            try {
-                activityObj = mapper.readValue(bytes, ResolvedActivity.class);
+                activity = mapper.readValue(hit.source(), ResolvedActivity.class);
             } catch (IOException ioe) {
-                final String errMsg = "Error while deserializing [" + activity + "]";
+                final String errMsg = "Error while deserializing [" + hit.getSource() + "]";
                 throw new ActivityStoreException(errMsg, ioe);
             }
 
-            activities.add(activityObj);
+            activities.add(activity);
         }
+
         return activitiesMap;
-    }
-
-    // TODO (med): Surely this method should be getActivity(activityId) since
-    // we don't really care about the user?
-    @Override
-    public ResolvedActivity getByUser(UUID userId, UUID activityId) throws ActivityStoreException {
-        SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                .setQuery(queryString("activity.id:" + activityId.toString()))
-                .setSize(1)
-                .execute().actionGet();
-
-        List<ResolvedActivity> activities =
-                (List<ResolvedActivity>) retrieveActivitiesFromSearchResponse(searchResponse);
-
-        return activities.size() > 0 ? activities.get(0) : null;
     }
 
     @Override
     public Collection<ResolvedActivity> getByUser(UUID userId, Collection<UUID> activityIds)
             throws ActivityStoreException {
+        AndFilterBuilder visibilityFilter = andFilter()
+                .add(termFilter(VISIBLE, true));
 
-        OrFilterBuilder orFilterBuilder = orFilter();
+        OrFilterBuilder idFilter = orFilter();
         for (UUID id : activityIds) {
-            orFilterBuilder.add(queryFilter(queryString("activity.id:" + id.toString())));
+            idFilter.add(queryFilter(queryString("activity.id:" + id.toString())));
         }
 
-        FilteredQueryBuilder fqBuilder = filteredQuery(
+        AndFilterBuilder combinedFilters = andFilter(visibilityFilter, idFilter);
+
+        QueryBuilder query = filteredQuery(
                 queryString("userId:" + userId.toString()),
-                orFilterBuilder
+                combinedFilters
         );
 
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
-                .setQuery(fqBuilder)
+                .setQuery(query)
                 .addSort(DATE_PATH, SortOrder.DESC)
                 .execute().actionGet();
 
@@ -206,9 +217,37 @@ public class ElasticSearchActivityStore implements ActivityStore {
     }
 
     @Override
+    public ResolvedActivity getActivity(UUID activityId) throws ActivityStoreException {
+        GetResponse response = client
+                .prepareGet(INDEX_NAME, INDEX_TYPE, activityId.toString())
+                .execute().actionGet();
+
+        ResolvedActivity activity;
+
+        try {
+            activity = mapper.readValue(response.source(), ResolvedActivity.class);
+        } catch (IOException ioe) {
+            final String errMsg = "Error while deserializing from json [" + response.getSource() + "]";
+            throw new ActivityStoreException(errMsg, ioe);
+        }
+
+        return (activity != null && activity.isVisible()) ? activity : null;
+    }
+
+    @Override
     public void setVisible(UUID activityId, boolean visible) throws ActivityStoreException {
-        // TODO (it does nothing for the moment, see issue 23)
-        LOGGER.debug("activity {} visibility set to {}", activityId, visible);
+        try {
+            client.prepareUpdate(INDEX_NAME, INDEX_TYPE, activityId.toString())
+                    .addScriptParam(VISIBLE, visible)
+                    .setScript("ctx._source.visible = visible")
+                    .execute().actionGet();
+
+            LOGGER.debug("activity {} visibility set to {}", activityId, visible);
+        } catch (ElasticSearchException ese) {
+            String message = "Error setting the visibility of activity "
+                    + activityId.toString();
+            throw new ActivityStoreException(message, ese);
+        }
     }
 
     @Override
@@ -235,6 +274,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
         }
         client.prepareIndex(INDEX_NAME, INDEX_TYPE)
                 .setSource(jsonActivity)
+                .setId(activity.getActivity().getId().toString())
                 .execute().actionGet();
     }
 
@@ -252,9 +292,17 @@ public class ElasticSearchActivityStore implements ActivityStore {
             throw new InvalidOrderException(order + " is not a valid sort order.");
         }
 
+        AndFilterBuilder visibilityFilter = andFilter()
+                .add(termFilter(VISIBLE, true));
+
+        FilteredQueryBuilder fq = filteredQuery(
+                queryString(query),
+                visibilityFilter
+        );
+
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
                 .setSearchType(SearchType.QUERY_THEN_FETCH)
-                .setQuery(queryString(query))
+                .setQuery(fq)
                 .addSort(DATE_PATH, sortOrder)
                 .setFrom(pageNumber * size)
                 .setSize(size)
@@ -267,30 +315,22 @@ public class ElasticSearchActivityStore implements ActivityStore {
             SearchResponse searchResponse
     ) throws ActivityStoreException {
         Collection<ResolvedActivity> activities = new ArrayList<ResolvedActivity>();
+
         for (SearchHit hit : searchResponse.getHits()) {
-            Map<String, Object> activity = hit.getSource();
-            byte[] jsonActivity;
-
+            ResolvedActivity activity;
             try {
-                jsonActivity = mapper.writeValueAsBytes(activity);
-            } catch (IOException e) {
-                final String errMsg = "Error while serializing to json [" + activity + "]";
-                throw new ActivityStoreException(errMsg, e);
-            }
-
-            ResolvedActivity activityObj;
-            try {
-                activityObj = mapper.readValue(
-                        jsonActivity,
+                activity = mapper.readValue(
+                        hit.source(),
                         ResolvedActivity.class
                 );
             } catch (IOException e) {
-                final String errMsg = "Error while deserializing from json [" + activity + "]";
+                final String errMsg = "Error while deserializing from json [" + hit.getSource() + "]";
                 throw new ActivityStoreException(errMsg, e);
             }
 
-            activities.add(activityObj);
+            activities.add(activity);
         }
+
         return activities;
     }
 

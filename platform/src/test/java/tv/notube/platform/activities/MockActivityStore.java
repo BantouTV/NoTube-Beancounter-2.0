@@ -1,7 +1,11 @@
-package tv.notube.activities;
+package tv.notube.platform.activities;
 
 import org.elasticsearch.search.sort.SortOrder;
 import org.joda.time.DateTime;
+import tv.notube.activities.ActivityStore;
+import tv.notube.activities.ActivityStoreException;
+import tv.notube.activities.InvalidOrderException;
+import tv.notube.activities.WildcardSearchException;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.*;
 import tv.notube.commons.model.activity.rai.TVEvent;
@@ -86,7 +90,7 @@ public class MockActivityStore implements ActivityStore {
     }
 
     @Override
-    public ResolvedActivity getByUser(UUID userId, UUID activityId) throws ActivityStoreException {
+    public ResolvedActivity getActivity(UUID activityId) throws ActivityStoreException {
         throw new UnsupportedOperationException("NIY");
     }
 
