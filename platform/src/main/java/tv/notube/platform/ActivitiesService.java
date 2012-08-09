@@ -39,6 +39,20 @@ public class ActivitiesService extends JsonService {
     // TODO (mid) this should be configurable
     private static final int ACTIVITIES_LIMIT = 20;
 
+    private static final String ACTIVITY= "activity";
+    private static final String ACTIVITY_ID = "activityId";
+    private static final String ACTIVITY_ID_OBJ = "activityIdObj";
+    private static final String API_KEY = "apikey";
+    private static final String IS_VISIBLE = "isVisible";
+    private static final String ORDER = "order";
+    private static final String PAGE_STRING = "page";
+    private static final String PAGE_NUMBER = "pageNumber";
+    private static final String PATH = "path";
+    private static final String USER = "user";
+    private static final String USERNAME = "username";
+    private static final String VALUE = "value";
+    private static final String VISIBILITY_OBJ = "vObj";
+
     private ApplicationsManager applicationsManager;
 
     private Queues queues;
@@ -63,60 +77,21 @@ public class ActivitiesService extends JsonService {
     @POST
     @Path("/add/{username}")
     public Response addActivity(
-            @PathParam("username") String username,
-            @FormParam("activity") String jsonActivity,
-            @QueryParam("apikey") String apiKey
+            @PathParam(USERNAME) String username,
+            @FormParam(ACTIVITY) String jsonActivity,
+            @QueryParam(API_KEY) String apiKey
     ) {
-        try {
-            check(
-                    this.getClass(),
-                    "addActivity",
-                    username,
-                    jsonActivity,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
+        Map<String, Object> params = new LinkedHashMap<String, Object>();
+        params.put(USERNAME, username);
+        params.put(ACTIVITY, jsonActivity);
+        params.put(API_KEY, apiKey);
+
+        Response error = validateRequest("addActivity", ApplicationsManager.Action.CREATE, params);
+
+        if (error != null) {
+            return error;
         }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.CREATE,
-                    ApplicationsManager.Object.ACTIVITIES
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authorizing your application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "application with key [" + apiKey + "] is not authorized")
-            );
-            return rb.build();
-        }
-        User user;
-        try {
-            user = userManager.getUser(username);
-            if (user == null) {
-                final String errMsg = "user with username [" + username + "] not found";
-                Response.ResponseBuilder rb = Response.serverError();
-                rb.entity(new StringPlatformResponse(
-                        StringPlatformResponse.Status.NOK,
-                        errMsg)
-                );
-                return rb.build();
-            }
-        } catch (UserManagerException e) {
-            final String errMsg = "Error while calling the UserManager";
-            return error(e, errMsg);
-        }
+
         // deserialize the given activity
         Activity activity;
         try {
@@ -125,6 +100,7 @@ public class ActivitiesService extends JsonService {
             final String errMsg = "Error: cannot parse your input json";
             return error(e, errMsg);
         }
+        User user = (User) params.get(USER);
         ResolvedActivity resolvedActivity = new ResolvedActivity(user.getId(), activity, user);
         String jsonResolvedActivity;
         try {
@@ -158,68 +134,35 @@ public class ActivitiesService extends JsonService {
         return mapper.readValue(jsonActivity, Activity.class);
     }
 
-    @DELETE
-    @Path("/{activityId}/visibility")
+    @PUT
+    @Path("/{activityId}/visible/{isVisible}")
     public Response setVisibility(
-            @PathParam("activityId") String activityId,
-            @QueryParam("visibility") String visibility,
-            @QueryParam("apikey") String apiKey
+            @PathParam(ACTIVITY_ID) String activityId,
+            @PathParam(IS_VISIBLE) String isVisible,
+            @QueryParam(API_KEY) String apiKey
     ) {
-        try {
-            check(
-                    this.getClass(),
-                    "setVisibility",
-                    activityId,
-                    visibility,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
+        Map<String, Object> params = new LinkedHashMap<String, Object>();
+        params.put(ACTIVITY_ID, activityId);
+        params.put(IS_VISIBLE, isVisible);
+        params.put(API_KEY, apiKey);
+
+        Response error = validateRequest("setVisibility", ApplicationsManager.Action.DELETE, params);
+
+        if (error != null) {
+            return error;
         }
+
+        boolean vObj = (Boolean) params.get(VISIBILITY_OBJ);
         try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        UUID activityIdObj;
-        try {
-            activityIdObj = UUID.fromString(activityId);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your activityId is not well formed");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.DELETE,
-                    ApplicationsManager.Object.ACTIVITIES
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating your application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry. You're not allowed to do that.")
-            );
-            return rb.build();
-        }
-        boolean vObj;
-        try {
-            vObj = Boolean.valueOf(visibility);
-        } catch (Exception e) {
-            return error(e, "visibility parameter must be {true, false} and not [" + visibility + "]");
-        }
-        try {
-            activities.setVisible(activityIdObj, vObj);
+            activities.setVisible((UUID) params.get(ACTIVITY_ID_OBJ), vObj);
         } catch (ActivityStoreException e) {
             return error(e, "Error modifying the visibility of activity with id [" + activityId + "]");
         }
+
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
-                new ResolvedActivitiesPlatformResponse(
-                        ResolvedActivitiesPlatformResponse.Status.OK,
+                new StringPlatformResponse(
+                        StringPlatformResponse.Status.OK,
                         "activity [" + activityId + "] visibility has been modified to [" + vObj + "]"
                 )
         );
@@ -230,65 +173,21 @@ public class ActivitiesService extends JsonService {
     @GET
     @Path("/get/{username}/{activityId}")
     public Response getActivity(
-            @PathParam("username") String username,
-            @PathParam("activityId") String activityId,
-            @QueryParam("apikey") String apiKey
+            @PathParam(USERNAME) String username,
+            @PathParam(ACTIVITY_ID) String activityId,
+            @QueryParam(API_KEY) String apiKey
     ) {
-        try {
-            check(
-                    this.getClass(),
-                    "getActivity",
-                    username,
-                    activityId,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
+        Map<String, Object> params = new LinkedHashMap<String, Object>();
+        params.put(USERNAME, username);
+        params.put(ACTIVITY_ID, activityId);
+        params.put(API_KEY, apiKey);
+
+        Response error = validateRequest("getActivity", ApplicationsManager.Action.RETRIEVE, params);
+
+        if (error != null) {
+            return error;
         }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        try {
-            UUID.fromString(activityId);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your activityId is not well formed");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.RETRIEVE,
-                    ApplicationsManager.Object.ACTIVITIES
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating your application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry. You're not allowed to do that.")
-            );
-            return rb.build();
-        }
-        User user;
-        try {
-            user = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user [" + username + "]");
-        }
-        if (user == null) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(
-                    new StringPlatformResponse(
-                            StringPlatformResponse.Status.NOK,
-                            "user with username [" + username + "] not found"
-                    )
-            );
-            return rb.build();
-        }
+
         ResolvedActivity activity;
         try {
             activity = activities.getActivity(UUID.fromString(activityId));
@@ -298,6 +197,7 @@ public class ActivitiesService extends JsonService {
                     "Error while getting activity [" + activityId + "] for user [" + username + "]"
             );
         }
+
         Response.ResponseBuilder rb = Response.ok();
         if (activity == null) {
             rb.entity(
@@ -322,56 +222,27 @@ public class ActivitiesService extends JsonService {
     @GET
     @Path("/search")
     public Response search(
-            @QueryParam("path") String path,
-            @QueryParam("value") String value,
-            @QueryParam("page") @DefaultValue("0") String pageString,
-            @QueryParam("order") @DefaultValue("desc") String order,
-            @QueryParam("apikey") String apiKey
+            @QueryParam(PATH) String path,
+            @QueryParam(VALUE) String value,
+            @QueryParam(PAGE_STRING) @DefaultValue("0") String pageString,
+            @QueryParam(ORDER) @DefaultValue("desc") String order,
+            @QueryParam(API_KEY) String apiKey
     ) {
-        try {
-            check(
-                    this.getClass(),
-                    "search",
-                    path,
-                    value,
-                    pageString,
-                    order,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
-        }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        int page;
-        try {
-            page = Integer.parseInt(pageString, 10);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your page number is not well formed");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.RETRIEVE,
-                    ApplicationsManager.Object.ACTIVITIES
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating your application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry. You're not allowed to do that.")
-            );
-            return rb.build();
+        Map<String, Object> params = new LinkedHashMap<String, Object>();
+        params.put(PATH, path);
+        params.put(VALUE, value);
+        params.put(PAGE_STRING, pageString);
+        params.put(ORDER, order);
+        params.put(API_KEY, apiKey);
+
+        Response error = validateRequest("search", ApplicationsManager.Action.RETRIEVE, params);
+
+        if (error != null) {
+            return error;
         }
 
         Collection<ResolvedActivity> activitiesRetrieved;
+        int page = (Integer) params.get(PAGE_NUMBER);
         try {
             activitiesRetrieved = activities.search(path, value, page, ACTIVITIES_LIMIT, order);
         } catch (ActivityStoreException ase) {
@@ -409,68 +280,25 @@ public class ActivitiesService extends JsonService {
     @GET
     @Path("/all/{username}")
     public Response getAllActivities(
-            @PathParam("username") String username,
-            @QueryParam("page") @DefaultValue("0") String pageString,
-            @QueryParam("order") @DefaultValue("desc") String order,
-            @QueryParam("apikey") String apiKey
+            @PathParam(USERNAME) String username,
+            @QueryParam(PAGE_STRING) @DefaultValue("0") String pageString,
+            @QueryParam(ORDER) @DefaultValue("desc") String order,
+            @QueryParam(API_KEY) String apiKey
     ) {
-        try {
-            check(
-                    this.getClass(),
-                    "getAllActivities",
-                    username,
-                    pageString,
-                    order,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
+        Map<String, Object> params = new LinkedHashMap<String, Object>();
+        params.put(USERNAME, username);
+        params.put(PAGE_STRING, pageString);
+        params.put(ORDER, order);
+        params.put(API_KEY, apiKey);
+
+        Response error = validateRequest("getAllActivities", ApplicationsManager.Action.RETRIEVE, params);
+
+        if (error != null) {
+            return error;
         }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        int page;
-        try {
-            page = Integer.parseInt(pageString, 10);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your page number is not well formed");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.RETRIEVE,
-                    ApplicationsManager.Object.ACTIVITIES
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating your application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry. You're not allowed to do that.")
-            );
-            return rb.build();
-        }
-        User user;
-        try {
-            user = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user [" + username + "]");
-        }
-        if (user == null) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(
-                    new StringPlatformResponse(
-                            StringPlatformResponse.Status.NOK,
-                            "user with username [" + username + "] not found"
-                    )
-            );
-            return rb.build();
-        }
+
+        User user = (User) params.get(USER);
+        int page = (Integer) params.get(PAGE_NUMBER);
 
         Collection<ResolvedActivity> allActivities;
         try {
@@ -499,5 +327,104 @@ public class ActivitiesService extends JsonService {
                 )
         );
         return rb.build();
+    }
+
+    private Response validateRequest(
+            String method,
+            ApplicationsManager.Action action,
+            Map<String, Object> params
+    ) {
+        try {
+            check(
+                    this.getClass(),
+                    method,
+                    params.values().toArray()
+            );
+        } catch (ServiceException e) {
+            return error(e, "Error while checking parameters");
+        }
+
+        String apiKey = (String) params.get(API_KEY);
+
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your apikey is not well formed");
+        }
+
+        boolean isAuth;
+        try {
+            isAuth = applicationsManager.isAuthorized(
+                    UUID.fromString(apiKey),
+                    action,
+                    ApplicationsManager.Object.ACTIVITIES
+            );
+        } catch (ApplicationsManagerException e) {
+            return error(e, "Error while authorizing your application");
+        }
+        if (!isAuth) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    "application with key [" + apiKey + "] is not authorized")
+            );
+            return rb.build();
+        }
+
+        if (params.containsKey(ACTIVITY_ID)) {
+            String activityId = (String) params.get(ACTIVITY_ID);
+            UUID activityIdObj;
+            try {
+                activityIdObj = UUID.fromString(activityId);
+            } catch (IllegalArgumentException e) {
+                return error(e, "Your activityId is not well formed");
+            }
+            params.put(ACTIVITY_ID_OBJ, activityIdObj);
+        }
+
+        if (params.containsKey(USERNAME)) {
+            String username = (String) params.get(USERNAME);
+            User user;
+            try {
+                user = userManager.getUser(username);
+                if (user == null) {
+                    final String errMsg = "user with username [" + username + "] not found";
+                    Response.ResponseBuilder rb = Response.serverError();
+                    rb.entity(new StringPlatformResponse(
+                            StringPlatformResponse.Status.NOK,
+                            errMsg)
+                    );
+                    return rb.build();
+                }
+                params.put(USER, user);
+            } catch (UserManagerException e) {
+                final String errMsg = "Error while calling the UserManager";
+                return error(e, errMsg);
+            }
+        }
+
+        if (params.containsKey(IS_VISIBLE)) {
+            boolean vObj;
+            String visibility = (String) params.get(IS_VISIBLE);
+            try {
+                vObj = Boolean.valueOf(visibility);
+            } catch (Exception e) {
+                return error(e, "visibility parameter must be {true, false} and not [" + visibility + "]");
+            }
+            params.put(VISIBILITY_OBJ, vObj);
+        }
+
+        if (params.containsKey(PAGE_STRING)) {
+            int page;
+            String pageString = (String) params.get(PAGE_STRING);
+            try {
+                page = Integer.parseInt(pageString, 10);
+            } catch (IllegalArgumentException e) {
+                return error(e, "Your page number is not well formed");
+            }
+            params.put(PAGE_NUMBER, page);
+        }
+
+        return null;
     }
 }

@@ -5,6 +5,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.PutMethod;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -16,6 +17,8 @@ import tv.notube.commons.model.activity.rai.TVEvent;
 import tv.notube.platform.APIResponse;
 import tv.notube.platform.AbstractJerseyTestCase;
 import tv.notube.platform.responses.ResolvedActivitiesPlatformResponse;
+import tv.notube.platform.responses.ResolvedActivityPlatformResponse;
+import tv.notube.platform.responses.StringPlatformResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,6 +28,7 @@ import java.util.UUID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 /**
  * Reference test case for {@link tv.notube.platform.ActivitiesService}
@@ -111,6 +115,189 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual.getStatus(), expected.getStatus());
         assertNotNull(actual.getObject());
         assertNotNull(UUID.fromString(actual.getObject()));
+    }
+
+    @Test
+    public void getSingleActivity() throws IOException {
+        UUID activityId = UUID.randomUUID();
+        String baseQuery = "activities/get/%s/%s?apikey=%s";
+        String query = String.format(
+                baseQuery,
+                "test-user",
+                activityId.toString(),
+                APIKEY
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+
+        ResolvedActivityPlatformResponse actual = fromJson(responseBody, ResolvedActivityPlatformResponse.class);
+
+        assertEquals(actual.getMessage(), "user 'test-user' activity with id [" + activityId + "] found");
+        assertEquals(actual.getStatus().toString(), "OK");
+
+        ResolvedActivity activity = actual.getObject();
+        assertNotNull(activity);
+        assertEquals(activity.getActivity().getId(), activityId);
+    }
+
+    @Test
+    public void getNonExistentSingleActivity() throws IOException {
+        UUID activityId = UUID.fromString("0ad77722-1338-4c32-9209-5b952530959a");
+        String baseQuery = "activities/get/%s/%s?apikey=%s";
+        String query = String.format(
+                baseQuery,
+                "test-user",
+                activityId.toString(),
+                APIKEY
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+
+        ResolvedActivityPlatformResponse actual = fromJson(responseBody, ResolvedActivityPlatformResponse.class);
+
+        assertEquals(actual.getMessage(), "user 'test-user' has no activity with id [" + activityId + "]");
+        assertEquals(actual.getStatus().toString(), "OK");
+        assertNull(actual.getObject());
+    }
+
+    @Test
+    public void getSingleActivityWithInvalidApiKeyShouldRespondWithError() throws IOException {
+        UUID activityId = UUID.randomUUID();
+        String baseQuery = "activities/get/%s/%s?apikey=%s";
+        String query = String.format(
+                baseQuery,
+                "test-user",
+                activityId.toString(),
+                "123456789abcdef-invalid"
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+
+        StringPlatformResponse actual = fromJson(responseBody, StringPlatformResponse.class);
+
+        assertEquals(actual.getMessage(), "Your apikey is not well formed");
+        assertEquals(actual.getStatus().toString(), "NOK");
+    }
+
+    @Test
+    public void getSingleActivityWithWrongParametersShouldRespondWithError() throws IOException {
+        UUID activityId = UUID.randomUUID();
+        String baseQuery = "activities/get/%s/%s";
+        String query = String.format(
+                baseQuery,
+                "test-user",
+                activityId.toString()
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+
+        StringPlatformResponse actual = fromJson(responseBody, StringPlatformResponse.class);
+
+        assertEquals(actual.getMessage(), "Error while checking parameters");
+        assertEquals(actual.getStatus().toString(), "NOK");
+    }
+
+    @Test
+    public void hideAnExistingVisibleActivity() throws Exception {
+        UUID activityId = UUID.randomUUID();
+        String baseQuery = "activities/%s/visible/%s?apikey=%s";
+        String query = String.format(
+                baseQuery,
+                activityId.toString(),
+                "false",
+                APIKEY
+        );
+
+        PutMethod getMethod = new PutMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+
+        StringPlatformResponse actual = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(actual.getMessage(), "activity [" + activityId + "] visibility has been modified to [false]");
+        assertEquals(actual.getStatus().toString(), "OK");
+    }
+
+    @Test
+    public void unhideAnExistingInvisibleActivity() throws Exception {
+        UUID activityId = UUID.randomUUID();
+        String baseQuery = "activities/%s/visible/%s?apikey=%s";
+        String query = String.format(
+                baseQuery,
+                activityId.toString(),
+                "true",
+                APIKEY
+        );
+
+        PutMethod getMethod = new PutMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+
+        StringPlatformResponse actual = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(actual.getMessage(), "activity [" + activityId + "] visibility has been modified to [true]");
+        assertEquals(actual.getStatus().toString(), "OK");
+    }
+
+    @Test
+    public void hidingANonExistentActivityShouldRespondWithAnError() throws Exception {
+        UUID activityId = UUID.fromString("0ad77722-1338-4c32-9209-5b952530959a");
+        String baseQuery = "activities/%s/visible/%s?apikey=%s";
+        String query = String.format(
+                baseQuery,
+                activityId.toString(),
+                "false",
+                APIKEY
+        );
+
+        PutMethod getMethod = new PutMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+
+        StringPlatformResponse actual = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(actual.getMessage(), "Error modifying the visibility of activity with id [" + activityId + "]");
+        assertEquals(actual.getStatus().toString(), "NOK");
     }
 
     @Test
