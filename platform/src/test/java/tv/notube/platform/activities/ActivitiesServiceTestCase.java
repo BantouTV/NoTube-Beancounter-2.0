@@ -120,10 +120,9 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     @Test
     public void getSingleActivity() throws IOException {
         UUID activityId = UUID.randomUUID();
-        String baseQuery = "activities/get/%s/%s?apikey=%s";
+        String baseQuery = "activities/%s?apikey=%s";
         String query = String.format(
                 baseQuery,
-                "test-user",
                 activityId.toString(),
                 APIKEY
         );
@@ -139,7 +138,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
         ResolvedActivityPlatformResponse actual = fromJson(responseBody, ResolvedActivityPlatformResponse.class);
 
-        assertEquals(actual.getMessage(), "user 'test-user' activity with id [" + activityId + "] found");
+        assertEquals(actual.getMessage(), "activity with id [" + activityId + "] found");
         assertEquals(actual.getStatus().toString(), "OK");
 
         ResolvedActivity activity = actual.getObject();
@@ -150,10 +149,9 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     @Test
     public void getNonExistentSingleActivity() throws IOException {
         UUID activityId = UUID.fromString("0ad77722-1338-4c32-9209-5b952530959a");
-        String baseQuery = "activities/get/%s/%s?apikey=%s";
+        String baseQuery = "activities/%s?apikey=%s";
         String query = String.format(
                 baseQuery,
-                "test-user",
                 activityId.toString(),
                 APIKEY
         );
@@ -169,7 +167,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
         ResolvedActivityPlatformResponse actual = fromJson(responseBody, ResolvedActivityPlatformResponse.class);
 
-        assertEquals(actual.getMessage(), "user 'test-user' has no activity with id [" + activityId + "]");
+        assertEquals(actual.getMessage(), "no activity with id [" + activityId + "]");
         assertEquals(actual.getStatus().toString(), "OK");
         assertNull(actual.getObject());
     }
@@ -177,10 +175,9 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     @Test
     public void getSingleActivityWithInvalidApiKeyShouldRespondWithError() throws IOException {
         UUID activityId = UUID.randomUUID();
-        String baseQuery = "activities/get/%s/%s?apikey=%s";
+        String baseQuery = "activities/%s?apikey=%s";
         String query = String.format(
                 baseQuery,
-                "test-user",
                 activityId.toString(),
                 "123456789abcdef-invalid"
         );
@@ -203,10 +200,9 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     @Test
     public void getSingleActivityWithWrongParametersShouldRespondWithError() throws IOException {
         UUID activityId = UUID.randomUUID();
-        String baseQuery = "activities/get/%s/%s";
+        String baseQuery = "activities/%s";
         String query = String.format(
                 baseQuery,
-                "test-user",
                 activityId.toString()
         );
 

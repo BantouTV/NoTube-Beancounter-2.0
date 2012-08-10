@@ -169,16 +169,13 @@ public class ActivitiesService extends JsonService {
         return rb.build();
     }
 
-    // TODO (med): This no longer requires the username, just the activityId.
     @GET
-    @Path("/get/{username}/{activityId}")
+    @Path("/{activityId}")
     public Response getActivity(
-            @PathParam(USERNAME) String username,
             @PathParam(ACTIVITY_ID) String activityId,
             @QueryParam(API_KEY) String apiKey
     ) {
         Map<String, Object> params = new LinkedHashMap<String, Object>();
-        params.put(USERNAME, username);
         params.put(ACTIVITY_ID, activityId);
         params.put(API_KEY, apiKey);
 
@@ -194,7 +191,7 @@ public class ActivitiesService extends JsonService {
         } catch (ActivityStoreException e) {
             return error(
                     e,
-                    "Error while getting activity [" + activityId + "] for user [" + username + "]"
+                    "Error while getting activity [" + activityId + "]"
             );
         }
 
@@ -203,7 +200,7 @@ public class ActivitiesService extends JsonService {
             rb.entity(
                     new ResolvedActivityPlatformResponse(
                             ResolvedActivityPlatformResponse.Status.OK,
-                            "user '" + username + "' has no activity with id [" + activityId + "]",
+                            "no activity with id [" + activityId + "]",
                             activity
                     )
             );
@@ -211,7 +208,7 @@ public class ActivitiesService extends JsonService {
             rb.entity(
                     new ResolvedActivityPlatformResponse(
                             ResolvedActivityPlatformResponse.Status.OK,
-                            "user '" + username + "' activity with id [" + activityId + "] found",
+                            "activity with id [" + activityId + "] found",
                             activity
                     )
             );
