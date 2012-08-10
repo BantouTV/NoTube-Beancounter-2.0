@@ -17,32 +17,32 @@ public class JmsPublisherRoute extends RouteBuilder {
     private ActivityToJmsConverter activityToJmsConverter;
 
     public void configure() {
-        errorHandler(deadLetterChannel(errorEndpoint()));
+         errorHandler(deadLetterChannel(errorEndpoint()));
 
-        from(fromEndpoint())
+         from(fromEndpoint())
 
-                .setHeader(ORIGINAL_BODY_HEADER, body())
+                 .setHeader(ORIGINAL_BODY_HEADER, body())
 
-                .unmarshal().json(JsonLibrary.Jackson, ResolvedActivity.class)
+                 .unmarshal().json(JsonLibrary.Jackson, ResolvedActivity.class)
 
-                .process(new Processor() {
-                    @Override
-                    public void process(Exchange exchange) throws Exception {
-                        ResolvedActivity body = exchange.getIn().getBody(ResolvedActivity.class);
-                        String originalBody = exchange.getIn().getHeader(ORIGINAL_BODY_HEADER, String.class);
-                        LightstreamerDTO lightstreamerDTO = activityToJmsConverter
-                                .wrapInExternalObject(body, originalBody);
-                        exchange.getOut().setBody(lightstreamerDTO);
-                    }
-                })
+                 .process(new Processor() {
+                     @Override
+                     public void process(Exchange exchange) throws Exception {
+                         ResolvedActivity body = exchange.getIn().getBody(ResolvedActivity.class);
+                         String originalBody = exchange.getIn().getHeader(ORIGINAL_BODY_HEADER, String.class);
+                         LightstreamerDTO lightstreamerDTO = activityToJmsConverter
+                                 .wrapInExternalObject(body, originalBody);
+                         exchange.getOut().setBody(lightstreamerDTO);
+                     }
+                 })
 
-                .filter(body().isNotNull())
+                 .filter(body().isNotNull())
 
-                .to(toEndpoint());
-    }
+                 .to(toEndpoint());
+     }
 
     protected String toEndpoint() {
-        return "jms:topic:{{jms.broker.queue}}?testConnectionOnStartup=true";
+        return "jms:topic:{{topic}}?testConnectionOnStartup=true";
     }
 
     protected String fromEndpoint() {
