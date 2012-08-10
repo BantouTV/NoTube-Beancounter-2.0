@@ -472,21 +472,21 @@
 
     <article class="articlecontent">
         <header>
-            <h2>12) Get a single activity of a user</h2>
+            <h2>12) Get a single activity</h2>
         </header>
 
-        Path: /activities/get/{username}/{activityId}<br>
+        Path: /activities/{activityId}<br>
         Method: GET<br>
         Parameters: <br>
-        - <b>{username}</b> the Beancounter username<br>
-        - <b>{activityId}</b> the activityId of one of the user's activities<br>
+        - <b>{activityId}</b> the activityId of one of some user's activities<br>
         - <b>apikey</b> <br>
-        Description: it retrieves a single specified activity of the specified user
+        Description: it retrieves a single specified activity if it exists and 
+        is visible.
         <br>
         Example: with curl
 
         <pre><code>
-    $ curl http://api.beancounter.io/rest/activities/get/dpalmisano/550e8400-e29b-41d4-a716-446655440000?apikey=your-api-key
+    $ curl http://api.beancounter.io/rest/activities/550e8400-e29b-41d4-a716-446655440000?apikey=your-api-key
         </code></pre>
 
         <h3>Responses</h3>
@@ -495,23 +495,65 @@
         <pre><code>
     {
         "status": "OK",
-        "message": "user '<b>{username}</b>' activity with id [<b>{activityId}</b>] found",
+        "message": "activity with id [<b>{activityId}</b>] found",
         "object": <i>the activity in JSON format</i>
     }
         </code></pre>
 
-        If the activity does not exist:
+        If the activity does not exist or is hidden:
         <pre><code>
     {
         "status": "OK",
-        "message": "user '<b>{username}</b>' has no activity with id [<b>{activityId}</b>]"
+        "message": "no activity with id [<b>{activityId}</b>]"
     }
         </code></pre>
     </article>
 
     <article class="articlecontent">
         <header>
-            <h2>13) Get all activities of a user</h2>
+            <h2>13) Change the visibility of an activity</h2>
+        </header>
+
+        Path: /activities/{activityId}/visible/{isVisible}<br>
+        Method: PUT<br>
+        Parameters: <br>
+        - <b>{activityId}</b> the activityId of one of some user's activities<br>
+        - <b>{isVisible}</b> either <tt>true</tt> or <tt>false</tt> depending
+        on whether the activity should be visible or not<br>
+        - <b>apikey</b> <br>
+        Description: sets the visibility of the specified activity. A hidden
+        activity will not be searched on or returned from any of the REST API
+        calls.
+        <br>
+        Example: with curl
+
+        <pre><code>
+    $ curl -XPUT http://api.beancounter.io/rest/activities/550e8400-e29b-41d4-a716-446655440000/visible/false?apikey=your-api-key
+        </code></pre>
+
+        <h3>Responses</h3>
+
+        If the visibility of the activity was successfully updated:
+        <pre><code>
+    {
+        "status": "OK",
+        "message": "activity [<b>{activityId}</b>] visibility has been modified to [<b>{isVisible}</b>]"
+    }
+        </code></pre>
+
+        If the activity's visibility could not be updated:
+        <pre><code>
+    {
+        "status": "NOK",
+        "message": "Error modifying the visibility of activity with id [<b>{activityId}</b>]",
+        "object": <i>internal error message specifying the cause of the error</i>
+    }
+        </code></pre>
+    </article>
+
+    <article class="articlecontent">
+        <header>
+            <h2>14) Get all activities of a user</h2>
         </header>
 
         Path: /activities/all/{username}/<br>
@@ -564,7 +606,7 @@
 
     <article class="articlecontent">
         <header>
-            <h2>14) Search for activities</h2>
+            <h2>15) Search for activities</h2>
         </header>
 
         Path: /activities/search<br>
@@ -634,7 +676,7 @@
     <article class="articlecontent">
 
                     <header>
-                        <h2>15) Register a filter</h2>
+                        <h2>16) Register a filter</h2>
                     </header>
 
                     Path: /filters/register/{name}<br>
@@ -707,7 +749,7 @@ curl -d "description=test-description&queue=testqueue&pattern={"userId":{"uuid":
     <article class="articlecontent">
 
                     <header>
-                        <h2>16) Retrieve a filter</h2>
+                        <h2>17) Retrieve a filter</h2>
                     </header>
 
                     Path: /filters/{name}<br>
@@ -764,7 +806,7 @@ curl -d "description=test-description&queue=testqueue&pattern={"userId":{"uuid":
     <article class="articlecontent">
 
                     <header>
-                        <h2>17) List all registered filters</h2>
+                        <h2>18) List all registered filters</h2>
                     </header>
 
                     Path: /filters/list/all<br>
@@ -788,7 +830,7 @@ curl -d "description=test-description&queue=testqueue&pattern={"userId":{"uuid":
     <article class="articlecontent">
 
                     <header>
-                        <h2>18) Start a specific filter</h2>
+                        <h2>19) Start a specific filter</h2>
                     </header>
 
                     Path: /filters/{name}/start<br>
@@ -812,7 +854,7 @@ curl -d "description=test-description&queue=testqueue&pattern={"userId":{"uuid":
     <article class="articlecontent">
 
                     <header>
-                        <h2>19) Stop a specific filter</h2>
+                        <h2>20) Stop a specific filter</h2>
                     </header>
 
                     Path: /filters/t{name}/stop<br>
@@ -836,7 +878,7 @@ curl -d "description=test-description&queue=testqueue&pattern={"userId":{"uuid":
     <article class="articlecontent">
 
                     <header>
-                        <h2>20) Delete a specific filter</h2>
+                        <h2>21) Delete a specific filter</h2>
                     </header>
 
                     Path: /filters/t{name}/stop<br>
@@ -876,7 +918,7 @@ curl -d "description=test-description&queue=testqueue&pattern={"userId":{"uuid":
     <article class="articlecontent">
 
                     <header>
-                        <h2>21) Check Beancounter.io service</h2>
+                        <h2>22) Check Beancounter.io service</h2>
                     </header>
 
                     Path: /api/check<br>
@@ -900,7 +942,7 @@ curl -d "description=test-description&queue=testqueue&pattern={"userId":{"uuid":
     <article class="articlecontent">
 
                     <header>
-                        <h2>22) Get beancounter.io version</h2>
+                        <h2>23) Get beancounter.io version</h2>
                     </header>
 
                     Path: /api/version<br>
