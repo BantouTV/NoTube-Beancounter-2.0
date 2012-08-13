@@ -7,7 +7,6 @@ import tv.notube.activities.ActivityStoreException;
 import tv.notube.activities.InvalidOrderException;
 import tv.notube.activities.WildcardSearchException;
 import tv.notube.applications.ApplicationsManager;
-import tv.notube.applications.ApplicationsManagerException;
 import tv.notube.commons.model.User;
 import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.ResolvedActivity;
@@ -15,10 +14,15 @@ import tv.notube.platform.responses.ResolvedActivitiesPlatformResponse;
 import tv.notube.platform.responses.ResolvedActivityPlatformResponse;
 import tv.notube.platform.responses.StringPlatformResponse;
 import tv.notube.platform.responses.UUIDPlatformResponse;
+import tv.notube.platform.validation.ActivityIdValidation;
+import tv.notube.platform.validation.ApiKeyValidation;
+import tv.notube.platform.validation.PageValidation;
+import tv.notube.platform.validation.RequestValidator;
+import tv.notube.platform.validation.UsernameValidation;
+import tv.notube.platform.validation.VisibilityValidation;
 import tv.notube.queues.Queues;
 import tv.notube.queues.QueuesException;
 import tv.notube.usermanager.UserManager;
-import tv.notube.usermanager.UserManagerException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -53,13 +57,9 @@ public class ActivitiesService extends JsonService {
     private static final String VALUE = "value";
     private static final String VISIBILITY_OBJ = "vObj";
 
-    private ApplicationsManager applicationsManager;
-
     private Queues queues;
-
-    private UserManager userManager;
-
     private ActivityStore activities;
+    private RequestValidator validator;
 
     @Inject
     public ActivitiesService(
@@ -68,10 +68,15 @@ public class ActivitiesService extends JsonService {
             final Queues queues,
             final ActivityStore activities
     ) {
-        this.applicationsManager = am;
-        this.userManager = um;
         this.queues = queues;
         this.activities = activities;
+
+        validator = new RequestValidator();
+        validator.addValidation(API_KEY, new ApiKeyValidation(am));
+        validator.addValidation(ACTIVITY_ID, new ActivityIdValidation());
+        validator.addValidation(IS_VISIBLE, new VisibilityValidation());
+        validator.addValidation(PAGE_STRING, new PageValidation());
+        validator.addValidation(USERNAME, new UsernameValidation(um));
     }
 
     @POST
@@ -86,7 +91,13 @@ public class ActivitiesService extends JsonService {
         params.put(ACTIVITY, jsonActivity);
         params.put(API_KEY, apiKey);
 
-        Response error = validateRequest("addActivity", ApplicationsManager.Action.CREATE, params);
+        Response error = validator.validateRequest(
+                this.getClass(),
+                "addActivity",
+                ApplicationsManager.Action.CREATE,
+                ApplicationsManager.Object.ACTIVITIES,
+                params
+        );
 
         if (error != null) {
             return error;
@@ -146,7 +157,13 @@ public class ActivitiesService extends JsonService {
         params.put(IS_VISIBLE, isVisible);
         params.put(API_KEY, apiKey);
 
-        Response error = validateRequest("setVisibility", ApplicationsManager.Action.DELETE, params);
+        Response error = validator.validateRequest(
+                this.getClass(),
+                "setVisibility",
+                ApplicationsManager.Action.DELETE,
+                ApplicationsManager.Object.ACTIVITIES,
+                params
+        );
 
         if (error != null) {
             return error;
@@ -179,7 +196,13 @@ public class ActivitiesService extends JsonService {
         params.put(ACTIVITY_ID, activityId);
         params.put(API_KEY, apiKey);
 
-        Response error = validateRequest("getActivity", ApplicationsManager.Action.RETRIEVE, params);
+        Response error = validator.validateRequest(
+                this.getClass(),
+                "getActivity",
+                ApplicationsManager.Action.RETRIEVE,
+                ApplicationsManager.Object.ACTIVITIES,
+                params
+        );
 
         if (error != null) {
             return error;
@@ -232,7 +255,13 @@ public class ActivitiesService extends JsonService {
         params.put(ORDER, order);
         params.put(API_KEY, apiKey);
 
-        Response error = validateRequest("search", ApplicationsManager.Action.RETRIEVE, params);
+        Response error = validator.validateRequest(
+                this.getClass(),
+                "search",
+                ApplicationsManager.Action.RETRIEVE,
+                ApplicationsManager.Object.ACTIVITIES,
+                params
+        );
 
         if (error != null) {
             return error;
@@ -288,7 +317,13 @@ public class ActivitiesService extends JsonService {
         params.put(ORDER, order);
         params.put(API_KEY, apiKey);
 
-        Response error = validateRequest("getAllActivities", ApplicationsManager.Action.RETRIEVE, params);
+        Response error = validator.validateRequest(
+                this.getClass(),
+                "getAllActivities",
+                ApplicationsManager.Action.RETRIEVE,
+                ApplicationsManager.Object.ACTIVITIES,
+                params
+        );
 
         if (error != null) {
             return error;
@@ -324,104 +359,5 @@ public class ActivitiesService extends JsonService {
                 )
         );
         return rb.build();
-    }
-
-    private Response validateRequest(
-            String method,
-            ApplicationsManager.Action action,
-            Map<String, Object> params
-    ) {
-        try {
-            check(
-                    this.getClass(),
-                    method,
-                    params.values().toArray()
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
-        }
-
-        String apiKey = (String) params.get(API_KEY);
-
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    action,
-                    ApplicationsManager.Object.ACTIVITIES
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authorizing your application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "application with key [" + apiKey + "] is not authorized")
-            );
-            return rb.build();
-        }
-
-        if (params.containsKey(ACTIVITY_ID)) {
-            String activityId = (String) params.get(ACTIVITY_ID);
-            UUID activityIdObj;
-            try {
-                activityIdObj = UUID.fromString(activityId);
-            } catch (IllegalArgumentException e) {
-                return error(e, "Your activityId is not well formed");
-            }
-            params.put(ACTIVITY_ID_OBJ, activityIdObj);
-        }
-
-        if (params.containsKey(USERNAME)) {
-            String username = (String) params.get(USERNAME);
-            User user;
-            try {
-                user = userManager.getUser(username);
-                if (user == null) {
-                    final String errMsg = "user with username [" + username + "] not found";
-                    Response.ResponseBuilder rb = Response.serverError();
-                    rb.entity(new StringPlatformResponse(
-                            StringPlatformResponse.Status.NOK,
-                            errMsg)
-                    );
-                    return rb.build();
-                }
-                params.put(USER, user);
-            } catch (UserManagerException e) {
-                final String errMsg = "Error while calling the UserManager";
-                return error(e, errMsg);
-            }
-        }
-
-        if (params.containsKey(IS_VISIBLE)) {
-            boolean vObj;
-            String visibility = (String) params.get(IS_VISIBLE);
-            try {
-                vObj = Boolean.valueOf(visibility);
-            } catch (Exception e) {
-                return error(e, "visibility parameter must be {true, false} and not [" + visibility + "]");
-            }
-            params.put(VISIBILITY_OBJ, vObj);
-        }
-
-        if (params.containsKey(PAGE_STRING)) {
-            int page;
-            String pageString = (String) params.get(PAGE_STRING);
-            try {
-                page = Integer.parseInt(pageString, 10);
-            } catch (IllegalArgumentException e) {
-                return error(e, "Your page number is not well formed");
-            }
-            params.put(PAGE_NUMBER, page);
-        }
-
-        return null;
     }
 }

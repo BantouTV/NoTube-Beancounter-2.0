@@ -215,7 +215,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         APIResponse actual = fromJson(responseBody, APIResponse.class);
         APIResponse expected = new APIResponse(
                 null,
-                "user [" + name + "] not found",
+                "user with username [" + name + "] not found",
                 "NOK"
         );
         Assert.assertEquals(actual, expected);

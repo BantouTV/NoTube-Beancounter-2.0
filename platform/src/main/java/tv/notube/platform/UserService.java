@@ -2,9 +2,7 @@ package tv.notube.platform;
 
 import com.google.inject.Inject;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.joda.time.DateTime;
-import tv.notube.activities.ActivityStore;
-import tv.notube.activities.ActivityStoreException;
+import org.scribe.builder.api.Api;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
 import tv.notube.commons.model.OAuthToken;
@@ -14,6 +12,9 @@ import tv.notube.commons.model.activity.Activity;
 import tv.notube.commons.model.activity.ResolvedActivity;
 import tv.notube.commons.model.auth.OAuthAuth;
 import tv.notube.platform.responses.*;
+import tv.notube.platform.validation.ApiKeyValidation;
+import tv.notube.platform.validation.RequestValidator;
+import tv.notube.platform.validation.UsernameValidation;
 import tv.notube.profiles.Profiles;
 import tv.notube.profiles.ProfilesException;
 import tv.notube.queues.Queues;
@@ -22,6 +23,7 @@ import tv.notube.usermanager.AtomicSignUp;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.UserManagerException;
 
+import javax.jws.soap.SOAPBinding;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -29,6 +31,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.util.*;
+
+import static tv.notube.platform.validation.RequestValidator.createParams;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
@@ -41,25 +45,27 @@ public class UserService extends JsonService {
 
     private UserManager userManager;
 
-    private ActivityStore activities;
-
     private Profiles profiles;
 
     private Queues queues;
+
+    private RequestValidator validator;
 
     @Inject
     public UserService(
             final ApplicationsManager am,
             final UserManager um,
-            final ActivityStore activities,
             final Profiles ps,
             final Queues queues
     ) {
         this.applicationsManager = am;
         this.userManager = um;
-        this.activities = activities;
         this.profiles = ps;
         this.queues = queues;
+
+        validator = new RequestValidator();
+        validator.addValidation(API_KEY, new ApiKeyValidation(am));
+        validator.addValidation(USERNAME, new UsernameValidation(um));
     }
 
     @POST
@@ -71,42 +77,31 @@ public class UserService extends JsonService {
             @FormParam("password") String password,
             @QueryParam("apikey") String apiKey
     ) {
-        try {
-            check(
-                    this.getClass(),
-                    "signUp",
-                    name,
-                    surname,
-                    username,
-                    password,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
+        Map<String, Object> params = createParams(
+                "name", name,
+                "surname", surname,
+                USERNAME, username,
+                "password", password,
+                API_KEY, apiKey
+        );
+
+        // TODO: eurgh....
+        validator.removeValidation(USERNAME);
+
+        Response error = validator.validateRequest(
+                this.getClass(),
+                "signUp",
+                ApplicationsManager.Action.CREATE,
+                ApplicationsManager.Object.USER,
+                params
+        );
+
+        validator.addValidation(USERNAME, new UsernameValidation(userManager));
+
+        if (error != null) {
+            return error;
         }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.CREATE,
-                    ApplicationsManager.Object.USER
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authorizing your application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "application with key [" + apiKey + "] is not authorized")
-            );
-            return rb.build();
-        }
+
         try {
             if (userManager.getUser(username) != null) {
                 final String errMsg = "username [" + username + "] is already taken";
@@ -147,62 +142,30 @@ public class UserService extends JsonService {
             @PathParam("username") String username,
             @QueryParam("apikey") String apiKey
     ) {
-        try {
-            check(
-                    this.getClass(),
-                    "getUser",
-                    username,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
-        }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.RETRIEVE,
-                    ApplicationsManager.Object.USER
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating your application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry. You're not allowed to do that.")
-            );
-            return rb.build();
-        }
-        User user;
-        try {
-            user = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            final String errMsg = "Error while getting user [" + username + "]";
-            return error(e, errMsg);
-        }
-        if (user == null) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(
-                    new StringPlatformResponse(
-                            StringPlatformResponse.Status.NOK,
-                            "user [" + username + "] not found"
-                    )
-            );
-            return rb.build();
+        Map<String, Object> params = createParams(
+                USERNAME, username,
+                API_KEY, apiKey
+        );
+
+        Response error = validator.validateRequest(
+                this.getClass(),
+                "getUser",
+                ApplicationsManager.Action.RETRIEVE,
+                ApplicationsManager.Object.USER,
+                params
+        );
+
+        if (error != null) {
+            return error;
         }
 
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new UserPlatformResponse(
-                UserPlatformResponse.Status.OK,
-                "user [" + username + "] found",
-                user)
+        rb.entity(
+                new UserPlatformResponse(
+                    UserPlatformResponse.Status.OK,
+                    "user [" + username + "] found",
+                    (User) params.get(USER)
+                )
         );
         return rb.build();
     }
@@ -213,55 +176,25 @@ public class UserService extends JsonService {
             @PathParam("username") String username,
             @QueryParam("apikey") String apiKey
     ) {
+        Map<String, Object> params = createParams(
+                USERNAME, username,
+                API_KEY, apiKey
+        );
+
+        Response error = validator.validateRequest(
+                this.getClass(),
+                "deleteUser",
+                ApplicationsManager.Action.DELETE,
+                ApplicationsManager.Object.USER,
+                params
+        );
+
+        if (error != null) {
+            return error;
+        }
+
         try {
-            check(
-                    this.getClass(),
-                    "deleteUser",
-                    username,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
-        }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        User user;
-        try {
-            user = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user [" + username + "]");
-        }
-        if (user == null) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(
-                    new StringPlatformResponse(
-                            StringPlatformResponse.Status.NOK,
-                            "user with username [" + username + "] not found")
-            );
-            return rb.build();
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.DELETE,
-                    ApplicationsManager.Object.USER
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authorizing your application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry, you're not allowed to do that")
-            );
-            return rb.build();
-        }
-        try {
+            User user = (User) params.get(USER);
             userManager.deleteUser(user.getUsername());
         } catch (UserManagerException e) {
             throw new RuntimeException(
@@ -269,6 +202,7 @@ public class UserService extends JsonService {
                     e
             );
         }
+
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new StringPlatformResponse(
                 StringPlatformResponse.Status.OK,
@@ -284,54 +218,25 @@ public class UserService extends JsonService {
             @PathParam("service") String service,
             @QueryParam("apikey") String apiKey
     ) {
-        try {
-            check(
-                    this.getClass(),
-                    "checkToken",
-                    username,
-                    service,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
+        Map<String, Object> params = createParams(
+                USERNAME, username,
+                "service", service,
+                API_KEY, apiKey
+        );
+
+        Response error = validator.validateRequest(
+                this.getClass(),
+                "checkToken",
+                ApplicationsManager.Action.RETRIEVE,
+                ApplicationsManager.Object.USER,
+                params
+        );
+
+        if (error != null) {
+            return error;
         }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.RETRIEVE,
-                    ApplicationsManager.Object.USER
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating your application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry, you're not allowed to do that")
-            );
-            return rb.build();
-        }
-        User user;
-        try {
-            user = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user [" + username + "]");
-        }
-        if (user == null) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "user with username [" + username + "] not found")
-            );
-            return rb.build();
-        }
+
+        User user = (User) params.get(USER);
         OAuthAuth auth = (OAuthAuth) user.getAuth(service);
         if (auth == null) {
             Response.ResponseBuilder rb = Response.serverError();
@@ -364,54 +269,25 @@ public class UserService extends JsonService {
             @FormParam("password") String password,
             @QueryParam("apikey") String apiKey
     ) {
-        try {
-            check(
-                    this.getClass(),
-                    "authenticate",
-                    username,
-                    password,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
+        Map<String, Object> params = createParams(
+                USERNAME, username,
+                "password", password,
+                API_KEY, apiKey
+        );
+
+        Response error = validator.validateRequest(
+                this.getClass(),
+                "authenticate",
+                ApplicationsManager.Action.RETRIEVE,
+                ApplicationsManager.Object.USER,
+                params
+        );
+
+        if (error != null) {
+            return error;
         }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.RETRIEVE,
-                    ApplicationsManager.Object.USER
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating your application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry, you're not allowed to do that")
-            );
-            return rb.build();
-        }
-        User user;
-        try {
-            user = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user [" + username + "]");
-        }
-        if (user == null) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "user with username [" + username + "] not found")
-            );
-            return rb.build();
-        }
+
+        User user = (User) params.get(USER);
         if (!user.getPassword().equals(password)) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(new StringPlatformResponse(
@@ -435,14 +311,6 @@ public class UserService extends JsonService {
     ) {
         // get a token for an anonymous user
         OAuthToken oAuthToken;
-        try {
-            oAuthToken = userManager.getOAuthToken(service);
-        } catch (UserManagerException e) {
-            return error(
-                    e,
-                    "Error while getting token from [" + service + "]"
-            );
-        }
         try {
             oAuthToken = userManager.getOAuthToken(service);
         } catch (UserManagerException e) {

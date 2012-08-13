@@ -118,6 +118,38 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
+    public void addActivityWithInvalidApiKeyShouldRespondWithError() throws Exception {
+        final String baseQuery = "activities/add/%s?apikey=%s";
+        final String username = "test-user";
+        final String activity = "{}";
+        final String query = String.format(
+                baseQuery,
+                username,
+                "123456abcdef"
+        );
+
+        PostMethod postMethod = new PostMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("activity", activity);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+
+        APIResponse actual = fromJson(responseBody, APIResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                "Your apikey is not well formed",
+                "NOK"
+        );
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus(), expected.getStatus());
+    }
+
+    @Test
     public void getSingleActivity() throws IOException {
         UUID activityId = UUID.randomUUID();
         String baseQuery = "activities/%s?apikey=%s";

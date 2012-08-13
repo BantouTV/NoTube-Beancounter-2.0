@@ -11,7 +11,7 @@ import javax.ws.rs.core.Response;
  */
 public abstract class JsonService extends Service {
 
-    protected Response error(
+    public static Response error(
             Exception e,
             String message
     ) {
