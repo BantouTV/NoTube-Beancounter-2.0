@@ -91,7 +91,19 @@ public class MockActivityStore implements ActivityStore {
 
     @Override
     public ResolvedActivity getActivity(UUID activityId) throws ActivityStoreException {
-        throw new UnsupportedOperationException("NIY");
+        if ("0ad77722-1338-4c32-9209-5b952530959a".equals(activityId.toString())) {
+            return null;
+        }
+
+        ResolvedActivity activity;
+        try {
+             activity = createFakeActivity(1);
+        } catch (TestsException e) {
+            throw new ActivityStoreException("Error while creating fake activity!", e);
+        }
+
+        activity.getActivity().setId(activityId);
+        return activity;
     }
 
     @Override
@@ -184,7 +196,11 @@ public class MockActivityStore implements ActivityStore {
 
     @Override
     public void setVisible(UUID activityId, boolean visible) throws ActivityStoreException {
-        throw new UnsupportedOperationException();
+        if ("0ad77722-1338-4c32-9209-5b952530959a".equals(activityId.toString())) {
+            String message = "Error setting the visibility of activity "
+                    + activityId.toString();
+            throw new ActivityStoreException(message);
+        }
     }
 
     private ResolvedActivity createFakeActivity(int i) throws TestsException {

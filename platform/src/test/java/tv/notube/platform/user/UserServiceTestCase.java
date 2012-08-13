@@ -221,54 +221,6 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         Assert.assertEquals(actual, expected);
     }
 
-    // TODO (mid) waiting for the API for pushing activities
-    @Test
-    public void testGetActivities() throws IOException {
-        final String baseQuery = "user/%s/activities?apikey=%s";
-        final String name = "test-user";
-        final String query = String.format(
-                baseQuery,
-                name,
-                APIKEY
-        );
-        GetMethod getMethod = new GetMethod(base_uri + query);
-        HttpClient client = new HttpClient();
-        int result = client.executeMethod(getMethod);
-        String responseBody = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
-        Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
-        Assert.assertEquals(actual.getMessage(), "user '" + name + "' activities found");
-        Assert.assertEquals(actual.getStatus(), PlatformResponse.Status.OK);
-        Assert.assertNotNull(actual.getObject());
-    }
-
-    @Test
-    public void testGetActivitiesMissingUser() throws IOException {
-        final String baseQuery = "user/%s/activities?apikey=%s";
-        final String name = "missing-user";
-        final String query = String.format(
-                baseQuery,
-                name,
-                APIKEY
-        );
-        GetMethod getMethod = new GetMethod(base_uri + query);
-        HttpClient client = new HttpClient();
-        int result = client.executeMethod(getMethod);
-        String responseBody = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
-        Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
-        APIResponse actual = fromJson(responseBody, APIResponse.class);
-        APIResponse expected = new APIResponse(
-                null,
-                "user with username [" + name + "] not found",
-                "NOK"
-        );
-        Assert.assertEquals(actual, expected);
-    }
-
     @Test
     public void testDeleteUser() throws IOException {
         final String baseQuery = "user/%s?apikey=%s";
