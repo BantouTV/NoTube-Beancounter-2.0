@@ -2,7 +2,6 @@ package tv.notube.platform;
 
 import com.google.inject.Inject;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.scribe.builder.api.Api;
 import tv.notube.applications.ApplicationsManager;
 import tv.notube.applications.ApplicationsManagerException;
 import tv.notube.commons.model.OAuthToken;
@@ -23,7 +22,6 @@ import tv.notube.usermanager.AtomicSignUp;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.UserManagerException;
 
-import javax.jws.soap.SOAPBinding;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -334,22 +332,13 @@ public class UserService extends JsonService {
             @PathParam("service") String service,
             @QueryParam("redirect") String finalRedirect
     ) {
-        // get a token for an anonymous user
-        OAuthToken oAuthToken;
-        try {
-            oAuthToken = userManager.getOAuthToken(service);
-        } catch (UserManagerException e) {
-            return error(
-                    e,
-                    "Error while getting token from [" + service + "]"
-            );
-        }
         URL finalRedirectURL;
         try {
             finalRedirectURL = new URL(finalRedirect);
         } catch (MalformedURLException e) {
             return error(e, "[" + finalRedirect + "] is not a valid URL");
         }
+        OAuthToken oAuthToken;
         try {
             oAuthToken = userManager.getOAuthToken(service, finalRedirectURL);
         } catch (UserManagerException e) {
@@ -536,14 +525,14 @@ public class UserService extends JsonService {
             }
         }
         Response.ResponseBuilder rb = Response.ok();
-            rb.entity(
-                    new AtomicSignUpResponse(
-                            PlatformResponse.Status.OK,
-                            "user with user name [" + signUp.getUsername() + "] logged in with service [" + signUp.getService() + "]",
-                            signUp
-                    )
-            );
-            return rb.build();
+        rb.entity(
+                new AtomicSignUpResponse(
+                        PlatformResponse.Status.OK,
+                        "user with user name [" + signUp.getUsername() + "] logged in with service [" + signUp.getService() + "]",
+                        signUp
+                )
+        );
+        return rb.build();
     }
 
     @GET
@@ -555,7 +544,6 @@ public class UserService extends JsonService {
         // Facebook OAuth exchange quite different from Twitter's one.
         return handleOAuthCallback("facebook", username, null, verifier);
     }
-
 
     @GET
     @Path("/oauth/callback/{service}/{username}/")

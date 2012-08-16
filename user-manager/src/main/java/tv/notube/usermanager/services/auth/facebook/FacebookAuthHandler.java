@@ -327,12 +327,12 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
     }
 
     private User createNewUser(Map<String, String> data) {
-        // users created in this way will have beanocunter username equals
+        // users created in this way will have beancounter username equals
         // to the facebook one.
         // TODO (high) implement a retry policy to be sure it's unique
-        String candindateBCUsername = String.valueOf(data.get("facebook.user.id"));
+        String candidateBCUsername = String.valueOf(data.get("facebook.user.id"));
         User user = new User();
-        user.setUsername(candindateBCUsername);
+        user.setUsername(candidateBCUsername);
         for (String k : data.keySet()) {
             user.addMetadata(k, data.get(k));
         }

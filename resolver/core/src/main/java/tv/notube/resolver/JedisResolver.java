@@ -117,9 +117,9 @@ public class JedisResolver implements Resolver {
             throw new ResolverException(errmsg, e);
         }
         Jedis jedis = pool.getResource();
-        jedis.select(database);
         String username;
         try {
+            jedis.select(database);
             username = jedis.hget(identifier, "username");
         } finally {
             pool.returnResource(jedis);
