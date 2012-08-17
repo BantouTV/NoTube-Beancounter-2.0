@@ -8,6 +8,7 @@ import io.beancounter.commons.model.activity.ResolvedActivity;
 import io.beancounter.commons.model.activity.rai.Comment;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.isNull;
 
@@ -48,6 +49,6 @@ public class ActivityToJmsConverterTest {
 
            LightstreamerDTO lightstreamerDTO = activityToJmsConverter.wrapInExternalObject(resolvedActivity, json);
 
-           assertThat(lightstreamerDTO, is(isNull()));
+           assertThat(lightstreamerDTO, is(nullValue()));
        }
 }

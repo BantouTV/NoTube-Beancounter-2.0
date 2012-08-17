@@ -3,9 +3,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <properties>
-        <jboss-client-lib>/jboss-5.1.0.GA/client/</jboss-client-lib>
-    </properties>
+    <!--<properties>-->
+        <!--<jboss-client-lib>/jboss-5.1.0.GA/client/</jboss-client-lib>-->
+    <!--</properties>-->
 
     <parent>
         <artifactId>publishers</artifactId>
