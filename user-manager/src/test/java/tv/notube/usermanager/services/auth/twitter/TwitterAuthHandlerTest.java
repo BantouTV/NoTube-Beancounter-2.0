@@ -1,10 +1,5 @@
 package tv.notube.usermanager.services.auth.twitter;
 
-import com.google.inject.Binder;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.name.Names;
 import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -28,26 +23,26 @@ import tv.notube.commons.model.auth.AuthenticatedUser;
 import tv.notube.commons.model.auth.OAuthAuth;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
+import twitter4j.auth.AccessToken;
 
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Properties;
 
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
 
 public class TwitterAuthHandlerTest {
 
+    // Note: These are not real access tokens.
     private static final String ACCESS_TOKEN = "7588892-kagSNqWge8gB1WwE3plnFsJHAZVfxWD7Vb57p0b4";
     private static final String ACCESS_TOKEN_SECRET = "PbKfYqSryyeKDWz4ebtY3o5ogNLG11WJuZBc9fQrQo";
     private static final String ATOMIC_OAUTH_CALLBACK = "http://api.beancounter.io/rest/user/oauth/atomic/callback/twitter/";
     private static final String OAUTH_CALLBACK = "http://api.beancounter.io/rest/user/oauth/callback/twitter/";
     private static final String REQUEST_TOKEN = "twitter-request-token";
+    private static final String REQUEST_TOKEN_SECRECT = "twitter-request-token-secret";
     private static final String REDIRECT_URL = "https://api.twitter.com/oauth/authenticate?oauth_token=" + REQUEST_TOKEN;
     private static final String USERNAME = "test-user";
 
@@ -55,54 +50,40 @@ public class TwitterAuthHandlerTest {
     private OAuthService twitterOAuth;
     private ServiceBuilder serviceBuilder;
     private Jedis jedis;
+    private JedisPool jedisPool;
     private Twitter twitter;
+    private int database;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        Injector injector = Guice.createInjector(new Module() {
-            @Override
-            public void configure(Binder binder) {
-                Names.bindProperties(binder, PropertiesHelper.readFromClasspath("/redis.properties"));
+        Properties properties = PropertiesHelper.readFromClasspath("/redis.properties");
+        database = Integer.parseInt(properties.getProperty("redis.db.requestTokens"), 10);
 
-                Service service = new Service("twitter");
+        Service service = new Service("twitter");
+        service.setDescription("Twitter service");
+        service.setEndpoint(new URL("https://api.twitter.com/1/statuses/user_timeline.json"));
+        service.setSessionEndpoint(new URL("https://api.twitter.com/oauth/request_token"));
+        service.setApikey("twitter-api-key");
+        service.setSecret("twitter-secret");
+        service.setOAuthCallback(new URL(OAUTH_CALLBACK));
+        service.setAtomicOAuthCallback(new URL(ATOMIC_OAUTH_CALLBACK));
 
-                try {
-                    service.setDescription("Twitter service");
-                    service.setEndpoint(new URL("https://api.twitter.com/1/statuses/user_timeline.json"));
-                    service.setSessionEndpoint(new URL("https://api.twitter.com/oauth/request_token"));
-                    service.setApikey("twitter-api-key");
-                    service.setSecret("twitter-secret");
-                    service.setOAuthCallback(new URL(OAUTH_CALLBACK));
-                    service.setAtomicOAuthCallback(new URL(ATOMIC_OAUTH_CALLBACK));
-                } catch (MalformedURLException mue) {
-                    fail();
-                }
+        twitterOAuth = mock(OAuthService.class);
+        serviceBuilder = mock(ServiceBuilder.class);
+        when(serviceBuilder.callback(anyString())).thenReturn(serviceBuilder);
+        when(serviceBuilder.build()).thenReturn(twitterOAuth);
 
-                twitterOAuth = mock(OAuthService.class);
-                serviceBuilder = mock(ServiceBuilder.class);
-                when(serviceBuilder.callback(anyString())).thenReturn(serviceBuilder);
-                when(serviceBuilder.build()).thenReturn(twitterOAuth);
+        jedis = mock(Jedis.class);
+        jedisPool = mock(JedisPool.class);
+        JedisPoolFactory jedisPoolFactory = mock(JedisPoolFactory.class);
+        when(jedisPoolFactory.build()).thenReturn(jedisPool);
+        when(jedisPool.getResource()).thenReturn(jedis);
 
-                jedis = mock(Jedis.class);
-                JedisPool jedisPool = mock(JedisPool.class);
-                JedisPoolFactory jedisPoolFactory = mock(JedisPoolFactory.class);
-                when(jedisPoolFactory.build()).thenReturn(jedisPool);
-                when(jedisPool.getResource()).thenReturn(jedis);
+        twitter = mock(Twitter.class);
+        TwitterFactoryWrapper twitterFactory = mock(TwitterFactoryWrapper.class);
+        when(twitterFactory.getInstance()).thenReturn(twitter);
 
-                twitter = mock(Twitter.class);
-                TwitterFactoryWrapper twitterFactory = mock(TwitterFactoryWrapper.class);
-                when(twitterFactory.getInstance()).thenReturn(twitter);
-
-                binder.bind(Service.class).toInstance(service);
-                binder.bind(ServiceBuilder.class).toInstance(serviceBuilder);
-                binder.bind(JedisPoolFactory.class).toInstance(jedisPoolFactory);
-                binder.bind(TwitterFactory.class);
-                binder.bind(TwitterFactoryWrapper.class).toInstance(twitterFactory);
-                binder.bind(AuthHandler.class).to(TwitterAuthHandler.class);
-            }
-        });
-
-        twitterHandler = injector.getInstance(AuthHandler.class);
+        twitterHandler = new TwitterAuthHandler(service, serviceBuilder, jedisPoolFactory, twitterFactory, database);
     }
 
     @Test
@@ -112,8 +93,7 @@ public class TwitterAuthHandlerTest {
 
     @Test(expectedExceptions = AuthHandlerException.class)
     public void twitterAuthHandlerShouldNotAuthenticateWhenAVerifierIsNotProvided() throws Exception {
-        User user = new User("Test", "User", USERNAME, "password");
-        twitterHandler.auth(user, "token-but-no-verifier");
+        twitterHandler.auth(getUser(), "token-but-no-verifier");
     }
 
     @Test(expectedExceptions = AuthHandlerException.class)
@@ -132,6 +112,8 @@ public class TwitterAuthHandlerTest {
 
         OAuthToken oAuthToken = twitterHandler.getToken();
         assertEquals(oAuthToken.getRedirectPage().toString(), REDIRECT_URL);
+
+        verifyJedisRequestTokenBehaviour();
     }
 
     @Test
@@ -140,6 +122,8 @@ public class TwitterAuthHandlerTest {
 
         OAuthToken oAuthToken = twitterHandler.getToken(new URL("http://api.beancounter.io/final/redirect"));
         assertEquals(oAuthToken.getRedirectPage().toString(), REDIRECT_URL);
+
+        verifyJedisRequestTokenBehaviour();
     }
 
     @Test
@@ -148,6 +132,8 @@ public class TwitterAuthHandlerTest {
 
         OAuthToken oAuthToken = twitterHandler.getToken(USERNAME);
         assertEquals(oAuthToken.getRedirectPage().toString(), REDIRECT_URL);
+
+        verifyJedisRequestTokenBehaviour();
     }
 
     @Test
@@ -157,19 +143,31 @@ public class TwitterAuthHandlerTest {
 
         OAuthToken oAuthToken = twitterHandler.getToken(USERNAME, new URL(customCallback));
         assertEquals(oAuthToken.getRedirectPage().toString(), REDIRECT_URL);
+
+        verifyJedisRequestTokenBehaviour();
+    }
+
+    @Test(expectedExceptions = AuthHandlerException.class)
+    public void twitterOAuth() throws Exception {
+        Token token = new Token(REQUEST_TOKEN, REQUEST_TOKEN_SECRECT);
+        when(twitterOAuth.getRequestToken()).thenReturn(token);
+        when(twitterOAuth.getAuthorizationUrl(token)).thenReturn("not://a-url");
+        when(serviceBuilder.callback(anyString())).thenReturn(serviceBuilder);
+
+        twitterHandler.getToken();
     }
 
     @Test
     public void authUserWithValidTokenAndVerifier() throws Exception {
         Token accessToken = new Token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET);
-        when(jedis.get(REQUEST_TOKEN)).thenReturn("twitter-request-token-secret");
+        when(jedis.get(REQUEST_TOKEN)).thenReturn(REQUEST_TOKEN_SECRECT);
         when(twitterOAuth.getAccessToken(Matchers.<Token>any(), Matchers.<Verifier>any())).thenReturn(accessToken);
 
         twitter4j.User twitterUser = mock(twitter4j.User.class);
         when(twitterUser.getId()).thenReturn(12345654321L);
         when(twitter.verifyCredentials()).thenReturn(twitterUser);
 
-        User user = new User("Test", "User", USERNAME, "password");
+        User user = getUser();
         AuthenticatedUser authenticatedUser = twitterHandler.auth(user, REQUEST_TOKEN, "twitter-verifier");
 
         assertEquals(authenticatedUser.getUserId(), "12345654321");
@@ -182,6 +180,13 @@ public class TwitterAuthHandlerTest {
         OAuthAuth auth = (OAuthAuth) authenticatedUser.getUser().getAuth(twitterHandler.getService());
         assertEquals(auth.getSession(), accessToken.getToken());
         assertEquals(auth.getSecret(), accessToken.getSecret());
+
+        verify(jedis).select(database);
+        verify(jedis).get(REQUEST_TOKEN);
+        verify(jedis).del(REQUEST_TOKEN);
+        verify(jedisPool).returnResource(jedis);
+        verify(twitter).setOAuthAccessToken(new AccessToken(ACCESS_TOKEN, ACCESS_TOKEN_SECRET));
+        verify(twitter).verifyCredentials();
     }
 
     @Test(expectedExceptions = AuthHandlerException.class)
@@ -191,8 +196,7 @@ public class TwitterAuthHandlerTest {
         when(twitterOAuth.getAccessToken(Matchers.<Token>any(), Matchers.<Verifier>any())).thenReturn(accessToken);
         when(twitter.verifyCredentials()).thenThrow(new TwitterException("Network problem"));
 
-        User user = new User("Test", "User", USERNAME, "password");
-        twitterHandler.auth(user, REQUEST_TOKEN, "twitter-verifier");
+        twitterHandler.auth(getUser(), REQUEST_TOKEN, "twitter-verifier");
     }
 
     @Test(expectedExceptions = AuthHandlerException.class)
@@ -207,21 +211,19 @@ public class TwitterAuthHandlerTest {
         when(twitterOAuth.getAccessToken(Matchers.<Token>any(), Matchers.<Verifier>any())).thenReturn(accessToken);
         when(twitter.verifyCredentials()).thenThrow(exception);
 
-        User user = new User("Test", "User", USERNAME, "password");
-        twitterHandler.auth(user, REQUEST_TOKEN, "twitter-verifier");
+        twitterHandler.auth(getUser(), REQUEST_TOKEN, "twitter-verifier");
     }
 
     @Test(expectedExceptions = AuthHandlerException.class)
     public void authUserWithExpiredRequestToken() throws Exception {
         when(jedis.get(REQUEST_TOKEN)).thenReturn(null);
 
-        User user = new User("Test", "User", USERNAME, "password");
-        twitterHandler.auth(user, REQUEST_TOKEN, "twitter-verifier");
+        twitterHandler.auth(getUser(), REQUEST_TOKEN, "twitter-verifier");
     }
 
     private void initTokenMocks(String callback) {
         TwitterApi.Authenticate twitterApi = new TwitterApi.Authenticate();
-        Token token = new Token(REQUEST_TOKEN, null);
+        Token token = new Token(REQUEST_TOKEN, REQUEST_TOKEN_SECRECT);
         when(twitterOAuth.getRequestToken()).thenReturn(token);
         when(twitterOAuth.getAuthorizationUrl(token)).thenReturn(twitterApi.getAuthorizationUrl(token));
         when(serviceBuilder.callback(anyString())).thenAnswer(assertCallbackEquals(callback));
@@ -237,5 +239,16 @@ public class TwitterAuthHandlerTest {
                 return serviceBuilder;
             }
         };
+    }
+
+    private void verifyJedisRequestTokenBehaviour() {
+        verify(jedis).select(database);
+        verify(jedis).set(REQUEST_TOKEN, REQUEST_TOKEN_SECRECT);
+        verify(jedis).expire(REQUEST_TOKEN, 7200);
+        verify(jedisPool).returnResource(jedis);
+    }
+
+    private User getUser() {
+        return new User("Test", "User", USERNAME, "password");
     }
 }

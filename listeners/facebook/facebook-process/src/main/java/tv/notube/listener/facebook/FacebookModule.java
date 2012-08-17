@@ -1,6 +1,8 @@
 package tv.notube.listener.facebook;
 
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import com.restfb.types.Post;
 import org.apache.camel.component.properties.PropertiesComponent;
@@ -10,7 +12,9 @@ import tv.notube.commons.helper.PropertiesHelper;
 import tv.notube.commons.helper.jedis.DefaultJedisPoolFactory;
 import tv.notube.commons.helper.jedis.JedisPoolFactory;
 import tv.notube.commons.helper.resolver.Services;
+import tv.notube.commons.model.Service;
 import tv.notube.commons.model.activity.Verb;
+import tv.notube.commons.model.auth.AuthHandler;
 import tv.notube.listener.commons.ActivityConverter;
 import tv.notube.listener.facebook.core.converter.FacebookActivityConverter;
 import tv.notube.listener.facebook.core.converter.FacebookActivityConverterException;
@@ -23,6 +27,9 @@ import tv.notube.usermanager.JedisUserManagerImpl;
 import tv.notube.usermanager.UserManager;
 import tv.notube.usermanager.services.auth.DefaultServiceAuthorizationManager;
 import tv.notube.usermanager.services.auth.ServiceAuthorizationManager;
+import tv.notube.usermanager.services.auth.facebook.FacebookAuthHandler;
+import tv.notube.usermanager.services.auth.twitter.TwitterAuthHandler;
+import tv.notube.usermanager.services.auth.twitter.TwitterFactoryWrapper;
 
 import java.util.Properties;
 
@@ -37,15 +44,28 @@ public class FacebookModule extends CamelModuleWithMatchingRoutes {
         Names.bindProperties(binder(), redisProperties);
         bindInstance("redisProperties", redisProperties);
         bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
+        bind(TwitterFactoryWrapper.class).in(Singleton.class);
 
         Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
         Services services = Services.build(properties);
         bind(Services.class).toInstance(services);
         bind(Resolver.class).to(JedisResolver.class);
 
-        ServiceAuthorizationManager sam = DefaultServiceAuthorizationManager.build(properties);
+        Service twitterService = DefaultServiceAuthorizationManager.buildService("twitter", properties);
+        Service facebookService = DefaultServiceAuthorizationManager.buildService("facebook", properties);
+        bind(Service.class)
+                .annotatedWith(Names.named("service.twitter"))
+                .toInstance(twitterService);
+        bind(Service.class)
+                .annotatedWith(Names.named("service.facebook"))
+                .toInstance(facebookService);
 
-        bind(ServiceAuthorizationManager.class).toInstance(sam);
+        MapBinder<Service, AuthHandler> authHandlerBinder
+                = MapBinder.newMapBinder(binder(), Service.class, AuthHandler.class);
+        authHandlerBinder.addBinding(twitterService).to(TwitterAuthHandler.class);
+        authHandlerBinder.addBinding(facebookService).to(FacebookAuthHandler.class);
+
+        bind(ServiceAuthorizationManager.class).to(DefaultServiceAuthorizationManager.class);
         bind(UserManager.class).to(JedisUserManagerImpl.class);
         FacebookActivityConverter fac = new FacebookActivityConverter();
         try {

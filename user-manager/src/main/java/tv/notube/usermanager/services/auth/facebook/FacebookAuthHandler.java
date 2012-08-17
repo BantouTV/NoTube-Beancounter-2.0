@@ -1,5 +1,7 @@
 package tv.notube.usermanager.services.auth.facebook;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
@@ -42,7 +44,8 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
 
     final static String SERVICE = "facebook";
 
-    public FacebookAuthHandler(Service service) {
+    @Inject
+    public FacebookAuthHandler(@Named("service.facebook") Service service) {
         super(service);
     }
 

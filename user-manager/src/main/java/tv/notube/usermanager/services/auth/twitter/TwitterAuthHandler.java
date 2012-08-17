@@ -3,6 +3,7 @@ package tv.notube.usermanager.services.auth.twitter;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.scribe.builder.ServiceBuilder;
+import org.scribe.builder.api.TwitterApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
@@ -35,25 +36,32 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
 
     private static final String SERVICE = "twitter";
 
+    // 2 hours
+    private static final int EXPIRE_TIME = 7200;
+
     private ServiceBuilder serviceBuilder;
 
     private JedisPool jedisPool;
 
     private Twitter twitter;
 
-    @Inject
-    @Named("redis.db.requestTokens")
-    private int database;
+    private final int database;
 
     @Inject
     public TwitterAuthHandler(
-            Service service,
+            @Named("service.twitter") Service service,
             ServiceBuilder serviceBuilder,
             JedisPoolFactory jedisPoolFactory,
-            TwitterFactoryWrapper twitterFactory
+            TwitterFactoryWrapper twitterFactory,
+            @Named("redis.db.requestTokens") int database
     ) {
         super(service);
         this.serviceBuilder = serviceBuilder;
+        this.serviceBuilder
+                .provider(TwitterApi.Authenticate.class)
+                .apiKey(service.getApikey())
+                .apiSecret(service.getSecret());
+        this.database = database;
         jedisPool = jedisPoolFactory.build();
         twitter = twitterFactory.getInstance();
         twitter.setOAuthConsumer(service.getApikey(), service.getSecret());
@@ -86,6 +94,7 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
         try {
             jedis.select(database);
             tokenSecret = jedis.get(token);
+            jedis.del(token);
         } finally {
             jedisPool.returnResource(jedis);
         }
@@ -165,11 +174,20 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
                 .build();
         Token token = twitterOAuth.getRequestToken();
         String redirectUrl = twitterOAuth.getAuthorizationUrl(token);
+        Jedis jedis = jedisPool.getResource();
+
+        try {
+            jedis.select(database);
+            jedis.set(token.getToken(), token.getSecret());
+            jedis.expire(token.getToken(), EXPIRE_TIME);
+        } finally {
+            jedisPool.returnResource(jedis);
+        }
 
         try {
             return new OAuthToken(new URL(redirectUrl));
         } catch (MalformedURLException e) {
-            throw new AuthHandlerException("The redirect URL is not well formed", e);
+            throw new AuthHandlerException("The redirect URL is not well formed.", e);
         }
     }
 }

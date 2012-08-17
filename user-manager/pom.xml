@@ -15,6 +15,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-multibindings</artifactId>
+        </dependency>
+        <dependency>
             <groupId>tv.notube.commons</groupId>
             <artifactId>model</artifactId>
         </dependency>
