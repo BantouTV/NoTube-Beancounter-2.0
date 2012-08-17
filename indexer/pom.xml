@@ -5,22 +5,22 @@
 
     <parent>
         <artifactId>parent</artifactId>
-        <groupId>tv.notube</groupId>
+        <groupId>io.beancounter</groupId>
         <version>1.3-SNAPSHOT</version>
     </parent>
 
-    <groupId>tv.notube</groupId>
+    <groupId>io.beancounter</groupId>
     <artifactId>indexer</artifactId>
   <version>1.3-SNAPSHOT</version>
-    <name>NoTube 2.0 Indexer</name>
+    <name>Beancounter Indexer</name>
 
     <dependencies>
         <dependency>
-            <groupId>tv.notube.commons</groupId>
+            <groupId>io.beancounter.commons</groupId>
             <artifactId>configuration</artifactId>
         </dependency>
         <dependency>
-            <groupId>tv.notube</groupId>
+            <groupId>io.beancounter</groupId>
             <artifactId>activities</artifactId>
         </dependency>
         <dependency>
@@ -63,7 +63,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>tv.notube.indexer.camel.IndexerMain</mainClass>
+                    <mainClass>io.beancounter.indexer.camel.IndexerMain</mainClass>
                     <includePluginDependencies>false</includePluginDependencies>
                 </configuration>
             </plugin>

@@ -4,14 +4,14 @@
 
     <parent>
         <artifactId>listeners</artifactId>
-        <groupId>tv.notube</groupId>
+        <groupId>io.beancounter</groupId>
         <version>1.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>facebook</artifactId>
-    <groupId>tv.notube.listeners</groupId>
+    <groupId>io.beancounter.listeners</groupId>
     <packaging>pom</packaging>
-    <name>NoTube 2.0 Facebook</name>
+    <name>Beancounter Facebook</name>
 
     <modules>
         <module>facebook-core</module>
@@ -20,7 +20,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>tv.notube</groupId>
+            <groupId>io.beancounter</groupId>
             <artifactId>listeners-commons</artifactId>
             <version>${project.version}</version>
         </dependency>

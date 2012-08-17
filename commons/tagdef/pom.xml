@@ -5,13 +5,13 @@
 
     <parent>
         <artifactId>commons</artifactId>
-        <groupId>tv.notube</groupId>
+        <groupId>io.beancounter</groupId>
         <version>1.3-SNAPSHOT</version>
     </parent>
 
-    <groupId>tv.notube.commons</groupId>
+    <groupId>io.beancounter.commons</groupId>
     <artifactId>tagdef</artifactId>
-    <name>NoTube 2.0 Commons: TagDef APIs</name>
+    <name>Beancounter Commons: TagDef APIs</name>
 
     <dependencies>
         <dependency>

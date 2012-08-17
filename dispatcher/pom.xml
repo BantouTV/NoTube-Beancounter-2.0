@@ -3,7 +3,7 @@
 
     <parent>
         <artifactId>parent</artifactId>
-        <groupId>tv.notube</groupId>
+        <groupId>io.beancounter</groupId>
         <version>1.3-SNAPSHOT</version>
     </parent>
 
@@ -11,15 +11,15 @@
 
     <artifactId>dispatcher</artifactId>
   <version>1.3-SNAPSHOT</version>
-    <name>NoTube 2.0 Dispatcher Camel Process</name>
+    <name>Beancounter Dispatcher Camel Process</name>
 
     <dependencies>
         <dependency>
-            <groupId>tv.notube.commons</groupId>
+            <groupId>io.beancounter.commons</groupId>
             <artifactId>configuration</artifactId>
         </dependency>
         <dependency>
-            <groupId>tv.notube.commons</groupId>
+            <groupId>io.beancounter.commons</groupId>
             <artifactId>helper</artifactId>
         </dependency>
         <dependency>

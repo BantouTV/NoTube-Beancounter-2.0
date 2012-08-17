@@ -1,4 +1,4 @@
-package tv.notube.filter.process;
+package io.beancounter.filter.process;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -18,12 +18,12 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import tv.notube.commons.model.activity.Activity;
-import tv.notube.commons.model.activity.ResolvedActivity;
-import tv.notube.commons.model.randomisers.VerbRandomizer;
-import tv.notube.commons.tests.TestsBuilder;
-import tv.notube.commons.tests.TestsException;
-import tv.notube.filter.FilterService;
+import io.beancounter.commons.model.activity.Activity;
+import io.beancounter.commons.model.activity.ResolvedActivity;
+import io.beancounter.commons.model.randomisers.VerbRandomizer;
+import io.beancounter.commons.tests.TestsBuilder;
+import io.beancounter.commons.tests.TestsException;
+import io.beancounter.filter.FilterService;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;

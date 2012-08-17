@@ -4,26 +4,26 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>tv.notube</groupId>
+        <groupId>io.beancounter</groupId>
         <artifactId>parent</artifactId>
         <version>1.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>user-manager</artifactId>
     <version>1.3-SNAPSHOT</version>
-    <name>NoTube 2.0 User Manager</name>
+    <name>Beancounter User Manager</name>
 
     <dependencies>
         <dependency>
-            <groupId>tv.notube.commons</groupId>
+            <groupId>io.beancounter.commons</groupId>
             <artifactId>model</artifactId>
         </dependency>
         <dependency>
-            <groupId>tv.notube.commons</groupId>
+            <groupId>io.beancounter.commons</groupId>
             <artifactId>configuration</artifactId>
         </dependency>
         <dependency>
-            <groupId>tv.notube.resolver</groupId>
+            <groupId>io.beancounter.resolver</groupId>
             <artifactId>core</artifactId>
         </dependency>
         <dependency>
@@ -35,11 +35,11 @@
             <artifactId>commons-httpclient</artifactId>
         </dependency>
         <dependency>
-            <groupId>tv.notube.commons</groupId>
+            <groupId>io.beancounter.commons</groupId>
             <artifactId>helper</artifactId>
         </dependency>
         <dependency>
-            <groupId>tv.notube.listeners.facebook</groupId>
+            <groupId>io.beancounter.listeners.facebook</groupId>
             <artifactId>facebook-core</artifactId>
         </dependency>
         <dependency>

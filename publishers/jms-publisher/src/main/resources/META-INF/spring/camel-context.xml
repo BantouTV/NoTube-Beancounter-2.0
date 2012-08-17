@@ -59,12 +59,12 @@
         <property name="timeToLive" value="r{lightstreamer.topic.ttl}"/>
     </bean>
 
-    <bean id="activityToJmsConverter" class="tv.notube.jmspublisher.process.ActivityToJmsConverter"/>
+    <bean id="activityToJmsConverter" class="io.beancounter.jmspublisher.process.ActivityToJmsConverter"/>
 
     <camel:camelContext xmlns="http://camel.apache.org/schema/spring">
         <camel:propertyPlaceholder id="properties" location="classpath:beancounter.properties"/>
         <camel:packageScan>
-          <camel:package>tv.notube.jmspublisher.process</camel:package>
+          <camel:package>io.beancounter.jmspublisher.process</camel:package>
         </camel:packageScan>
     </camel:camelContext>
 </beans>
