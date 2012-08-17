@@ -31,7 +31,10 @@
             <groupId>com.restfb</groupId>
             <artifactId>restfb</artifactId>
         </dependency>
-
+        <dependency>
+          <groupId>org.apache.camel</groupId>
+          <artifactId>camel-guice</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

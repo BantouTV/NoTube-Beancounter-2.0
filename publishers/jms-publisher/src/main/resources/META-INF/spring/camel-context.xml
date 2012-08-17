@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xsi:schemaLocation="
+         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+    <bean id="renderingPlaceholderConfig"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="placeholderPrefix" value="r{"/>
+        <property name="locations">
+            <list>
+                <value>classpath:beancounter.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="jndiTemplate-Client" class="org.springframework.jndi.JndiTemplate">
+        <property name="environment">
+            <props>
+                <prop key="java.naming.provider.url">r{renderingservice.jms.naming.provider.url}</prop>
+                <prop key="java.naming.factory.url.pkgs">r{renderingservice.jms.naming.factory.url.pkgs}
+                </prop>
+                <prop key="java.naming.factory.initial">r{renderingservice.jms.naming.factory.initial}</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="jmsConnectionFactory" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiTemplate">
+            <ref bean="jndiTemplate-Client"/>
+        </property>
+        <property name="jndiName">
+            <value>r{renderingservice.jms.connectionfactory}</value>
+        </property>
+        <property name="lookupOnStartup" value="false"/>
+        <property name="cache" value="true"/>
+        <property name="proxyInterface" value="javax.jms.ConnectionFactory"/>
+    </bean>
+
+    <bean id="jmsDestResolver" class="org.springframework.jms.support.destination.JndiDestinationResolver">
+        <property name="jndiTemplate">
+            <ref bean="jndiTemplate-Client"/>
+        </property>
+        <property name="cache">
+            <value>true</value>
+        </property>
+        <property name="fallbackToDynamicDestination" value="false"/>
+    </bean>
+
+    <bean id="lightstreamerJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="jmsConnectionFactory"/>
+        <property name="destinationResolver" ref="jmsDestResolver"/>
+        <property name="defaultDestinationName" value="r{lightstreamer.topic}"/>
+        <property name="pubSubDomain" value="true"/>
+        <property name="explicitQosEnabled" value="true"/>
+        <property name="deliveryPersistent" value="r{lightstreamer.topic.deliverypersistent}"/>
+        <property name="timeToLive" value="r{lightstreamer.topic.ttl}"/>
+    </bean>
+
+    <bean id="activityToJmsConverter" class="tv.notube.jmspublisher.process.ActivityToJmsConverter"/>
+
+    <camel:camelContext xmlns="http://camel.apache.org/schema/spring">
+        <camel:propertyPlaceholder id="properties" location="classpath:beancounter.properties"/>
+        <camel:packageScan>
+          <camel:package>tv.notube.jmspublisher.process</camel:package>
+        </camel:packageScan>
+    </camel:camelContext>
+</beans>

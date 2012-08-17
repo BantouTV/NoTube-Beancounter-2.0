@@ -21,15 +21,8 @@
             <groupId>tv.notube</groupId>
             <artifactId>activities</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-jms</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.jms</groupId>
-            <artifactId>jms</artifactId>
-            <version>1.1</version>
-        </dependency>
+
+
         <dependency>
             <groupId>org.jboss.client</groupId>
             <artifactId>jbossall-client</artifactId>
@@ -37,10 +30,15 @@
             <scope>system</scope>
             <systemPath>${jboss-client-lib}jbossall-client.jar</systemPath>
         </dependency>
+
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-spring</artifactId>
             <version>${camel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-jms</artifactId>
         </dependency>
     </dependencies>
 
@@ -60,6 +58,7 @@
                                 <filter>
                                     <excludes>
                                         <exclude>META-INF/INDEX.LIST</exclude>
+                                        <exclude>META-INF/spring.handlers</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
@@ -69,7 +68,7 @@
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Class-Path>lib/jbossall-client.jar</Class-Path>
-                                        <Main-Class>org.apache.camel.guice.Main</Main-Class>
+                                        <Main-Class>org.apache.camel.spring.Main</Main-Class>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
