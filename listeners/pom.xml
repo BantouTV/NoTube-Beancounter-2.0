@@ -4,14 +4,14 @@
 
     <parent>
         <artifactId>parent</artifactId>
-        <groupId>tv.notube</groupId>
+        <groupId>io.beancounter</groupId>
         <version>1.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>listeners</artifactId>
   <version>1.3-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>NoTube 2.0 Listeners</name>
+    <name>Beancounter Listeners</name>
 
     <modules>
         <module>listeners-commons</module>
@@ -21,7 +21,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>tv.notube.commons</groupId>
+            <groupId>io.beancounter.commons</groupId>
             <artifactId>configuration</artifactId>
         </dependency>
         <dependency>

@@ -6,7 +6,7 @@
     <display-name>recommendations-services</display-name>
 
     <listener>
-        <listener-class>tv.notube.platform.ProductionServiceConfig</listener-class>
+        <listener-class>io.beancounter.platform.ProductionServiceConfig</listener-class>
     </listener>
 
     <filter>

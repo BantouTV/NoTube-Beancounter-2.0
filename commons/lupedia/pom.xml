@@ -5,17 +5,17 @@
 
     <parent>
         <artifactId>commons</artifactId>
-        <groupId>tv.notube</groupId>
+        <groupId>io.beancounter</groupId>
         <version>1.3-SNAPSHOT</version>
     </parent>
 
-    <groupId>tv.notube.commons</groupId>
+    <groupId>io.beancounter.commons</groupId>
     <artifactId>lupedia</artifactId>
-    <name>NoTube 2.0 Commons: LUpedia NLP implementation</name>
+    <name>Beancounter Commons: LUpedia NLP implementation</name>
 
     <dependencies>
         <dependency>
-            <groupId>tv.notube.commons</groupId>
+            <groupId>io.beancounter.commons</groupId>
             <artifactId>nlp</artifactId>
             <version>${project.version}</version>
         </dependency>

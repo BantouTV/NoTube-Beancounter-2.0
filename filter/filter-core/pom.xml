@@ -3,23 +3,23 @@
 
     <parent>
         <artifactId>filter</artifactId>
-        <groupId>tv.notube.filter</groupId>
+        <groupId>io.beancounter.filter</groupId>
         <version>1.3-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>tv.notube.filter</groupId>
+    <groupId>io.beancounter.filter</groupId>
     <artifactId>filter-core</artifactId>
-    <name>NoTube 2.0 Filter Core</name>
+    <name>Beancounter Filter Core</name>
 
     <dependencies>
         <dependency>
-            <groupId>tv.notube.commons</groupId>
+            <groupId>io.beancounter.commons</groupId>
             <artifactId>configuration</artifactId>
         </dependency>
         <dependency>
-            <groupId>tv.notube.commons</groupId>
+            <groupId>io.beancounter.commons</groupId>
             <artifactId>model</artifactId>
         </dependency>
     </dependencies>

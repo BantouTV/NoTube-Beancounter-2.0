@@ -4,14 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>parent</artifactId>
-        <groupId>tv.notube</groupId>
+        <groupId>io.beancounter</groupId>
         <version>1.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>realtime-profiler</artifactId>
   <version>1.3-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>NoTube 2.0 Profiler</name>
+    <name>Beancounter Profiler</name>
 
     <modules>
         <module>realtime-profiler-core</module>
@@ -24,11 +24,11 @@
             <artifactId>guice</artifactId>
         </dependency>
         <dependency>
-            <groupId>tv.notube.commons</groupId>
+            <groupId>io.beancounter.commons</groupId>
             <artifactId>model</artifactId>
         </dependency>
         <dependency>
-            <groupId>tv.notube.commons</groupId>
+            <groupId>io.beancounter.commons</groupId>
             <artifactId>helper</artifactId>
         </dependency>
     </dependencies>

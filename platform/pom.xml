@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>tv.notube</groupId>
+        <groupId>io.beancounter</groupId>
         <artifactId>parent</artifactId>
         <version>1.3-SNAPSHOT</version>
     </parent>
@@ -11,7 +11,7 @@
     <artifactId>platform</artifactId>
     <version>1.3-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>NoTube 2.0 Web REST API</name>
+    <name>Beancounter Web REST API</name>
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
@@ -27,35 +27,35 @@
 
     <dependencies>
         <dependency>
-            <groupId>tv.notube.commons</groupId>
+            <groupId>io.beancounter.commons</groupId>
             <artifactId>configuration</artifactId>
         </dependency>
         <dependency>
-            <groupId>tv.notube</groupId>
+            <groupId>io.beancounter</groupId>
             <artifactId>user-manager</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>tv.notube.commons</groupId>
+                    <groupId>io.beancounter.commons</groupId>
                     <artifactId>model</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>tv.notube</groupId>
+            <groupId>io.beancounter</groupId>
             <artifactId>profiles</artifactId>
         </dependency>
         <dependency>
-            <groupId>tv.notube</groupId>
+            <groupId>io.beancounter</groupId>
             <artifactId>applications</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>tv.notube.commons</groupId>
+                    <groupId>io.beancounter.commons</groupId>
                     <artifactId>model</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>tv.notube</groupId>
+            <groupId>io.beancounter</groupId>
             <artifactId>activities</artifactId>
         </dependency>
         <dependency>
@@ -104,11 +104,11 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>tv.notube</groupId>
+            <groupId>io.beancounter</groupId>
             <artifactId>queues</artifactId>
         </dependency>
         <dependency>
-            <groupId>tv.notube.filter</groupId>
+            <groupId>io.beancounter.filter</groupId>
             <artifactId>filter-core</artifactId>
         </dependency>
         <dependency>
