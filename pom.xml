@@ -30,7 +30,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <camel.version>2.10.0</camel.version>
-        <activemq-core.version>5.6.0</activemq-core.version>
         <guice.version>2.0</guice.version>
         <slf4j-api.version>1.6.1</slf4j-api.version>
         <log4j.version>1.2.16</log4j.version>
@@ -73,6 +72,7 @@
         <apache.commons-io.version>1.3.2</apache.commons-io.version>
         <maven-release-plugin.version>2.3.2</maven-release-plugin.version>
         <maven-shade-plugin.version>1.7.1</maven-shade-plugin.version>
+        <jms.version>1.1</jms.version>
     </properties>
 
     <dependencyManagement>
@@ -309,9 +309,9 @@
                 <version>${camel.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.activemq</groupId>
-                <artifactId>activemq-core</artifactId>
-                <version>${activemq-core.version}</version>
+                <groupId>javax.jms</groupId>
+                <artifactId>jms</artifactId>
+                <version>${jms.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.camel</groupId>
@@ -592,9 +592,9 @@
                     <version>${maven-release-plugin.version}</version>
                 </plugin>
                 <plugin>
-                     <groupId>org.apache.maven.plugins</groupId>
-                     <artifactId>maven-shade-plugin</artifactId>
-                     <version>${maven-shade-plugin.version}</version>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${maven-shade-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
