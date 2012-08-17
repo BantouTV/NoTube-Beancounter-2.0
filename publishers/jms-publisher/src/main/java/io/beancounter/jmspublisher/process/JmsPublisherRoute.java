@@ -11,8 +11,8 @@ import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
-import it.rainet.portal.cms.client.integration.lightstreamer.LightstreamerDTO;
 import io.beancounter.commons.model.activity.ResolvedActivity;
+import it.rainet.portal.cms.client.integration.lightstreamer.LightstreamerDTO;
 
 public class JmsPublisherRoute extends RouteBuilder {
     private final String ORIGINAL_BODY_HEADER = "OriginalBody";

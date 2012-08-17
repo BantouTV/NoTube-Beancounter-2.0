@@ -4,7 +4,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <properties>
-        <jboss-client-lib>/Users/bilginibryam/notube/jboss-5.1.0.GA/client/</jboss-client-lib>
+        <jboss-client-lib>/jboss-5.1.0.GA/client/</jboss-client-lib>
     </properties>
 
     <parent>
@@ -21,16 +21,13 @@
             <groupId>io.beancounter</groupId>
             <artifactId>activities</artifactId>
         </dependency>
-
-
-        <dependency>
-            <groupId>org.jboss.client</groupId>
-            <artifactId>jbossall-client</artifactId>
-            <version>5.0.0.Beta4</version>
-            <scope>system</scope>
-            <systemPath>${jboss-client-lib}jbossall-client.jar</systemPath>
-        </dependency>
-
+        <!--<dependency>-->
+        <!--<groupId>org.jboss.client</groupId>-->
+        <!--<artifactId>jbossall-client</artifactId>-->
+        <!--<version>5.0.0.Beta4</version>-->
+        <!--<scope>system</scope>-->
+        <!--<systemPath>${jboss-client-lib}jbossall-client.jar</systemPath>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-spring</artifactId>
@@ -39,6 +36,10 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jms</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.jms</groupId>
+            <artifactId>jms</artifactId>
         </dependency>
     </dependencies>
 
@@ -65,7 +66,8 @@
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>jar-with-shades</shadedClassifierName>
                             <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Class-Path>lib/jbossall-client.jar</Class-Path>
                                         <Main-Class>org.apache.camel.spring.Main</Main-Class>
