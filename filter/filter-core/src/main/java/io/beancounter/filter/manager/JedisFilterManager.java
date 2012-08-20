@@ -33,7 +33,7 @@ public class JedisFilterManager implements FilterManager {
 
     @Inject
     @Named("redis.db.filters")
-    private int db;
+    private int database;
 
     private ObjectMapper objectMapper;
 
@@ -71,24 +71,59 @@ public class JedisFilterManager implements FilterManager {
             LOGGER.error(errMsg, e);
             throw new FilterManagerException(errMsg, e);
         }
-        Jedis jedis = pool.getResource();
-        jedis.select(db);
+        Jedis jedis;
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        }
+        try {
+            jedis.select(database);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "] for filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        }
         try {
             jedis.set(name, filterJson);
+        } catch (Exception e) {
+            final String errMsg = "Error while registering filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
         } finally {
             pool.returnResource(jedis);
         }
-
         return name;
     }
 
     @Override
     public Filter get(String name) throws FilterManagerException {
-        Jedis jedis = pool.getResource();
-        jedis.select(db);
+        Jedis jedis;
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        }
+        try {
+            jedis.select(database);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "] for filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        }
         String filterJson;
         try {
             filterJson = jedis.get(name);
+        } catch (Exception e) {
+            final String errMsg = "Error while retrieving filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
         } finally {
             pool.returnResource(jedis);
         }
@@ -117,10 +152,28 @@ public class JedisFilterManager implements FilterManager {
         notify(name);
 
         // then delete it
-        Jedis jedis = pool.getResource();
-        jedis.select(db);
+        Jedis jedis;
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        }
+        try {
+            jedis.select(database);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "] for filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        }
         try {
             jedis.del(name);
+        } catch (Exception e) {
+            final String errMsg = "Error while deleting filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
         } finally {
             pool.returnResource(jedis);
         }
@@ -142,7 +195,7 @@ public class JedisFilterManager implements FilterManager {
 
     private void notify(String name) throws FilterManagerException {
         Jedis jedis = pool.getResource();
-        jedis.select(db);
+        jedis.select(database);
         try {
             jedis.publish(CHANNEL, name);
         } finally {
@@ -175,10 +228,28 @@ public class JedisFilterManager implements FilterManager {
             LOGGER.error(errMsg, e);
             throw new FilterManagerException(errMsg, e);
         }
-        Jedis jedis = pool.getResource();
-        jedis.select(db);
+        Jedis jedis;
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        }
+        try {
+            jedis.select(database);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "] for filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        }
         try {
             jedis.set(name, filterJson);
+        } catch (Exception e) {
+            final String errMsg = "Error while updating filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
         } finally {
             pool.returnResource(jedis);
         }
@@ -186,11 +257,29 @@ public class JedisFilterManager implements FilterManager {
 
     @Override
     public Collection<String> getRegisteredFilters() throws FilterManagerException {
-        Jedis jedis = pool.getResource();
-        jedis.select(db);
+        Jedis jedis;
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        }
+        try {
+            jedis.select(database);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "] for filters";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        }
         Set<String> keys;
         try {
             keys = jedis.keys("*");
+        } catch (Exception e) {
+            final String errMsg = "Error while retrieving filters";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
         } finally {
             pool.returnResource(jedis);
         }

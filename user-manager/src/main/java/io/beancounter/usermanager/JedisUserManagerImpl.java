@@ -64,7 +64,6 @@ public class JedisUserManagerImpl implements UserManager {
 
     @Override
     public synchronized void storeUser(User user) throws UserManagerException {
-        Jedis jedis;
         String userJson;
         try {
             userJson = mapper.writeValueAsString(user);
@@ -76,10 +75,28 @@ public class JedisUserManagerImpl implements UserManager {
                     e
             );
         }
-        jedis = pool.getResource();
-        jedis.select(database);
+        Jedis jedis;
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        try {
+            jedis.select(database);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "] for user [" + user.getId() + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
         try {
             jedis.set(user.getUsername(), userJson);
+        } catch (Exception e) {
+            final String errMsg = "Error while storing user [" + user.getId() + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
         } finally {
             pool.returnResource(jedis);
         }
@@ -88,11 +105,28 @@ public class JedisUserManagerImpl implements UserManager {
     @Override
     public User getUser(String username) throws UserManagerException {
         Jedis jedis;
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        try {
+            jedis.select(database);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "] for user [" + username + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
         String userJson;
-        jedis = pool.getResource();
-        jedis.select(database);
         try {
             userJson = jedis.get(username);
+        } catch (Exception e) {
+            final String errMsg = "Error while retrieving user [" + username + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
         } finally {
             pool.returnResource(jedis);
         }
@@ -113,10 +147,28 @@ public class JedisUserManagerImpl implements UserManager {
 
     @Override
     public synchronized void deleteUser(String username) throws UserManagerException {
-        Jedis jedis = pool.getResource();
-        jedis.select(database);
+        Jedis jedis;
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        try {
+            jedis.select(database);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "] for user [" + username + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
         try {
             jedis.del(username);
+        } catch (Exception e) {
+            final String errMsg = "Error while deleting user [" + username + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
         } finally {
             pool.returnResource(jedis);
         }

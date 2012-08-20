@@ -49,7 +49,6 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
                 email,
                 callback
         );
-        Jedis jedis;
         String applicationJson;
         try {
             applicationJson = mapper.writeValueAsString(application);
@@ -61,10 +60,29 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
                     e
             );
         }
-        jedis = pool.getResource();
+        Jedis jedis;
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
+        }
         try {
             jedis.select(database);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "] for app [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
+        }
+        try {
             jedis.set(application.getApiKey().toString(), applicationJson);
+        } catch (Exception e) {
+            final String errMsg = "Error while storing application [" + applicationJson + "] with id [" +
+                    application.getApiKey().toString() + "]";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
         } finally {
             pool.returnResource(jedis);
         }
@@ -73,10 +91,28 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
 
     @Override
     public void deregisterApplication(UUID key) throws ApplicationsManagerException {
-        Jedis jedis = pool.getResource();
+        Jedis jedis;
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
+        }
         try {
             jedis.select(database);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "] for app with id [" + key + "]";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
+        }
+        try {
             jedis.del(key.toString());
+        } catch (Exception e) {
+            final String errMsg = "Error while deleting application with id [" + key.toString() + "]";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
         } finally {
             pool.returnResource(jedis);
         }
@@ -85,11 +121,28 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
     @Override
     public synchronized Application getApplicationByApiKey(UUID key) throws ApplicationsManagerException {
         Jedis jedis;
-        String applicationJson;
-        jedis = pool.getResource();
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
+        }
         try {
             jedis.select(database);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "] for app with id [" + key + "]";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
+        }
+        String applicationJson;
+        try {
             applicationJson = jedis.get(key.toString());
+        } catch (Exception e) {
+            final String errMsg = "Error while retrieving application with id [" + key.toString() + "]";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
         } finally {
             pool.returnResource(jedis);
         }
