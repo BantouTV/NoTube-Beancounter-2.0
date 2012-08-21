@@ -1,5 +1,7 @@
 package io.beancounter.listener;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import com.google.inject.Provides;
@@ -7,6 +9,7 @@ import com.google.inject.name.Names;
 
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.guice.CamelModuleWithMatchingRoutes;
+import org.apache.camel.spi.LifecycleStrategy;
 import org.guiceyfruit.jndi.JndiBind;
 
 import io.beancounter.commons.helper.PropertiesHelper;
@@ -41,6 +44,14 @@ public class TwitterModule extends CamelModuleWithMatchingRoutes {
         PropertiesComponent pc = new PropertiesComponent();
         pc.setLocation("classpath:beancounter.properties");
         return pc;
+    }
+
+
+    @Provides
+    List<LifecycleStrategy> lifecycleStrategy(JedisPoolFactory factory) {
+        ArrayList<LifecycleStrategy> list = new ArrayList<LifecycleStrategy>();
+        list.add(new ResourceCleanupStrategy(factory));
+        return list;
     }
 }
 
