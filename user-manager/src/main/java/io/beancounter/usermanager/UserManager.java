@@ -168,7 +168,7 @@ public interface UserManager {
      * @param verifier
      * @return {@link AtomicSignUp} with all needed information
      */
-    public AtomicSignUp storeUserFromOAuth(String service, String verifier) throws UserManagerException;
+    public AtomicSignUp storeUserFromOAuth(String service, String token, String verifier) throws UserManagerException;
 
     /**
      * Totally equivalent to storeUserFromOAuth(String service, String verifier) but it handles
@@ -180,8 +180,12 @@ public interface UserManager {
      * @return
      * @throws UserManagerException
      */
-    public AtomicSignUp storeUserFromOAuth(String service, String verifier, String decodedFinalRedirect)
-            throws UserManagerException;
+    public AtomicSignUp storeUserFromOAuth(
+            String service,
+            String token,
+            String verifier,
+            String decodedFinalRedirect
+    ) throws UserManagerException;
 
     /**
      * This method grabs the latest activities a user performed on a service.

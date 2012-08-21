@@ -410,13 +410,47 @@ public class UserService extends JsonService {
             return error(e, "Malformed redirect URL");
         }
     }
-              //  /rest/user/oauth/atomic/callback/facebook/web/
+
     @GET
     @Path("/oauth/atomic/callback/{service}/web/{redirect}")
-    public Response handleAtomicAuthCallbackWeb(
-        @PathParam("service") String service,
-        @PathParam("redirect") String finalRedirect,
-        @QueryParam("code") String verifier
+    public Response handleAtomicOAuthCallbackWeb(
+            @PathParam("service") String service,
+            @PathParam("redirect") String finalRedirect,
+            @QueryParam("oauth_token") String token,
+            @QueryParam("oauth_verifier") String verifier
+    ) {
+        String decodedFinalRedirect;
+        try {
+            decodedFinalRedirect = URLDecoder.decode(finalRedirect, "UTF-8");
+        } catch (UnsupportedEncodingException uee) {
+            return error(uee, "Error while decoding URL [" + finalRedirect + "]");
+        }
+
+        AtomicSignUp signUp;
+        try {
+            signUp = userManager.storeUserFromOAuth(service, token, verifier, decodedFinalRedirect);
+        } catch (UserManagerException ume) {
+            return error(ume, "Error while doing OAuth exchange for service: [" + service + "]");
+        }
+
+        // TODO (high): Get latest activities.
+
+        URI finalRedirectUri;
+        try {
+            finalRedirectUri = new URI(decodedFinalRedirect + "?username=" + signUp.getUsername());
+        } catch (URISyntaxException use) {
+            return error(use, "Malformed redirect URL");
+        }
+        return Response.temporaryRedirect(finalRedirectUri).build();
+    }
+
+    //  /rest/user/oauth/atomic/callback/facebook/web/
+    @GET
+    @Path("/oauth/atomic/callback/facebook/web/{redirect}")
+    public Response handleAtomicFacebookOAuthCallbackWeb(
+            @PathParam("service") String service,
+            @PathParam("redirect") String finalRedirect,
+            @QueryParam("code") String verifier
     ) {
         String decodedFinalRedirect;
         try {
@@ -427,7 +461,7 @@ public class UserService extends JsonService {
         }
         AtomicSignUp signUp;
         try {
-            signUp = userManager.storeUserFromOAuth(service, verifier, decodedFinalRedirect);
+            signUp = userManager.storeUserFromOAuth(service, null, verifier, decodedFinalRedirect);
         } catch (UserManagerException e) {
             return error(e, "Error while OAuth exchange for service: [" + service + "]");
         }
@@ -478,13 +512,40 @@ public class UserService extends JsonService {
 
     @GET
     @Path("/oauth/atomic/callback/{service}/")
-    public Response handleAtomicAuthCallbackMobile(
+    public Response handleAtomicOAuthCallbackMobile(
+            @PathParam("service") String service,
+            @QueryParam("oauth_token") String token,
+            @QueryParam("oauth_verifier") String verifier
+    ) {
+        AtomicSignUp signUp;
+        try {
+            signUp = userManager.storeUserFromOAuth(service, token, verifier);
+        } catch (UserManagerException ume) {
+            return error(ume, "Error while doing OAuth exchange for service: [" + service + "]");
+        }
+
+        // TODO (high): Get latest activities.
+
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(
+                new AtomicSignUpResponse(
+                        PlatformResponse.Status.OK,
+                        "user with user name [" + signUp.getUsername() + "] logged in with service [" + signUp.getService() + "]",
+                        signUp
+                )
+        );
+        return rb.build();
+    }
+
+    @GET
+    @Path("/oauth/atomic/callback/facebook/")
+    public Response handleAtomicFacebookOAuthCallbackMobile(
             @PathParam("service") String service,
             @QueryParam("code") String verifier
     ) {
         AtomicSignUp signUp;
         try {
-            signUp = userManager.storeUserFromOAuth(service, verifier);
+            signUp = userManager.storeUserFromOAuth(service, null, verifier);
         } catch (UserManagerException e) {
             return error(e, "Error while OAuth exchange for service: [" + service + "]");
         }

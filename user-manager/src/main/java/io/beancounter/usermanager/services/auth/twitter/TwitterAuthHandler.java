@@ -67,6 +67,7 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
         twitter.setOAuthConsumer(service.getApikey(), service.getSecret());
     }
 
+    @Override
     public User auth(User user, String token) throws AuthHandlerException {
         throw new AuthHandlerException("Twitter OAuth MUST have a token and a verifier");
     }
@@ -77,7 +78,7 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
     }
 
     @Override
-    public AuthenticatedUser auth(String verifier, String finalRedirect)
+    public AuthenticatedUser authWithRedirect(String verifier, String finalRedirect)
             throws AuthHandlerException {
         throw new AuthHandlerException("Twitter OAuth MUST have a token and a verifier");
     }
@@ -85,41 +86,33 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
     @Override
     public AuthenticatedUser auth(User user, String token, String verifier)
             throws AuthHandlerException {
-        Verifier v = new Verifier(verifier);
-        OAuthService twitterOAuth = serviceBuilder.build();
+        Token accessToken = getTwitterAccessToken(token, verifier);
+        twitter4j.User twitterUser = getTwitterUser(accessToken);
 
-        Jedis jedis = jedisPool.getResource();
-        String tokenSecret;
+        String twitterId = String.valueOf(twitterUser.getId());
+        user.addService(
+                service.getName(),
+                new OAuthAuth(accessToken.getToken(), accessToken.getSecret())
+        );
 
-        try {
-            jedis.select(database);
-            tokenSecret = jedis.get(token);
-            jedis.del(token);
-        } finally {
-            jedisPool.returnResource(jedis);
-        }
+        return new AuthenticatedUser(twitterId, user);
+    }
 
-        if (tokenSecret == null) {
-            String message = "Request token [" + token + "] is either invalid or has expired.";
-            throw new AuthHandlerException(message);
-        }
+    @Override
+    public AuthenticatedUser auth(String token, String verifier) throws AuthHandlerException {
+        Token accessToken = getTwitterAccessToken(token, verifier);
+        twitter4j.User twitterUser = getTwitterUser(accessToken);
 
-        Token requestToken = new Token(token, tokenSecret);
-        Token accessToken = twitterOAuth.getAccessToken(requestToken, v);
-
-        String twitterId;
-        try {
-            twitter.setOAuthAccessToken(new AccessToken(accessToken.getToken(), accessToken.getSecret()));
-            twitter4j.User twitterUser = twitter.verifyCredentials();
-            twitterId = String.valueOf(twitterUser.getId());
-        } catch (TwitterException twe) {
-            // When Twitter service or network is unavailable,
-            // or if supplied credentials are wrong.
-            String message = (twe.getStatusCode() == 401)
-                    ? "OAuth credentials are invalid."
-                    : "Error connecting to Twitter.";
-            throw new AuthHandlerException(message, twe);
-        }
+        // Users created in this way will have beancounter username equals
+        // to their Twitter id.
+        // TODO (high) implement a retry policy to be sure it's unique
+        // TODO (med): Decide what metadata we want to store.
+        String twitterId = String.valueOf(twitterUser.getId());
+        User user = new User();
+        user.setUsername(twitterId);
+        user.addMetadata("twitter.user.name", twitterUser.getName());
+        user.addMetadata("twitter.user.screenName", twitterUser.getScreenName());
+        user.addMetadata("twitter.user.description", twitterUser.getDescription());
 
         user.addService(
                 service.getName(),
@@ -148,6 +141,7 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
         return createOAuthServiceAndGetToken(callback);
     }
 
+    @Override
     public OAuthToken getToken(String username) throws AuthHandlerException {
         return createOAuthServiceAndGetToken(service.getOAuthCallback() + username);
     }
@@ -189,5 +183,47 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
         } catch (MalformedURLException e) {
             throw new AuthHandlerException("The redirect URL is not well formed.", e);
         }
+    }
+
+    private Token getTwitterAccessToken(String token, String verifier) throws AuthHandlerException {
+        Verifier v = new Verifier(verifier);
+        OAuthService twitterOAuth = serviceBuilder.build();
+
+        Jedis jedis = jedisPool.getResource();
+        String tokenSecret;
+
+        try {
+            jedis.select(database);
+            tokenSecret = jedis.get(token);
+            jedis.del(token);
+        } finally {
+            jedisPool.returnResource(jedis);
+        }
+
+        if (tokenSecret == null) {
+            String message = "Request token [" + token + "] is either invalid or has expired.";
+            throw new AuthHandlerException(message);
+        }
+
+        Token requestToken = new Token(token, tokenSecret);
+        return twitterOAuth.getAccessToken(requestToken, v);
+    }
+
+    private twitter4j.User getTwitterUser(Token accessToken) throws AuthHandlerException {
+        twitter4j.User twitterUser;
+
+        try {
+            twitter.setOAuthAccessToken(new AccessToken(accessToken.getToken(), accessToken.getSecret()));
+            twitterUser = twitter.verifyCredentials();
+        } catch (TwitterException twe) {
+            // When Twitter service or network is unavailable,
+            // or if supplied credentials are wrong.
+            String message = (twe.getStatusCode() == 401)
+                    ? "OAuth credentials are invalid."
+                    : "Error connecting to Twitter.";
+            throw new AuthHandlerException(message, twe);
+        }
+
+        return twitterUser;
     }
 }

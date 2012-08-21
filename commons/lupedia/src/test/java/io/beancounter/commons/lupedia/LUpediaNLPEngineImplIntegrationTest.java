@@ -20,7 +20,7 @@ import java.util.*;
 *
 * @author Davide Palmisano ( dpalmisano@gmail.com )
 */
-public class LUpediaNLPEngineImplTestCase {
+public class LUpediaNLPEngineImplIntegrationTest {
 
     private NLPEngine nlpEngine;
 

@@ -106,7 +106,7 @@ public class TwitterAuthHandlerTest {
 
     @Test(expectedExceptions = AuthHandlerException.class)
     public void twitterAuthHandlerShouldNotAuthenticateWhenNoTokenIsProvided() throws Exception {
-        twitterHandler.auth("only-a-verifier", "http://final.redirect.url.com");
+        twitterHandler.authWithRedirect("only-a-verifier", "http://final.redirect.url.com");
     }
 
     @Test

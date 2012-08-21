@@ -29,18 +29,42 @@ public interface AuthHandler {
             String verifier
     ) throws AuthHandlerException;
 
+    public AuthenticatedUser auth(
+            String token,
+            String verifier
+    ) throws AuthHandlerException;
+
     /**
-     * @param username
+     * To handle anonymous <i>OAuth</i> callbacks.
+     *
+     * @param verifier
+     * @return
+     */
+    public AuthenticatedUser auth(String verifier) throws AuthHandlerException;
+
+    /**
+     * Totally equivalent to auth(String verifier) but it allows custom redirect url.
+     *
+     * @param verifier
+     * @param finalRedirect
      * @return
      * @throws AuthHandlerException
      */
-    public OAuthToken getToken(String username) throws AuthHandlerException;
+    public AuthenticatedUser authWithRedirect(String verifier, String finalRedirect)
+            throws AuthHandlerException;
 
     /**
      * @return
      * @throws AuthHandlerException
      */
     public OAuthToken getToken() throws AuthHandlerException;
+
+    /**
+     * @param username
+     * @return
+     * @throws AuthHandlerException
+     */
+    public OAuthToken getToken(String username) throws AuthHandlerException;
 
     /**
      * Totally equivalent to OAuthToken getToken() but it allows a final redirect url.
@@ -61,20 +85,11 @@ public interface AuthHandler {
     public OAuthToken getToken(String username, URL callback) throws AuthHandlerException;
 
     /**
-     * Returns the service url which this auth serves.
+     * Returns the service url which this authWithRedirect serves.
      *
      * @return
      */
     public String getService();
-
-    /**
-     * To handle anonymous <i>OAuth</i> callbacks.
-     *
-     * @param verifier
-     * @return
-     */
-    public AuthenticatedUser auth(String verifier) throws AuthHandlerException;
-
 
     /**
      * To grab an initial bunch of user activities.
@@ -86,16 +101,5 @@ public interface AuthHandler {
      * @throws AuthHandlerException
      */
     public List<Activity> grabActivities(String secret, String identifier, int limit)
-            throws AuthHandlerException;
-
-    /**
-     * Totally equivalent to auth(String verifier) but it allows custom redirect url.
-     *
-     * @param verifier
-     * @param finalRedirect
-     * @return
-     * @throws AuthHandlerException
-     */
-    public AuthenticatedUser auth(String verifier, String finalRedirect)
             throws AuthHandlerException;
 }

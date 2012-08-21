@@ -205,7 +205,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
     }
 
     @Override
-    public AuthenticatedUser auth(String verifier, String finalRedirect)
+    public AuthenticatedUser authWithRedirect(String verifier, String finalRedirect)
             throws AuthHandlerException {
         if (verifier == null) {
             auth((User) null, null);
@@ -240,6 +240,11 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                 new OAuthAuth(accessToken.getToken(), accessToken.getSecret())
         );
         return new AuthenticatedUser(data.get("facebook.user.id"), user);
+    }
+
+    @Override
+    public AuthenticatedUser auth(String token, String verifier) throws AuthHandlerException {
+        return auth(verifier);
     }
 
     @Override
