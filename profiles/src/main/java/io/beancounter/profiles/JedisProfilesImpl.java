@@ -8,6 +8,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import io.beancounter.commons.model.UserProfile;
 import io.beancounter.commons.helper.jedis.JedisPoolFactory;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -54,31 +55,26 @@ public class JedisProfilesImpl implements Profiles {
                     e
             );
         }
-        Jedis jedis;
-        try {
-            jedis = pool.getResource();
-        } catch (Exception e) {
-            final String errMsg = "Error while getting a Jedis resource";
-            LOGGER.error(errMsg, e);
-            throw new ProfilesException(errMsg, e);
-        }
-        try {
-            jedis.select(database);
-        } catch (Exception e) {
-            pool.returnResource(jedis);
-            final String errMsg = "Error while selecting database [" + database + "] for user profile [" + up.getUserId() + "]";
-            LOGGER.error(errMsg, e);
-            throw new ProfilesException(errMsg, e);
-        }
+        Jedis jedis = getJedisResource();
         LOGGER.debug("storing profile for user [" + up.getUserId() + "] on database [" + database + "]");
+        boolean isConnectionIssue = false;
         try {
             jedis.set(up.getUserId().toString(), userProfile);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while storing profile for user [" + up.getUserId() + "]";
+            LOGGER.error(errMsg, e);
+            throw new ProfilesException(errMsg, e);
         } catch (Exception e) {
             final String errMsg = "Error while storing profile for user [" + up.getUserId() + "]";
             LOGGER.error(errMsg, e);
             throw new ProfilesException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
         LOGGER.debug("profile for user [" + up.getUserId() + "] stored");
     }
@@ -87,31 +83,26 @@ public class JedisProfilesImpl implements Profiles {
     public UserProfile lookup(UUID userId) throws ProfilesException {
         LOGGER.debug("looking up profile for user [" + userId + "] stored");
         UserProfile profile;
-        Jedis jedis;
-        try {
-            jedis = pool.getResource();
-        } catch (Exception e) {
-            final String errMsg = "Error while getting a Jedis resource";
-            LOGGER.error(errMsg, e);
-            throw new ProfilesException(errMsg, e);
-        }
-        try {
-            jedis.select(database);
-        } catch (Exception e) {
-            pool.returnResource(jedis);
-            final String errMsg = "Error while selecting database [" + database + "] for user profile [" + userId + "]";
-            LOGGER.error(errMsg, e);
-            throw new ProfilesException(errMsg, e);
-        }
+        Jedis jedis = getJedisResource();
         String stringProfile;
+        boolean isConnectionIssue = false;
         try {
             stringProfile = jedis.get(userId.toString());
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Error while retrieving user profile for user [" + userId + "]";
+            LOGGER.error(errMsg, e);
+            throw new ProfilesException(errMsg, e);
         } catch (Exception e) {
             final String errMsg = "Error while retrieving user profile for user [" + userId + "]";
             LOGGER.error(errMsg, e);
             throw new ProfilesException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
         if(stringProfile == null) {
             return null;
@@ -128,5 +119,35 @@ public class JedisProfilesImpl implements Profiles {
         }
         LOGGER.debug("profile for user [" + userId + "] looked up properly");
         return profile;
+    }
+
+    private Jedis getJedisResource() throws ProfilesException {
+        Jedis jedis;
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new ProfilesException(errMsg, e);
+        }
+        boolean isConnectionIssue = false;
+        try {
+            jedis.select(database);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while selecting database [" + database + "]";
+            LOGGER.error(errMsg, e);
+            throw new ProfilesException(errMsg, e);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "]";
+            LOGGER.error(errMsg, e);
+            throw new ProfilesException(errMsg, e);
+        } finally {
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            }
+        }
+        return jedis;
     }
 }
