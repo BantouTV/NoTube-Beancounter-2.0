@@ -30,32 +30,6 @@ public class FacebookPublisherModule extends CamelModuleWithMatchingRoutes {
     protected void configure() {
         super.configure();
         bind(FacebookPublisherRoute.class);
-
-        Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
-        Properties redisProperties = PropertiesHelper.readFromClasspath("/redis.properties");
-        Names.bindProperties(binder(), redisProperties);
-
-        Service twitterService = DefaultServiceAuthorizationManager.buildService("twitter", properties);
-        Service facebookService = DefaultServiceAuthorizationManager.buildService("facebook", properties);
-        bind(Service.class)
-                .annotatedWith(Names.named("service.twitter"))
-                .toInstance(twitterService);
-        bind(Service.class)
-                .annotatedWith(Names.named("service.facebook"))
-                .toInstance(facebookService);
-
-        bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).in(Singleton.class);
-        bind(TwitterFactoryWrapper.class).in(Singleton.class);
-
-        MapBinder<Service, AuthHandler> authHandlerBinder
-                = MapBinder.newMapBinder(binder(), Service.class, AuthHandler.class);
-        authHandlerBinder.addBinding(twitterService).to(TwitterAuthHandler.class);
-        authHandlerBinder.addBinding(facebookService).to(FacebookAuthHandler.class);
-
-        bind(ServiceAuthorizationManager.class).to(DefaultServiceAuthorizationManager.class);
-
-        bind(Resolver.class).to(JedisResolver.class);
-        bind(UserManager.class).to(JedisUserManagerImpl.class);
     }
 
     @Provides

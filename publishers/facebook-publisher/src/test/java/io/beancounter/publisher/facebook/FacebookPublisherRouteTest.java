@@ -21,8 +21,6 @@ import static org.mockito.Mockito.*;
 public class FacebookPublisherRouteTest extends CamelTestSupport {
 
     private Injector injector;
-    private Resolver resolver;
-    private UserManager userManager;
     private FacebookPublisher publisher;
 
     @BeforeMethod
@@ -30,11 +28,6 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
         injector = Guice.createInjector(new Module() {
             @Override
             public void configure(Binder binder) {
-                resolver = mock(Resolver.class);
-                userManager = mock(UserManager.class);
-
-                binder.bind(Resolver.class).toInstance(resolver);
-                binder.bind(UserManager.class).toInstance(userManager);
                 binder.bind(FacebookPublisherRoute.class).toInstance(new FacebookPublisherRoute() {
                     @Override
                     protected String fromEndpoint() {
@@ -84,8 +77,6 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
         user.addService(service, new OAuthAuth(token, "password"));
 
         doReturn(new FacebookType()).when(publisher).publishActivity(anyString(), anyString());
-        when(resolver.resolveUsername("10000101110123", service)).thenReturn(username);
-        when(userManager.getUser(username)).thenReturn(user);
 
         MockEndpoint error = getMockEndpoint("mock:error");
         error.expectedMessageCount(0);
@@ -106,8 +97,6 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
 
         doThrow(new FacebookOAuthException("OAuthException", "Invalid OAuth access token."))
                 .when(publisher).publishActivity(anyString(), anyString());
-        when(resolver.resolveUsername("10000101110123", service)).thenReturn(username);
-        when(userManager.getUser(username)).thenReturn(user);
 
         MockEndpoint error = getMockEndpoint("mock:error");
         error.expectedMessageCount(1);
@@ -119,6 +108,6 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
     }
 
     private String validResolvedActivity() {
-        return "{\"userId\":\"5609618e-7ff4-41bd-9972-0ed2bc5955f1\",\"activity\":{\"id\":\"baea9cbd-d285-42ab-ba84-7b8316e59a74\",\"verb\":\"LIKE\",\"object\":{\"type\":\"FB-LIKE\",\"url\":\"http://www.facebook.com/9876543211\",\"name\":\"Prosciutto di Parma\",\"description\":null,\"categories\":[\"Food\",\"beverages\"]},\"context\":{\"date\":1343117754000,\"service\":\"facebook\",\"mood\":null,\"username\":\"10000101110123\"}}}";
+        return "{\"userId\":\"5609618e-7ff4-41bd-9972-0ed2bc5955f1\",\"activity\":{\"id\":\"baea9cbd-d285-42ab-ba84-7b8316e59a74\",\"verb\":\"LIKE\",\"object\":{\"type\":\"FB-LIKE\",\"url\":\"http://www.facebook.com/9876543211\",\"name\":\"Prosciutto di Parma\",\"description\":null,\"categories\":[\"Food\",\"beverages\"]},\"context\":{\"date\":1343117754000,\"service\":\"facebook\",\"mood\":null,\"username\":\"10000101110123\"}},\"user\":{\"username\":\"test-user\",\"services\":{\"facebook\":{\"type\":\"OAuth\",\"session\":\"123456abcdef\"}}}}";
     }
 }

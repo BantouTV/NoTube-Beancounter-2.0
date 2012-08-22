@@ -139,8 +139,6 @@ public class JedisFilterManager implements FilterManager {
             LOGGER.error(errMsg);
             throw new FilterManagerException(errMsg);
         }
-        // notify the filter has been stopped
-        notify(name);
 
         // then delete it
         Jedis jedis = getJedisResource();
@@ -163,6 +161,8 @@ public class JedisFilterManager implements FilterManager {
                 pool.returnResource(jedis);
             }
         }
+        // notify the filter has been deleted
+        notify(name);
     }
 
     @Override

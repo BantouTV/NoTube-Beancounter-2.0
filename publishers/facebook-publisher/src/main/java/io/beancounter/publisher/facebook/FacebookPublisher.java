@@ -11,18 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.beancounter.commons.model.activity.Activity;
 import io.beancounter.commons.model.activity.ResolvedActivity;
-import io.beancounter.resolver.Resolver;
-import io.beancounter.usermanager.UserManager;
 
 public class FacebookPublisher implements Processor {
 
     private static final Logger LOG = LoggerFactory.getLogger(FacebookPublisher.class);
-
-    @Inject
-    private Resolver resolver;
-
-    @Inject
-    private UserManager userManager;
 
     @Override
     public void process(Exchange exchange) throws Exception {
@@ -30,14 +22,7 @@ public class FacebookPublisher implements Processor {
         Activity activity = resolvedActivity.getActivity();
 
         // Get FB user access token.
-        String service = activity.getContext().getService();
-        String beancounterUsername = resolver.resolveUsername(
-                activity.getContext().getUsername(),
-                service
-        );
-
-        String token = userManager.getUser(beancounterUsername)
-                .getServices().get(service).getSession();
+        String token = resolvedActivity.getUser().getServices().get("facebook").getSession();
 
         // Publish activity on user's FB feed. Should be configurable.
         FacebookType response = publishActivity(token, activity.getObject().getUrl().toString());
