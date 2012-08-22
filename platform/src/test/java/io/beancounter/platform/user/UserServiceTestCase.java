@@ -2,34 +2,25 @@ package io.beancounter.platform.user;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.name.Names;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.sun.grizzly.http.embed.GrizzlyWebServer;
 import com.sun.grizzly.http.servlet.ServletAdapter;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
-import io.beancounter.activities.ActivityStore;
 import io.beancounter.applications.ApplicationsManager;
 import io.beancounter.applications.MockApplicationsManager;
-import io.beancounter.commons.helper.PropertiesHelper;
 import io.beancounter.commons.model.OAuthToken;
 import io.beancounter.commons.model.User;
 import io.beancounter.commons.tests.Tests;
 import io.beancounter.commons.tests.TestsBuilder;
 import io.beancounter.commons.tests.TestsException;
-import io.beancounter.filter.manager.FilterManager;
-import io.beancounter.filter.manager.InMemoryFilterManager;
 import io.beancounter.platform.APIResponse;
 import io.beancounter.platform.AbstractJerseyTestCase;
-import io.beancounter.platform.ActivitiesService;
-import io.beancounter.platform.AliveService;
 import io.beancounter.platform.ApplicationService;
-import io.beancounter.platform.FilterService;
 import io.beancounter.platform.JacksonMixInProvider;
 import io.beancounter.platform.PlatformResponse;
 import io.beancounter.platform.UserService;
-import io.beancounter.platform.activities.MockActivityStore;
 import io.beancounter.platform.responses.UserPlatformResponse;
 import io.beancounter.profiles.MockProfiles;
 import io.beancounter.profiles.Profiles;
@@ -55,7 +46,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.UUID;
 
 import static org.mockito.Mockito.mock;
@@ -128,16 +118,19 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    public void testSignUp() throws IOException {
-        final String baseQuery = "user/register?apikey=%s";
-        final String name = "Fake_Name";
-        final String surname = "Fake_Surname";
-        final String username = "missing-user";
-        final String password = "abc";
-        final String query = String.format(
+    public void testSignUp() throws Exception {
+        String baseQuery = "user/register?apikey=%s";
+        String name = "Fake_Name";
+        String surname = "Fake_Surname";
+        String username = "missing-user";
+        String password = "abc";
+        String query = String.format(
                 baseQuery,
                 APIKEY
         );
+
+        when(userManager.getUser(username)).thenReturn(null);
+
         PostMethod postMethod = new PostMethod(base_uri + query);
         HttpClient client = new HttpClient();
         postMethod.addParameter("name", name);
@@ -148,6 +141,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(postMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+
         assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         assertNotEquals(responseBody, "");
         APIResponse actual = fromJson(responseBody, APIResponse.class);
@@ -159,10 +153,13 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual, expected);
         assertNotNull(actual.getObject());
         assertNotNull(UUID.fromString(actual.getObject()));
+
+        User user = new User(name, surname, username, password);
+        verify(userManager).storeUser(user);
     }
 
     @Test
-    public void testSignUpRandom() throws IOException, TestsException, URISyntaxException {
+    public void testSignUpRandom() throws Exception {
         User user = tests.build(User.class).getObject();
 
         String baseQuery = "user/register?apikey=%s";
@@ -174,6 +171,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
                 baseQuery,
                 APIKEY
         );
+
         PostMethod postMethod = new PostMethod(base_uri + query);
         HttpClient client = new HttpClient();
         postMethod.addParameter("name", name);
@@ -184,6 +182,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(postMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+
         assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         assertNotEquals(responseBody, "");
         APIResponse actual = fromJson(responseBody, APIResponse.class);
@@ -222,6 +221,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String responseBody = new String(postMethod.getResponseBody());
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
+
         assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
         assertNotEquals(responseBody, "");
         APIResponse actual = fromJson(responseBody, APIResponse.class);
@@ -235,9 +235,9 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetUser() throws Exception {
-        final String baseQuery = "user/%s?apikey=%s";
-        final String username = "test-user";
-        final String query = String.format(
+        String baseQuery = "user/%s?apikey=%s";
+        String username = "test-user";
+        String query = String.format(
                 baseQuery,
                 username,
                 APIKEY
@@ -268,9 +268,9 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
     
     @Test
     public void testGetUserMissingUser() throws Exception {
-        final String baseQuery = "user/%s?apikey=%s";
-        final String name = "missing-user";
-        final String query = String.format(
+        String baseQuery = "user/%s?apikey=%s";
+        String name = "missing-user";
+        String query = String.format(
                 baseQuery,
                 name,
                 APIKEY
@@ -297,9 +297,9 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testDeleteUser() throws Exception {
-        final String baseQuery = "user/%s?apikey=%s";
-        final String username = "test-user";
-        final String query = String.format(
+        String baseQuery = "user/%s?apikey=%s";
+        String username = "test-user";
+        String query = String.format(
                 baseQuery,
                 username,
                 APIKEY
@@ -327,10 +327,10 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testAuthenticate() throws Exception {
-        final String baseQuery = "user/%s/authenticate?apikey=%s";
-        final String username = "test-user";
-        final String password = "abc";
-        final String query = String.format(
+        String baseQuery = "user/%s/authenticate?apikey=%s";
+        String username = "test-user";
+        String password = "abc";
+        String query = String.format(
                 baseQuery,
                 username,
                 APIKEY
@@ -553,9 +553,9 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
     // TODO (mid) review this test, we need to store the profile first
     @Test(enabled = false)
     public void testGetProfile() throws IOException {
-        final String baseQuery = "user/%s/profile?apikey=%s";
-        final String username = "test-user";
-        final String query = String.format(
+        String baseQuery = "user/%s/profile?apikey=%s";
+        String username = "test-user";
+        String query = String.format(
                 baseQuery,
                 username,
                 APIKEY
@@ -576,57 +576,25 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
             return Guice.createInjector(new JerseyServletModule() {
                 @Override
                 protected void configureServlets() {
-    /*//                    applicationsManager = mock(ApplicationsManager.class);
-                        userManager = mock(UserManager.class);
-    //                    profiles = mock(Profiles.class);
-    //                    queues = mock(Queues.class);
-
-                        Map<String, String> initParams = new HashMap<String, String>();
-                        // add bindings to mockups
-                        bind(ApplicationsManager.class).to(MockApplicationsManager.class);
-                        bind(UserManager.class).toInstance(userManager);
-                        bind(Profiles.class).to(MockProfiles.class);
-                        bind(Queues.class).to(MockQueues.class);
-                        // add REST services
-    //                    bind(ApplicationService.class);
-    //                    bind(UserService.class);
-
-                        // add bindings for Jackson
-                        bind(JacksonJaxbJsonProvider.class).asEagerSingleton();
-                        bind(JacksonMixInProvider.class).asEagerSingleton();
-                        bind(MessageBodyReader.class).to(JacksonJsonProvider.class);
-                        bind(MessageBodyWriter.class).to(JacksonJsonProvider.class);
-                        // Route all requests through GuiceContainer
-                        serve("*//*").with(GuiceContainer.class);
-                        filter("*//*").through(GuiceContainer.class, initParams);*/
-                    Map<String, String> initParams = new HashMap<String, String>();
-                    // add bindings to mockups
-                    bind(ApplicationsManager.class).to(MockApplicationsManager.class).asEagerSingleton();
                     userManager = mock(UserManager.class);
-                    //bind(UserManager.class).to(MockUserManager.class);
+                    bind(ApplicationsManager.class).to(MockApplicationsManager.class).asEagerSingleton();
                     bind(UserManager.class).toInstance(userManager);
                     bind(Profiles.class).to(MockProfiles.class);
-                    bind(ActivityStore.class).to(MockActivityStore.class).asEagerSingleton();
                     bind(Queues.class).to(MockQueues.class);
-                    bind(FilterManager.class).to(InMemoryFilterManager.class).asEagerSingleton();
+
                     // add REST services
                     bind(ApplicationService.class);
                     bind(UserService.class);
-                    bind(ActivitiesService.class);
 
-                    Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
-                    Names.bindProperties(binder(), properties);
-
-                    bind(AliveService.class);
-                    bind(FilterService.class);
                     // add bindings for Jackson
                     bind(JacksonJaxbJsonProvider.class).asEagerSingleton();
                     bind(JacksonMixInProvider.class).asEagerSingleton();
                     bind(MessageBodyReader.class).to(JacksonJsonProvider.class);
                     bind(MessageBodyWriter.class).to(JacksonJsonProvider.class);
+
                     // Route all requests through GuiceContainer
                     serve("/*").with(GuiceContainer.class);
-                    filter("/*").through(GuiceContainer.class, initParams);
+                    filter("/*").through(GuiceContainer.class);
                 }
             });
         }
