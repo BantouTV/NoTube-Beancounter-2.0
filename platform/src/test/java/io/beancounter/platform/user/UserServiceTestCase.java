@@ -21,12 +21,14 @@ import io.beancounter.platform.ApplicationService;
 import io.beancounter.platform.JacksonMixInProvider;
 import io.beancounter.platform.PlatformResponse;
 import io.beancounter.platform.UserService;
+import io.beancounter.platform.responses.StringPlatformResponse;
 import io.beancounter.platform.responses.UserPlatformResponse;
 import io.beancounter.profiles.MockProfiles;
 import io.beancounter.profiles.Profiles;
 import io.beancounter.queues.MockQueues;
 import io.beancounter.queues.Queues;
 import io.beancounter.usermanager.UserManager;
+import io.beancounter.usermanager.UserManagerException;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
@@ -48,6 +50,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.mockito.Matchers.anyChar;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -568,6 +571,141 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
         assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
+    }
+
+    @Test
+    public void signingUpWithServiceFromMobileDeviceShouldRedirectWithoutErrors() throws Exception {
+        String baseQuery = "user/register/%s/mobile";
+        String service = "social-service";
+        String query = String.format(
+                baseQuery,
+                service
+        );
+
+        URL redirectUrl = new URL("http://example.com/oauth/token-1234");
+        when(userManager.getOAuthToken(service)).thenReturn(new OAuthToken(redirectUrl));
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+
+        assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        assertFalse(responseBody.isEmpty());
+        assertEquals(getMethod.getURI().getHost(), "www.iana.org");
+    }
+
+    @Test
+    public void signingUpWithServiceFromMobileDeviceWhenNoOAuthTokenCanBeRetrievedShouldRespondWithError() throws Exception {
+        String baseQuery = "user/register/%s/mobile";
+        String service = "social-service";
+        String errorMessage = "Error getting OAuth token";
+        String query = String.format(
+                baseQuery,
+                service
+        );
+
+        when(userManager.getOAuthToken(service))
+                .thenThrow(new UserManagerException(errorMessage));
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse actual = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(actual.getStatus(), PlatformResponse.Status.NOK);
+        assertEquals(actual.getMessage(), "Error while getting token from [" + service + "]");
+        assertEquals(actual.getObject(), errorMessage);
+    }
+
+    @Test
+    public void signingUpWithServiceFromTheWebShouldRedirectWithoutErrors() throws Exception {
+        String baseQuery = "user/register/%s/web?redirect=%s";
+        String service = "social-service";
+        String finalRedirect = "http://example.com";
+        String query = String.format(
+                baseQuery,
+                service,
+                finalRedirect
+        );
+
+        URL redirectUrl = new URL("http://example.com/oauth/token-1234");
+        when(userManager.getOAuthToken(service, new URL(finalRedirect)))
+                .thenReturn(new OAuthToken(redirectUrl));
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+
+        assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        assertFalse(responseBody.isEmpty());
+        assertEquals(getMethod.getURI().getHost(), "www.iana.org");
+    }
+
+    @Test
+    public void signingUpWithServiceFromTheWebWhenNoOAuthTokenCanBeRetrievedShouldRespondWithError() throws Exception {
+        String baseQuery = "user/register/%s/web?redirect=%s";
+        String service = "social-service";
+        String finalRedirect = "http://example.com";
+        String errorMessage = "Error getting OAuth token";
+        String query = String.format(
+                baseQuery,
+                service,
+                finalRedirect
+        );
+
+        when(userManager.getOAuthToken(service, new URL(finalRedirect)))
+                .thenThrow(new UserManagerException(errorMessage));
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse actual = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(actual.getStatus(), PlatformResponse.Status.NOK);
+        assertEquals(actual.getMessage(), "Error while getting token from [" + service + "]");
+        assertEquals(actual.getObject(), errorMessage);
+    }
+
+    @Test
+    public void signingUpWithServiceFromTheWebWhenMissingFinalRedirectParamShouldRespondWithError() throws Exception {
+        String baseQuery = "user/register/%s/web";
+        String service = "social-service";
+        String query = String.format(
+                baseQuery,
+                service
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse actual = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(actual.getStatus(), PlatformResponse.Status.NOK);
+        assertEquals(actual.getMessage(), "[null] is not a valid URL");
     }
 
     public static class UserServiceTestConfig extends GuiceServletContextListener {
