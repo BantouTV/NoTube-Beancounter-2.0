@@ -20,7 +20,7 @@ public abstract class AbstractJerseyTestCase {
 
     protected final URI base_uri;
 
-    private GrizzlyWebServer server;
+    protected GrizzlyWebServer server;
 
     protected AbstractJerseyTestCase(int port) {
         try {
