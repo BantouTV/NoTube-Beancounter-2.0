@@ -14,6 +14,7 @@ import redis.clients.jedis.JedisPool;
 import io.beancounter.commons.helper.jedis.JedisPoolFactory;
 import io.beancounter.commons.helper.resolver.Services;
 import io.beancounter.commons.model.activity.Activity;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  * <i>Redis</i>-based implementation of {@link Resolver}.
@@ -49,14 +50,28 @@ public class JedisResolver implements Resolver {
             LOGGER.error(errmsg, e);
             throw new ResolverException(errmsg, e);
         }
-        Jedis jedis = pool.getResource();
-        jedis.select(database);
+        Jedis jedis = getJedisResource(database);
         String userIdentifier = activity.getContext().getUsername();
         String userId;
+        boolean isConnectionIssue = false;
         try {
             userId = jedis.hget(userIdentifier, "uuid");
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while getting userId for [" + userIdentifier
+                    + "] for service [" + service + "]";
+            LOGGER.error(errMsg, e);
+            throw new ResolverException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while getting userId for [" + userIdentifier + "] for service [" + service + "]";
+            LOGGER.error(errMsg, e);
+            throw new ResolverException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
         if (userId == null) {
             final String errmsg = "User [" + userIdentifier + "] not found for [" + service + "]";
@@ -83,13 +98,27 @@ public class JedisResolver implements Resolver {
             LOGGER.error(errmsg, e);
             throw new ResolverException(errmsg, e);
         }
-        Jedis jedis = pool.getResource();
-        jedis.select(database);
+        Jedis jedis = getJedisResource(database);
         String userId;
+        boolean isConnectionIssue = false;
         try {
             userId = jedis.hget(identifier, "uuid");
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while getting userId for [" + identifier + "] for service ["
+                    + service + "]";
+            LOGGER.error(errMsg, e);
+            throw new ResolverException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while getting userId for [" + identifier + "] for service [" + service + "]";
+            LOGGER.error(errMsg, e);
+            throw new ResolverException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
         if (userId == null) {
             final String errmsg = "User [" + identifier + "] not found for [" + service + "]";
@@ -116,13 +145,27 @@ public class JedisResolver implements Resolver {
             LOGGER.error(errmsg, e);
             throw new ResolverException(errmsg, e);
         }
-        Jedis jedis = pool.getResource();
+        Jedis jedis = getJedisResource(database);
         String username;
+        boolean isConnectionIssue = false;
         try {
-            jedis.select(database);
             username = jedis.hget(identifier, "username");
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connectino error while getting username for [" + identifier + "] for service ["
+                    + service + "]";
+            LOGGER.error(errMsg, e);
+            throw new ResolverException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while getting username for [" + identifier + "] for service [" + service + "]";
+            LOGGER.error(errMsg, e);
+            throw new ResolverException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
         if (username == null) {
             final String errmsg = "User [" + identifier + "] not found for [" + service + "]";
@@ -149,38 +192,96 @@ public class JedisResolver implements Resolver {
             LOGGER.error(errMsg, e);
             throw new ResolverException(errMsg, e);
         }
-        Jedis jedis = pool.getResource();
-        jedis.select(database);
+        Jedis jedis = getJedisResource(database);
+        boolean isConnectionIssue = false;
         try {
             jedis.hset(identifier, "uuid", userId.toString());
             jedis.hset(identifier, "username", username);
             long numberOfElements = jedis.rpush(service, userId.toString());
             jedis.hset(identifier, "index", "" + (--numberOfElements));
-
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while storing user [" + username + userId + "] for service ["
+                    + service + "]";
+            LOGGER.error(errMsg, e);
+            throw new ResolverException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while storing user [" + username + userId + "] for service [" + service + "]";
+            LOGGER.error(errMsg, e);
+            throw new ResolverException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
     }
 
     @Override
     public List<String> getUserIdsFor(String serviceName, int start, int stop) throws ResolverException {
-        Jedis jedis;
+        int database;
         try {
-            int database = services.get(serviceName);
-            jedis = pool.getResource();
-            jedis.select(database);
-        } catch (Exception e) {
+            database = services.get(serviceName);
+        } catch (NullPointerException e) {
             final String errMsg = "Service [" + serviceName + "] not supported";
             LOGGER.error(errMsg, e);
             throw new ResolverException(errMsg, e);
         }
-
+        Jedis jedis = getJedisResource(database);
+        List<String> userIds;
+        boolean isConnectionIssue = false;
         try {
-            return jedis.lrange(serviceName, start, stop);
+            userIds = jedis.lrange(serviceName, start, stop);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while retrieving userIds [from " + start + " to " + stop
+                    + "] for service [" + serviceName + "]";
+            LOGGER.error(errMsg, e);
+            throw new ResolverException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while retrieving userIds [from " + start + " to " + stop + "] for service ["
+                    + serviceName + "]";
+            LOGGER.error(errMsg, e);
+            throw new ResolverException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
+        return userIds;
     }
 
+    private Jedis getJedisResource(int database) throws ResolverException {
+        Jedis jedis;
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new ResolverException(errMsg, e);
+        }
+        boolean isConnectionIssue = false;
+        try {
+            jedis.select(database);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while selecting database [" + database + "]";
+            LOGGER.error(errMsg, e);
+            throw new ResolverException(errMsg, e);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "]";
+            LOGGER.error(errMsg, e);
+            throw new ResolverException(errMsg, e);
+        } finally {
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            }
+        }
+        return jedis;
+    }
 
 }

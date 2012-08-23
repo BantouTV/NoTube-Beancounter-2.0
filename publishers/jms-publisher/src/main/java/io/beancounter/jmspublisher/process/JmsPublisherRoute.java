@@ -1,15 +1,10 @@
 package io.beancounter.jmspublisher.process;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessageCreator;
 
 import io.beancounter.commons.model.activity.ResolvedActivity;
 import it.rainet.portal.cms.client.integration.lightstreamer.LightstreamerDTO;
@@ -18,11 +13,11 @@ public class JmsPublisherRoute extends RouteBuilder {
     private final String ORIGINAL_BODY_HEADER = "OriginalBody";
 
     private ActivityToJmsConverter activityToJmsConverter;
-    private JmsTemplate jmsTemplate;
+    private JmsPublisher jmsPublisher;
 
-    public JmsPublisherRoute(ActivityToJmsConverter activityToJmsConverter, JmsTemplate jmsTemplate) {
+    public JmsPublisherRoute(ActivityToJmsConverter activityToJmsConverter, JmsPublisher jmsPublisher) {
         this.activityToJmsConverter = activityToJmsConverter;
-        this.jmsTemplate = jmsTemplate;
+        this.jmsPublisher = jmsPublisher;
     }
 
     public void configure() {
@@ -39,8 +34,8 @@ public class JmsPublisherRoute extends RouteBuilder {
                     public void process(Exchange exchange) throws Exception {
                         ResolvedActivity body = exchange.getIn().getBody(ResolvedActivity.class);
                         String originalBody = exchange.getIn().getHeader(ORIGINAL_BODY_HEADER, String.class);
-                        LightstreamerDTO lightstreamerDTO = activityToJmsConverter
-                                .wrapInExternalObject(body, originalBody);
+                        LightstreamerDTO lightstreamerDTO = activityToJmsConverter.wrapInExternalObject(body,
+                                originalBody);
                         exchange.getOut().setBody(lightstreamerDTO);
                     }
                 })
@@ -49,34 +44,8 @@ public class JmsPublisherRoute extends RouteBuilder {
 
                 .to("log:jmsPublisher?showAll=true&multiline=true&level=DEBUG")
 
-                .process(new Processor() {
-                    @Override
-                    public void process(Exchange exchange) throws Exception {
-                        final LightstreamerDTO dto = exchange.getIn().getBody(LightstreamerDTO.class);
-
-                        try {
-
-                            jmsTemplate.send(new MessageCreator() {
-                                public Message createMessage(Session session) throws JMSException {
-                                    log.debug("Creating Lightstreamer message [" + dto + "]");
-                                    return session.createObjectMessage(dto);
-                                }
-                            });
-                        } catch (Exception e) {
-                            log.error("Error sending jms message", e);
-                            throw e;
-                        }
-                    }
-                })
-
-                .to("log:jmsPublisher?showAll=true&multiline=true&level=DEBUG")
-
-        ;
+                .bean(jmsPublisher);
     }
-
-//    protected String toEndpoint() {
-//        return "jms:topic:{{topic}}?testConnectionOnStartup=true";
-//    }
 
     protected String fromEndpoint() {
         return "kestrel://{{kestrel.queue.jms.url}}";

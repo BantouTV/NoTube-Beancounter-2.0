@@ -9,6 +9,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import io.beancounter.applications.model.Application;
 import io.beancounter.commons.helper.jedis.JedisPoolFactory;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.io.IOException;
 import java.net.URL;
@@ -49,7 +50,6 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
                 email,
                 callback
         );
-        Jedis jedis;
         String applicationJson;
         try {
             applicationJson = mapper.writeValueAsString(application);
@@ -61,37 +61,77 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
                     e
             );
         }
-        jedis = pool.getResource();
+        Jedis jedis = getJedisResource();
+        boolean isConnectionIssue = false;
         try {
-            jedis.select(database);
             jedis.set(application.getApiKey().toString(), applicationJson);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while storing application [" + applicationJson
+                    + "] with id [" + application.getApiKey().toString() + "]";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while storing application [" + applicationJson + "] with id [" +
+                    application.getApiKey().toString() + "]";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
         return application.getApiKey();
     }
 
     @Override
     public void deregisterApplication(UUID key) throws ApplicationsManagerException {
-        Jedis jedis = pool.getResource();
+        Jedis jedis = getJedisResource();
+        boolean isConnectionIssue = false;
         try {
-            jedis.select(database);
             jedis.del(key.toString());
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while deleting application with id [" + key.toString() + "]";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while deleting application with id [" + key.toString() + "]";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
     }
 
     @Override
     public synchronized Application getApplicationByApiKey(UUID key) throws ApplicationsManagerException {
-        Jedis jedis;
+        Jedis jedis = getJedisResource();
         String applicationJson;
-        jedis = pool.getResource();
+        boolean isConnectionIssue = false;
         try {
-            jedis.select(database);
             applicationJson = jedis.get(key.toString());
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while retrieving application with id [" + key.toString() + "]";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while retrieving application with id [" + key.toString() + "]";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
         if(applicationJson == null) {
             return null;
@@ -117,4 +157,35 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
         }
         return application.hasPrivileges(action, object);
     }
+
+    private Jedis getJedisResource() throws ApplicationsManagerException {
+        Jedis jedis;
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
+        }
+        boolean isConnectionIssue = false;
+        try {
+            jedis.select(database);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while selecting database [" + database + "]";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "]";
+            LOGGER.error(errMsg, e);
+            throw new ApplicationsManagerException(errMsg, e);
+        } finally {
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            }
+        }
+        return jedis;
+    }
+
 }

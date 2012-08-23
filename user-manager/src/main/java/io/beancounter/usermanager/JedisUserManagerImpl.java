@@ -21,6 +21,7 @@ import io.beancounter.resolver.ResolverException;
 import io.beancounter.resolver.ResolverMappingNotFoundException;
 import io.beancounter.usermanager.services.auth.ServiceAuthorizationManager;
 import io.beancounter.usermanager.services.auth.ServiceAuthorizationManagerException;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.io.IOException;
 import java.net.URL;
@@ -65,7 +66,6 @@ public class JedisUserManagerImpl implements UserManager {
 
     @Override
     public synchronized void storeUser(User user) throws UserManagerException {
-        Jedis jedis;
         String userJson;
         try {
             userJson = mapper.writeValueAsString(user);
@@ -77,25 +77,50 @@ public class JedisUserManagerImpl implements UserManager {
                     e
             );
         }
-        jedis = pool.getResource();
-        jedis.select(database);
+        Jedis jedis = getJedisResource();
+        boolean isConnectionIssue = false;
         try {
             jedis.set(user.getUsername(), userJson);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while storing user [" + user.getId() + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while storing user [" + user.getId() + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
     }
 
     @Override
     public User getUser(String username) throws UserManagerException {
-        Jedis jedis;
+        Jedis jedis = getJedisResource();
         String userJson;
-        jedis = pool.getResource();
-        jedis.select(database);
+        boolean isConnectionIssue = false;
         try {
             userJson = jedis.get(username);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while retrieving user [" + username + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while retrieving user [" + username + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
         if (userJson == null) {
             return null;
@@ -114,12 +139,25 @@ public class JedisUserManagerImpl implements UserManager {
 
     @Override
     public synchronized void deleteUser(String username) throws UserManagerException {
-        Jedis jedis = pool.getResource();
-        jedis.select(database);
+        Jedis jedis = getJedisResource();
+        boolean isConnectionIssue = false;
         try {
             jedis.del(username);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while deleting user [" + username + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while deleting user [" + username + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
     }
 
@@ -458,5 +496,35 @@ public class JedisUserManagerImpl implements UserManager {
         User user = getUser(username);
         user.addService(service, auth);
         storeUser(user);
+    }
+    
+    private Jedis getJedisResource() throws UserManagerException {
+        Jedis jedis;
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        }
+        boolean isConnectionIssue = false;
+        try {
+            jedis.select(database);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while selecting database [" + database + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "]";
+            LOGGER.error(errMsg, e);
+            throw new UserManagerException(errMsg, e);
+        } finally {
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            }
+        }
+        return jedis;
     }
 }

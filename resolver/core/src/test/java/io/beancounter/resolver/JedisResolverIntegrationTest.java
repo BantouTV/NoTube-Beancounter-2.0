@@ -2,8 +2,8 @@ package io.beancounter.resolver;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import junit.framework.Assert;
 import org.joda.time.DateTime;
+import org.testng.Assert;
 import org.testng.annotations.*;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.testng.AssertJUnit.assertEquals;
 
 /**
  * @author Enrico Candino ( enrico.candino@gmail.com )
@@ -71,8 +70,12 @@ public class JedisResolverIntegrationTest {
         jedis.hset("facebook_username", "username", "beancounter-username");
         Activity event = getEventActivity();
         event.getContext().setUsername("not-existing-user");
-        UUID resolved = resolver.resolve(event);
-        Assert.assertNull(resolved);
+        try {
+            resolver.resolve(event);
+            Assert.fail();
+        } catch (ResolverException e) {
+            Assert.assertEquals(e.getMessage(), "User [not-existing-user] not found for [facebook]");
+        }
     }
 
     @Test
@@ -82,8 +85,12 @@ public class JedisResolverIntegrationTest {
         jedis.hset("twitter_username", "username", "beancounter-username");
         Activity unsupportedActivity = getEventActivity();
         unsupportedActivity.setVerb(Verb.CHECKIN);
-        UUID resolved = resolver.resolve(unsupportedActivity);
-        Assert.assertNull(resolved);
+        try {
+            resolver.resolve(unsupportedActivity);
+            Assert.fail();
+        } catch (ResolverException e) {
+            Assert.assertEquals(e.getMessage(), "User [facebook_username] not found for [facebook]");
+        }
     }
 
     @Test
@@ -95,9 +102,9 @@ public class JedisResolverIntegrationTest {
         jedis.rpush(serviceName, "120");
 
         List<String> userIds = resolver.getUserIdsFor(serviceName, 0, 10);
-        assertEquals(userIds.get(0), "121");
-        assertEquals(userIds.get(1), "122");
-        assertEquals(userIds.get(2), "120");
+        Assert.assertEquals(userIds.get(0), "121");
+        Assert.assertEquals(userIds.get(1), "122");
+        Assert.assertEquals(userIds.get(2), "120");
     }
 
     private Activity getTweetActivity() throws Exception {

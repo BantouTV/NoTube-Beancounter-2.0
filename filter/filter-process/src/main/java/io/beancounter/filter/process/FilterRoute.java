@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.google.inject.Inject;
 
+import io.beancounter.filter.FilterServiceException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
@@ -25,14 +26,17 @@ public class FilterRoute extends RouteBuilder {
     public void configure() {
         errorHandler(deadLetterChannel(errorEndpoint()));
 
+        try {
+            filterService.refresh();
+        } catch (FilterServiceException e) {
+            throw new RuntimeException(e);
+        }
+
         from(fromKestrel())
                 .unmarshal().json(JsonLibrary.Jackson, ResolvedActivity.class)
-
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
-                        // TODO (this was never called)
-                        filterService.refresh();
                         ResolvedActivity resolvedActivity = exchange.getIn().getBody(ResolvedActivity.class);
                         Set<String> targets = filterService.processActivity(resolvedActivity);
                         targets = appendTargetPrefix(targets);
@@ -52,7 +56,7 @@ public class FilterRoute extends RouteBuilder {
                     @Override
                     public void process(Exchange exchange) throws Exception {
                         String filterId = exchange.getIn().getBody(String.class);
-                        LOGGER.debug("reloading filter {}", filterId);
+                        LOGGER.debug("reloading filter [{}]", filterId);
                         filterService.refresh(filterId);
                     }
                 });

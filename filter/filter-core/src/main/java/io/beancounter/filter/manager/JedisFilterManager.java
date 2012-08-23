@@ -11,6 +11,7 @@ import redis.clients.jedis.JedisPool;
 import io.beancounter.commons.helper.jedis.JedisPoolFactory;
 import io.beancounter.filter.model.Filter;
 import io.beancounter.filter.model.pattern.ActivityPattern;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class JedisFilterManager implements FilterManager {
 
     @Inject
     @Named("redis.db.filters")
-    private int db;
+    private int database;
 
     private ObjectMapper objectMapper;
 
@@ -71,26 +72,51 @@ public class JedisFilterManager implements FilterManager {
             LOGGER.error(errMsg, e);
             throw new FilterManagerException(errMsg, e);
         }
-        Jedis jedis = pool.getResource();
-        jedis.select(db);
+        Jedis jedis = getJedisResource();
+        boolean isConnectionIssue = false;
         try {
             jedis.set(name, filterJson);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while registering filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while registering filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
-
         return name;
     }
 
     @Override
     public Filter get(String name) throws FilterManagerException {
-        Jedis jedis = pool.getResource();
-        jedis.select(db);
+        Jedis jedis = getJedisResource();
         String filterJson;
+        boolean isConnectionIssue = false;
         try {
             filterJson = jedis.get(name);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while retrieving filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while retrieving filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
         if (filterJson == null) {
             return null;
@@ -113,17 +139,30 @@ public class JedisFilterManager implements FilterManager {
             LOGGER.error(errMsg);
             throw new FilterManagerException(errMsg);
         }
-        // notify the filter has been stopped
-        notify(name);
 
         // then delete it
-        Jedis jedis = pool.getResource();
-        jedis.select(db);
+        Jedis jedis = getJedisResource();
+        boolean isConnectionIssue = false;
         try {
             jedis.del(name);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while deleting filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while deleting filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
+        // notify the filter has been deleted
+        notify(name);
     }
 
     @Override
@@ -141,12 +180,24 @@ public class JedisFilterManager implements FilterManager {
     }
 
     private void notify(String name) throws FilterManagerException {
-        Jedis jedis = pool.getResource();
-        jedis.select(db);
+        Jedis jedis = getJedisResource();
+        boolean isConnectionIssue = false;
         try {
             jedis.publish(CHANNEL, name);
+        } catch (JedisConnectionException e) {
+            final String errMsg = "Jedis Connection error while publishing filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while publishing filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
     }
 
@@ -175,28 +226,84 @@ public class JedisFilterManager implements FilterManager {
             LOGGER.error(errMsg, e);
             throw new FilterManagerException(errMsg, e);
         }
-        Jedis jedis = pool.getResource();
-        jedis.select(db);
+        Jedis jedis = getJedisResource();
+        boolean isConnectionIssue = false;
         try {
             jedis.set(name, filterJson);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while updating filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while updating filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
         } finally {
-            pool.returnResource(jedis);
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
     }
 
     @Override
     public Collection<String> getRegisteredFilters() throws FilterManagerException {
-        Jedis jedis = pool.getResource();
-        jedis.select(db);
+        Jedis jedis = getJedisResource();
         Set<String> keys;
+        boolean isConnectionIssue = false;
         try {
             keys = jedis.keys("*");
-        } finally {
-            pool.returnResource(jedis);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while retrieving filters";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while retrieving filters";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        }  finally {
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            } else {
+                pool.returnResource(jedis);
+            }
         }
         if (keys == null) {
             return new ArrayList<String>();
         }
         return new ArrayList<String>(keys);
+    }
+
+    private Jedis getJedisResource() throws FilterManagerException {
+        Jedis jedis;
+        try {
+            jedis = pool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        }
+        boolean isConnectionIssue = false;
+        try {
+            jedis.select(database);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while selecting database [" + database + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        } catch (Exception e) {
+            pool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "]";
+            LOGGER.error(errMsg, e);
+            throw new FilterManagerException(errMsg, e);
+        } finally {
+            if(isConnectionIssue) {
+                pool.returnBrokenResource(jedis);
+            }
+        }
+        return jedis;
     }
 }

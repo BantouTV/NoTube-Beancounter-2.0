@@ -20,8 +20,7 @@
         <property name="environment">
             <props>
                 <prop key="java.naming.provider.url">r{renderingservice.jms.naming.provider.url}</prop>
-                <prop key="java.naming.factory.url.pkgs">r{renderingservice.jms.naming.factory.url.pkgs}
-                </prop>
+                <prop key="java.naming.factory.url.pkgs">r{renderingservice.jms.naming.factory.url.pkgs}</prop>
                 <prop key="java.naming.factory.initial">r{renderingservice.jms.naming.factory.initial}</prop>
             </props>
         </property>
@@ -60,6 +59,9 @@
     </bean>
 
     <bean id="activityToJmsConverter" class="io.beancounter.jmspublisher.process.ActivityToJmsConverter"/>
+    <bean id="jmsPublisher" class="io.beancounter.jmspublisher.process.JmsPublisher">
+        <constructor-arg ref="lightstreamerJmsTemplate"/>
+    </bean>
 
     <camel:camelContext xmlns="http://camel.apache.org/schema/spring">
         <camel:propertyPlaceholder id="properties" location="classpath:beancounter.properties"/>
