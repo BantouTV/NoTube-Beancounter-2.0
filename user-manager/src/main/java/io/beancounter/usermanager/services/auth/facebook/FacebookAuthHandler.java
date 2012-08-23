@@ -89,7 +89,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                 .provider(FacebookApi.class)
                 .apiKey(service.getApikey())
                 .apiSecret(service.getSecret())
-                .scope("read_stream,user_likes,user_location,user_interests,user_activities")
+                .scope("read_stream,user_likes,user_location,user_interests,user_activities,publish_actions")
                 .callback(service.getOAuthCallback() + username)
                 .build();
         Token token = null;
@@ -110,7 +110,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                 .provider(FacebookApi.class)
                 .apiKey(service.getApikey())
                 .apiSecret(service.getSecret())
-                .scope("read_stream,user_likes,user_location,user_interests,user_activities")
+                .scope("read_stream,user_likes,user_location,user_interests,user_activities,publish_actions")
                 .callback(service.getAtomicOAuthCallback().toString())
                 .build();
         Token token = null;
@@ -137,7 +137,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                 .provider(FacebookApi.class)
                 .apiKey(service.getApikey())
                 .apiSecret(service.getSecret())
-                .scope("read_stream,user_likes,user_location,user_interests,user_activities")
+                .scope("read_stream,user_likes,user_location,user_interests,user_activities,publish_actions")
                 .callback(service.getAtomicOAuthCallback().toString() + "web/" + encodedRedirect)
                 .build();
         Token token = null;
@@ -159,7 +159,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                 .provider(FacebookApi.class)
                 .apiKey(service.getApikey())
                 .apiSecret(service.getSecret())
-                .scope("read_stream,user_likes,user_location,user_interests,user_activities")
+                .scope("read_stream,user_likes,user_location,user_interests,user_activities,publish_actions")
                 .callback(callback + username)
                 .build();
         Token token = null;
@@ -184,7 +184,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                 .provider(FacebookApi.class)
                 .apiKey(service.getApikey())
                 .apiSecret(service.getSecret())
-                .scope("read_stream,user_likes,user_location,user_interests,user_activities")
+                .scope("read_stream,user_likes,user_location,user_interests,user_activities,publish_actions")
                 .callback(service.getAtomicOAuthCallback().toString())
                 .build();
         Token requestToken = null;
@@ -222,7 +222,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                 .provider(FacebookApi.class)
                 .apiKey(service.getApikey())
                 .apiSecret(service.getSecret())
-                .scope("read_stream,user_likes,user_location,user_interests,user_activities")
+                .scope("read_stream,user_likes,user_location,user_interests,user_activities,publish_actions")
                 .callback(service.getAtomicOAuthCallback().toString() + "web/" + encodedRedirect)
                 .build();
         Token requestToken = null;
