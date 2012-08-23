@@ -1,6 +1,7 @@
 package io.beancounter.platform;
 
 import com.google.inject.Inject;
+import io.beancounter.commons.helper.UriUtils;
 import io.beancounter.platform.validation.ApiKeyValidation;
 import io.beancounter.platform.validation.RequestValidator;
 import io.beancounter.platform.validation.UsernameValidation;
@@ -410,33 +411,36 @@ public class UserService extends JsonService {
             return error(e, "Malformed redirect URL");
         }
     }
-              //  /rest/user/oauth/atomic/callback/facebook/web/
+
     @GET
     @Path("/oauth/atomic/callback/{service}/web/{redirect}")
-    public Response handleAtomicAuthCallbackWeb(
-        @PathParam("service") String service,
-        @PathParam("redirect") String finalRedirect,
-        @QueryParam("code") String verifier
+    public Response handleAtomicOAuthCallbackWeb(
+            @PathParam("service") String service,
+            @PathParam("redirect") String finalRedirect,
+            @QueryParam("oauth_token") String token,
+            @QueryParam("oauth_verifier") String verifier
     ) {
         String decodedFinalRedirect;
         try {
-            decodedFinalRedirect = URLDecoder.decode(finalRedirect, "UTF-8");
-            decodedFinalRedirect = URLDecoder.decode(decodedFinalRedirect, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return error(e, "error while url decoding [" + finalRedirect + "]");
+            decodedFinalRedirect = UriUtils.decodeBase64(finalRedirect);
+        } catch (UnsupportedEncodingException uee) {
+            return error(uee, "Error while decoding URL [" + finalRedirect + "]");
         }
+
         AtomicSignUp signUp;
         try {
-            signUp = userManager.storeUserFromOAuth(service, verifier, decodedFinalRedirect);
-        } catch (UserManagerException e) {
-            return error(e, "Error while OAuth exchange for service: [" + service + "]");
+            signUp = userManager.storeUserFromOAuth(service, token, verifier, decodedFinalRedirect);
+        } catch (UserManagerException ume) {
+            return error(ume, "Error while doing OAuth exchange for service: [" + service + "]");
         }
+
         User user;
         try {
             user = userManager.getUser(signUp.getUsername());
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user: [" + signUp.getUsername() + "]");
         }
+
         final int LIMIT = 40;
         List<Activity> activities;
         try {
@@ -449,11 +453,13 @@ public class UserService extends JsonService {
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user: [" + signUp.getUsername() + "] initial activities");
         }
+
         ObjectMapper mapper = new ObjectMapper();
         for (Activity activity : activities) {
             ResolvedActivity ra = new ResolvedActivity();
             ra.setActivity(activity);
             ra.setUserId(signUp.getUserId());
+            ra.setUser(user);
             String raJson;
             try {
                 raJson = mapper.writeValueAsString(ra);
@@ -467,33 +473,46 @@ public class UserService extends JsonService {
                 return error(e, "Error while pushing down json resolved activity: [" + raJson + "] for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
             }
         }
+
         URI finalRedirectUri;
         try {
             finalRedirectUri = new URI(decodedFinalRedirect + "?username=" + signUp.getUsername());
-        } catch (URISyntaxException e) {
-            return error(e, "Malformed redirect URL");
+        } catch (URISyntaxException use) {
+            return error(use, "Malformed redirect URL");
         }
         return Response.temporaryRedirect(finalRedirectUri).build();
     }
 
     @GET
-    @Path("/oauth/atomic/callback/{service}/")
-    public Response handleAtomicAuthCallbackMobile(
-            @PathParam("service") String service,
+    @Path("/oauth/atomic/callback/facebook/web/{redirect}")
+    public Response handleAtomicFacebookOAuthCallbackWeb(
+            @PathParam("redirect") String finalRedirect,
             @QueryParam("code") String verifier
+    ) {
+        return handleAtomicOAuthCallbackWeb("facebook", finalRedirect, null, verifier);
+    }
+
+    @GET
+    @Path("/oauth/atomic/callback/{service}/")
+    public Response handleAtomicOAuthCallbackMobile(
+            @PathParam("service") String service,
+            @QueryParam("oauth_token") String token,
+            @QueryParam("oauth_verifier") String verifier
     ) {
         AtomicSignUp signUp;
         try {
-            signUp = userManager.storeUserFromOAuth(service, verifier);
-        } catch (UserManagerException e) {
-            return error(e, "Error while OAuth exchange for service: [" + service + "]");
+            signUp = userManager.storeUserFromOAuth(service, token, verifier);
+        } catch (UserManagerException ume) {
+            return error(ume, "Error while doing OAuth exchange for service: [" + service + "]");
         }
+
         User user;
         try {
             user = userManager.getUser(signUp.getUsername());
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user: [" + signUp.getUsername() + "]");
         }
+
         final int LIMIT = 40;
         List<Activity> activities;
         try {
@@ -506,11 +525,13 @@ public class UserService extends JsonService {
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user: [" + signUp.getUsername() + "] initial activities");
         }
+
         ObjectMapper mapper = new ObjectMapper();
         for (Activity activity : activities) {
             ResolvedActivity ra = new ResolvedActivity();
             ra.setActivity(activity);
             ra.setUserId(signUp.getUserId());
+            ra.setUser(user);
             String raJson;
             try {
                 raJson = mapper.writeValueAsString(ra);
@@ -524,6 +545,7 @@ public class UserService extends JsonService {
                 return error(e, "Error while pushing down json resolved activity: [" + raJson + "] for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
             }
         }
+
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
                 new AtomicSignUpResponse(
@@ -533,6 +555,14 @@ public class UserService extends JsonService {
                 )
         );
         return rb.build();
+    }
+
+    @GET
+    @Path("/oauth/atomic/callback/facebook/")
+    public Response handleAtomicFacebookOAuthCallbackMobile(
+            @QueryParam("code") String verifier
+    ) {
+        return handleAtomicOAuthCallbackMobile("facebook", null, verifier);
     }
 
     @GET

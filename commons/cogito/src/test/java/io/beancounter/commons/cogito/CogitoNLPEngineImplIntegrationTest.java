@@ -20,7 +20,7 @@ import java.util.Set;
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-public class CogitoNLPEngineImplTest {
+public class CogitoNLPEngineImplIntegrationTest {
 
     private NLPEngine nlp;
 
@@ -65,7 +65,7 @@ public class CogitoNLPEngineImplTest {
     }
 
     private String getText(String fileName) {
-        InputStream is = CogitoNLPEngineImplTest.class.getResourceAsStream(fileName);
+        InputStream is = CogitoNLPEngineImplIntegrationTest.class.getResourceAsStream(fileName);
         try {
             return IOUtils.toString(is);
         } catch (IOException e) {
