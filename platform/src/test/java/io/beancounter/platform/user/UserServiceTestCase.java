@@ -10,11 +10,17 @@ import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import io.beancounter.applications.ApplicationsManager;
 import io.beancounter.applications.MockApplicationsManager;
+import io.beancounter.commons.helper.UriUtils;
 import io.beancounter.commons.model.OAuthToken;
 import io.beancounter.commons.model.User;
+import io.beancounter.commons.model.activity.Activity;
+import io.beancounter.commons.model.activity.ActivityBuilder;
+import io.beancounter.commons.model.activity.DefaultActivityBuilder;
+import io.beancounter.commons.model.activity.ResolvedActivity;
+import io.beancounter.commons.model.activity.Tweet;
+import io.beancounter.commons.model.activity.Verb;
 import io.beancounter.commons.tests.Tests;
 import io.beancounter.commons.tests.TestsBuilder;
-import io.beancounter.commons.tests.TestsException;
 import io.beancounter.platform.APIResponse;
 import io.beancounter.platform.AbstractJerseyTestCase;
 import io.beancounter.platform.ApplicationService;
@@ -25,8 +31,8 @@ import io.beancounter.platform.responses.StringPlatformResponse;
 import io.beancounter.platform.responses.UserPlatformResponse;
 import io.beancounter.profiles.MockProfiles;
 import io.beancounter.profiles.Profiles;
-import io.beancounter.queues.MockQueues;
 import io.beancounter.queues.Queues;
+import io.beancounter.usermanager.AtomicSignUp;
 import io.beancounter.usermanager.UserManager;
 import io.beancounter.usermanager.UserManagerException;
 import org.apache.commons.httpclient.HttpClient;
@@ -36,6 +42,8 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.joda.time.DateTime;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
@@ -44,13 +52,13 @@ import org.testng.annotations.Test;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.mockito.Matchers.anyChar;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -68,6 +76,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     private static String APIKEY;
     private static UserManager userManager;
+    private static Queues queues;
 
     protected UserServiceTestCase() {
         super(9995);
@@ -99,7 +108,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @BeforeMethod
     private void resetMocks() throws Exception {
-        reset(userManager);
+        reset(userManager, queues);
     }
 
     private UUID registerTestApplication() throws IOException {
@@ -708,6 +717,83 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual.getMessage(), "[null] is not a valid URL");
     }
 
+    @Test
+    public void handlingAtomicTwitterOAuthCallbackFromWebShouldRedirectWithoutErrors() throws Exception {
+        String baseQuery = "user/oauth/atomic/callback/%s/web/%s?oauth_token=%s&oauth_verifier=%s";
+        String service = "twitter";
+        String serviceUserId = "1234564321";
+        String username = "test-user";
+        String token = "twitter-oauth-token";
+        String verifier = "twitter-oauth-verifier";
+        String decodedFinalRedirectUrl = "http://example.com/final/redirect";
+        String encodedFinalRedirectUrl = UriUtils.encodeBase64(decodedFinalRedirectUrl);
+        String query = String.format(
+                baseQuery,
+                service,
+                encodedFinalRedirectUrl,
+                token,
+                verifier
+        );
+
+        User user = new User("Test", "User", username, "password");
+        AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId);
+        List<Activity> activities = generateActivities(service, serviceUserId, 3);
+
+        when(userManager.storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl))
+                .thenReturn(signUp);
+        when(userManager.getUser(username)).thenReturn(user);
+        when(userManager.grabUserActivities(user, serviceUserId, service, 40))
+                .thenReturn(activities);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+
+        assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        assertFalse(responseBody.isEmpty());
+        assertEquals(getMethod.getURI().getHost(), "www.iana.org");
+
+        ObjectMapper mapper = new ObjectMapper();
+        for (Activity activity : activities) {
+            ResolvedActivity ra = new ResolvedActivity();
+            ra.setActivity(activity);
+            ra.setUserId(user.getId());
+            ra.setUser(user);
+
+            verify(queues).push(mapper.writeValueAsString(ra));
+        }
+        verify(userManager).storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl);
+    }
+
+    private List<Activity> generateActivities(
+            String service,
+            String serviceUserId,
+            int numActivities
+    ) throws Exception {
+        List<Activity> activities = new ArrayList<Activity>(numActivities);
+        ActivityBuilder builder = new DefaultActivityBuilder();
+
+        for (int i = 0; i < numActivities; i++) {
+            builder.push();
+            builder.setVerb(Verb.TWEET);
+            Map<String, Object> fields = new HashMap<String, Object>();
+            fields.put("setText", "Fake tweet number " + (i + 1));
+            builder.setObject(
+                    Tweet.class,
+                    new URL("http://twitter.com/status/1237281" + i),
+                    "Tweet Name",
+                    fields
+            );
+            builder.setContext(new DateTime(), service, serviceUserId);
+            activities.add(builder.pop());
+        }
+
+        return activities;
+    }
+
     public static class UserServiceTestConfig extends GuiceServletContextListener {
         @Override
         protected Injector getInjector() {
@@ -715,10 +801,11 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
                 @Override
                 protected void configureServlets() {
                     userManager = mock(UserManager.class);
+                    queues = mock(Queues.class);
                     bind(ApplicationsManager.class).to(MockApplicationsManager.class).asEagerSingleton();
                     bind(UserManager.class).toInstance(userManager);
                     bind(Profiles.class).to(MockProfiles.class);
-                    bind(Queues.class).to(MockQueues.class);
+                    bind(Queues.class).toInstance(queues);
 
                     // add REST services
                     bind(ApplicationService.class);

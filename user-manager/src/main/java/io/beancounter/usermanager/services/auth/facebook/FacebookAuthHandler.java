@@ -6,6 +6,8 @@ import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
 import com.restfb.types.Post;
+import io.beancounter.commons.helper.UriUtils;
+import org.apache.commons.codec.EncoderException;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.model.Token;
@@ -31,7 +33,6 @@ import io.beancounter.listener.facebook.core.model.FacebookData;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -128,11 +129,16 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
     public OAuthToken getToken(URL finalRedirectUrl) throws AuthHandlerException {
         String encodedRedirect;
         try {
-            encodedRedirect = URLEncoder.encode(finalRedirectUrl.toString(), "UTF-8");
-            encodedRedirect = URLEncoder.encode(encodedRedirect, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new AuthHandlerException("", e);
+            encodedRedirect = UriUtils.encodeBase64(finalRedirectUrl.toString());
+        } catch (UnsupportedEncodingException uee) {
+            throw new AuthHandlerException("UTF-8 encoding is not supported on this system.", uee);
+        } catch (EncoderException eex) {
+            throw new AuthHandlerException(
+                    "Error while encoding final redirect URL [" + finalRedirectUrl + "].",
+                    eex
+            );
         }
+
         OAuthService facebookOAuth = new ServiceBuilder()
                 .provider(FacebookApi.class)
                 .apiKey(service.getApikey())
@@ -210,13 +216,19 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
         if (verifier == null) {
             auth((User) null, null);
         }
+
         String encodedRedirect;
         try {
-            encodedRedirect = URLEncoder.encode(finalRedirect, "UTF-8");
-            encodedRedirect = URLEncoder.encode(encodedRedirect, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new AuthHandlerException("", e);
+            encodedRedirect = UriUtils.encodeBase64(finalRedirect);
+        } catch (UnsupportedEncodingException uee) {
+            throw new AuthHandlerException("UTF-8 encoding is not supported on this system.", uee);
+        } catch (EncoderException eex) {
+            throw new AuthHandlerException(
+                    "Error while encoding final redirect URL [" + finalRedirect + "].",
+                    eex
+            );
         }
+
         Verifier v = new Verifier(verifier);
         OAuthService facebookOAuth = new ServiceBuilder()
                 .provider(FacebookApi.class)

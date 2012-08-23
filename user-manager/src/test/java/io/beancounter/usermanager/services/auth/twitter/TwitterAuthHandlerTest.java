@@ -121,7 +121,7 @@ public class TwitterAuthHandlerTest {
 
     @Test
     public void twitterOAuthTokenShouldHaveCorrectRedirectUrlWhenFinalRedirectUrlIsSpecified() throws Exception {
-        initTokenMocks(ATOMIC_OAUTH_CALLBACK + "web/http%3A%2F%2Fapi.beancounter.io%2Ffinal%2Fredirect");
+        initTokenMocks(ATOMIC_OAUTH_CALLBACK + "web/aHR0cDovL2FwaS5iZWFuY291bnRlci5pby9maW5hbC9yZWRpcmVjdA");
 
         OAuthToken oAuthToken = twitterHandler.getToken(new URL("http://api.beancounter.io/final/redirect"));
         assertEquals(oAuthToken.getRedirectPage().toString(), REDIRECT_URL);

@@ -2,8 +2,10 @@ package io.beancounter.usermanager.services.auth.twitter;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import io.beancounter.commons.helper.UriUtils;
 import io.beancounter.commons.helper.jedis.JedisPoolFactory;
 import io.beancounter.commons.model.User;
+import org.apache.commons.codec.EncoderException;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.TwitterApi;
 import org.scribe.model.Token;
@@ -24,7 +26,6 @@ import twitter4j.auth.AccessToken;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -131,9 +132,14 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
     public OAuthToken getToken(URL finalRedirectUrl) throws AuthHandlerException {
         String encodedFinalRedirect;
         try {
-            encodedFinalRedirect = URLEncoder.encode(finalRedirectUrl.toString(), "UTF-8");
+            encodedFinalRedirect = UriUtils.encodeBase64(finalRedirectUrl.toString());
         } catch (UnsupportedEncodingException uee) {
             throw new AuthHandlerException("UTF-8 encoding is not supported on this system.", uee);
+        } catch (EncoderException eex) {
+            throw new AuthHandlerException(
+                    "Error while encoding final redirect URL [" + finalRedirectUrl + "].",
+                    eex
+            );
         }
 
         String callback = service.getAtomicOAuthCallback() + "web/" + encodedFinalRedirect;

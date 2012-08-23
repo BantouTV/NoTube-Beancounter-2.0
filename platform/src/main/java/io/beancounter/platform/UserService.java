@@ -1,6 +1,7 @@
 package io.beancounter.platform;
 
 import com.google.inject.Inject;
+import io.beancounter.commons.helper.UriUtils;
 import io.beancounter.platform.validation.ApiKeyValidation;
 import io.beancounter.platform.validation.RequestValidator;
 import io.beancounter.platform.validation.UsernameValidation;
@@ -421,7 +422,7 @@ public class UserService extends JsonService {
     ) {
         String decodedFinalRedirect;
         try {
-            decodedFinalRedirect = URLDecoder.decode(finalRedirect, "UTF-8");
+            decodedFinalRedirect = UriUtils.decodeBase64(finalRedirect);
         } catch (UnsupportedEncodingException uee) {
             return error(uee, "Error while decoding URL [" + finalRedirect + "]");
         }
