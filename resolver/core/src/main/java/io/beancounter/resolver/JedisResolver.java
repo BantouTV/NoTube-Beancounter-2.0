@@ -197,7 +197,7 @@ public class JedisResolver implements Resolver {
         try {
             jedis.hset(identifier, "uuid", userId.toString());
             jedis.hset(identifier, "username", username);
-            long numberOfElements = jedis.rpush(service, userId.toString());
+            long numberOfElements = jedis.rpush(service, identifier);
             jedis.hset(identifier, "index", "" + (--numberOfElements));
         } catch (JedisConnectionException e) {
             isConnectionIssue = true;
