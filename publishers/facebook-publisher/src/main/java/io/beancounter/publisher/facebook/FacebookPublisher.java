@@ -41,24 +41,20 @@ public class FacebookPublisher implements Processor {
 
     private Publisher getPublisher(io.beancounter.commons.model.activity.Object object)
             throws FacebookPublisherException{
-        String className = getProperties().getProperty(object.getClass().getCanonicalName());
-        Class clazz;
-        try {
-            clazz = Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            final String errMessage = "Class [" + className + "] not found";
-            LOG.error(errMessage);
-            throw new FacebookPublisherException(errMessage, e);
-        }
+        Class clazz = (Class) getProperties().get(object.getClass().getCanonicalName());
         Publisher publisher;
         try {
             publisher = (Publisher) clazz.newInstance();
         } catch (InstantiationException e) {
-            final String errMessage = "Error while instantiating class [" + className + "]";
+            final String errMessage = "Error while instantiating class [" + clazz + "]";
             LOG.error(errMessage);
             throw new FacebookPublisherException(errMessage, e);
         } catch (IllegalAccessException e) {
-            final String errMessage = "Error while accessing [" + className + "]";
+            final String errMessage = "Error while accessing [" + clazz + "]";
+            LOG.error(errMessage);
+            throw new FacebookPublisherException(errMessage, e);
+        } catch (NullPointerException e) {
+            final String errMessage = "Object not supported [" + object.getClass().getCanonicalName() + "]";
             LOG.error(errMessage);
             throw new FacebookPublisherException(errMessage, e);
         }
@@ -67,9 +63,9 @@ public class FacebookPublisher implements Processor {
 
     private Properties getProperties() {
         Properties prop = new Properties();
-        prop.put(io.beancounter.commons.model.activity.Object.class.getCanonicalName(), ObjectPublisher.class.getCanonicalName());
-        prop.put(Comment.class.getCanonicalName(), CommentPublisher.class.getCanonicalName());
-        prop.put(TVEvent.class.getCanonicalName(), TVEventPublisher.class.getCanonicalName());
+        prop.put(io.beancounter.commons.model.activity.Object.class.getCanonicalName(), ObjectPublisher.class);
+        prop.put(Comment.class.getCanonicalName(), CommentPublisher.class);
+        prop.put(TVEvent.class.getCanonicalName(), TVEventPublisher.class);
         return prop;
     }
 }
