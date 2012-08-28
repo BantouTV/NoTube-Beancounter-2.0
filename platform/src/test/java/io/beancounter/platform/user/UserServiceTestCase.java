@@ -755,7 +755,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         assertFalse(responseBody.isEmpty());
         assertEquals(getMethod.getURI().getHost(), "www.iana.org");
-
+        /*
         ObjectMapper mapper = new ObjectMapper();
         for (Activity activity : activities) {
             ResolvedActivity ra = new ResolvedActivity();
@@ -765,6 +765,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
             verify(queues).push(mapper.writeValueAsString(ra));
         }
+        */
         verify(userManager).storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl);
     }
 
