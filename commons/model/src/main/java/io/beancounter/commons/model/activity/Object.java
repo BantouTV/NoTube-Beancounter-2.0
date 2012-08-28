@@ -17,6 +17,7 @@ import java.net.URL;
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="type")
 @JsonSubTypes({
+        @JsonSubTypes.Type(value = Object.class, name = "OBJECT"),
         @JsonSubTypes.Type(value = Tweet.class, name = "TWEET"),
         @JsonSubTypes.Type(value = Event.class, name = "EVENT"),
         @JsonSubTypes.Type(value = Article.class, name = "ARTICLE"),
