@@ -1,9 +1,5 @@
 #!/bin/bash
 
-(
-    echo "Starting " + $1 + $2 "..." >&2
+echo "Starting: " $1 " and storing the output to " ${1/-SNAPSHOT-jar-with-dependencies.jar/.out}
 
-    nohup java -jar $1-$2-SNAPSHOT-jar-with-dependencies.jar -jndiProperties /guicejndi.properties > /dev/null;
-
-) &
-
+nohup java -server -Xmx1024m -Xms1024m -jar $1 -jndiProperties /guicejndi.properties > ${1/-SNAPSHOT-jar-with-dependencies.jar/.out}  &
