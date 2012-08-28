@@ -26,7 +26,6 @@ import twitter4j.auth.AccessToken;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

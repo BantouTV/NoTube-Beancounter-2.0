@@ -180,7 +180,6 @@ public class JedisUserManagerImpl implements UserManager {
     @Override
     public OAuthToken getOAuthToken(String serviceName) throws UserManagerException {
         AuthHandler authHandler = getAuthHandlerForService(serviceName);
-
         try {
             return authHandler.getToken();
         } catch (AuthHandlerException e) {
@@ -222,7 +221,6 @@ public class JedisUserManagerImpl implements UserManager {
     public synchronized AtomicSignUp storeUserFromOAuth(String serviceName, String token, String verifier)
             throws UserManagerException {
         AuthHandler authHandler = getAuthHandlerForService(serviceName);
-
         // authorize the user
         AuthenticatedUser authUser;
         try {
@@ -424,7 +422,6 @@ public class JedisUserManagerImpl implements UserManager {
 
     AuthHandler getAuthHandlerForService(String serviceName) throws UserManagerException {
         checkServiceIsSupported(serviceName);
-
         AuthHandler authHandler;
         try {
             authHandler = sam.getHandler(serviceName);

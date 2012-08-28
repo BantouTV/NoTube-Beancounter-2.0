@@ -16,6 +16,7 @@
     <modules>
         <module>jms-publisher</module>
         <module>facebook-publisher</module>
+        <module>twitter-publisher</module>
     </modules>
 
     <dependencies>
