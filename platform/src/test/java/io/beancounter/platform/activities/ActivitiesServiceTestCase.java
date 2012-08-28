@@ -1060,4 +1060,48 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual.getStatus(), expected.getStatus());
     }
 
+    @Test
+    public void testAddActivityObject() throws IOException {
+        final String baseQuery = "activities/add/%s?apikey=%s";
+        final String username = "test-user";
+        final String activity = "{\n" +
+                "    \"verb\": \"WATCHED\",\n" +
+                "    \"object\": {\n" +
+                "        \"type\": \"OBJECT\",\n" +
+                "        \"url\": \"http: //www.rai.tv/dl/RaiTV/socialtv/PublishingBlock-cab033f4-55b9-4a4d-b20f-6540a0ef5487.html\",\n" +
+                "        \"name\": \"Miss Italia\",\n" +
+                "        \"description\": \"Concorso Miss Italia\"\n" +
+                "    },\n" +
+                "    \"context\": {\n" +
+                "        \"date\": 1340702105000,\n" +
+                "        \"service\": null,\n" +
+                "        \"mood\": null\n" +
+                "    }\n" +
+                "}";
+        final String query = String.format(
+                baseQuery,
+                username,
+                APIKEY
+        );
+        PostMethod postMethod = new PostMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("activity", activity);
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+        assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        APIResponse actual = fromJson(responseBody, APIResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                "activity successfully registered",
+                "OK"
+        );
+        assertEquals(actual.getMessage(), expected.getMessage());
+        assertEquals(actual.getStatus(), expected.getStatus());
+        assertNotNull(actual.getObject());
+        assertNotNull(UUID.fromString(actual.getObject()));
+    }
+
 }

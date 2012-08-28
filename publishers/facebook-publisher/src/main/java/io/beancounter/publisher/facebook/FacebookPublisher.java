@@ -29,7 +29,14 @@ public class FacebookPublisher implements Processor {
         Activity activity = resolvedActivity.getActivity();
 
         // Get FB user access token.
-        String token = resolvedActivity.getUser().getServices().get("facebook").getSession();
+        String token;
+        try {
+            token = resolvedActivity.getUser().getServices().get("facebook").getSession();
+        } catch (NullPointerException e) {
+            final String errMessage = "Facebook service not authorized. Do you have the token?";
+            LOG.error(errMessage);
+            throw new FacebookPublisherException(errMessage, e);
+        }
 
         Publisher publisher = getPublisher(activity.getObject());
 
