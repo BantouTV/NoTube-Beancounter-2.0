@@ -39,7 +39,7 @@ public class FacebookPublisher implements Processor {
         LOG.debug("Published message ID: " + response.getId());
     }
 
-    private Publisher getPublisher(io.beancounter.commons.model.activity.Object object)
+    Publisher getPublisher(io.beancounter.commons.model.activity.Object object)
             throws FacebookPublisherException{
         Class clazz = (Class) getProperties().get(object.getClass().getCanonicalName());
         Publisher publisher;

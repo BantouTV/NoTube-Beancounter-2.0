@@ -7,22 +7,16 @@ import com.google.inject.Module;
 import com.restfb.exception.FacebookOAuthException;
 import com.restfb.types.FacebookType;
 import io.beancounter.commons.model.activity.*;
-import io.beancounter.commons.model.activity.Object;
 import io.beancounter.commons.model.activity.rai.Comment;
-import io.beancounter.publisher.facebook.adapters.CommentPublisher;
-import io.beancounter.publisher.facebook.adapters.ObjectPublisher;
-import io.beancounter.publisher.facebook.adapters.TVEventPublisher;
+import io.beancounter.publisher.facebook.adapters.Publisher;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.testng.CamelTestSupport;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.auth.OAuthAuth;
-import io.beancounter.resolver.Resolver;
-import io.beancounter.usermanager.UserManager;
-
-import java.net.URL;
 
 import static org.mockito.Mockito.*;
 
@@ -30,10 +24,7 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
 
     private Injector injector;
     private FacebookPublisher publisher;
-
-    private ObjectPublisher objectPublisher;
-    private CommentPublisher commentPublisher;
-    private TVEventPublisher tvEventPublisher;
+    private ObjectMapper mapper;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -60,10 +51,7 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
         });
 
         publisher = spy(injector.getInstance(FacebookPublisher.class));
-
-        objectPublisher = spy(injector.getInstance(ObjectPublisher.class));
-        commentPublisher = spy(injector.getInstance(CommentPublisher.class));
-        tvEventPublisher = spy(injector.getInstance(TVEventPublisher.class));
+        mapper = new ObjectMapper();
 
         super.setUp();
     }
@@ -73,8 +61,7 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
         return injector.getInstance(FacebookPublisherRoute.class);
     }
 
-    // TODO (high) fix and enable this
-    @Test(enabled = false)
+    @Test
     public void messagesWhichAreNotResolvedActivitiesAreIgnored() throws Exception {
         MockEndpoint error = getMockEndpoint("mock:error");
         error.expectedMessageCount(2);
@@ -85,51 +72,56 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
         error.assertIsSatisfied();
     }
 
-    // TODO (high) fix and enable this
-    @Test(enabled = false)
-    public void validResolvedActivityIsProcessedCorrectly() throws Exception {
+    @Test
+    public void validRaiCommentIsProcessedCorrectly() throws Exception {
         String service = "facebook";
         String token = "123456abcdef";
         String username = "test-user";
         User user = new User("Bob", "Smith", username, "password");
-        user.addService(service, new OAuthAuth(token, "password"));
+        user.addService(service, new OAuthAuth(token, "token-secret"));
 
-        //doReturn(new FacebookType()).when(publisher).publishActivity(anyString(), anyString());
+        ResolvedActivity activity = mapper.readValue(validRaiCommentActivity(), ResolvedActivity.class);
+        Comment comment = (Comment) activity.getActivity().getObject();
 
-        doReturn(new FacebookType()).when(objectPublisher).publishActivity(anyString(), eq(Verb.LIKE), (Comment)anyObject());
+        @SuppressWarnings("unchecked")
+        Publisher<Comment> commentPublisher = mock(Publisher.class);
+        when(commentPublisher.publishActivity(token, Verb.COMMENT, comment))
+                .thenReturn(new FacebookType());
+        doReturn(commentPublisher).when(publisher).getPublisher(any(Comment.class));
 
         MockEndpoint error = getMockEndpoint("mock:error");
         error.expectedMessageCount(0);
 
-        //template.sendBody("direct:start", validResolvedActivity());
         template.sendBody("direct:start", validRaiCommentActivity());
 
         error.assertIsSatisfied();
-        //verify(publisher).publishActivity(token, "http://www.facebook.com/9876543211");
-        Object object = new Object();
-        object.setUrl(new URL("http://www.facebook.com/9876543211"));
-        verify(objectPublisher).publishActivity(token, Verb.LIKE, object);
+        verify(commentPublisher).publishActivity(token, Verb.COMMENT, comment);
     }
 
-    // TODO (high) fix and enable this
-    @Test(enabled = false)
+    @Test
     public void exceptionShouldBeHandledWhenAccessTokenIsInvalid() throws Exception {
         String service = "facebook";
         String token = "123456abcdef";
         String username = "test-user";
         User user = new User("Bob", "Smith", username, "password");
-        user.addService(service, new OAuthAuth(token, "password"));
+        user.addService(service, new OAuthAuth(token, "token-secret"));
 
-        //doThrow(new FacebookOAuthException("OAuthException", "Invalid OAuth access token."))
-        //        .when(publisher).publishActivity(anyString(), anyString());
+        ResolvedActivity activity = mapper.readValue(validRaiCommentActivity(), ResolvedActivity.class);
+        Comment comment = (Comment) activity.getActivity().getObject();
+
+        @SuppressWarnings("unchecked")
+        Publisher<Comment> commentPublisher = mock(Publisher.class);
+        when(commentPublisher.publishActivity(token, Verb.COMMENT, comment))
+                .thenThrow(new FacebookOAuthException("OAuthException", "Invalid OAuth access token."));
+        doReturn(commentPublisher).when(publisher).getPublisher(any(Comment.class));
 
         MockEndpoint error = getMockEndpoint("mock:error");
         error.expectedMessageCount(1);
 
-        template.sendBody("direct:start", validResolvedActivity());
+        template.sendBody("direct:start", validRaiCommentActivity());
 
         error.assertIsSatisfied();
-        //verify(publisher).publishActivity(token, "http://www.facebook.com/9876543211");
+        verify(commentPublisher).publishActivity(token, Verb.COMMENT, comment);
     }
 
     private String validResolvedActivity() {
@@ -137,6 +129,6 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
     }
 
     private String validRaiCommentActivity() {
-        return "{\\\"type\\\":\\\"RAI-TV-COMMENT\\\",\\\"url\\\":\\\"http://rai.it\\\",\\\"name\\\":null,\\\"description\\\":null,\\\"text\\\":\\\"A fake comment for the facebook-filter\\\",\\\"onEvent\\\":\\\"ContentSet-07499e81-1058-4ea0-90f7-77f0fc17eade\\\"},\\\"context\\\":{\\\"date\\\":1340702105000,\\\"service\\\":\\\"http://twitter.com\\\",\\\"mood\\\":null}}";
+        return "{\"userId\":\"5609618e-7ff4-41bd-9972-0ed2bc5955f1\",\"activity\":{\"id\":\"baea9cbd-d285-42ab-ba84-7b8316e59a75\",\"verb\":\"COMMENT\",\"object\":{\"type\":\"RAI-TV-COMMENT\",\"url\":\"http://rai.it\",\"name\":null,\"description\":null,\"text\":\"A fake comment for the facebook-filter\",\"onEvent\":\"ContentSet-07499e81-1058-4ea0-90f7-77f0fc17eade\"},\"context\":{\"date\":1340702105000,\"service\":\"http://rai.it\",\"mood\":null}},\"user\":{\"username\":\"test-user\",\"services\":{\"facebook\":{\"type\":\"OAuth\",\"session\":\"123456abcdef\"}}}}";
     }
 }
