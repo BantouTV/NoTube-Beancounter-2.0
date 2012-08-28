@@ -440,7 +440,7 @@ public class UserService extends JsonService {
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user: [" + signUp.getUsername() + "]");
         }
-
+        /**
         final int LIMIT = 40;
         List<Activity> activities;
         try {
@@ -472,7 +472,7 @@ public class UserService extends JsonService {
             } catch (QueuesException e) {
                 return error(e, "Error while pushing down json resolved activity: [" + raJson + "] for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
             }
-        }
+        } **/
 
         URI finalRedirectUri;
         try {
@@ -512,7 +512,7 @@ public class UserService extends JsonService {
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user: [" + signUp.getUsername() + "]");
         }
-
+        /**
         final int LIMIT = 40;
         List<Activity> activities;
         try {
@@ -525,7 +525,7 @@ public class UserService extends JsonService {
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user: [" + signUp.getUsername() + "] initial activities");
         }
-
+        // TODO (low) tidy up the following code.
         ObjectMapper mapper = new ObjectMapper();
         for (Activity activity : activities) {
             ResolvedActivity ra = new ResolvedActivity();
@@ -544,7 +544,7 @@ public class UserService extends JsonService {
             } catch (QueuesException e) {
                 return error(e, "Error while pushing down json resolved activity: [" + raJson + "] for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
             }
-        }
+        } **/
 
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
