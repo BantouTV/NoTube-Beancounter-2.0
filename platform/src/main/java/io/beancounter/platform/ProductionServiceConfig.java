@@ -77,6 +77,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(ActivitiesService.class);
                 bind(AliveService.class);
                 bind(FilterService.class);
+                bind(MyRaiTVService.class);
 
                 // bind Production Implementations
                 Properties redisProperties = PropertiesHelper.readFromClasspath("/redis.properties");

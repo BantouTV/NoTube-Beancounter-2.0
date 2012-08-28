@@ -51,6 +51,7 @@ public class TestServiceConfig extends GuiceServletContextListener {
                 bind(ApplicationService.class);
                 bind(UserService.class);
                 bind(ActivitiesService.class);
+                bind(MyRaiTVService.class);
 
                 Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
                 Names.bindProperties(binder(), properties);
