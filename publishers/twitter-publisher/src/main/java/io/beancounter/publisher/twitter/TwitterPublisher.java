@@ -37,7 +37,14 @@ public class TwitterPublisher implements Processor {
         Object object = resolvedActivity.getActivity().getObject();
 
         OAuthAuth auth = (OAuthAuth) resolvedActivity.getUser().getServices().get("twitter");
-        AccessToken token = new AccessToken(auth.getSession(), auth.getSecret());
+        AccessToken token;
+        try {
+            token = new AccessToken(auth.getSession(), auth.getSecret());
+        } catch (NullPointerException e) {
+            final String errMessage = "Twitter service not authorized. Do you have the token?";
+            LOG.error(errMessage);
+            throw new TwitterPublisherException(errMessage, e);
+        }
 
         TwitterFactory factory = new TwitterFactory();
         Twitter twitter = factory.getInstance();

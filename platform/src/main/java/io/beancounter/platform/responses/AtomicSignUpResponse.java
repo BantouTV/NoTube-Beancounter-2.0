@@ -28,7 +28,7 @@ public class AtomicSignUpResponse extends PlatformResponse<AtomicSignUp> {
         return atomicSignUp;
     }
 
-    public void setAtomicSignUp(AtomicSignUp atomicSignUp) {
+    public void setObject(AtomicSignUp atomicSignUp) {
         this.atomicSignUp = atomicSignUp;
     }
 }

@@ -24,7 +24,6 @@ public class UsernameValidation implements Validation {
     public Response validate(Map<String, Object> params) {
         String username = (String) params.get(USERNAME);
         User user;
-
         try {
             user = userManager.getUser(username);
         } catch (UserManagerException e) {
