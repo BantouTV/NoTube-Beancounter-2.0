@@ -17,7 +17,6 @@ import org.testng.annotations.Test;
 
 import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.activity.Activity;
-import io.beancounter.commons.model.activity.ActivityBuilder;
 import io.beancounter.commons.model.activity.ResolvedActivity;
 import io.beancounter.commons.model.auth.OAuthAuth;
 import io.beancounter.commons.model.randomisers.VerbRandomizer;

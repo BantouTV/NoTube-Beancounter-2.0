@@ -103,20 +103,23 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
     public AuthenticatedUser auth(String token, String verifier) throws AuthHandlerException {
         Token accessToken = getTwitterAccessToken(token, verifier);
         twitter4j.User twitterUser = getTwitterUser(accessToken);
+
         // Users created in this way will have beancounter username equals
         // to their Twitter id.
         // TODO (high) implement a retry policy to be sure it's unique
-        // TODO (med): Decide what metadata we want to store.
         String twitterId = String.valueOf(twitterUser.getId());
         User user = new User();
         user.setUsername(twitterId);
         user.addMetadata("twitter.user.name", twitterUser.getName());
         user.addMetadata("twitter.user.screenName", twitterUser.getScreenName());
         user.addMetadata("twitter.user.description", twitterUser.getDescription());
+        user.addMetadata("twitter.user.imageUrl", twitterUser.getProfileImageURL().toString());
+
         user.addService(
                 service.getName(),
                 new OAuthAuth(accessToken.getToken(), accessToken.getSecret())
         );
+
         return new AuthenticatedUser(twitterId, user);
     }
 
@@ -172,6 +175,7 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
         Token token = twitterOAuth.getRequestToken();
         String redirectUrl = twitterOAuth.getAuthorizationUrl(token);
         Jedis jedis = jedisPool.getResource();
+
         try {
             jedis.select(database);
             jedis.set(token.getToken(), token.getSecret());
@@ -179,6 +183,7 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
         } finally {
             jedisPool.returnResource(jedis);
         }
+
         try {
             return new OAuthToken(new URL(redirectUrl));
         } catch (MalformedURLException e) {
