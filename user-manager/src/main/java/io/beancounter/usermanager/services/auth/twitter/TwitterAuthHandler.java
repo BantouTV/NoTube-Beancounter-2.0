@@ -26,6 +26,7 @@ import twitter4j.auth.AccessToken;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -107,13 +108,13 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
         // Users created in this way will have beancounter username equals
         // to their Twitter id.
         // TODO (high) implement a retry policy to be sure it's unique
-        // TODO (med): Decide what metadata we want to store.
         String twitterId = String.valueOf(twitterUser.getId());
         User user = new User();
         user.setUsername(twitterId);
         user.addMetadata("twitter.user.name", twitterUser.getName());
         user.addMetadata("twitter.user.screenName", twitterUser.getScreenName());
         user.addMetadata("twitter.user.description", twitterUser.getDescription());
+        user.addMetadata("twitter.user.imageUrl", twitterUser.getProfileImageURL().toString());
 
         user.addService(
                 service.getName(),
