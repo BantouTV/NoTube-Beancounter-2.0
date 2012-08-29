@@ -724,18 +724,11 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
 
-        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
-        APIResponse expected = new APIResponse(
-                null,
-                "search for [type=RAI-CONTENT-ITEM] found activities.",
-                "OK"
-        );
+        ResolvedActivitiesPlatformResponse response = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
+        assertEquals(response.getMessage(), "search for [type=RAI-CONTENT-ITEM] found activities.");
+        assertEquals(response.getStatus().toString(), "OK");
 
-        assertEquals(actual.getMessage(), expected.getMessage());
-        assertEquals(actual.getStatus().toString(), expected.getStatus());
-
-        List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(actual.getObject());
-        assertNotNull(activities);
+        List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(response.getObject());
         assertEquals(activities.size(), 1);
 
         TVEvent tvEvent = (TVEvent) activities.get(0).getActivity().getObject();
@@ -767,31 +760,20 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
             logger.info("response body: " + responseBody);
             assertNotEquals(responseBody, "");
 
-            ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
+            ResolvedActivitiesPlatformResponse response = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
 
-            if (actual.getObject().isEmpty()) {
-                APIResponse expected = new APIResponse(
-                        null,
-                        "search for [type=TWEET] found no more activities.",
-                        "OK"
-                );
-                assertEquals(actual.getStatus().toString(), expected.getStatus());
-                assertEquals(actual.getMessage(), expected.getMessage());
-                assertNotNull(actual.getObject());
-                assertEquals(actual.getObject().size(), 0);
+            if (response.getObject().isEmpty()) {
+                assertEquals(response.getStatus().toString(), "OK");
+                assertEquals(response.getMessage(), "search for [type=TWEET] found no more activities.");
+                assertNotNull(response.getObject());
+                assertEquals(response.getObject().size(), 0);
                 break;
             }
 
-            APIResponse expected = new APIResponse(
-                    null,
-                    "search for [type=TWEET] found activities.",
-                    "OK"
-            );
+            assertEquals(response.getMessage(), "search for [type=TWEET] found activities.");
+            assertEquals(response.getStatus().toString(), "OK");
 
-            assertEquals(actual.getMessage(), expected.getMessage());
-            assertEquals(actual.getStatus().toString(), expected.getStatus());
-
-            List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(actual.getObject());
+            List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(response.getObject());
             for (ResolvedActivity activity : activities) {
                 Tweet tweet = (Tweet) activity.getActivity().getObject();
                 assertEquals(tweet.getText(), "Fake text #" + i++);
@@ -828,31 +810,20 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
             logger.info("response body: " + responseBody);
             assertNotEquals(responseBody, "");
 
-            ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
+            ResolvedActivitiesPlatformResponse response = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
 
-            if (actual.getObject().isEmpty()) {
-                APIResponse expected = new APIResponse(
-                        null,
-                        "search for [type=TWEET] found no more activities.",
-                        "OK"
-                );
-                assertEquals(actual.getStatus().toString(), expected.getStatus());
-                assertEquals(actual.getMessage(), expected.getMessage());
-                assertNotNull(actual.getObject());
-                assertEquals(actual.getObject().size(), 0);
+            if (response.getObject().isEmpty()) {
+                assertEquals(response.getStatus().toString(), "OK");
+                assertEquals(response.getMessage(), "search for [type=TWEET] found no more activities.");
+                assertNotNull(response.getObject());
+                assertEquals(response.getObject().size(), 0);
                 break;
             }
 
-            APIResponse expected = new APIResponse(
-                    null,
-                    "search for [type=TWEET] found activities.",
-                    "OK"
-            );
+            assertEquals(response.getMessage(), "search for [type=TWEET] found activities.");
+            assertEquals(response.getStatus().toString(), "OK");
 
-            assertEquals(actual.getMessage(), expected.getMessage());
-            assertEquals(actual.getStatus().toString(), expected.getStatus());
-
-            List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(actual.getObject());
+            List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(response.getObject());
             for (ResolvedActivity activity : activities) {
                 Tweet tweet = (Tweet) activity.getActivity().getObject();
                 assertEquals(tweet.getText(), "Fake text #" + (49 - i++));
@@ -884,16 +855,10 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
 
-        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
-        APIResponse expected = new APIResponse(
-                null,
-                order + " is not a valid sort order.",
-                "NOK"
-        );
-
-        assertEquals(actual.getMessage(), expected.getMessage());
-        assertEquals(actual.getStatus().toString(), expected.getStatus());
-        assertEquals(actual.getObject(), expected.getObject());
+        ResolvedActivitiesPlatformResponse response = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
+        assertEquals(response.getMessage(), order + " is not a valid sort order.");
+        assertEquals(response.getStatus().toString(), "NOK");
+        assertNull(response.getObject());
     }
 
     @Test
@@ -915,16 +880,10 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
 
-        ResolvedActivitiesPlatformResponse actual = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
-        ResolvedActivitiesPlatformResponse expected = new ResolvedActivitiesPlatformResponse(
-                ResolvedActivitiesPlatformResponse.Status.NOK,
-                "Wildcard searches are not allowed.",
-                null
-        );
-
-        assertEquals(actual.getStatus(), expected.getStatus());
-        assertEquals(actual.getMessage(), expected.getMessage());
-        assertEquals(actual.getObject(), expected.getObject());
+        ResolvedActivitiesPlatformResponse response = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
+        assertEquals(response.getStatus().toString(), "NOK");
+        assertEquals(response.getMessage(), "Wildcard searches are not allowed.");
+        assertNull(response.getObject());
     }
 
     @Test
