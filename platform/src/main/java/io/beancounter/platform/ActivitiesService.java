@@ -1,6 +1,7 @@
 package io.beancounter.platform;
 
 import com.google.inject.Inject;
+import com.sun.org.apache.regexp.internal.RE;
 import io.beancounter.activities.ActivityStore;
 import io.beancounter.activities.ActivityStoreException;
 import io.beancounter.activities.InvalidOrderException;
@@ -83,10 +84,11 @@ public class ActivitiesService extends JsonService {
             @FormParam(ACTIVITY) String jsonActivity,
             @QueryParam(API_KEY) String apiKey
     ) {
-        Map<String, Object> params = new LinkedHashMap<String, Object>();
-        params.put(USERNAME, username);
-        params.put(ACTIVITY, jsonActivity);
-        params.put(API_KEY, apiKey);
+        Map<String, Object> params = RequestValidator.createParams(
+                USERNAME, username,
+                ACTIVITY, jsonActivity,
+                API_KEY, apiKey
+        );
 
         Response error = validator.validateRequest(
                 this.getClass(),
@@ -149,10 +151,11 @@ public class ActivitiesService extends JsonService {
             @PathParam(IS_VISIBLE) String isVisible,
             @QueryParam(API_KEY) String apiKey
     ) {
-        Map<String, Object> params = new LinkedHashMap<String, Object>();
-        params.put(ACTIVITY_ID, activityId);
-        params.put(IS_VISIBLE, isVisible);
-        params.put(API_KEY, apiKey);
+        Map<String, Object> params = RequestValidator.createParams(
+                ACTIVITY_ID, activityId,
+                IS_VISIBLE, isVisible,
+                API_KEY, apiKey
+        );
 
         Response error = validator.validateRequest(
                 this.getClass(),
@@ -286,6 +289,7 @@ public class ActivitiesService extends JsonService {
             );
             return rb.build();
         }
+
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
                 new ResolvedActivitiesPlatformResponse(
@@ -339,9 +343,11 @@ public class ActivitiesService extends JsonService {
             );
         } catch (InvalidOrderException ioe) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    ioe.getMessage())
+            rb.entity(
+                    new StringPlatformResponse(
+                            StringPlatformResponse.Status.NOK,
+                            ioe.getMessage()
+                    )
             );
             return rb.build();
         }
