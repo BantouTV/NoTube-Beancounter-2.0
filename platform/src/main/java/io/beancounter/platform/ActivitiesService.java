@@ -1,7 +1,6 @@
 package io.beancounter.platform;
 
 import com.google.inject.Inject;
-import com.sun.org.apache.regexp.internal.RE;
 import io.beancounter.activities.ActivityStore;
 import io.beancounter.activities.ActivityStoreException;
 import io.beancounter.activities.InvalidOrderException;
@@ -192,9 +191,10 @@ public class ActivitiesService extends JsonService {
             @PathParam(ACTIVITY_ID) String activityId,
             @QueryParam(API_KEY) String apiKey
     ) {
-        Map<String, Object> params = new LinkedHashMap<String, Object>();
-        params.put(ACTIVITY_ID, activityId);
-        params.put(API_KEY, apiKey);
+        Map<String, Object> params = RequestValidator.createParams(
+                ACTIVITY_ID, activityId,
+                API_KEY, apiKey
+        );
 
         Response error = validator.validateRequest(
                 this.getClass(),
@@ -248,12 +248,13 @@ public class ActivitiesService extends JsonService {
             @QueryParam(ORDER) @DefaultValue("desc") String order,
             @QueryParam(API_KEY) String apiKey
     ) {
-        Map<String, Object> params = new LinkedHashMap<String, Object>();
-        params.put(PATH, path);
-        params.put(VALUE, value);
-        params.put(PAGE_STRING, pageString);
-        params.put(ORDER, order);
-        params.put(API_KEY, apiKey);
+        Map<String, Object> params = RequestValidator.createParams(
+                PATH, path,
+                VALUE, value,
+                PAGE_STRING, pageString,
+                ORDER, order,
+                API_KEY, apiKey
+        );
 
         Response error = validator.validateRequest(
                 this.getClass(),
@@ -312,11 +313,12 @@ public class ActivitiesService extends JsonService {
             @QueryParam(ORDER) @DefaultValue("desc") String order,
             @QueryParam(API_KEY) String apiKey
     ) {
-        Map<String, Object> params = new LinkedHashMap<String, Object>();
-        params.put(USERNAME, username);
-        params.put(PAGE_STRING, pageString);
-        params.put(ORDER, order);
-        params.put(API_KEY, apiKey);
+        Map<String, Object> params = RequestValidator.createParams(
+                USERNAME, username,
+                PAGE_STRING, pageString,
+                ORDER, order,
+                API_KEY, apiKey
+        );
 
         Response error = validator.validateRequest(
                 this.getClass(),

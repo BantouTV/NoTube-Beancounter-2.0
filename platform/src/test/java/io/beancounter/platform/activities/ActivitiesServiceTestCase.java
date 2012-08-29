@@ -66,7 +66,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Reference test case for {@link io.beancounter.platform.ActivitiesService}
