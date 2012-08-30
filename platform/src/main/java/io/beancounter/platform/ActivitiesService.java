@@ -83,10 +83,11 @@ public class ActivitiesService extends JsonService {
             @FormParam(ACTIVITY) String jsonActivity,
             @QueryParam(API_KEY) String apiKey
     ) {
-        Map<String, Object> params = new LinkedHashMap<String, Object>();
-        params.put(USERNAME, username);
-        params.put(ACTIVITY, jsonActivity);
-        params.put(API_KEY, apiKey);
+        Map<String, Object> params = RequestValidator.createParams(
+                USERNAME, username,
+                ACTIVITY, jsonActivity,
+                API_KEY, apiKey
+        );
 
         Response error = validator.validateRequest(
                 this.getClass(),
@@ -149,10 +150,11 @@ public class ActivitiesService extends JsonService {
             @PathParam(IS_VISIBLE) String isVisible,
             @QueryParam(API_KEY) String apiKey
     ) {
-        Map<String, Object> params = new LinkedHashMap<String, Object>();
-        params.put(ACTIVITY_ID, activityId);
-        params.put(IS_VISIBLE, isVisible);
-        params.put(API_KEY, apiKey);
+        Map<String, Object> params = RequestValidator.createParams(
+                ACTIVITY_ID, activityId,
+                IS_VISIBLE, isVisible,
+                API_KEY, apiKey
+        );
 
         Response error = validator.validateRequest(
                 this.getClass(),
@@ -189,9 +191,10 @@ public class ActivitiesService extends JsonService {
             @PathParam(ACTIVITY_ID) String activityId,
             @QueryParam(API_KEY) String apiKey
     ) {
-        Map<String, Object> params = new LinkedHashMap<String, Object>();
-        params.put(ACTIVITY_ID, activityId);
-        params.put(API_KEY, apiKey);
+        Map<String, Object> params = RequestValidator.createParams(
+                ACTIVITY_ID, activityId,
+                API_KEY, apiKey
+        );
 
         Response error = validator.validateRequest(
                 this.getClass(),
@@ -245,12 +248,13 @@ public class ActivitiesService extends JsonService {
             @QueryParam(ORDER) @DefaultValue("desc") String order,
             @QueryParam(API_KEY) String apiKey
     ) {
-        Map<String, Object> params = new LinkedHashMap<String, Object>();
-        params.put(PATH, path);
-        params.put(VALUE, value);
-        params.put(PAGE_STRING, pageString);
-        params.put(ORDER, order);
-        params.put(API_KEY, apiKey);
+        Map<String, Object> params = RequestValidator.createParams(
+                PATH, path,
+                VALUE, value,
+                PAGE_STRING, pageString,
+                ORDER, order,
+                API_KEY, apiKey
+        );
 
         Response error = validator.validateRequest(
                 this.getClass(),
@@ -286,6 +290,7 @@ public class ActivitiesService extends JsonService {
             );
             return rb.build();
         }
+
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
                 new ResolvedActivitiesPlatformResponse(
@@ -308,11 +313,12 @@ public class ActivitiesService extends JsonService {
             @QueryParam(ORDER) @DefaultValue("desc") String order,
             @QueryParam(API_KEY) String apiKey
     ) {
-        Map<String, Object> params = new LinkedHashMap<String, Object>();
-        params.put(USERNAME, username);
-        params.put(PAGE_STRING, pageString);
-        params.put(ORDER, order);
-        params.put(API_KEY, apiKey);
+        Map<String, Object> params = RequestValidator.createParams(
+                USERNAME, username,
+                PAGE_STRING, pageString,
+                ORDER, order,
+                API_KEY, apiKey
+        );
 
         Response error = validator.validateRequest(
                 this.getClass(),
@@ -339,9 +345,11 @@ public class ActivitiesService extends JsonService {
             );
         } catch (InvalidOrderException ioe) {
             Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    ioe.getMessage())
+            rb.entity(
+                    new StringPlatformResponse(
+                            StringPlatformResponse.Status.NOK,
+                            ioe.getMessage()
+                    )
             );
             return rb.build();
         }

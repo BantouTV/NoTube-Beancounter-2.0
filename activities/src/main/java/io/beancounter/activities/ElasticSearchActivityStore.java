@@ -262,7 +262,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
 
     private void indexActivity(UUID userId, ResolvedActivity activity, Client client)
             throws ActivityStoreException {
-        // TODO (high): is this needed or does the ResolvedActivity already
+        // TODO (low): is this needed or does the ResolvedActivity already
         // have the correct userId?
         activity.setUserId(userId);
         byte[] jsonActivity;
@@ -348,7 +348,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
         if (nodes.isEmpty()) {
             transportClient.close();
             throw new RuntimeException("Could not connect to elasticsearch cluster."
-                    + " Please check the elasticsearch-configuration.xml file.");
+                    + " Please check the settings in the es.properties file.");
         }
         return transportClient;
     }
