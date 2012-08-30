@@ -1,14 +1,12 @@
-package io.beancounter.publisher.facebook;
+package io.beancounter.publisher.twitter;
 
 import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.restfb.exception.FacebookOAuthException;
-import com.restfb.types.FacebookType;
 import io.beancounter.commons.model.activity.*;
 import io.beancounter.commons.model.activity.rai.Comment;
-import io.beancounter.publisher.facebook.adapters.Publisher;
+import io.beancounter.publisher.twitter.adapters.Publisher;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.testng.CamelTestSupport;
@@ -17,21 +15,28 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.auth.OAuthAuth;
+import twitter4j.Status;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.auth.AccessToken;
 
 import static org.mockito.Mockito.*;
 
-public class FacebookPublisherRouteTest extends CamelTestSupport {
+public class TwitterPublisherRouteTest extends CamelTestSupport {
 
     private Injector injector;
-    private FacebookPublisher publisher;
+    private TwitterPublisher publisher;
+    private Twitter twitter;
     private ObjectMapper mapper;
 
     @BeforeMethod
     public void setUp() throws Exception {
+        twitter = mock(Twitter.class);
         injector = Guice.createInjector(new Module() {
             @Override
             public void configure(Binder binder) {
-                binder.bind(FacebookPublisherRoute.class).toInstance(new FacebookPublisherRoute() {
+                binder.bind(Twitter.class).toInstance(twitter);
+                binder.bind(TwitterPublisherRoute.class).toInstance(new TwitterPublisherRoute() {
                     @Override
                     protected String fromEndpoint() {
                         return "direct:start";
@@ -43,14 +48,14 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
                     }
 
                     @Override
-                    protected FacebookPublisher facebookPublisher() {
+                    protected TwitterPublisher twitterPublisher() {
                         return publisher;
                     }
                 });
             }
         });
 
-        publisher = spy(injector.getInstance(FacebookPublisher.class));
+        publisher = spy(injector.getInstance(TwitterPublisher.class));
         mapper = new ObjectMapper();
 
         super.setUp();
@@ -58,7 +63,7 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
 
     @Override
     protected RouteBuilder createRouteBuilder() throws Exception {
-        return injector.getInstance(FacebookPublisherRoute.class);
+        return injector.getInstance(TwitterPublisherRoute.class);
     }
 
     @Test
@@ -74,7 +79,7 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
 
     @Test
     public void validRaiCommentIsProcessedCorrectly() throws Exception {
-        String service = "facebook";
+        String service = "twitter";
         String token = "123456abcdef";
         String username = "test-user";
         User user = new User("Bob", "Smith", username, "password");
@@ -83,10 +88,14 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
         ResolvedActivity activity = mapper.readValue(validRaiCommentActivity(), ResolvedActivity.class);
         Comment comment = (Comment) activity.getActivity().getObject();
 
+        doReturn(mock(AccessToken.class)).when(publisher).getToken(anyString(), anyString());
+
         @SuppressWarnings("unchecked")
         Publisher<Comment> commentPublisher = mock(Publisher.class);
-        when(commentPublisher.publishActivity(token, Verb.COMMENT, comment))
-                .thenReturn(new FacebookType());
+
+        when(commentPublisher.publish(twitter, Verb.COMMENT, comment))
+                .thenReturn(mock(Status.class));
+
         doReturn(commentPublisher).when(publisher).getPublisher(any(Comment.class));
 
         MockEndpoint error = getMockEndpoint("mock:error");
@@ -95,12 +104,12 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
         template.sendBody("direct:start", validRaiCommentActivity());
 
         error.assertIsSatisfied();
-        verify(commentPublisher).publishActivity(token, Verb.COMMENT, comment);
+        verify(commentPublisher).publish(twitter, Verb.COMMENT, comment);
     }
 
     @Test
     public void exceptionShouldBeHandledWhenAccessTokenIsInvalid() throws Exception {
-        String service = "facebook";
+        String service = "twitter";
         String token = "123456abcdef";
         String username = "test-user";
         User user = new User("Bob", "Smith", username, "password");
@@ -109,10 +118,12 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
         ResolvedActivity activity = mapper.readValue(validRaiCommentActivity(), ResolvedActivity.class);
         Comment comment = (Comment) activity.getActivity().getObject();
 
+        doReturn(mock(AccessToken.class)).when(publisher).getToken(anyString(), anyString());
+
         @SuppressWarnings("unchecked")
         Publisher<Comment> commentPublisher = mock(Publisher.class);
-        when(commentPublisher.publishActivity(token, Verb.COMMENT, comment))
-                .thenThrow(new FacebookOAuthException("OAuthException", "Invalid OAuth access token."));
+        when(commentPublisher.publish(twitter, Verb.COMMENT, comment))
+                .thenThrow(new TwitterPublisherException("OAuthException, Invalid OAuth access token", new TwitterException("OAuthException")));
         doReturn(commentPublisher).when(publisher).getPublisher(any(Comment.class));
 
         MockEndpoint error = getMockEndpoint("mock:error");
@@ -121,10 +132,10 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
         template.sendBody("direct:start", validRaiCommentActivity());
 
         error.assertIsSatisfied();
-        verify(commentPublisher).publishActivity(token, Verb.COMMENT, comment);
+        verify(commentPublisher).publish(twitter, Verb.COMMENT, comment);
     }
 
     private String validRaiCommentActivity() {
-        return "{\"userId\":\"5609618e-7ff4-41bd-9972-0ed2bc5955f1\",\"activity\":{\"id\":\"baea9cbd-d285-42ab-ba84-7b8316e59a75\",\"verb\":\"COMMENT\",\"object\":{\"type\":\"RAI-TV-COMMENT\",\"url\":\"http://rai.it\",\"name\":null,\"description\":null,\"text\":\"A fake comment for the facebook-filter\",\"onEvent\":\"ContentSet-07499e81-1058-4ea0-90f7-77f0fc17eade\"},\"context\":{\"date\":1340702105000,\"service\":\"http://rai.it\",\"mood\":null}},\"user\":{\"username\":\"test-user\",\"services\":{\"facebook\":{\"type\":\"OAuth\",\"session\":\"123456abcdef\"}}}}";
+        return "{\"userId\":\"5609618e-7ff4-41bd-9972-0ed2bc5955f1\",\"activity\":{\"id\":\"baea9cbd-d285-42ab-ba84-7b8316e59a75\",\"verb\":\"COMMENT\",\"object\":{\"type\":\"RAI-TV-COMMENT\",\"url\":\"http://rai.it\",\"name\":null,\"description\":null,\"text\":\"A fake comment for the twitter-filter\",\"onEvent\":\"ContentSet-07499e81-1058-4ea0-90f7-77f0fc17eade\"},\"context\":{\"date\":1340702105000,\"service\":\"http://rai.it\",\"mood\":null}},\"user\":{\"username\":\"test-user\",\"services\":{\"twitter\":{\"type\":\"OAuth\",\"session\":\"123456abcdef\",\"secret\":\"token-secret\"}}}}";
     }
 }

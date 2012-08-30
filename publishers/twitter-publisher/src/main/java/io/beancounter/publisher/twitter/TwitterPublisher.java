@@ -1,5 +1,6 @@
 package io.beancounter.publisher.twitter;
 
+import com.google.inject.Inject;
 import io.beancounter.commons.helper.PropertiesHelper;
 import io.beancounter.commons.model.Service;
 import io.beancounter.commons.model.activity.ResolvedActivity;
@@ -18,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import twitter4j.Status;
 import twitter4j.Twitter;
-import twitter4j.TwitterFactory;
 import twitter4j.auth.AccessToken;
 
 import java.util.Properties;
@@ -31,28 +31,26 @@ public class TwitterPublisher implements Processor {
 
     private static final Logger LOG = LoggerFactory.getLogger(TwitterPublisher.class);
 
+    @Inject
+    private Twitter twitter;
+
     @Override
     public void process(Exchange exchange) throws TwitterPublisherException {
         ResolvedActivity resolvedActivity = exchange.getIn().getBody(ResolvedActivity.class);
         Object object = resolvedActivity.getActivity().getObject();
 
         OAuthAuth auth = (OAuthAuth) resolvedActivity.getUser().getServices().get("twitter");
-        AccessToken token;
-        try {
-            token = new AccessToken(auth.getSession(), auth.getSecret());
-        } catch (NullPointerException e) {
+        if(auth==null) {
             final String errMessage = "Twitter service not authorized. Do you have the token?";
             LOG.error(errMessage);
-            throw new TwitterPublisherException(errMessage, e);
+            throw new TwitterPublisherException(errMessage, new NullPointerException());
         }
-
-        TwitterFactory factory = new TwitterFactory();
-        Twitter twitter = factory.getInstance();
 
         Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
         Service service = DefaultServiceAuthorizationManager.buildService("twitter", properties);
 
         twitter.setOAuthConsumer(service.getApikey(), service.getSecret());
+        AccessToken token = getToken(auth.getSession(), auth.getSecret());
         twitter.setOAuthAccessToken(token);
 
         Publisher publisher = getPublisher(resolvedActivity.getActivity().getObject());
@@ -61,7 +59,11 @@ public class TwitterPublisher implements Processor {
         LOG.debug("Status updated to [" + status.getText() + "]");
     }
 
-    private Publisher getPublisher(Object object)
+    AccessToken getToken(String session, String secret) {
+        return new AccessToken(session, secret);
+    }
+
+    Publisher getPublisher(Object object)
             throws TwitterPublisherException{
         Class clazz = (Class) getProperties().get(object.getClass().getCanonicalName());
         Publisher publisher;
