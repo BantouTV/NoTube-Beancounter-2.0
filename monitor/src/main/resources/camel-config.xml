@@ -12,7 +12,7 @@
         <multicast>
             <to uri="http4://0.0.0.0:34590/dispatcher/ping?bridgeEndpoint=true"/>
             <to uri="http4://0.0.0.0:34591/facebook/ping?bridgeEndpoint=true"/>
-            <to uri="http4://0.0.0.0:34592/filter/ping?bridgeEndpoint=true"/>
+            <!--<to uri="http4://0.0.0.0:34592/filter/ping?bridgeEndpoint=true"/>-->
         </multicast>
     </route>
   </camelContext>
