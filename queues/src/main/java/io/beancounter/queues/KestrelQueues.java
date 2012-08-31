@@ -45,4 +45,9 @@ public final class KestrelQueues implements Queues {
         client.set(queueName, 3600, json);
     }
 
+    @Override
+    public void push(String json, String queueName) throws QueuesException {
+        client.set(queueName, 3600, json);
+    }
+
 }

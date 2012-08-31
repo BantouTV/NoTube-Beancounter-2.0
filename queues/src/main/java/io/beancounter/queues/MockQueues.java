@@ -17,6 +17,11 @@ public class MockQueues implements Queues {
         queue.add(json);
     }
 
+     @Override
+    public void push(String json, String queueName) throws QueuesException {
+         push(json);
+    }
+
     @Override
     public void shutDown() throws QueuesException {}
 }

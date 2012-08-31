@@ -14,8 +14,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 public class JmsPublisherRouteTest extends CamelTestSupport {
+
     private ActivityToJmsConverter activityToJmsConverter;
+
     private LightstreamerDTO convertedValue;
+
     private JmsPublisher jmsPublisher;
 
     @Override
@@ -24,7 +27,7 @@ public class JmsPublisherRouteTest extends CamelTestSupport {
 
         activityToJmsConverter = new ActivityToJmsConverter() {
             @Override
-            public LightstreamerDTO wrapInExternalObject(ResolvedActivity resolvedActivity, String json) {
+            public LightstreamerDTO wrapResolvedActivityInExternalObject(ResolvedActivity resolvedActivity, String json) {
                 return convertedValue;
             }
         };

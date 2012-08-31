@@ -21,7 +21,6 @@ public class JmsPublisher {
     }
 
     public void publish(final LightstreamerDTO dto) {
-
         try {
 
             jmsTemplate.send(new MessageCreator() {

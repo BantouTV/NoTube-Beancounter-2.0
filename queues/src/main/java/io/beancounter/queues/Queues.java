@@ -17,6 +17,15 @@ public interface Queues {
     public void push(String json) throws QueuesException;
 
     /**
+     * Pushes a json object down the queue.
+     *
+     * @param json
+     * @param queueName
+     * @throws QueuesException
+     */
+    public void push(String json, String queueName) throws QueuesException;
+
+    /**
      * Shut down the connection.
      *
      * @throws QueuesException

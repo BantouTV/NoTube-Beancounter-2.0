@@ -9,6 +9,7 @@ import io.beancounter.applications.ApplicationsManager;
 import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.activity.Activity;
 import io.beancounter.commons.model.activity.ResolvedActivity;
+import io.beancounter.commons.model.notifies.Notify;
 import io.beancounter.platform.responses.ResolvedActivitiesPlatformResponse;
 import io.beancounter.platform.responses.ResolvedActivityPlatformResponse;
 import io.beancounter.platform.responses.StringPlatformResponse;
@@ -22,6 +23,7 @@ import io.beancounter.platform.validation.VisibilityValidation;
 import io.beancounter.queues.Queues;
 import io.beancounter.queues.QueuesException;
 import io.beancounter.usermanager.UserManager;
+import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.DefaultValue;
@@ -55,7 +57,9 @@ public class ActivitiesService extends JsonService {
     private static final int ACTIVITIES_LIMIT = 20;
 
     private Queues queues;
+
     private ActivityStore activities;
+
     private RequestValidator validator;
 
     @Inject
@@ -169,11 +173,27 @@ public class ActivitiesService extends JsonService {
         }
 
         boolean vObj = (Boolean) params.get(VISIBILITY_OBJ);
+        UUID activityIdObj = (UUID) params.get(ACTIVITY_ID_OBJ);
         try {
-            activities.setVisible((UUID) params.get(ACTIVITY_ID_OBJ), vObj);
+            activities.setVisible(activityIdObj, vObj);
         } catch (ActivityStoreException e) {
             return error(e, "Error modifying the visibility of activity with id [" + activityId + "]");
         }
+
+        // these notifications should be properly managed - this is
+        // just a workaround for the 1.4 release.
+        String jsonNotifyMessage;
+        try {
+            jsonNotifyMessage = getDeleteMessage(activityIdObj, vObj);
+        } catch (IOException e) {
+            return error(e, "Error serializing the notification for [" + activityId + "] to [" + vObj + "]");
+        }
+        try {
+            queues.push(jsonNotifyMessage, "social");
+        } catch (QueuesException e) {
+            return error(e, "Error pushing [" + jsonNotifyMessage + "] down queue with name [social]");
+        }
+        // the code above should be soon-ish replaced with something more general.
 
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
@@ -183,6 +203,16 @@ public class ActivitiesService extends JsonService {
                 )
         );
         return rb.build();
+    }
+
+    private String getDeleteMessage(UUID activityIdObj, boolean vObj) throws IOException {
+        Notify notify = new Notify(
+                "setVisibility",
+                activityIdObj.toString(),
+                String.valueOf(vObj)
+        );
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(notify);
     }
 
     @GET
