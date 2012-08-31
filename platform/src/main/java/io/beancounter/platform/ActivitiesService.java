@@ -274,7 +274,7 @@ public class ActivitiesService extends JsonService {
         Collection<ResolvedActivity> activitiesRetrieved;
         int page = (Integer) params.get(PAGE_NUMBER);
         try {
-            activitiesRetrieved = activities.search(path, value, page, ACTIVITIES_LIMIT, order, Collections.<String>emptyList());
+            activitiesRetrieved = activities.search(path, value, page, ACTIVITIES_LIMIT, order, filters);
         } catch (ActivityStoreException ase) {
             return error(ase, "Error while getting page " + page
                     + " of activities where [" + path + "=" + value +"]");

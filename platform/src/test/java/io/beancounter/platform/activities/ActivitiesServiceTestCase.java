@@ -968,7 +968,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertNull(response.getObject());
     }
 
-    @Test(enabled = false)
+    @Test
     public void wildcardsAreNotAllowedInSearchFilters() throws Exception {
         String baseQuery = "activities/search?path=%s&value=%s&filter=%s&apikey=%s";
         String expectedMessage = "Wildcard searches are not allowed.";
@@ -1001,10 +1001,45 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
+    public void incorrectlyFormattedFiltersCauseErrorsToBeReturned() throws Exception {
+        String baseQuery = "activities/search?path=%s&value=%s&filter=%s&apikey=%s";
+        String expectedMessage = "Incorrectly formatted filter";
+        String path = "type";
+        String value = Verb.TWEET.name();
+
+        for (String filter : Arrays.asList("invalid:", ":invalid", "invalid")) {
+            String query = String.format(
+                    baseQuery,
+                    path,
+                    value,
+                    filter,
+                    APIKEY
+            );
+
+            List<String> filters = Arrays.asList(filter);
+            when(activityStore.search(path, value, 0, 20, "desc", filters))
+                    .thenThrow(new ActivityStoreException(expectedMessage));
+
+            GetMethod getMethod = new GetMethod(base_uri + query);
+            HttpClient client = new HttpClient();
+
+            int responseCode = client.executeMethod(getMethod);
+            String responseBody = new String(getMethod.getResponseBody());
+            assertEquals(responseCode, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            assertFalse(responseBody.isEmpty());
+
+            StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+            assertEquals(response.getStatus().toString(), "NOK");
+            assertEquals(response.getMessage(), "Error while getting page " + 0 + " of activities where [" + path + "=" + value +"]");
+            assertEquals(response.getObject(), expectedMessage);
+        }
+    }
+
+    @Test
     public void testCustomActivityContentItem() throws Exception {
-        final String baseQuery = "activities/add/%s?apikey=%s";
-        final String username = "test-user";
-        final String activity = "{\n" +
+        String baseQuery = "activities/add/%s?apikey=%s";
+        String username = "test-user";
+        String activity = "{\n" +
                 "    \"verb\": \"WATCHED\",\n" +
                 "    \"object\": {\n" +
                 "        \"type\": \"RAI-CONTENT-ITEM\",\n" +
@@ -1020,7 +1055,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 "        \"username\": \"dpalmisano\"\n" +
                 "    }\n" +
                 "}";
-        final String query = String.format(
+        String query = String.format(
                 baseQuery,
                 username,
                 APIKEY
