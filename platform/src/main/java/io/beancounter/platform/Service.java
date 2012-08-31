@@ -93,14 +93,13 @@ public abstract class Service {
                         "Parameter [" + p.getName().substring(p.getName().indexOf('=') + 1, p.getName().lastIndexOf(')')) + "] is null"
                 );
             }
-            if (!p.getClazz().equals(p.getValueClazz())) {
+            if (!p.getClazz().isAssignableFrom(p.getValueClazz())) {
                 throw new ServiceException(
                         "Parameter [" + p.getName().substring(p.getName().indexOf('=') + 1, p.getName().lastIndexOf(')')) + "] " +
                                 "doesn't match the type. Found " + p.getValueClazz() + " instead of " + p.getClazz()
                 );
             } else {
-                String value = (String) p.getValue();
-                if (value.equals("")) {
+                if (p.getValue() instanceof String && p.getValue().equals("")) {
                     throw new ServiceException(
                             "Parameter [" + p.getName().substring(p.getName().indexOf('=') + 1, p.getName().lastIndexOf(')')) + "] cannot be empty string"
                     );
@@ -134,6 +133,13 @@ public abstract class Service {
         String names[] = types.keySet().toArray(new String[types.keySet().size()]);
         List<Param> params = new ArrayList<Param>();
         for (Object value : values) {
+            if (value == null) {
+                String paramName = names[i];
+                throw new ServiceException(
+                       "Parameter [" + paramName.substring(paramName.indexOf('=') + 1, paramName.lastIndexOf(')')) + "] is null"
+                );
+            }
+
             Param p = new Param(types.get(names[i]), names[i], value, value.getClass());
             params.add(p);
             i++;
