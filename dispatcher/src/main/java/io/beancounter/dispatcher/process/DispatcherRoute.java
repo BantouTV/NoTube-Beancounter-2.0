@@ -24,6 +24,10 @@ public class DispatcherRoute extends RouteBuilder {
         from(fromEndpoint())
                 .multicast().parallelProcessing()
                 .to(toEndpoints());
+
+        //for monitoring the process
+        from("jetty:http://0.0.0.0:34590/dispatcher/ping")
+                .transform(constant("PONG\n"));
     }
 
     protected String[] toEndpoints() {

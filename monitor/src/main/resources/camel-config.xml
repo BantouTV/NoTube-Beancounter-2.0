@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xsi:schemaLocation="
+         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+  <camelContext xmlns="http://camel.apache.org/schema/spring">
+    <route>
+      <from uri="servlet:///status"/>
+        <multicast>
+            <to uri="http4://0.0.0.0:34590/dispatcher/ping?bridgeEndpoint=true"/>
+            <to uri="http4://0.0.0.0:34591/facebook/ping?bridgeEndpoint=true"/>
+            <!--<to uri="http4://0.0.0.0:34592/filter/ping?bridgeEndpoint=true"/>-->
+        </multicast>
+    </route>
+  </camelContext>
+</beans>

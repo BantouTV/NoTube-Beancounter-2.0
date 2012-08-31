@@ -24,6 +24,7 @@
         <module>filter</module>
         <module>dispatcher</module>
         <module>publishers</module>
+        <module>monitor</module>
         <module>camel-redis</module>
     </modules>
 
