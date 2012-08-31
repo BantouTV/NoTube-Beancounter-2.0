@@ -50,6 +50,7 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -223,9 +224,8 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
-        assertNotEquals(responseBody, "");
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
 
         ResolvedActivityPlatformResponse response = fromJson(responseBody, ResolvedActivityPlatformResponse.class);
 
@@ -254,9 +254,8 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
-        assertNotEquals(responseBody, "");
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
 
         ResolvedActivityPlatformResponse actual = fromJson(responseBody, ResolvedActivityPlatformResponse.class);
 
@@ -280,9 +279,8 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
-        assertNotEquals(responseBody, "");
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
 
         StringPlatformResponse actual = fromJson(responseBody, StringPlatformResponse.class);
 
@@ -304,9 +302,8 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
-        assertNotEquals(responseBody, "");
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
 
         StringPlatformResponse actual = fromJson(responseBody, StringPlatformResponse.class);
 
@@ -330,9 +327,8 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
-        assertNotEquals(responseBody, "");
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
 
         StringPlatformResponse actual = fromJson(responseBody, StringPlatformResponse.class);
         assertEquals(actual.getMessage(), "activity [" + activityId + "] visibility has been modified to [false]");
@@ -780,7 +776,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
         List<ResolvedActivity> results = new ArrayList<ResolvedActivity>();
         results.add(createCustomActivity());
-        when(activityStore.search(path, value, 0, 20, order)).thenReturn(results);
+        when(activityStore.search(path, value, 0, 20, order, Collections.<String>emptyList())).thenReturn(results);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -819,7 +815,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                     APIKEY
             );
 
-            when(activityStore.search(path, value, page, 20, "desc"))
+            when(activityStore.search(path, value, page, 20, "desc", Collections.<String>emptyList()))
                     .thenReturn(createSearchResults(page, 20, "desc"));
 
             GetMethod getMethod = new GetMethod(base_uri + query);
@@ -876,7 +872,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                     APIKEY
             );
 
-            when(activityStore.search(path, value, page, 20, order))
+            when(activityStore.search(path, value, page, 20, order, Collections.<String>emptyList()))
                     .thenReturn(createSearchResults(page, 20, order));
 
             GetMethod getMethod = new GetMethod(base_uri + query);
@@ -927,7 +923,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 APIKEY
         );
 
-        when(activityStore.search(path, value, 0, 20, order))
+        when(activityStore.search(path, value, 0, 20, order, Collections.<String>emptyList()))
                 .thenThrow(new InvalidOrderException(order + " is not a valid sort order."));
 
         GetMethod getMethod = new GetMethod(base_uri + query);
@@ -955,7 +951,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 APIKEY
         );
 
-        when(activityStore.search("*", "*", 0, 20, "desc"))
+        when(activityStore.search("*", "*", 0, 20, "desc", Collections.<String>emptyList()))
                 .thenThrow(new WildcardSearchException(expectedMessage));
 
         GetMethod getMethod = new GetMethod(base_uri + query);
@@ -972,37 +968,78 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertNull(response.getObject());
     }
 
-    // TODO (critical): See issue #88
-    @Test(enabled = false)
+    @Test
     public void wildcardsAreNotAllowedInSearchFilters() throws Exception {
-        final String baseQuery = "activities/search?path=%s&value=%s&filter=%s&apikey=%s";
-        final String query = String.format(
+        String baseQuery = "activities/search?path=%s&value=%s&filter=%s&apikey=%s";
+        String expectedMessage = "Wildcard searches are not allowed.";
+        String path = "type";
+        String value = Verb.TWEET.name();
+        String query = String.format(
                 baseQuery,
-                "type",
-                Verb.TWEET.name(),
+                path,
+                value,
                 "url:*",
                 APIKEY
         );
+
+        List<String> filters = Arrays.asList("url:*");
+        when(activityStore.search(path, value, 0, 20, "desc", filters))
+                .thenThrow(new WildcardSearchException(expectedMessage));
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
 
         int responseCode = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
-        assertEquals(responseCode, HttpStatus.SC_OK);
+        assertEquals(responseCode, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         assertFalse(responseBody.isEmpty());
 
         ResolvedActivitiesPlatformResponse response = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
         assertEquals(response.getStatus().toString(), "NOK");
-        assertEquals(response.getMessage(), "Wildcard searches are not allowed.");
+        assertEquals(response.getMessage(), expectedMessage);
         assertNull(response.getObject());
     }
 
     @Test
+    public void incorrectlyFormattedFiltersCauseErrorsToBeReturned() throws Exception {
+        String baseQuery = "activities/search?path=%s&value=%s&filter=%s&apikey=%s";
+        String expectedMessage = "Incorrectly formatted filter";
+        String path = "type";
+        String value = Verb.TWEET.name();
+
+        for (String filter : Arrays.asList("invalid:", ":invalid", "invalid")) {
+            String query = String.format(
+                    baseQuery,
+                    path,
+                    value,
+                    filter,
+                    APIKEY
+            );
+
+            List<String> filters = Arrays.asList(filter);
+            when(activityStore.search(path, value, 0, 20, "desc", filters))
+                    .thenThrow(new ActivityStoreException(expectedMessage));
+
+            GetMethod getMethod = new GetMethod(base_uri + query);
+            HttpClient client = new HttpClient();
+
+            int responseCode = client.executeMethod(getMethod);
+            String responseBody = new String(getMethod.getResponseBody());
+            assertEquals(responseCode, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            assertFalse(responseBody.isEmpty());
+
+            StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+            assertEquals(response.getStatus().toString(), "NOK");
+            assertEquals(response.getMessage(), "Error while getting page " + 0 + " of activities where [" + path + "=" + value +"]");
+            assertEquals(response.getObject(), expectedMessage);
+        }
+    }
+
+    @Test
     public void testCustomActivityContentItem() throws Exception {
-        final String baseQuery = "activities/add/%s?apikey=%s";
-        final String username = "test-user";
-        final String activity = "{\n" +
+        String baseQuery = "activities/add/%s?apikey=%s";
+        String username = "test-user";
+        String activity = "{\n" +
                 "    \"verb\": \"WATCHED\",\n" +
                 "    \"object\": {\n" +
                 "        \"type\": \"RAI-CONTENT-ITEM\",\n" +
@@ -1018,7 +1055,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 "        \"username\": \"dpalmisano\"\n" +
                 "    }\n" +
                 "}";
-        final String query = String.format(
+        String query = String.format(
                 baseQuery,
                 username,
                 APIKEY
