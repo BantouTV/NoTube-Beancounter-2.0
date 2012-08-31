@@ -6,10 +6,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * put class description here
@@ -42,10 +39,13 @@ public abstract class Service {
 
         private T value;
 
-        public Param(Class<T> clazz, String name, T value) {
+        private Class<T> valueClazz;
+
+        public Param(Class<T> clazz, String name, T value, Class<T> valueClazz) {
             this.clazz = clazz;
             this.name = name;
             this.value = value;
+            this.valueClazz = valueClazz;
         }
 
         public boolean isNull() {
@@ -75,6 +75,10 @@ public abstract class Service {
         public T getValue() {
             return value;
         }
+
+        public Class<T> getValueClazz() {
+            return valueClazz;
+        }
     }
 
     private static void areCompliant(Param... params) throws ServiceException {
@@ -86,14 +90,19 @@ public abstract class Service {
         for (Param p : params) {
             if (p.isNull()) {
                 throw new ServiceException(
-                        "Parameter " + p.getName() + " is null"
+                        "Parameter [" + p.getName().substring(p.getName().indexOf('=') + 1, p.getName().lastIndexOf(')')) + "] is null"
                 );
             }
-            if (p.getClazz().equals(String.class)) {
+            if (!p.getClazz().equals(p.getValueClazz())) {
+                throw new ServiceException(
+                        "Parameter [" + p.getName().substring(p.getName().indexOf('=') + 1, p.getName().lastIndexOf(')')) + "] " +
+                                "doesn't match the type. Found " + p.getValueClazz() + " instead of " + p.getClazz()
+                );
+            } else {
                 String value = (String) p.getValue();
                 if (value.equals("")) {
                     throw new ServiceException(
-                            "Parameter " + p.getName() + " cannot be empty string"
+                            "Parameter [" + p.getName().substring(p.getName().indexOf('=') + 1, p.getName().lastIndexOf(')')) + "] cannot be empty string"
                     );
                 }
             }
@@ -104,16 +113,16 @@ public abstract class Service {
         Method[] methods = clazz.getMethods();
         Method m = null;
         for(Method candidate : methods) {
-            if(candidate.getParameterTypes().length != values.length) {
-                continue;
+            if(candidate.getName().equals(name)) {
+                m = candidate;
             }
-            if(!candidate.getName().equals(name)) {
-                continue;
-            }
-            m = candidate;
         }
         if(m == null) {
-            throw new ServiceException("Method not found");
+            throw new ServiceException("Method [" + name + "] not found in [" + clazz.getName() + "]");
+        }
+        if(m.getParameterTypes().length != values.length) {
+            throw new ServiceException("Some parameters are missing for method [" + name + "]. " +
+                    "Parameters sent: [" + values.length + "/" + m.getParameterTypes().length + "]");
         }
         check(m, values);
     }
@@ -125,7 +134,7 @@ public abstract class Service {
         String names[] = types.keySet().toArray(new String[types.keySet().size()]);
         List<Param> params = new ArrayList<Param>();
         for (Object value : values) {
-            Param p = new Param(types.get(names[i]), names[i], value);
+            Param p = new Param(types.get(names[i]), names[i], value, value.getClass());
             params.add(p);
             i++;
         }
@@ -135,7 +144,7 @@ public abstract class Service {
     private static Map<String, Class> getJerseyAnnotatedParameters(Method m) {
         Annotation[][] annotations = m.getParameterAnnotations();
         Class<?> types[] = m.getParameterTypes();
-        Map<String, Class> result = new HashMap<String, Class>();
+        Map<String, Class> result = new LinkedHashMap<String, Class>();
         int i = 0;
         for (Annotation[] a : annotations) {
             for (Annotation aa : a) {

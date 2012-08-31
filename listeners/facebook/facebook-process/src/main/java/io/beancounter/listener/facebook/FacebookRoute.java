@@ -52,6 +52,12 @@ public class FacebookRoute extends RouteBuilder {
                 .marshal().json(JsonLibrary.Jackson)
                 .log(body().toString())
                 .to(toKestrelQueue());
+
+
+        //for monitoring the process
+        from("jetty:http://0.0.0.0:34591/facebook/ping")
+                .transform(constant("PONG\n"));
+
     }
 
     protected String fromFacebookEndpoint() {

@@ -9,7 +9,7 @@ import io.beancounter.commons.model.activity.ResolvedActivity;
 import io.beancounter.commons.model.activity.rai.Comment;
 
 public class ActivityToJmsConverter {
-    public static final String TYPE = "beancounter";
+    public static final String TYPE = "BC";
     private static final Logger LOG = LoggerFactory.getLogger(ActivityToJmsConverter.class);
 
     public LightstreamerDTO wrapInExternalObject(ResolvedActivity resolvedActivity, String json) {

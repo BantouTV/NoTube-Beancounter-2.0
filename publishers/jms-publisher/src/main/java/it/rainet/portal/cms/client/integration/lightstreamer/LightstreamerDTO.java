@@ -5,6 +5,9 @@ import java.io.Serializable;
 public class LightstreamerDTO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String TYPE_OPENBOXES = "OB";
+	public static final String TYPE_BEANCOUNTER = "BC";
 
 	public enum Command {
 		START, STOP
@@ -40,6 +43,7 @@ public class LightstreamerDTO implements Serializable {
 	@Override
 	public String toString() {
 		return "owner = " + owner +
+				"type = " + type + 
 				", body = " + (body.length() > 100 ? body.substring(0, 97) + "..." : body);
 	}
 
