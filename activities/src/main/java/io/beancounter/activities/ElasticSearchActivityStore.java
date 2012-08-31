@@ -28,7 +28,6 @@ import io.beancounter.commons.helper.es.NodeInfo;
 import io.beancounter.commons.model.activity.*;
 
 import java.io.IOException;
-import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -311,27 +310,14 @@ public class ElasticSearchActivityStore implements ActivityStore {
             throw new InvalidOrderException(order + " is not a valid sort order.");
         }
 
-        AndFilterBuilder visibilityFilter = andFilter()
+        AndFilterBuilder filterBuilder = andFilter()
                 .add(termFilter(VISIBLE, true));
 
-        for (String filter : filters) {
-            int colonCount = 0;
-            int length = filter.length();
-            for (int i = 0; i < length; i++) {
-                if (filter.charAt(i) == ':') {
-                    colonCount++;
-                }
-            }
-            int colonIndex = filter.indexOf(":");
-            if (colonCount != 1 || colonIndex < 1 || colonIndex > length - 2) {
-                throw new ActivityStoreException("Filter is incorrectly formatted: " + filter);
-            }
-            visibilityFilter.add(queryFilter(queryString(filter)));
-        }
+        addAdditionalFilters(filterBuilder, filters);
 
         FilteredQueryBuilder fq = filteredQuery(
                 queryString(query),
-                visibilityFilter
+                filterBuilder
         );
 
         SearchResponse searchResponse = client.prepareSearch(INDEX_NAME)
@@ -343,6 +329,29 @@ public class ElasticSearchActivityStore implements ActivityStore {
                 .execute().actionGet();
 
         return retrieveActivitiesFromSearchResponse(searchResponse);
+    }
+
+    private void addAdditionalFilters(
+            AndFilterBuilder filterBuilder,
+            List<String> filters
+    ) throws ActivityStoreException {
+        for (String filter : filters) {
+            int colonCount = 0;
+            int length = filter.length();
+
+            for (int i = 0; i < length; i++) {
+                if (filter.charAt(i) == ':') {
+                    colonCount++;
+                }
+            }
+
+            int colonIndex = filter.indexOf(":");
+            if (colonCount != 1 || colonIndex < 1 || colonIndex > length - 2) {
+                throw new ActivityStoreException("Filter is incorrectly formatted: " + filter);
+            }
+
+            filterBuilder.add(queryFilter(queryString(filter)));
+        }
     }
 
     private Collection<ResolvedActivity> retrieveActivitiesFromSearchResponse(
