@@ -18,7 +18,7 @@ public class ObjectPublisher implements Publisher<Object> {
 
     @Override
     public Status publish(Twitter twitter, Verb verb, Object object) throws TwitterPublisherException {
-        String message = object.getDescription() + " - " + object.getUrl().toString();
+        String message = Trimmer.trim(object.getDescription(), object.getUrl(), 3) + " - " + object.getUrl().toString();
         Status status;
         try {
             status = twitter.updateStatus(message);

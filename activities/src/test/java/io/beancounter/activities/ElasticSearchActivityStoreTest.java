@@ -30,7 +30,9 @@ import java.io.IOException;
 import java.lang.Object;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -557,7 +559,8 @@ public class ElasticSearchActivityStoreTest {
                 Verb.TWEET.name(),
                 0,
                 10,
-                descOrder
+                descOrder,
+                Collections.<String>emptyList()
         );
 
         assertEquals(activitiesRetrieved.size(), 10);
@@ -570,7 +573,8 @@ public class ElasticSearchActivityStoreTest {
                 Verb.TWEET.name(),
                 0,
                 10,
-                descOrder
+                descOrder,
+                Collections.<String>emptyList()
         );
 
         assertEquals(activitiesRetrieved.size(), 10);
@@ -596,7 +600,8 @@ public class ElasticSearchActivityStoreTest {
                 "\"twitter-username\"",
                 0,
                 20,
-                descOrder
+                descOrder,
+                Collections.<String>emptyList()
         );
 
         assertEquals(activitiesRetrieved.size(), 10);
@@ -609,7 +614,9 @@ public class ElasticSearchActivityStoreTest {
                 "\"twitter-username\"",
                 0,
                 20,
-                descOrder);
+                descOrder,
+                Collections.<String>emptyList()
+        );
 
         assertEquals(activitiesRetrieved.size(), 10);
         for (int i = 0; i < activitiesRetrieved.size(); i++) {
@@ -634,7 +641,8 @@ public class ElasticSearchActivityStoreTest {
                 String.valueOf(dateTimeMillis),
                 0,
                 20,
-                descOrder
+                descOrder,
+                Collections.<String>emptyList()
         );
 
         assertEquals(activitiesRetrieved.size(), 1);
@@ -645,7 +653,8 @@ public class ElasticSearchActivityStoreTest {
                 String.valueOf(dateTimeMillis),
                 0,
                 20,
-                descOrder
+                descOrder,
+                Collections.<String>emptyList()
         );
 
         assertEquals(activitiesRetrieved.size(), 1);
@@ -669,7 +678,8 @@ public class ElasticSearchActivityStoreTest {
                 "\"twitter-username\"",
                 0,
                 10,
-                descOrder
+                descOrder,
+                Collections.<String>emptyList()
         );
 
         assertEquals(activitiesRetrieved.size(), 1);
@@ -684,7 +694,9 @@ public class ElasticSearchActivityStoreTest {
                     "\"different-username\"",
                     0,
                     10,
-                    descOrder);
+                    descOrder,
+                    Collections.<String>emptyList()
+            );
         } catch (ActivityStoreException ignored) {
             return;
         }
@@ -709,7 +721,8 @@ public class ElasticSearchActivityStoreTest {
                 Verb.TWEET.name(),
                 0,
                 10,
-                ascOrder
+                ascOrder,
+                Collections.<String>emptyList()
         );
 
         assertEquals(activitiesRetrieved.size(), 10);
@@ -725,7 +738,8 @@ public class ElasticSearchActivityStoreTest {
                 Verb.TWEET.name(),
                 0,
                 10,
-                ascOrder
+                ascOrder,
+                Collections.<String>emptyList()
         );
 
         assertEquals(activitiesRetrieved.size(), 10);
@@ -754,7 +768,8 @@ public class ElasticSearchActivityStoreTest {
                 "\"twitter-username\"",
                 0,
                 20,
-                ascOrder
+                ascOrder,
+                Collections.<String>emptyList()
         );
 
         assertEquals(activitiesRetrieved.size(), 10);
@@ -770,7 +785,9 @@ public class ElasticSearchActivityStoreTest {
                 "\"twitter-username\"",
                 0,
                 20,
-                ascOrder);
+                ascOrder,
+                Collections.<String>emptyList()
+        );
 
         assertEquals(activitiesRetrieved.size(), 10);
         for (int i = 0; i < activitiesRetrieved.size(); i++) {
@@ -798,7 +815,8 @@ public class ElasticSearchActivityStoreTest {
                 String.valueOf(dateTimeMillis),
                 0,
                 20,
-                ascOrder
+                ascOrder,
+                Collections.<String>emptyList()
         );
 
         assertEquals(activitiesRetrieved.size(), 1);
@@ -809,7 +827,8 @@ public class ElasticSearchActivityStoreTest {
                 String.valueOf(dateTimeMillis),
                 0,
                 20,
-                ascOrder
+                ascOrder,
+                Collections.<String>emptyList()
         );
 
         assertEquals(activitiesRetrieved.size(), 1);
@@ -818,33 +837,155 @@ public class ElasticSearchActivityStoreTest {
 
     @Test(expectedExceptions = WildcardSearchException.class)
     public void wildcardSearchesShouldNotBeAllowed() throws Exception {
-        UUID userId1 = UUID.randomUUID();
-        UUID userId2 = UUID.randomUUID();
-        DateTime dateTime = new DateTime(DateTimeZone.UTC);
-
-        as.store(userId1, createTweetActivities(userId1, dateTime, 5));
-        as.store(userId2, createTweetActivities(userId2, dateTime, 5));
-
-        refreshIndex();
-
         try {
-            as.search("userId", "*", 0, 10, descOrder);
+            as.search("userId", "*", 0, 10, descOrder, Collections.<String>emptyList());
         } catch (WildcardSearchException expected) {}
 
         try {
-            as.search("*", "*", 0, 10, descOrder);
+            as.search("*", "*", 0, 10, descOrder, Collections.<String>emptyList());
         } catch (WildcardSearchException expected) {}
 
         try {
-            as.search("user*", "*", 0, 10, ascOrder);
+            as.search("user*", "*", 0, 10, ascOrder, Collections.<String>emptyList());
         } catch (WildcardSearchException expected) {}
 
-        as.search("type", "tw*er", 0, 10, ascOrder);
+        as.search("type", "tw*er", 0, 10, ascOrder, Collections.<String>emptyList());
     }
 
     @Test(expectedExceptions = InvalidOrderException.class)
     public void searchingWithInvalidSortOrderShouldThrowException() throws Exception {
-        as.search("type", "TWEET", 0, 10, "not-an-order");
+        as.search("type", "TWEET", 0, 10, "not-an-order", Collections.<String>emptyList());
+    }
+
+    @Test(expectedExceptions = WildcardSearchException.class)
+    public void wildcardsAreNotAllowedInFilters() throws Exception {
+        List<String> filters = Arrays.asList("userId:*");
+        try {
+            as.search("type", "TWEET", 0, 10, ascOrder, filters);
+        } catch (WildcardSearchException expected) {}
+
+        filters = Arrays.asList("*:facebook");
+        try {
+            as.search("type", "TWEET", 0, 10, ascOrder, filters);
+        } catch (WildcardSearchException expected) {}
+
+        filters = Arrays.asList("*:facebook", "my*:test");
+        try {
+            as.search("type", "TWEET", 0, 10, ascOrder, filters);
+        } catch (WildcardSearchException expected) {}
+
+        filters = Arrays.asList("*:*");
+        as.search("type", "TWEET", 0, 10, ascOrder, filters);
+    }
+
+    @Test
+    public void emptyFiltersAreIgnoredInSearch() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+        List<String> filters = Collections.emptyList();
+
+        List<ResolvedActivity> tweetActivities
+                = (List<ResolvedActivity>) createTweetActivities(userId, dateTime, 10);
+        Collection<ResolvedActivity> songsStored = createLastFmActivities(userId, dateTime.minusYears(1), 10);
+        as.store(userId, tweetActivities);
+        as.store(userId, songsStored);
+
+        refreshIndex();
+
+        List<ResolvedActivity> activitiesRetrieved = (List<ResolvedActivity>) as.search(
+                "userId",
+                "\"" + userId.toString() + "\"",
+                0,
+                20,
+                descOrder,
+                filters
+        );
+        assertEquals(activitiesRetrieved.size(), 20);
+
+        tweetActivities.addAll(songsStored);
+        for (int i = 0; i < activitiesRetrieved.size(); i++) {
+            assertEquals(activitiesRetrieved.get(i), tweetActivities.get(i));
+        }
+    }
+
+    @Test
+    public void searchFiltersNarrowTheSearchCorrectly() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+        List<String> filters = Arrays.asList("type:TWEET");
+
+        List<ResolvedActivity> tweetActivities
+                = (List<ResolvedActivity>) createTweetActivities(userId, dateTime, 10);
+        Collection<ResolvedActivity> songsStored = createLastFmActivities(userId, dateTime.minusYears(1), 10);
+        as.store(userId, tweetActivities);
+        as.store(userId, songsStored);
+
+        refreshIndex();
+
+        List<ResolvedActivity> activitiesRetrieved = (List<ResolvedActivity>) as.search(
+                "userId",
+                "\"" + userId.toString() + "\"",
+                0,
+                20,
+                descOrder,
+                filters
+        );
+        assertEquals(activitiesRetrieved.size(), 10);
+
+        for (int i = 0; i < activitiesRetrieved.size(); i++) {
+            assertEquals(activitiesRetrieved.get(i), tweetActivities.get(i));
+        }
+    }
+
+    @Test
+    public void multipleSearchFiltersHaveLogicalAndRelationship() throws Exception {
+        UUID userId = UUID.randomUUID();
+        DateTime dateTime = new DateTime(DateTimeZone.UTC);
+        long dateTimeMillis = dateTime.minusDays(1).getMillis();
+        List<String> filters = Arrays.asList("type:TWEET", "date:" + dateTimeMillis);
+
+        List<ResolvedActivity> tweetActivities
+                = (List<ResolvedActivity>) createTweetActivities(userId, dateTime, 10);
+        Collection<ResolvedActivity> songsStored = createLastFmActivities(userId, dateTime.minusYears(1), 10);
+        as.store(userId, tweetActivities);
+        as.store(userId, songsStored);
+
+        refreshIndex();
+
+        List<ResolvedActivity> activitiesRetrieved = (List<ResolvedActivity>) as.search(
+                "userId",
+                "\"" + userId.toString() + "\"",
+                0,
+                20,
+                descOrder,
+                filters
+        );
+        assertEquals(activitiesRetrieved.size(), 1);
+        assertEquals(activitiesRetrieved.get(0), tweetActivities.get(1));
+    }
+
+    @Test(expectedExceptions = ActivityStoreException.class)
+    public void searchFilterWithNoColonIsIncorrectlyFormattedAndShouldCauseException() throws Exception {
+        List<String> filters = Arrays.asList("invalid-filter");
+        as.search("type", "TWEET", 0, 10, descOrder, filters);
+    }
+
+    @Test(expectedExceptions = ActivityStoreException.class)
+    public void searchFilterWithMoreThanOneColonIsIncorrectlyFormattedAndShouldCauseException() throws Exception {
+        List<String> filters = Arrays.asList("invalid:filter:here");
+        as.search("type", "TWEET", 0, 10, descOrder, filters);
+    }
+
+    @Test(expectedExceptions = ActivityStoreException.class)
+    public void searchFilterWithNothingBeforeTheColonIsIncorrectlyFormattedAndShouldCauseException() throws Exception {
+        List<String> filters = Arrays.asList(":invalid");
+        as.search("type", "TWEET", 0, 10, descOrder, filters);
+    }
+
+    @Test(expectedExceptions = ActivityStoreException.class)
+    public void searchFilterWithNothingAfterTheColonIsIncorrectlyFormattedAndShouldCauseException() throws Exception {
+        List<String> filters = Arrays.asList("invalid:");
+        as.search("type", "TWEET", 0, 10, descOrder, filters);
     }
 
     @Test
@@ -860,7 +1001,8 @@ public class ElasticSearchActivityStoreTest {
                 Verb.TWEET.name(),
                 0,
                 10,
-                descOrder
+                descOrder,
+                Collections.<String>emptyList()
         );
 
         assertTrue(activitiesRetrieved.isEmpty());
