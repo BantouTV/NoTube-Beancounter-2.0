@@ -152,8 +152,8 @@ public class MockActivityStore implements ActivityStore {
 
     @Override
     public Collection<ResolvedActivity> search(
-            String path, String value, int pageNumber, int size, String order
-    ) throws ActivityStoreException, WildcardSearchException, InvalidOrderException {
+            String path, String value, int pageNumber, int size, String order,
+            List<String> filters) throws ActivityStoreException, WildcardSearchException, InvalidOrderException {
         if (path.contains("*") || value.contains("*")) {
             throw new WildcardSearchException("Wildcard searches are not allowed.");
         }

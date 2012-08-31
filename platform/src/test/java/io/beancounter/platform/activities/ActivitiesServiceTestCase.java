@@ -50,6 +50,7 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -780,7 +781,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
         List<ResolvedActivity> results = new ArrayList<ResolvedActivity>();
         results.add(createCustomActivity());
-        when(activityStore.search(path, value, 0, 20, order)).thenReturn(results);
+        when(activityStore.search(path, value, 0, 20, order, Collections.<String>emptyList())).thenReturn(results);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -819,7 +820,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                     APIKEY
             );
 
-            when(activityStore.search(path, value, page, 20, "desc"))
+            when(activityStore.search(path, value, page, 20, "desc", Collections.<String>emptyList()))
                     .thenReturn(createSearchResults(page, 20, "desc"));
 
             GetMethod getMethod = new GetMethod(base_uri + query);
@@ -876,7 +877,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                     APIKEY
             );
 
-            when(activityStore.search(path, value, page, 20, order))
+            when(activityStore.search(path, value, page, 20, order, Collections.<String>emptyList()))
                     .thenReturn(createSearchResults(page, 20, order));
 
             GetMethod getMethod = new GetMethod(base_uri + query);
@@ -927,7 +928,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 APIKEY
         );
 
-        when(activityStore.search(path, value, 0, 20, order))
+        when(activityStore.search(path, value, 0, 20, order, Collections.<String>emptyList()))
                 .thenThrow(new InvalidOrderException(order + " is not a valid sort order."));
 
         GetMethod getMethod = new GetMethod(base_uri + query);
@@ -955,7 +956,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 APIKEY
         );
 
-        when(activityStore.search("*", "*", 0, 20, "desc"))
+        when(activityStore.search("*", "*", 0, 20, "desc", Collections.<String>emptyList()))
                 .thenThrow(new WildcardSearchException(expectedMessage));
 
         GetMethod getMethod = new GetMethod(base_uri + query);
@@ -972,29 +973,35 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertNull(response.getObject());
     }
 
-    // TODO (critical): See issue #88
-    @Test(enabled = false)
+    @Test
     public void wildcardsAreNotAllowedInSearchFilters() throws Exception {
-        final String baseQuery = "activities/search?path=%s&value=%s&filter=%s&apikey=%s";
-        final String query = String.format(
+        String baseQuery = "activities/search?path=%s&value=%s&filter=%s&apikey=%s";
+        String expectedMessage = "Wildcard searches are not allowed.";
+        String path = "type";
+        String value = Verb.TWEET.name();
+        String query = String.format(
                 baseQuery,
-                "type",
-                Verb.TWEET.name(),
+                path,
+                value,
                 "url:*",
                 APIKEY
         );
+
+        List<String> filters = Arrays.asList("url:*");
+        when(activityStore.search(path, value, 0, 20, "desc", filters))
+                .thenThrow(new WildcardSearchException(expectedMessage));
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
 
         int responseCode = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
-        assertEquals(responseCode, HttpStatus.SC_OK);
+        assertEquals(responseCode, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         assertFalse(responseBody.isEmpty());
 
         ResolvedActivitiesPlatformResponse response = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
         assertEquals(response.getStatus().toString(), "NOK");
-        assertEquals(response.getMessage(), "Wildcard searches are not allowed.");
+        assertEquals(response.getMessage(), expectedMessage);
         assertNull(response.getObject());
     }
 

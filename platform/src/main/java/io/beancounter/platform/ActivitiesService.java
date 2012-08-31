@@ -37,7 +37,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -246,6 +247,7 @@ public class ActivitiesService extends JsonService {
             @QueryParam(VALUE) String value,
             @QueryParam(PAGE_STRING) @DefaultValue("0") String pageString,
             @QueryParam(ORDER) @DefaultValue("desc") String order,
+            @QueryParam("filter") List<String> filters,
             @QueryParam(API_KEY) String apiKey
     ) {
         Map<String, Object> params = RequestValidator.createParams(
@@ -253,6 +255,7 @@ public class ActivitiesService extends JsonService {
                 VALUE, value,
                 PAGE_STRING, pageString,
                 ORDER, order,
+                "filters", filters,
                 API_KEY, apiKey
         );
 
@@ -271,7 +274,7 @@ public class ActivitiesService extends JsonService {
         Collection<ResolvedActivity> activitiesRetrieved;
         int page = (Integer) params.get(PAGE_NUMBER);
         try {
-            activitiesRetrieved = activities.search(path, value, page, ACTIVITIES_LIMIT, order);
+            activitiesRetrieved = activities.search(path, value, page, ACTIVITIES_LIMIT, order, Collections.<String>emptyList());
         } catch (ActivityStoreException ase) {
             return error(ase, "Error while getting page " + page
                     + " of activities where [" + path + "=" + value +"]");

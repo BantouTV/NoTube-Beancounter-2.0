@@ -5,6 +5,7 @@ import io.beancounter.commons.model.activity.Activity;
 import io.beancounter.commons.model.activity.ResolvedActivity;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -109,6 +110,7 @@ public interface ActivityStore {
      * JSON path and provides results in a paginated format. Wildcard searches
      * are not allowed.
      *
+     *
      * @param path The JSON path to match the value to.
      * @param value The value to search for.
      * @param pageNumber The number of the page of results to return.
@@ -116,6 +118,7 @@ public interface ActivityStore {
      * @param order The order in which the results should be given. Either "asc"
      * for ascending (earliest activities first) or "desc" for descending
      * (latest activities first).
+     * @param filters
      * @return Zero or more activities which are the results of executing the
      * search.
      * @throws ActivityStoreException Thrown if something goes wrong when
@@ -129,7 +132,8 @@ public interface ActivityStore {
             String value,
             int pageNumber,
             int size,
-            String order
+            String order,
+            List<String> filters
     ) throws ActivityStoreException, WildcardSearchException, InvalidOrderException;
 
     /**

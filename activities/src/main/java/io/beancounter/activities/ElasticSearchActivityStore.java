@@ -28,8 +28,10 @@ import io.beancounter.commons.helper.es.NodeInfo;
 import io.beancounter.commons.model.activity.*;
 
 import java.io.IOException;
+import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -207,13 +209,24 @@ public class ElasticSearchActivityStore implements ActivityStore {
 
     @Override
     public Collection<ResolvedActivity> search(
-            String path, String value, int pageNumber, int size, String order
+            String path,
+            String value,
+            int pageNumber,
+            int size,
+            String order,
+            List<String> filters
     ) throws ActivityStoreException, WildcardSearchException, InvalidOrderException {
         if (path.contains("*") || value.contains("*")) {
             throw new WildcardSearchException("Wildcard searches are not allowed.");
         }
 
-        return searchAndPaginateResults(path + ":" + value, pageNumber, size, order);
+        for (String filter : filters) {
+            if (filter.contains("*")) {
+                throw new WildcardSearchException("Wildcard searches are not allowed.");
+            }
+        }
+
+        return searchAndPaginateResults(path + ":" + value, pageNumber, size, order, filters);
     }
 
     @Override
@@ -285,6 +298,12 @@ public class ElasticSearchActivityStore implements ActivityStore {
     private Collection<ResolvedActivity> searchAndPaginateResults(
             String query, int pageNumber, int size, String order
     ) throws ActivityStoreException, InvalidOrderException {
+        return searchAndPaginateResults(query, pageNumber, size, order, Collections.<String>emptyList());
+    }
+
+    private Collection<ResolvedActivity> searchAndPaginateResults(
+            String query, int pageNumber, int size, String order, List<String> filters
+    ) throws ActivityStoreException, InvalidOrderException {
         SortOrder sortOrder;
         try {
             sortOrder = SortOrder.valueOf(order.toUpperCase());
@@ -294,6 +313,21 @@ public class ElasticSearchActivityStore implements ActivityStore {
 
         AndFilterBuilder visibilityFilter = andFilter()
                 .add(termFilter(VISIBLE, true));
+
+        for (String filter : filters) {
+            int colonCount = 0;
+            int length = filter.length();
+            for (int i = 0; i < length; i++) {
+                if (filter.charAt(i) == ':') {
+                    colonCount++;
+                }
+            }
+            int colonIndex = filter.indexOf(":");
+            if (colonCount != 1 || colonIndex < 1 || colonIndex > length - 2) {
+                throw new ActivityStoreException("Filter is incorrectly formatted: " + filter);
+            }
+            visibilityFilter.add(queryFilter(queryString(filter)));
+        }
 
         FilteredQueryBuilder fq = filteredQuery(
                 queryString(query),
