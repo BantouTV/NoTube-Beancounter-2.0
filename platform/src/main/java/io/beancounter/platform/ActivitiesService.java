@@ -23,6 +23,7 @@ import io.beancounter.queues.Queues;
 import io.beancounter.queues.QueuesException;
 import io.beancounter.usermanager.UserManager;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.joda.time.DateTime;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
@@ -112,6 +113,9 @@ public class ActivitiesService extends JsonService {
         }
         User user = (User) params.get(USER);
         ResolvedActivity resolvedActivity = new ResolvedActivity(user.getId(), activity, user);
+        if (resolvedActivity.getActivity().getContext().getDate() == null) {
+            resolvedActivity.getActivity().getContext().setDate(DateTime.now());
+        }
         String jsonResolvedActivity;
         try {
             jsonResolvedActivity = parseResolvedActivity(resolvedActivity);
