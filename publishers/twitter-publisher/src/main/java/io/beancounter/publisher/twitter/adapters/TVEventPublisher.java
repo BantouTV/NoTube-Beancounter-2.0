@@ -37,7 +37,7 @@ public class TVEventPublisher implements Publisher<TVEvent> {
         } else if(verb.equals(Verb.CHECKIN)) {
             message += "Just joined the tv event ";
         }
-        message += tvEvent.getName() + " - " + tvEvent.getUrl();
+        message = Trimmer.trim(message + tvEvent.getName(), tvEvent.getUrl(), 3) + " - " + tvEvent.getUrl();
         return message;
     }
 }

@@ -4,6 +4,7 @@ import junit.framework.Assert;
 import org.testng.annotations.Test;
 
 /**
+ *
  * @author Enrico Candino ( enrico.candino @ gmail.com )
  */
 public class ServiceTest {
