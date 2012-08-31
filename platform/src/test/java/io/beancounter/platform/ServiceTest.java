@@ -36,43 +36,16 @@ public class ServiceTest {
 
     @Test
     public void testCheckOrderParameters() throws ServiceException {
-        // order: name - surname - username - password - apikey
+        Object[] realParams = new Object[]{"name", "surname", "username", "password", "apikey"};
         Object[] params = new Object[]{"", "", "", "", ""};
-        try {
-            Service.check(UserService.class, "signUp", params);
-        } catch (ServiceException e) {
-            assertEquals(e.getMessage(), "Parameter [name] cannot be empty string");
+        for(int i = 0; i<params.length; i++) {
+            try {
+                Service.check(UserService.class, "signUp", params);
+            } catch (ServiceException e) {
+                assertEquals(e.getMessage(), "Parameter [" + realParams[i] + "] cannot be empty string");
+            }
+            params[i] = realParams[i];
         }
-
-        params = new Object[]{"name", "", "", "", ""};
-        try {
-            Service.check(UserService.class, "signUp", params);
-        } catch (ServiceException e) {
-            assertEquals(e.getMessage(), "Parameter [surname] cannot be empty string");
-        }
-
-        params = new Object[]{"name", "surname", "", "", ""};
-        try {
-            Service.check(UserService.class, "signUp", params);
-        } catch (ServiceException e) {
-            assertEquals(e.getMessage(), "Parameter [username] cannot be empty string");
-        }
-
-        params = new Object[]{"name", "surname", "username", "", ""};
-        try {
-            Service.check(UserService.class, "signUp", params);
-        } catch (ServiceException e) {
-            assertEquals(e.getMessage(), "Parameter [password] cannot be empty string");
-        }
-
-        params = new Object[]{"name", "surname", "username", "password", ""};
-        try {
-            Service.check(UserService.class, "signUp", params);
-        } catch (ServiceException e) {
-            assertEquals(e.getMessage(), "Parameter [apikey] cannot be empty string");
-        }
-
-        params = new Object[]{"name", "surname", "username", "password", "apikey"};
         Service.check(UserService.class, "signUp", params);
     }
 
