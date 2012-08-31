@@ -102,7 +102,6 @@ public class ActivitiesService extends JsonService {
                 ApplicationsManager.Object.ACTIVITIES,
                 params
         );
-
         if (error != null) {
             return error;
         }
@@ -115,11 +114,14 @@ public class ActivitiesService extends JsonService {
             final String errMsg = "Error: cannot parse your input json";
             return error(e, errMsg);
         }
+
+        // if the activity has not been provided, then set it to now
+        if(activity.getContext().getDate() == null) {
+            activity.getContext().setDate(DateTime.now());
+        }
+
         User user = (User) params.get(USER);
         ResolvedActivity resolvedActivity = new ResolvedActivity(user.getId(), activity, user);
-        if (resolvedActivity.getActivity().getContext().getDate() == null) {
-            resolvedActivity.getActivity().getContext().setDate(DateTime.now());
-        }
         String jsonResolvedActivity;
         try {
             jsonResolvedActivity = parseResolvedActivity(resolvedActivity);

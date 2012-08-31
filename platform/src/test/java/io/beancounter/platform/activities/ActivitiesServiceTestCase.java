@@ -177,6 +177,51 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
+    public void testAddActivityWithANullDate() throws Exception {
+        String baseQuery = "activities/add/%s?apikey=%s";
+        final String username = "test-user";
+        final String activity = "{\"object\":" +
+                "{\"type\":\"TWEET\"," +
+                "\"text\":\"Just a fake tweet!\"," +
+                "\"hashTags\":[\"testingBeancounter\"]," +
+                "\"urls\":[\"http://fakeUrlToTest.io\"]," +
+                "\"name\":\"tweet_name\"," +
+                "\"description\":null," +
+                "\"url\":\"http://twitter.com\"}," +
+                "\"context\":" +
+                "{\"date\":null," +
+                "\"service\":null," +
+                "\"mood\":null}," +
+                "\"verb\":\"TWEET\"}";
+        String query = String.format(
+                baseQuery,
+                username,
+                APIKEY
+        );
+
+        when(userManager.getUser(username)).thenReturn(getUser(username));
+
+        PostMethod postMethod = new PostMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("activity", activity);
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        assertNotEquals(responseBody, "");
+        assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+
+        APIResponse actual = fromJson(responseBody, APIResponse.class);
+        assertEquals(actual.getMessage(), "activity successfully registered");
+        assertEquals(actual.getStatus(), "OK");
+        assertNotNull(actual.getObject());
+        UUID returnedActivityId = UUID.fromString(actual.getObject());
+        assertNotNull(returnedActivityId);
+
+        verify(queues).push(anyString());
+    }
+
+    @Test
     public void addActivityWithInvalidApiKeyShouldRespondWithError() throws Exception {
         String baseQuery = "activities/add/%s?apikey=%s";
         String username = "test-user";
