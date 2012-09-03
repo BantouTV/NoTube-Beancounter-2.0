@@ -1,6 +1,6 @@
 package io.beancounter.filter.model.pattern;
 
-import io.beancounter.commons.model.activity.ResolvedActivity;
+import io.beancounter.commons.model.activity.*;
 
 /**
  * put class description here
@@ -72,8 +72,10 @@ public class ActivityPattern implements Pattern<ResolvedActivity> {
 
     @Override
     public boolean matches(ResolvedActivity ra) {
-        return (this.equals(ANY)) ||
-                (userId.matches(ra.getUserId()) && verb.matches(ra.getActivity().getVerb()) && object.matches(ra.getActivity().getObject()) && context.matches(ra.getActivity().getContext()));
+        return (this.equals(ANY)) || (userId.matches(ra.getUserId()) &&
+                verb.matches(ra.getActivity().getVerb()) &&
+                object.matches(ra.getActivity().getObject()) &&
+                context.matches(ra.getActivity().getContext()));
     }
 
     @Override
