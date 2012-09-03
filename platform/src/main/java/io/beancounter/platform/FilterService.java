@@ -17,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -26,14 +27,15 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 public class FilterService extends JsonService {
 
-    @Inject
     private ApplicationsManager applicationsManager;
 
-    @Inject
     private FilterManager filterManager;
 
     @Inject
-    public FilterService() {}
+    public FilterService(ApplicationsManager applicationsManager, FilterManager filterManager) {
+        this.applicationsManager = applicationsManager;
+        this.filterManager = filterManager;
+    }
 
     @POST
     @Path("/register/{name}")
@@ -41,7 +43,7 @@ public class FilterService extends JsonService {
             @PathParam("name") String name,
             @FormParam("description") String description,
             @FormParam("pattern") String patternJson,
-            @FormParam("queue") String queue,
+            @FormParam("queue") Set<String> queues,
             @QueryParam("apikey") String apiKey
     ) {
         try {
@@ -51,11 +53,21 @@ public class FilterService extends JsonService {
                     name,
                     description,
                     patternJson,
-                    queue,
+                    queues,
                     apiKey
             );
         } catch (ServiceException e) {
             return error(e, "Error while checking parameters");
+        }
+        if (queues.isEmpty()) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(
+                    new StringPlatformResponse(
+                            StringPlatformResponse.Status.NOK,
+                            "You must specify at least one queue"
+                    )
+            );
+            return rb.build();
         }
         try {
             UUID.fromString(apiKey);
@@ -89,7 +101,7 @@ public class FilterService extends JsonService {
         }
         String actualName;
         try {
-            actualName = filterManager.register(name, description, queue, pattern);
+            actualName = filterManager.register(name, description, queues, pattern);
         } catch (FilterManagerException e) {
             final String errMsg = "Error while [" + name + "] filter";
             return error(e, errMsg);
