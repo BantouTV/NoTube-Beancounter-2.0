@@ -22,6 +22,7 @@ import io.beancounter.platform.ApplicationService;
 import io.beancounter.platform.JacksonMixInProvider;
 import io.beancounter.queues.Queues;
 import io.beancounter.usermanager.UserManager;
+import junit.framework.Assert;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
@@ -30,7 +31,9 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
+import org.mockito.ArgumentCaptor;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
@@ -57,11 +60,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
@@ -218,7 +217,12 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         UUID returnedActivityId = UUID.fromString(actual.getObject());
         assertNotNull(returnedActivityId);
 
-        verify(queues).push(anyString());
+        ArgumentCaptor captor = ArgumentCaptor.forClass(String.class);
+        verify(queues).push((String) captor.capture());
+        String resolvedActivity = (String) captor.getValue();
+        ObjectMapper mapper = new ObjectMapper();
+        ResolvedActivity expected = mapper.readValue(resolvedActivity, ResolvedActivity.class);
+        Assert.assertNotNull(expected.getActivity().getContext().getDate());
     }
 
     @Test
