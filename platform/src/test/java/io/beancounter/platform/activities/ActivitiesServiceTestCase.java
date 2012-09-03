@@ -113,24 +113,6 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         reset(activityStore, queues, userManager);
     }
 
-    private UUID registerTestApplication() throws IOException {
-        String baseQuery = "application/register";
-        final String name = "fake_application_name";
-        final String description = "This is a test registration!";
-        final String email = "fake_mail@test.com";
-        final String oauth = "http://fakeUrlOAUTH";
-        PostMethod postMethod = new PostMethod(base_uri + baseQuery);
-        HttpClient client = new HttpClient();
-        postMethod.addParameter("name", name);
-        postMethod.addParameter("description", description);
-        postMethod.addParameter("email", email);
-        postMethod.addParameter("oauthCallback", oauth);
-        client.executeMethod(postMethod);
-        String responseBody = new String(postMethod.getResponseBody());
-        APIResponse actual = fromJson(responseBody, APIResponse.class);
-        return UUID.fromString(actual.getObject());
-    }
-
     @Test
     public void testAddActivity() throws Exception {
         final String baseQuery = "activities/add/%s?apikey=%s";

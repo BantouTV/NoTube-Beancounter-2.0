@@ -13,7 +13,6 @@ import io.beancounter.applications.MockApplicationsManager;
 import io.beancounter.filter.manager.FilterManager;
 import io.beancounter.filter.model.Filter;
 import io.beancounter.filter.model.pattern.ActivityPattern;
-import io.beancounter.platform.APIResponse;
 import io.beancounter.platform.AbstractJerseyTestCase;
 import io.beancounter.platform.ApplicationService;
 import io.beancounter.platform.FilterService;
@@ -40,7 +39,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
@@ -71,26 +69,6 @@ public class FiltersServiceTestCase extends AbstractJerseyTestCase {
         server.start();
     }
 
-    private UUID registerTestApplication() throws IOException {
-        String baseQuery = "application/register";
-        String name = "fake_application_name";
-        String description = "This is a test registration!";
-        String email = "fake_mail@test.com";
-        String oauth = "http://fakeUrlOAUTH";
-
-        PostMethod postMethod = new PostMethod(base_uri + baseQuery);
-        HttpClient client = new HttpClient();
-        postMethod.addParameter("name", name);
-        postMethod.addParameter("description", description);
-        postMethod.addParameter("email", email);
-        postMethod.addParameter("oauthCallback", oauth);
-        client.executeMethod(postMethod);
-
-        String responseBody = new String(postMethod.getResponseBody());
-        APIResponse actual = fromJson(responseBody, APIResponse.class);
-        return UUID.fromString(actual.getObject());
-    }
-
     @BeforeTest
     public void registerApp() throws Exception {
         APIKEY = registerTestApplication().toString();
@@ -119,7 +97,7 @@ public class FiltersServiceTestCase extends AbstractJerseyTestCase {
                 baseQuery,
                 name,
                 APIKEY
-        );
+        );        
 
         PostMethod postMethod = new PostMethod(base_uri + query);
         HttpClient client = new HttpClient();

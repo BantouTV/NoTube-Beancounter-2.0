@@ -1,12 +1,13 @@
 package io.beancounter.platform.applications;
 
+import io.beancounter.platform.PlatformResponse;
+import io.beancounter.platform.responses.ApplicationPlatformResponse;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import io.beancounter.platform.APIResponse;
 import io.beancounter.platform.AbstractJerseyTestCase;
 
 import java.io.IOException;
@@ -43,15 +44,17 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        APIResponse actual = fromJson(responseBody, APIResponse.class);
+        ApplicationPlatformResponse actual = fromJson(responseBody, ApplicationPlatformResponse.class);
         Assert.assertNotNull(actual);
-        APIResponse expected = new APIResponse(
-                actual.getObject(),
+        ApplicationPlatformResponse expected = new ApplicationPlatformResponse(
+                PlatformResponse.Status.OK,
                 "Application '" + name + "' successfully registered",
-                "OK"
+                actual.getObject()
         );
-        Assert.assertEquals(actual, expected);
-        final UUID applicationKey = UUID.fromString(actual.getObject());
+        Assert.assertEquals(actual.getStatus(), expected.getStatus());
+        Assert.assertEquals(actual.getMessage(), expected.getMessage());
+        Assert.assertEquals(actual.getObject(), expected.getObject());
+        final UUID applicationKey = actual.getObject().getAdminKey();
         baseQuery = "application/" + applicationKey;
         DeleteMethod deleteMethod = new DeleteMethod(base_uri + baseQuery);
         result = client.executeMethod(deleteMethod);
@@ -59,14 +62,16 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        actual = fromJson(responseBody, APIResponse.class);
+        actual = fromJson(responseBody, ApplicationPlatformResponse.class);
         Assert.assertNotNull(actual);
-        expected = new APIResponse(
-                null,
+        expected = new ApplicationPlatformResponse(
+                PlatformResponse.Status.OK,
                 "Application with api key'" + applicationKey + "' successfully removed",
-                "OK"
+                null
         );
-        Assert.assertEquals(actual, expected);
+        Assert.assertEquals(actual.getStatus(), expected.getStatus());
+        Assert.assertEquals(actual.getMessage(), expected.getMessage());
+        Assert.assertEquals(actual.getObject(), expected.getObject());
     }
 
 }
