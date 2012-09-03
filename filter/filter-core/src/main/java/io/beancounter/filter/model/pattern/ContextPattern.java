@@ -87,4 +87,18 @@ public class ContextPattern implements Pattern<Context> {
                 && this.getMood().matches(mood)
                 && this.getUsername().matches(username);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContextPattern that = (ContextPattern) o;
+
+        return !(date != null ? !date.equals(that.date) : that.date != null)
+                && !(mood != null ? !mood.equals(that.mood) : that.mood != null)
+                && !(service != null ? !service.equals(that.service) : that.service != null)
+                && !(username != null ? !username.equals(that.username) : that.username != null);
+
+    }
 }

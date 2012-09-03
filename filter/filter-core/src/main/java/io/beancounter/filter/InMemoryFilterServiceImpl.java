@@ -59,7 +59,7 @@ public final class InMemoryFilterServiceImpl implements FilterService {
             LOGGER.error(errMsg, e);
             throw new FilterServiceException(errMsg, e);
         }
-        if(filter == null) {
+        if (filter == null) {
             return;
         }
         if (filter.isActive()) {
@@ -73,14 +73,14 @@ public final class InMemoryFilterServiceImpl implements FilterService {
     public Set<String> processActivity(ResolvedActivity resolvedActivity) {
         LOGGER.debug("processing activity {}", resolvedActivity);
         Set<String> result = new HashSet<String>();
-        for(Filter filter : filters) {
+        for (Filter filter : filters) {
             // TODO (high) this exception is thrown when we have multiple active filters
             // if thrown the activities filtered are lost
             // understand why this is happening
             try {
                 if(filter.getActivityPattern().matches(resolvedActivity)) {
                     LOGGER.debug("activity {} filtered", resolvedActivity);
-                    result.add(filter.getQueue());
+                    result.addAll(filter.getQueues());
                 }
             } catch (Exception e) {
                 LOGGER.error("Error while trying to match the activity with the filter [{}]", filter.getName(), e);

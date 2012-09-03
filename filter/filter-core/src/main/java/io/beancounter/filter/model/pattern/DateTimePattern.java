@@ -68,7 +68,7 @@ public class DateTimePattern implements Pattern<DateTime> {
         DateTimePattern that = (DateTimePattern) o;
 
         if (bool != that.bool) return false;
-        if (date != null ? !date.equals(that.date) : that.date != null)
+        if (date != null ? !(date.getMillis() == that.date.getMillis()) : that.date != null)
             return false;
 
         return true;

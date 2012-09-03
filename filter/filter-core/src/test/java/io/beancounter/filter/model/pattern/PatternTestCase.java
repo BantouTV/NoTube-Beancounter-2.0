@@ -20,6 +20,8 @@ import io.beancounter.filter.model.pattern.rai.TVEventPattern;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -211,7 +213,9 @@ public class PatternTestCase {
 
         Assert.assertTrue(commentPattern.matches(comment));
         FilterManager fm = new InMemoryFilterManager();
-        fm.register("test-filter", "test filter", "queue", activityPattern);
+        Set<String> queues = new HashSet<String>();
+        queues.add("queue");
+        fm.register("test-filter", "test filter", queues, activityPattern);
         boolean b = fm.get("test-filter").getActivityPattern().matches(actual);
         Assert.assertTrue(b);
 
@@ -222,7 +226,7 @@ public class PatternTestCase {
         );
         activityPattern.setObject(commentPattern);
         fm.delete("test-filter");
-        fm.register("test-filter", "test filter", "queue", activityPattern);
+        fm.register("test-filter", "test filter", queues, activityPattern);
         b = fm.get("test-filter").getActivityPattern().matches(actual);
         Assert.assertFalse(b);
     }

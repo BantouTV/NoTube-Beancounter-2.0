@@ -85,4 +85,18 @@ public class ActivityPattern implements Pattern<ResolvedActivity> {
                 ", context=" + context +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ActivityPattern pattern = (ActivityPattern) o;
+
+        return !(context != null ? !context.equals(pattern.context) : pattern.context != null)
+                && !(object != null ? !object.equals(pattern.object) : pattern.object != null)
+                && !(userId != null ? !userId.equals(pattern.userId) : pattern.userId != null)
+                && !(verb != null ? !verb.equals(pattern.verb) : pattern.verb != null);
+
+    }
 }

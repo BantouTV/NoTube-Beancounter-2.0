@@ -3,6 +3,8 @@ package io.beancounter.filter.model;
 import org.joda.time.DateTime;
 import io.beancounter.filter.model.pattern.ActivityPattern;
 
+import java.util.Set;
+
 /**
  * This class describes a Filter. A Filter is a component able to divert
  * to a specific queue an {@link io.beancounter.commons.model.activity.Activity}
@@ -20,7 +22,7 @@ public class Filter {
 
     private boolean active = false;
 
-    private String queue;
+    private Set<String> queues;
 
     private ActivityPattern activityPattern;
 
@@ -28,11 +30,11 @@ public class Filter {
         activityPattern = ActivityPattern.ANY;
     }
 
-    public Filter(String name, String description, ActivityPattern activityPattern, String queue) {
+    public Filter(String name, String description, ActivityPattern activityPattern, Set<String> queues) {
         this.name = name;
         this.description = description;
         this.activityPattern = activityPattern;
-        this.queue = queue;
+        this.queues = queues;
         this.definedAt = DateTime.now();
     }
 
@@ -76,12 +78,12 @@ public class Filter {
         this.active = active;
     }
 
-    public String getQueue() {
-        return queue;
+    public Set<String> getQueues() {
+        return queues;
     }
 
-    public void setQueue(String queue) {
-        this.queue = queue;
+    public void setQueues(Set<String> queues) {
+        this.queues = queues;
     }
 
     @Override
@@ -109,7 +111,7 @@ public class Filter {
                 ", description='" + description + '\'' +
                 ", definedAt=" + definedAt +
                 ", active=" + active +
-                ", queue='" + queue + '\'' +
+                ", queues='" + queues + '\'' +
                 ", activityPattern=" + activityPattern +
                 '}';
     }
