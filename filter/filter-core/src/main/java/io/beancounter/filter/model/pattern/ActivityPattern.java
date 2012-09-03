@@ -1,6 +1,6 @@
 package io.beancounter.filter.model.pattern;
 
-import io.beancounter.commons.model.activity.*;
+import io.beancounter.commons.model.activity.ResolvedActivity;
 
 /**
  * put class description here
