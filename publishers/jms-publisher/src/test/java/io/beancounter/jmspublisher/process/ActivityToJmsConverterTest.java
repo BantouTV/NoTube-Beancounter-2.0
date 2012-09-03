@@ -30,7 +30,10 @@ public class ActivityToJmsConverterTest {
         ResolvedActivity resolvedActivity = ActivityBuilder.aResolvedActivity();
         resolvedActivity.getActivity().setObject(comment);
 
-        LightstreamerDTO lightstreamerDTO = activityToJmsConverter.wrapInExternalObject(resolvedActivity, json);
+        LightstreamerDTO lightstreamerDTO = activityToJmsConverter.wrapResolvedActivityInExternalObject(
+                resolvedActivity,
+                json
+        );
 
         assertThat(lightstreamerDTO.getBody(), is(json));
         assertThat(lightstreamerDTO.getOwner(), is(onEvent));
@@ -47,7 +50,10 @@ public class ActivityToJmsConverterTest {
            ResolvedActivity resolvedActivity = ActivityBuilder.aResolvedActivity();
            resolvedActivity.getActivity().setObject(comment);
 
-           LightstreamerDTO lightstreamerDTO = activityToJmsConverter.wrapInExternalObject(resolvedActivity, json);
+           LightstreamerDTO lightstreamerDTO = activityToJmsConverter.wrapResolvedActivityInExternalObject(
+                   resolvedActivity,
+                   json
+           );
 
            assertThat(lightstreamerDTO, is(nullValue()));
        }

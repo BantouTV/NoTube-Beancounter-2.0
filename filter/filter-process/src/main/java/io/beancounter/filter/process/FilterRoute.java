@@ -17,7 +17,9 @@ import io.beancounter.commons.model.activity.ResolvedActivity;
 import io.beancounter.filter.FilterService;
 
 public class FilterRoute extends RouteBuilder {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterRoute.class);
+
     private static final String ENDPOINTS_HEADER = "endpoints";
 
     @Inject
@@ -25,11 +27,12 @@ public class FilterRoute extends RouteBuilder {
 
     public void configure() {
         errorHandler(deadLetterChannel(errorEndpoint()));
-
         try {
             filterService.refresh();
         } catch (FilterServiceException e) {
-            throw new RuntimeException(e);
+            final String errMsg = "Error while refreshing filters from the manager";
+            LOGGER.error(errMsg, e);
+            throw new RuntimeException(errMsg, e);
         }
 
         from(fromKestrel())
@@ -82,6 +85,7 @@ public class FilterRoute extends RouteBuilder {
     }
 
     protected String fromRedis() {
+        // TODO (low) this should be configurable and not embedded
         return "redis://localhost:6379?command=SUBSCRIBE&channels=filters&serializer=#serializer";
     }
 

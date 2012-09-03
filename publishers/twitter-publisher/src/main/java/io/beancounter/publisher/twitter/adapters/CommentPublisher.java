@@ -31,6 +31,6 @@ public class CommentPublisher implements Publisher<Comment> {
     }
 
     private String getMessage(Comment comment) {
-        return "\"" + Trimmer.trim(comment.getText(), comment.getUrl()) + "\" - " + comment.getUrl().toString();
+        return "" + Trimmer.trim(comment.getText(), comment.getUrl(), 3) + " - " + comment.getUrl().toString();
     }
 }

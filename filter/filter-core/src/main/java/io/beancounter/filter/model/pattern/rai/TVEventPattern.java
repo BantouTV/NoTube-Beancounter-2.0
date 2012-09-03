@@ -51,7 +51,12 @@ public class TVEventPattern extends ObjectPattern {
 
     @Override
     public boolean matches(io.beancounter.commons.model.activity.Object object) {
-        TVEvent that = (TVEvent) object;
+        TVEvent that;
+        try {
+            that = (TVEvent) object;
+        } catch (ClassCastException e) {
+            return false;
+        }
         return this.equals(ANY) || super.matches(that) || uuidPattern.matches(that.getId());
     }
 
