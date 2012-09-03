@@ -18,14 +18,14 @@ public class InMemoryFilterManager implements FilterManager {
     public synchronized String register(
             String name,
             String description,
-            String queue,
+            Set<String> queues,
             ActivityPattern activityPattern
     ) throws FilterManagerException {
         Filter filter = new Filter(
                 name,
                 description,
                 activityPattern,
-                queue
+                queues
         );
         filters.add(filter);
         return name;

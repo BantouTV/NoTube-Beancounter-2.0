@@ -21,10 +21,14 @@ public final class InMemoryFilterServiceImpl implements FilterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryFilterServiceImpl.class);
 
-    @Inject
     private FilterManager filterManager;
 
     private Set<Filter> filters = new HashSet<Filter>();
+
+    @Inject
+    public InMemoryFilterServiceImpl(FilterManager filterManager) {
+        this.filterManager = filterManager;
+    }
 
     @Override
     public synchronized void refresh() throws FilterServiceException {
@@ -59,7 +63,7 @@ public final class InMemoryFilterServiceImpl implements FilterService {
             LOGGER.error(errMsg, e);
             throw new FilterServiceException(errMsg, e);
         }
-        if(filter == null) {
+        if (filter == null) {
             return;
         }
         if (filter.isActive()) {
@@ -75,9 +79,9 @@ public final class InMemoryFilterServiceImpl implements FilterService {
         Set<String> result = new HashSet<String>();
         for(Filter filter : filters) {
             try {
-                if(filter.getActivityPattern().matches(resolvedActivity)) {
+                if (filter.getActivityPattern().matches(resolvedActivity)) {
                     LOGGER.debug("activity {} filtered", resolvedActivity);
-                    result.add(filter.getQueue());
+                    result.addAll(filter.getQueues());
                 }
             } catch (Exception e) {
                 LOGGER.error("Error while trying to match the activity with the filter [{}]", filter.getName(), e);

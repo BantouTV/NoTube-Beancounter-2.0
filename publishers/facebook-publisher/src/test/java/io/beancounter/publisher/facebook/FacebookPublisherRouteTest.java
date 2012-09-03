@@ -124,7 +124,35 @@ public class FacebookPublisherRouteTest extends CamelTestSupport {
         verify(commentPublisher).publishActivity(token, Verb.COMMENT, comment);
     }
 
+    @Test
+    public void exceptionShouldBeHandledWhenResolvedActivityHasNoUser() throws Exception {
+        MockEndpoint error = getMockEndpoint("mock:error");
+        error.expectedMessageCount(1);
+
+        template.sendBody("direct:start", resolvedActivityWithNoUser());
+
+        error.assertIsSatisfied();
+    }
+
+    @Test
+    public void exceptionShouldBeHandledWhenUserHasNoFacebookAuth() throws Exception {
+        MockEndpoint error = getMockEndpoint("mock:error");
+        error.expectedMessageCount(1);
+
+        template.sendBody("direct:start", activityWithNoFacebookAuth());
+
+        error.assertIsSatisfied();
+    }
+
     private String validRaiCommentActivity() {
         return "{\"userId\":\"5609618e-7ff4-41bd-9972-0ed2bc5955f1\",\"activity\":{\"id\":\"baea9cbd-d285-42ab-ba84-7b8316e59a75\",\"verb\":\"COMMENT\",\"object\":{\"type\":\"RAI-TV-COMMENT\",\"url\":\"http://rai.it\",\"name\":null,\"description\":null,\"text\":\"A fake comment for the facebook-filter\",\"onEvent\":\"ContentSet-07499e81-1058-4ea0-90f7-77f0fc17eade\"},\"context\":{\"date\":1340702105000,\"service\":\"http://rai.it\",\"mood\":null}},\"user\":{\"username\":\"test-user\",\"services\":{\"facebook\":{\"type\":\"OAuth\",\"session\":\"123456abcdef\"}}}}";
+    }
+
+    private String resolvedActivityWithNoUser() {
+        return "{\"userId\":\"5609618e-7ff4-41bd-9972-0ed2bc5955f1\",\"activity\":{\"id\":\"baea9cbd-d285-42ab-ba84-7b8316e59a75\",\"verb\":\"COMMENT\",\"object\":{\"type\":\"RAI-TV-COMMENT\",\"url\":\"http://rai.it\",\"name\":null,\"description\":null,\"text\":\"A fake comment for the facebook-filter\",\"onEvent\":\"ContentSet-07499e81-1058-4ea0-90f7-77f0fc17eade\"},\"context\":{\"date\":1340702105000,\"service\":\"http://rai.it\",\"mood\":null}}}";
+    }
+
+    private String activityWithNoFacebookAuth() {
+        return "{\"userId\":\"5609618e-7ff4-41bd-9972-0ed2bc5955f1\",\"activity\":{\"id\":\"baea9cbd-d285-42ab-ba84-7b8316e59a75\",\"verb\":\"COMMENT\",\"object\":{\"type\":\"RAI-TV-COMMENT\",\"url\":\"http://rai.it\",\"name\":null,\"description\":null,\"text\":\"A fake comment for the facebook-filter\",\"onEvent\":\"ContentSet-07499e81-1058-4ea0-90f7-77f0fc17eade\"},\"context\":{\"date\":1340702105000,\"service\":\"http://rai.it\",\"mood\":null}},\"user\":{\"username\":\"test-user\",\"services\":{\"twitter\":{\"type\":\"OAuth\",\"session\":\"123456abcdef\"}}}}";
     }
 }

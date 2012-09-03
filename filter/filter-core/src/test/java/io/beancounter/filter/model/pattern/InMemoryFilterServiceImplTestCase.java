@@ -17,6 +17,7 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -90,19 +91,18 @@ public class InMemoryFilterServiceImplTestCase {
         );
     }
 
-
-
-
     public class FilterTestModule extends AbstractModule {
 
         @Override
         protected void configure() {
             FilterManager filterManager = new InMemoryFilterManager();
             try {
+                Set<String> queues = new HashSet<String>(1);
+                queues.add("comment-queue");
                 filterManager.register(
                         "rai-comment-filter",
                         "test rai comment filter",
-                        "comment-queue",
+                        queues,
                         getActivityCommentPattern()
                 );
                 filterManager.start("rai-comment-filter");
@@ -110,10 +110,12 @@ public class InMemoryFilterServiceImplTestCase {
                 throw new RuntimeException(e);
             }
             try {
+                Set<String> queues = new HashSet<String>(1);
+                queues.add("watch-queue");
                 filterManager.register(
                         "watched-filter",
                         "watch comment filter",
-                        "watch-queue",
+                        queues,
                         getActivityObjectPattern()
                 );
                 filterManager.start("watched-filter");
