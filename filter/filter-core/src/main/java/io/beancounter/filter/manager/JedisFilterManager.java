@@ -50,7 +50,7 @@ public class JedisFilterManager implements FilterManager {
     public String register(
             String name,
             String description,
-            String queue,
+            Set<String> queues,
             ActivityPattern activityPattern
     ) throws FilterManagerException {
         if (get(name) != null) {
@@ -62,7 +62,7 @@ public class JedisFilterManager implements FilterManager {
                 name,
                 description,
                 activityPattern,
-                queue
+                queues
         );
         String filterJson;
         try {

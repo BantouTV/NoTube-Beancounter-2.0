@@ -49,7 +49,12 @@ public class CommentPattern extends ObjectPattern {
 
     @Override
     public boolean matches(io.beancounter.commons.model.activity.Object object) {
-        Comment that = (Comment) object;
+        Comment that;
+        try {
+            that = (Comment) object;
+        } catch (ClassCastException e) {
+            return false;
+        }
         return this.equals(ANY) || onEventPattern.matches(that.getOnEvent());
     }
 

@@ -72,8 +72,10 @@ public class ActivityPattern implements Pattern<ResolvedActivity> {
 
     @Override
     public boolean matches(ResolvedActivity ra) {
-        return (this.equals(ANY)) ||
-                (userId.matches(ra.getUserId()) && verb.matches(ra.getActivity().getVerb()) && object.matches(ra.getActivity().getObject()) && context.matches(ra.getActivity().getContext()));
+        return (this.equals(ANY)) || (userId.matches(ra.getUserId()) &&
+                verb.matches(ra.getActivity().getVerb()) &&
+                object.matches(ra.getActivity().getObject()) &&
+                context.matches(ra.getActivity().getContext()));
     }
 
     @Override
@@ -84,5 +86,19 @@ public class ActivityPattern implements Pattern<ResolvedActivity> {
                 ", object=" + object +
                 ", context=" + context +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ActivityPattern pattern = (ActivityPattern) o;
+
+        return !(context != null ? !context.equals(pattern.context) : pattern.context != null)
+                && !(object != null ? !object.equals(pattern.object) : pattern.object != null)
+                && !(userId != null ? !userId.equals(pattern.userId) : pattern.userId != null)
+                && !(verb != null ? !verb.equals(pattern.verb) : pattern.verb != null);
+
     }
 }

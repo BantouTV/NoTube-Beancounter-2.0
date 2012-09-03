@@ -4,6 +4,7 @@ import io.beancounter.filter.model.Filter;
 import io.beancounter.filter.model.pattern.ActivityPattern;
 
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * This interface defines the minimum contract to perform CRUD operations
@@ -16,7 +17,7 @@ public interface FilterManager {
     public String register(
             String name,
             String description,
-            String queue,
+            Set<String> queues,
             ActivityPattern activityPattern
     ) throws FilterManagerException;
 
