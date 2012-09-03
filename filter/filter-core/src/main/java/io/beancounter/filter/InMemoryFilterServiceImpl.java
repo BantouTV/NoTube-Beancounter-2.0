@@ -21,10 +21,14 @@ public final class InMemoryFilterServiceImpl implements FilterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryFilterServiceImpl.class);
 
-    @Inject
     private FilterManager filterManager;
 
     private Set<Filter> filters = new HashSet<Filter>();
+
+    @Inject
+    public InMemoryFilterServiceImpl(FilterManager filterManager) {
+        this.filterManager = filterManager;
+    }
 
     @Override
     public synchronized void refresh() throws FilterServiceException {
@@ -77,8 +81,10 @@ public final class InMemoryFilterServiceImpl implements FilterService {
             // TODO (high) this exception is thrown when we have multiple active filters
             // if thrown the activities filtered are lost
             // understand why this is happening
+            // Something to do with a casting exception during pattern matching.
+            // See issue #83.
             try {
-                if(filter.getActivityPattern().matches(resolvedActivity)) {
+                if (filter.getActivityPattern().matches(resolvedActivity)) {
                     LOGGER.debug("activity {} filtered", resolvedActivity);
                     result.addAll(filter.getQueues());
                 }
