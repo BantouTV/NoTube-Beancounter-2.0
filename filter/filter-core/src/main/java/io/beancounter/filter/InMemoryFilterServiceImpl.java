@@ -74,9 +74,6 @@ public final class InMemoryFilterServiceImpl implements FilterService {
         LOGGER.debug("processing activity {}", resolvedActivity);
         Set<String> result = new HashSet<String>();
         for(Filter filter : filters) {
-            // TODO (high) this exception is thrown when we have multiple active filters
-            // if thrown the activities filtered are lost
-            // understand why this is happening
             try {
                 if(filter.getActivityPattern().matches(resolvedActivity)) {
                     LOGGER.debug("activity {} filtered", resolvedActivity);
