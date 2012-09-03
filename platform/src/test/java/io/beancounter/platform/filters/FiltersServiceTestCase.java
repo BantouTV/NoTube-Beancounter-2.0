@@ -12,7 +12,6 @@ import io.beancounter.platform.APIResponse;
 import io.beancounter.platform.AbstractJerseyTestCase;
 
 import java.io.IOException;
-import java.util.UUID;
 
 /**
  * Reference test case for {@link io.beancounter.platform.FilterService}
@@ -32,24 +31,6 @@ public class FiltersServiceTestCase extends AbstractJerseyTestCase {
         String baseQuery = "application/" + APIKEY;
         DeleteMethod deleteMethod = new DeleteMethod(base_uri + baseQuery);
         client.executeMethod(deleteMethod);
-    }
-
-    private UUID registerTestApplication() throws IOException {
-        String baseQuery = "application/register";
-        final String name = "fake_application_name";
-        final String description = "This is a test registration!";
-        final String email = "fake_mail@test.com";
-        final String oauth = "http://fakeUrlOAUTH";
-        PostMethod postMethod = new PostMethod(base_uri + baseQuery);
-        HttpClient client = new HttpClient();
-        postMethod.addParameter("name", name);
-        postMethod.addParameter("description", description);
-        postMethod.addParameter("email", email);
-        postMethod.addParameter("oauthCallback", oauth);
-        client.executeMethod(postMethod);
-        String responseBody = new String(postMethod.getResponseBody());
-        APIResponse actual = fromJson(responseBody, APIResponse.class);
-        return UUID.fromString(actual.getObject());
     }
 
     @BeforeMethod

@@ -19,7 +19,7 @@ public class MockApplicationsManager implements ApplicationsManager {
     private Set<Application> applications = new HashSet<Application>();
 
     @Override
-    public UUID registerApplication(
+    public Application registerApplication(
             String name,
             String description,
             String email,
@@ -32,7 +32,7 @@ public class MockApplicationsManager implements ApplicationsManager {
                 callback
         );
         applications.add(application);
-        return application.getApiKey();
+        return application;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class MockApplicationsManager implements ApplicationsManager {
         Iterator it = applications.iterator();
         while(it.hasNext()) {
             Application app = (Application) it.next();
-            if(app.getApiKey().equals(key)) {
+            if(app.getConsumerKey().equals(key) || app.getAdminKey().equals(key)) {
                it.remove();
             }
         }
@@ -49,7 +49,7 @@ public class MockApplicationsManager implements ApplicationsManager {
     @Override
     public Application getApplicationByApiKey(UUID key) throws ApplicationsManagerException {
         for(Application application : applications) {
-            if(application.getApiKey().equals(key)) {
+            if(application.getConsumerKey().equals(key) || application.getAdminKey().equals(key)) {
                 return application;
             }
         }
@@ -59,7 +59,7 @@ public class MockApplicationsManager implements ApplicationsManager {
     @Override
     public boolean isAuthorized(UUID key, Action action, Object object) throws ApplicationsManagerException {
         Application application = getApplicationByApiKey(key);
-        if(application.getApiKey().equals(key)) {
+        if(application.getConsumerKey().equals(key) || application.getAdminKey().equals(key)) {
             return true;
         }
         return false;

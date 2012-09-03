@@ -22,7 +22,7 @@ public class AliveServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    private void testCheck() throws IOException {
+    public void testCheck() throws IOException {
         HttpClient client = new HttpClient();
         String baseQuery = "api/check";
         GetMethod getMethod = new GetMethod(base_uri + baseQuery);
@@ -44,7 +44,7 @@ public class AliveServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    private void testVersion() throws IOException {
+    public void testVersion() throws IOException {
         HttpClient client = new HttpClient();
         String baseQuery = "api/version";
         GetMethod getMethod = new GetMethod(base_uri + baseQuery);

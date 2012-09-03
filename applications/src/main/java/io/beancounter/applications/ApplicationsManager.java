@@ -44,7 +44,7 @@ public interface ApplicationsManager {
         DELETE
     }
 
-    public UUID registerApplication(
+    public Application registerApplication(
             String name,
             String description,
             String email,
