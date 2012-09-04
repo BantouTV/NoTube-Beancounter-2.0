@@ -25,10 +25,7 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(JedisApplicationsManagerImpl.class);
 
     @Inject
-    @Named("redis.db.applications") int databaseApp;
-
-    @Inject
-    @Named("redis.db.applicationKeys") int databaseKeys;
+    @Named("redis.db.applications") int database;
 
     private JedisPool pool;
 
@@ -41,7 +38,7 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
     }
 
     @Override
-    public Application registerApplication(
+    public UUID registerApplication(
             String name,
             String description,
             String email,
@@ -64,22 +61,19 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
                     e
             );
         }
-        Jedis jedis = getJedisResource(databaseApp);
+        Jedis jedis = getJedisResource();
         boolean isConnectionIssue = false;
         try {
-            jedis.set(application.getName(), applicationJson);
-            jedis.select(databaseKeys);
-            jedis.set(application.getAdminKey().toString(), application.getName());
-            jedis.set(application.getConsumerKey().toString(), application.getName());
+            jedis.set(application.getApiKey().toString(), applicationJson);
         } catch (JedisConnectionException e) {
             isConnectionIssue = true;
             final String errMsg = "Jedis Connection error while storing application [" + applicationJson
-                    + "] with name [" + application.getName() + "]";
+                    + "] with id [" + application.getApiKey().toString() + "]";
             LOGGER.error(errMsg, e);
             throw new ApplicationsManagerException(errMsg, e);
         } catch (Exception e) {
-            final String errMsg = "Error while storing application [" + applicationJson + "] with name [" +
-                    application.getName() + "]";
+            final String errMsg = "Error while storing application [" + applicationJson + "] with id [" +
+                    application.getApiKey().toString() + "]";
             LOGGER.error(errMsg, e);
             throw new ApplicationsManagerException(errMsg, e);
         } finally {
@@ -89,19 +83,15 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
                 pool.returnResource(jedis);
             }
         }
-        return application;
+        return application.getApiKey();
     }
 
     @Override
     public void deregisterApplication(UUID key) throws ApplicationsManagerException {
-        Application application = getApplicationByApiKey(key);
-        Jedis jedis = getJedisResource(databaseApp);
+        Jedis jedis = getJedisResource();
         boolean isConnectionIssue = false;
         try {
-            jedis.del(application.getName());
-            jedis.select(databaseKeys);
-            jedis.del(application.getConsumerKey().toString());
-            jedis.del(application.getAdminKey().toString());
+            jedis.del(key.toString());
         } catch (JedisConnectionException e) {
             isConnectionIssue = true;
             final String errMsg = "Jedis Connection error while deleting application with id [" + key.toString() + "]";
@@ -122,16 +112,11 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
 
     @Override
     public synchronized Application getApplicationByApiKey(UUID key) throws ApplicationsManagerException {
-        Jedis jedis = getJedisResource(databaseKeys);
+        Jedis jedis = getJedisResource();
         String applicationJson;
         boolean isConnectionIssue = false;
         try {
-            String appName = jedis.get(key.toString());
-            if (appName == null) {
-                return null;
-            }
-            jedis.select(databaseApp);
-            applicationJson = jedis.get(appName);
+            applicationJson = jedis.get(key.toString());
         } catch (JedisConnectionException e) {
             isConnectionIssue = true;
             final String errMsg = "Jedis Connection error while retrieving application with id [" + key.toString() + "]";
@@ -173,7 +158,7 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
         return application.hasPrivileges(action, object);
     }
 
-    private Jedis getJedisResource(int database) throws ApplicationsManagerException {
+    private Jedis getJedisResource() throws ApplicationsManagerException {
         Jedis jedis;
         try {
             jedis = pool.getResource();

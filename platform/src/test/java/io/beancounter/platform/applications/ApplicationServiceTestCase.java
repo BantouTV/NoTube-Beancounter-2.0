@@ -1,7 +1,6 @@
 package io.beancounter.platform.applications;
 
-import io.beancounter.platform.PlatformResponse;
-import io.beancounter.platform.responses.ApplicationPlatformResponse;
+import io.beancounter.platform.APIResponse;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
@@ -44,17 +43,15 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        ApplicationPlatformResponse actual = fromJson(responseBody, ApplicationPlatformResponse.class);
+        APIResponse actual = fromJson(responseBody, APIResponse.class);
         Assert.assertNotNull(actual);
-        ApplicationPlatformResponse expected = new ApplicationPlatformResponse(
-                PlatformResponse.Status.OK,
+        APIResponse expected = new APIResponse(
+                actual.getObject(),
                 "Application '" + name + "' successfully registered",
-                actual.getObject()
+                "OK"
         );
-        Assert.assertEquals(actual.getStatus(), expected.getStatus());
-        Assert.assertEquals(actual.getMessage(), expected.getMessage());
-        Assert.assertEquals(actual.getObject(), expected.getObject());
-        final UUID applicationKey = actual.getObject().getAdminKey();
+        Assert.assertEquals(actual, expected);
+        final UUID applicationKey =UUID.fromString(actual.getObject());
         baseQuery = "application/" + applicationKey;
         DeleteMethod deleteMethod = new DeleteMethod(base_uri + baseQuery);
         result = client.executeMethod(deleteMethod);
@@ -62,16 +59,14 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
         logger.info("result code: " + result);
         logger.info("response body: " + responseBody);
         Assert.assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        actual = fromJson(responseBody, ApplicationPlatformResponse.class);
+        actual = fromJson(responseBody, APIResponse.class);
         Assert.assertNotNull(actual);
-        expected = new ApplicationPlatformResponse(
-                PlatformResponse.Status.OK,
+        expected = new APIResponse(
+                null,
                 "Application with api key'" + applicationKey + "' successfully removed",
-                null
+                "OK"
         );
-        Assert.assertEquals(actual.getStatus(), expected.getStatus());
-        Assert.assertEquals(actual.getMessage(), expected.getMessage());
-        Assert.assertEquals(actual.getObject(), expected.getObject());
+        Assert.assertEquals(actual, expected);
     }
 
 }

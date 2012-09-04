@@ -11,6 +11,7 @@ import io.beancounter.commons.helper.jedis.JedisPoolFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.UUID;
 
 /**
  * Reference test case for {@link JedisApplicationsManagerImpl}.
@@ -36,32 +37,28 @@ public class JedisApplicationsManagerIntegrationTest {
         final String description = "a test app";
         final String email = "t@test.com";
         final URL oAuth = new URL("http://fake.com/oauth");
-        Application application = applicationsManager.registerApplication(
+        UUID key = applicationsManager.registerApplication(
                 name,
                 description,
                 email,
                 oAuth
         );
-        Application actualConsumer = applicationsManager.getApplicationByApiKey(application.getConsumerKey());
-        Assert.assertNotNull(actualConsumer);
-        Assert.assertNotNull(actualConsumer.getConsumerKey());
-        Assert.assertNotNull(actualConsumer.getAdminKey());
-        Assert.assertEquals(actualConsumer.getName(), name);
-        Assert.assertEquals(actualConsumer.getDescription(), description);
-        Assert.assertEquals(actualConsumer.getCallback(), oAuth);
-
-        Application actualAdmin = applicationsManager.getApplicationByApiKey(application.getAdminKey());
-        Assert.assertEquals(actualConsumer, actualAdmin);
+        Application actual = applicationsManager.getApplicationByApiKey(key);
+        Assert.assertNotNull(actual);
+        Assert.assertEquals(actual.getApiKey(), key);
+        Assert.assertEquals(actual.getName(), name);
+        Assert.assertEquals(actual.getDescription(), description);
+        Assert.assertEquals(actual.getCallback(), oAuth);
 
         Assert.assertTrue(applicationsManager.isAuthorized(
-                actualConsumer.getConsumerKey(),
+                key,
                 ApplicationsManager.Action.CREATE,
                 ApplicationsManager.Object.USER)
         );
 
-        applicationsManager.deregisterApplication(actualConsumer.getConsumerKey());
+        applicationsManager.deregisterApplication(key);
 
-        actualConsumer = applicationsManager.getApplicationByApiKey(actualConsumer.getConsumerKey());
-        Assert.assertNull(actualConsumer);
+        actual = applicationsManager.getApplicationByApiKey(key);
+        Assert.assertNull(actual);
     }
 }

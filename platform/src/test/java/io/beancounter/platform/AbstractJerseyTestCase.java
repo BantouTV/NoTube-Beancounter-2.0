@@ -3,7 +3,7 @@ package io.beancounter.platform;
 import com.google.inject.servlet.GuiceFilter;
 import com.sun.grizzly.http.embed.GrizzlyWebServer;
 import com.sun.grizzly.http.servlet.ServletAdapter;
-import io.beancounter.platform.responses.ApplicationPlatformResponse;
+import io.beancounter.platform.responses.UUIDPlatformResponse;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.log4j.Logger;
@@ -72,8 +72,8 @@ public abstract class AbstractJerseyTestCase {
         postMethod.addParameter("oauthCallback", oauth);
         client.executeMethod(postMethod);
         String responseBody = new String(postMethod.getResponseBody());
-        ApplicationPlatformResponse actual = fromJson(responseBody, ApplicationPlatformResponse.class);
-        return actual.getObject().getAdminKey();
+        UUIDPlatformResponse actual = fromJson(responseBody, UUIDPlatformResponse.class);
+        return actual.getObject();
     }
 
 }

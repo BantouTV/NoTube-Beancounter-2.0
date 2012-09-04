@@ -26,9 +26,7 @@ public class Application implements Serializable {
 
     private URL callback;
 
-    private UUID consumerKey;
-
-    private UUID adminKey;
+    private UUID apiKey;
 
     private Permissions permissions;
 
@@ -39,8 +37,7 @@ public class Application implements Serializable {
             @JsonProperty("email") String email,
             @JsonProperty("callback") URL callback
     ) {
-        this.consumerKey = UUID.randomUUID();
-        this.adminKey = UUID.randomUUID();
+        this.apiKey = UUID.randomUUID();
         this.name = name;
         this.description = description;
         this.email = email;
@@ -76,20 +73,12 @@ public class Application implements Serializable {
         return callback;
     }
 
-    public UUID getConsumerKey() {
-        return consumerKey;
+    public UUID getApiKey() {
+        return apiKey;
     }
 
-    public void setConsumerKey(UUID consumerKey) {
-        this.consumerKey = consumerKey;
-    }
-
-    public UUID getAdminKey() {
-        return adminKey;
-    }
-
-    public void setAdminKey(UUID adminKey) {
-        this.adminKey = adminKey;
+    public void setApiKey(UUID apiKey) {
+        this.apiKey = apiKey;
     }
 
     public boolean hasPrivileges(
@@ -109,17 +98,14 @@ public class Application implements Serializable {
 
         Application that = (Application) o;
 
-        if (!adminKey.equals(that.adminKey)) return false;
-        if (!consumerKey.equals(that.consumerKey)) return false;
+        if (apiKey != null ? !apiKey.equals(that.apiKey) : that.apiKey != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = consumerKey.hashCode();
-        result = 31 * result + adminKey.hashCode();
-        return result;
+        return apiKey != null ? apiKey.hashCode() : 0;
     }
 
     @Override
@@ -129,8 +115,7 @@ public class Application implements Serializable {
                 ", description='" + description + '\'' +
                 ", email='" + email + '\'' +
                 ", callback=" + callback +
-                ", consumerKey=" + consumerKey +
-                ", adminKey=" + adminKey +
+                ", apiKey=" + apiKey +
                 ", permissions=" + permissions +
                 '}';
     }

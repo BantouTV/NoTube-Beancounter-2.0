@@ -3,9 +3,8 @@ package io.beancounter.platform;
 import com.google.inject.Inject;
 import io.beancounter.applications.ApplicationsManager;
 import io.beancounter.applications.ApplicationsManagerException;
-import io.beancounter.applications.model.Application;
-import io.beancounter.platform.responses.ApplicationPlatformResponse;
 import io.beancounter.platform.responses.StringPlatformResponse;
+import io.beancounter.platform.responses.UUIDPlatformResponse;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -45,9 +44,9 @@ public class ApplicationService extends JsonService {
                     e
             );
         }
-        Application application;
+        UUID apiKey;
         try {
-            application = applicationsManager.registerApplication(name, description, email, oauthUrl);
+            apiKey = applicationsManager.registerApplication(name, description, email, oauthUrl);
         } catch (ApplicationsManagerException e) {
             throw new RuntimeException(
                     "Error while registering application '" + name + "'",
@@ -55,10 +54,10 @@ public class ApplicationService extends JsonService {
             );
         }
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new ApplicationPlatformResponse(
+        rb.entity(new UUIDPlatformResponse(
                 StringPlatformResponse.Status.OK,
                 "Application '" + name + "' successfully registered",
-                application)
+                apiKey)
         );
         return rb.build();
     }

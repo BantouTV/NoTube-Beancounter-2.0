@@ -48,7 +48,7 @@ public class FacebookProfilingRuleTestCase {
         Collection<URI> actual = rule.getResult();
         Assert.assertEquals(actual.size(), 4);
         Assert.assertTrue(actual.contains(new URI("http://dati.rai.tv/category/software")));
-        Assert.assertTrue(actual.contains(new URI("http://dati.rai.tv/category/informatica")));
+        Assert.assertTrue(actual.contains(new URI("http://dati.rai.tv/category/computer+science")));
         Assert.assertTrue(actual.contains(new URI("http://dati.rai.tv/category/internet")));
     }
 
