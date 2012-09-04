@@ -6,6 +6,9 @@ import com.restfb.Parameter;
 import com.restfb.types.FacebookType;
 import io.beancounter.commons.model.activity.Verb;
 import io.beancounter.commons.model.activity.rai.TVEvent;
+import io.beancounter.publisher.facebook.FacebookPublisherException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -13,8 +16,10 @@ import io.beancounter.commons.model.activity.rai.TVEvent;
  */
 public class TVEventPublisher implements Publisher<TVEvent> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TVEventPublisher.class);
+
     @Override
-    public FacebookType publishActivity(String token, Verb verb, TVEvent tvEvent) {
+    public FacebookType publishActivity(String token, Verb verb, TVEvent tvEvent) throws FacebookPublisherException {
         FacebookClient client = new DefaultFacebookClient(token);
         return client.publish(
                 "me/feed",
@@ -24,12 +29,14 @@ public class TVEventPublisher implements Publisher<TVEvent> {
         );
     }
 
-    private String getMessage(Verb verb, TVEvent tvEvent) {
+    private String getMessage(Verb verb, TVEvent tvEvent) throws FacebookPublisherException {
         String message = "";
-        if(verb.equals(Verb.WATCHED)) {
-            message += "Just watched at ";
-        } else if(verb.equals(Verb.CHECKIN)) {
+        if(verb.equals(Verb.CHECKIN)) {
             message += "Just joined the tv event ";
+        } else {
+            final String errMessage = "Verb [" + verb + "] not supported";
+            LOG.error(errMessage);
+            throw new FacebookPublisherException(errMessage, new UnsupportedOperationException());
         }
         message += tvEvent.getName();
         return message;

@@ -2,10 +2,7 @@ package io.beancounter.publisher.facebook;
 
 import com.restfb.types.FacebookType;
 import io.beancounter.commons.model.activity.*;
-import io.beancounter.commons.model.activity.rai.Comment;
 import io.beancounter.commons.model.activity.rai.TVEvent;
-import io.beancounter.publisher.facebook.adapters.CommentPublisher;
-import io.beancounter.publisher.facebook.adapters.ObjectPublisher;
 import io.beancounter.publisher.facebook.adapters.Publisher;
 import io.beancounter.publisher.facebook.adapters.TVEventPublisher;
 import org.apache.camel.Exchange;
@@ -70,8 +67,9 @@ public class FacebookPublisher implements Processor {
 
     private Properties getProperties() {
         Properties prop = new Properties();
-        prop.put(io.beancounter.commons.model.activity.Object.class.getCanonicalName(), ObjectPublisher.class);
-        prop.put(Comment.class.getCanonicalName(), CommentPublisher.class);
+        // TODO remove when done with RAI
+        //prop.put(io.beancounter.commons.model.activity.Object.class.getCanonicalName(), ObjectPublisher.class);
+        //prop.put(Comment.class.getCanonicalName(), CommentPublisher.class);
         prop.put(TVEvent.class.getCanonicalName(), TVEventPublisher.class);
         return prop;
     }
