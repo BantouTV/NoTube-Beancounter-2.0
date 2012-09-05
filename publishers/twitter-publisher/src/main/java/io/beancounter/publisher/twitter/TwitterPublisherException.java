@@ -2,7 +2,7 @@ package io.beancounter.publisher.twitter;
 
 /**
  *
- * @author Enrico Candino ( enrico.candino @ gmail.com )
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class TwitterPublisherException extends Exception {
 

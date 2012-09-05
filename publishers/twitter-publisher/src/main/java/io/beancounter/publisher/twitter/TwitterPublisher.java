@@ -22,7 +22,7 @@ import java.util.Properties;
 
 /**
  *
- * @author Enrico Candino ( enrico.candino @ gmail.com )
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class TwitterPublisher implements Processor {
 

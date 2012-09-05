@@ -7,7 +7,7 @@ import twitter4j.Twitter;
 
 /**
  *
- * @author Enrico Candino ( enrico.candino @ gmail.com )
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public interface Publisher<T> {
 

@@ -6,7 +6,7 @@ import org.apache.camel.model.dataformat.JsonLibrary;
 
 /**
  *
- * @author Enrico Candino ( enrico.candino @ gmail.com )
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class TwitterPublisherRoute extends RouteBuilder {
 

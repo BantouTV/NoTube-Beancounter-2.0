@@ -3,7 +3,7 @@ package io.beancounter.publisher.twitter.adapters;
 import java.net.URL;
 
 /**
- * @author Enrico Candino ( enrico.candino @ gmail.com )
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class Trimmer {
 
