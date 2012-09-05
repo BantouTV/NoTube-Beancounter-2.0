@@ -4,12 +4,9 @@ import com.google.inject.Inject;
 import io.beancounter.commons.helper.PropertiesHelper;
 import io.beancounter.commons.model.Service;
 import io.beancounter.commons.model.activity.ResolvedActivity;
-import io.beancounter.commons.model.activity.rai.Comment;
 import io.beancounter.commons.model.activity.rai.TVEvent;
 import io.beancounter.commons.model.activity.Object;
 import io.beancounter.commons.model.auth.OAuthAuth;
-import io.beancounter.publisher.twitter.adapters.CommentPublisher;
-import io.beancounter.publisher.twitter.adapters.ObjectPublisher;
 import io.beancounter.publisher.twitter.adapters.Publisher;
 import io.beancounter.publisher.twitter.adapters.TVEventPublisher;
 import io.beancounter.usermanager.services.auth.DefaultServiceAuthorizationManager;
@@ -126,8 +123,9 @@ public class TwitterPublisher implements Processor {
 
     private Properties getProperties() {
         Properties prop = new Properties();
-        prop.put(io.beancounter.commons.model.activity.Object.class.getCanonicalName(), ObjectPublisher.class);
-        prop.put(Comment.class.getCanonicalName(), CommentPublisher.class);
+        // TODO remove when done with RAI
+        //prop.put(io.beancounter.commons.model.activity.Object.class.getCanonicalName(), ObjectPublisher.class);
+        //prop.put(Comment.class.getCanonicalName(), CommentPublisher.class);
         prop.put(TVEvent.class.getCanonicalName(), TVEventPublisher.class);
         return prop;
     }
