@@ -44,6 +44,7 @@ public class UserManagerModule extends AbstractModule {
         bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).in(Singleton.class);
         bind(TwitterFactoryWrapper.class).in(Singleton.class);
         bind(Resolver.class).to(JedisResolver.class);
+        bind(UserTokenManager.class).to(JedisUserTokenManager.class);
         bind(UserManager.class).to(JedisUserManagerImpl.class);
 
         MapBinder<Service, AuthHandler> authHandlerBinder
