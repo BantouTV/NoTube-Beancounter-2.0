@@ -20,7 +20,7 @@ public class JedisUserTokenManager implements UserTokenManager {
     @Override
     public boolean checkTokenExists(UUID token) throws UserManagerException {
         if (token == null) {
-            throw new UserManagerException("User token is null");
+            throw new UserManagerException("User token cannot be null");
         }
 
         Jedis jedis = null;
@@ -61,6 +61,35 @@ public class JedisUserTokenManager implements UserTokenManager {
             UUID userToken = UUID.randomUUID();
             jedis.set(userToken.toString(), username);
             return userToken;
+        } catch (JedisConnectionException jce) {
+            isConnectionIssue = true;
+            throw new UserManagerException(jce.getMessage(), jce);
+        } catch (Exception ex) {
+            throw new UserManagerException(ex.getMessage(), ex);
+        } finally {
+            if (jedis != null) {
+                if (isConnectionIssue) {
+                    jedisPool.returnBrokenResource(jedis);
+                } else {
+                    jedisPool.returnResource(jedis);
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean deleteUserToken(UUID token) throws UserManagerException {
+        if (token == null) {
+            throw new UserManagerException("User token cannot be null");
+        }
+
+        Jedis jedis = null;
+        boolean isConnectionIssue = false;
+
+        try {
+            jedis = jedisPool.getResource();
+            jedis.select(database);
+            return jedis.del(token.toString()) > 0;
         } catch (JedisConnectionException jce) {
             isConnectionIssue = true;
             throw new UserManagerException(jce.getMessage(), jce);

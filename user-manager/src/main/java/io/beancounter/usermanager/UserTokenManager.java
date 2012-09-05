@@ -15,14 +15,6 @@ public interface UserTokenManager {
     boolean checkTokenExists(UUID token) throws UserManagerException;
 
     /**
-     * Set the number of the database in Redis that is used for storing user
-     * tokens.
-     *
-     * @param database The Redis database number.
-     */
-    void setDatabase(int database);
-
-    /**
      * Creates a new unique user token for the given user and stores it in
      * the user tokens Redis database.
      *
@@ -32,4 +24,22 @@ public interface UserTokenManager {
      *         while interacting with Redis.
      */
     UUID createUserToken(String username) throws UserManagerException;
+
+    /**
+     * Delete the specified user token (if it exists).
+     *
+     * @param token The user token to delete.
+     * @return true if the token exists and was deleted; false otherwise.
+     * @throws UserManagerException If the token is null or an error occurs
+     *         while interacting with Redis.
+     */
+    boolean deleteUserToken(UUID token) throws UserManagerException;
+
+    /**
+     * Set the number of the database in Redis that is used for storing user
+     * tokens.
+     *
+     * @param database The Redis database number.
+     */
+    void setDatabase(int database);
 }
