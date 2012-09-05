@@ -1,5 +1,7 @@
 package io.beancounter.usermanager;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import io.beancounter.commons.helper.jedis.JedisPoolFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -13,6 +15,7 @@ public class JedisUserTokenManager implements UserTokenManager {
 
     private int database;
 
+    @Inject
     public JedisUserTokenManager(JedisPoolFactory jedisPoolFactory) {
         jedisPool = jedisPoolFactory.build();
     }
@@ -106,8 +109,9 @@ public class JedisUserTokenManager implements UserTokenManager {
         }
     }
 
+    @Inject
     @Override
-    public void setDatabase(int database) {
+    public void setDatabase(@Named("redis.db.userTokens") int database) {
         if (database < 0) {
             throw new IllegalArgumentException("Database number must be at least 0");
         }
