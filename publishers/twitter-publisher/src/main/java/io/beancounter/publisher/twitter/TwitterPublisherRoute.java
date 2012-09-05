@@ -1,5 +1,6 @@
 package io.beancounter.publisher.twitter;
 
+import com.google.inject.Inject;
 import io.beancounter.commons.model.activity.ResolvedActivity;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
@@ -10,13 +11,16 @@ import org.apache.camel.model.dataformat.JsonLibrary;
  */
 public class TwitterPublisherRoute extends RouteBuilder {
 
+    @Inject
+    private TwitterPublisher twitterPublisher;
+
     @Override
     public void configure() throws Exception {
         errorHandler(deadLetterChannel(errorEndpoint()));
 
         from(fromEndpoint())
                 .unmarshal().json(JsonLibrary.Jackson, ResolvedActivity.class)
-                .process(twitterPublisher());
+                .process(twitterPublisher);
     }
 
     protected String fromEndpoint() {
@@ -27,7 +31,4 @@ public class TwitterPublisherRoute extends RouteBuilder {
         return "log:" + getClass().getSimpleName() + "?{{camel.log.options.error}}";
     }
 
-    protected TwitterPublisher twitterPublisher() {
-        return new TwitterPublisher();
-    }
 }
