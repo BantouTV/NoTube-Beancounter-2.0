@@ -7,7 +7,7 @@ import twitter4j.auth.AccessToken;
 
 /**
  *
- * @author Enrico Candino (( enrico.candino@gmail.com ))
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public abstract class AbstractTwitterIntegrationTest {
 

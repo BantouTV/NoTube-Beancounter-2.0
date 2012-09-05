@@ -2,7 +2,7 @@ package io.beancounter.publisher.facebook;
 
 /**
  *
- * @author Enrico Candino (( enrico.candino@gmail.com ))
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class FacebookPublisherException extends Exception {
 

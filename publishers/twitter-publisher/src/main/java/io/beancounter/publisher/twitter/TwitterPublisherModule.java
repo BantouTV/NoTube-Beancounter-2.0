@@ -1,6 +1,7 @@
 package io.beancounter.publisher.twitter;
 
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.guice.CamelModuleWithMatchingRoutes;
 import org.guiceyfruit.jndi.JndiBind;
@@ -18,6 +19,7 @@ public class TwitterPublisherModule extends CamelModuleWithMatchingRoutes {
         super.configure();
         TwitterFactory factory = new TwitterFactory();
         bind(Twitter.class).toInstance(factory.getInstance());
+        bind(TwitterPublisher.class);
         bind(TwitterPublisherRoute.class);
     }
 

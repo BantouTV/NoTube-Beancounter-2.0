@@ -32,10 +32,12 @@ public class TwitterPublisherRouteTest extends CamelTestSupport {
     @BeforeMethod
     public void setUp() throws Exception {
         twitter = mock(Twitter.class);
+        publisher = spy(new TwitterPublisher());
         injector = Guice.createInjector(new Module() {
             @Override
             public void configure(Binder binder) {
                 binder.bind(Twitter.class).toInstance(twitter);
+                binder.bind(TwitterPublisher.class).toInstance(publisher);
                 binder.bind(TwitterPublisherRoute.class).toInstance(new TwitterPublisherRoute() {
                     @Override
                     protected String fromEndpoint() {
@@ -46,16 +48,10 @@ public class TwitterPublisherRouteTest extends CamelTestSupport {
                     public String errorEndpoint() {
                         return "mock:error";
                     }
-
-                    @Override
-                    protected TwitterPublisher twitterPublisher() {
-                        return publisher;
-                    }
                 });
             }
         });
 
-        publisher = spy(injector.getInstance(TwitterPublisher.class));
         mapper = new ObjectMapper();
 
         super.setUp();
