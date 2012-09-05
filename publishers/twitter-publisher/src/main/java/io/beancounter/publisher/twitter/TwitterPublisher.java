@@ -40,18 +40,16 @@ public class TwitterPublisher implements Processor {
         Object object = resolvedActivity.getActivity().getObject();
 
         OAuthAuth auth = (OAuthAuth) resolvedActivity.getUser().getServices().get("twitter");
-        if(auth==null) {
+        if (auth == null) {
             final String errMessage = "Twitter service not authorized. Do you have the token?";
             LOG.error(errMessage);
             throw new TwitterPublisherException(errMessage, new NullPointerException());
         }
-
         Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
         Service service = DefaultServiceAuthorizationManager.buildService("twitter", properties);
 
-        twitter.setOAuthConsumer(service.getApikey(), service.getSecret());
-        AccessToken token = getToken(auth.getSession(), auth.getSecret());
-        twitter.setOAuthAccessToken(token);
+        setTwitterCredential(twitter, service);
+        setAccessToken(twitter, auth);
 
         Publisher publisher = getPublisher(resolvedActivity.getActivity().getObject());
         Status status = publisher.publish(twitter, resolvedActivity.getActivity().getVerb(), object);
@@ -59,12 +57,53 @@ public class TwitterPublisher implements Processor {
         LOG.debug("Status updated to [" + status.getText() + "]");
     }
 
+    private void setTwitterCredential(Twitter twitter, Service service) throws TwitterPublisherException {
+        String apikey;
+        try {
+            apikey = service.getApikey();
+        } catch (NullPointerException e) {
+            final String errMessage = "Error while setting OAuth permission for the application. Twitter apikey not found!";
+            LOG.error(errMessage);
+            throw new TwitterPublisherException(errMessage, e);
+        }
+        String secret;
+        try {
+            secret = service.getSecret();
+        } catch (NullPointerException e) {
+            final String errMessage = "Error while setting OAuth permission for the application. Twitter secret not found!";
+            LOG.error(errMessage);
+            throw new TwitterPublisherException(errMessage, e);
+        }
+        twitter.setOAuthConsumer(apikey, secret);
+    }
+
+    private void setAccessToken(Twitter twitter, OAuthAuth auth) throws TwitterPublisherException {
+        String tokenSession;
+        try {
+            tokenSession = auth.getSession();
+        } catch (NullPointerException e) {
+            final String errMessage = "Error while getting the twitter token for user. Session not found!";
+            LOG.error(errMessage);
+            throw new TwitterPublisherException(errMessage, e);
+        }
+        String tokenSecret;
+        try {
+            tokenSecret = auth.getSecret();
+        } catch (NullPointerException e) {
+            final String errMessage = "Error while getting the twitter token for user. Secret not found!";
+            LOG.error(errMessage);
+            throw new TwitterPublisherException(errMessage, e);
+        }
+        AccessToken token = getToken(tokenSession, tokenSecret);
+        twitter.setOAuthAccessToken(token);
+    }
+
     AccessToken getToken(String session, String secret) {
         return new AccessToken(session, secret);
     }
 
     Publisher getPublisher(Object object)
-            throws TwitterPublisherException{
+            throws TwitterPublisherException {
         Class clazz = (Class) getProperties().get(object.getClass().getCanonicalName());
         Publisher publisher;
         try {

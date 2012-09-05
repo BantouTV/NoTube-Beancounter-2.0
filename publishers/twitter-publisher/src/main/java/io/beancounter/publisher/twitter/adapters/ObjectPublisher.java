@@ -10,6 +10,7 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 
 /**
+ *
  * @author Enrico Candino ( enrico.candino @ gmail.com )
  */
 public class ObjectPublisher implements Publisher<Object> {

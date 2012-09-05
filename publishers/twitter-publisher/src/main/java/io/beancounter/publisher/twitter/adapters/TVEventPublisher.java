@@ -10,6 +10,7 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 
 /**
+ *
  * @author Enrico Candino ( enrico.candino @ gmail.com )
  */
 public class TVEventPublisher implements Publisher<TVEvent> {
@@ -32,9 +33,9 @@ public class TVEventPublisher implements Publisher<TVEvent> {
 
     private String getMessage(Verb verb, TVEvent tvEvent) {
         String message = "";
-        if(verb.equals(Verb.WATCHED)) {
+        if (verb.equals(Verb.WATCHED)) {
             message += "Just watched at ";
-        } else if(verb.equals(Verb.CHECKIN)) {
+        } else if (verb.equals(Verb.CHECKIN)) {
             message += "Just joined the tv event ";
         }
         message = Trimmer.trim(message + tvEvent.getName(), tvEvent.getUrl(), 3) + " - " + tvEvent.getUrl();
