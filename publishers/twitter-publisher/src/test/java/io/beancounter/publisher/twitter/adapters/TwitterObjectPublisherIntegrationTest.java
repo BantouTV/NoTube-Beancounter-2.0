@@ -11,7 +11,7 @@ import java.net.URL;
 
 /**
  *
- * @author Enrico Candino (( enrico.candino@gmail.com ))
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class TwitterObjectPublisherIntegrationTest extends AbstractTwitterIntegrationTest {
 

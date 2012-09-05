@@ -12,7 +12,7 @@ import java.util.UUID;
 
 /**
  *
- * @author Enrico Candino (( enrico.candino@gmail.com ))
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class TvitterTVEventPublisherIntegrationTest extends AbstractTwitterIntegrationTest {
 

@@ -9,7 +9,7 @@ import io.beancounter.commons.model.activity.rai.Comment;
 
 /**
  *
- * @author Enrico Candino (( enrico.candino@gmail.com ))
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class CommentPublisher implements Publisher<Comment> {
 
