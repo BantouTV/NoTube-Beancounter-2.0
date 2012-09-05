@@ -46,11 +46,6 @@ public class TwitterPublisherRouteTest extends CamelTestSupport {
                     public String errorEndpoint() {
                         return "mock:error";
                     }
-
-                    @Override
-                    protected TwitterPublisher twitterPublisher() {
-                        return publisher;
-                    }
                 });
             }
         });
