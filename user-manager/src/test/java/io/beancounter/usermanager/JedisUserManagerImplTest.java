@@ -14,6 +14,7 @@ import io.beancounter.resolver.ResolverMappingNotFoundException;
 import io.beancounter.usermanager.services.auth.ServiceAuthorizationManager;
 import io.beancounter.usermanager.services.auth.ServiceAuthorizationManagerException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.mockito.Matchers;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import redis.clients.jedis.Jedis;
@@ -641,5 +642,133 @@ public class JedisUserManagerImplTest {
                 .thenThrow(new UserManagerException("Error"));
 
         userManager.storeUserFromOAuth(serviceName, token, code);
+    }
+
+    @Test
+    public void registeringTwitterOAuthServiceToUserWithNoUserTokenShouldBeSuccessful() throws Exception {
+        String serviceName = "twiter";
+        String username = "username";
+        String serviceUserId = "17473832";
+        String token = "oauth_token";
+        String verifier = "oauth_verifier";
+        UUID userToken = UUID.randomUUID();
+
+        AuthHandler authHandler = mock(AuthHandler.class);
+        User user = new User("Test", "User", username, "password");
+        AuthenticatedUser authUser = new AuthenticatedUser(serviceUserId, user);
+
+        when(authManager.getService(serviceName)).thenReturn(new Service(serviceName));
+        when(authManager.getHandler(serviceName)).thenReturn(authHandler);
+        when(authHandler.auth(user, token, verifier)).thenReturn(authUser);
+        when(tokenManager.createUserToken(username)).thenReturn(userToken);
+
+        userManager.registerOAuthService(serviceName, user, token, verifier);
+        user.setUserToken(userToken);
+
+        verify(authHandler).auth(user, token, verifier);
+        verify(tokenManager).createUserToken(username);
+        verify(tokenManager, never()).deleteUserToken(Matchers.<UUID>any());
+        verify(resolver).store(serviceUserId, serviceName, user.getId(), username);
+        verify(jedis).select(0);
+        verify(jedis).set(username, mapper.writeValueAsString(user));
+        verify(jedisPool).getResource();
+        verify(jedisPool).returnResource(jedis);
+    }
+
+    @Test
+    public void registeringTwitterOAuthServiceToUserWithExistingUserTokenShouldBeSuccessful() throws Exception {
+        String serviceName = "twiter";
+        String username = "username";
+        String serviceUserId = "17473832";
+        String token = "oauth_token";
+        String verifier = "oauth_verifier";
+        UUID oldUserToken = UUID.randomUUID();
+        UUID newUserToken = UUID.randomUUID();
+
+        AuthHandler authHandler = mock(AuthHandler.class);
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(oldUserToken);
+        AuthenticatedUser authUser = new AuthenticatedUser(serviceUserId, user);
+
+        when(authManager.getService(serviceName)).thenReturn(new Service(serviceName));
+        when(authManager.getHandler(serviceName)).thenReturn(authHandler);
+        when(authHandler.auth(user, token, verifier)).thenReturn(authUser);
+        when(tokenManager.createUserToken(username)).thenReturn(newUserToken);
+
+        userManager.registerOAuthService(serviceName, user, token, verifier);
+        user.setUserToken(newUserToken);
+
+        verify(authHandler).auth(user, token, verifier);
+        verify(tokenManager).deleteUserToken(oldUserToken);
+        verify(tokenManager).createUserToken(username);
+        verify(resolver).store(serviceUserId, serviceName, user.getId(), username);
+        verify(jedis).select(0);
+        verify(jedis).set(username, mapper.writeValueAsString(user));
+        verify(jedisPool).getResource();
+        verify(jedisPool).returnResource(jedis);
+    }
+
+    @Test
+    public void registeringFacebookOAuthServiceToUserWithNoUserTokenShouldBeSuccessful() throws Exception {
+        String serviceName = "facebook";
+        String username = "username";
+        String serviceUserId = "17473832";
+        String token = null;
+        String code = "oauth2_code";
+        UUID userToken = UUID.randomUUID();
+
+        AuthHandler authHandler = mock(AuthHandler.class);
+        User user = new User("Test", "User", username, "password");
+        AuthenticatedUser authUser = new AuthenticatedUser(serviceUserId, user);
+
+        when(authManager.getService(serviceName)).thenReturn(new Service(serviceName));
+        when(authManager.getHandler(serviceName)).thenReturn(authHandler);
+        when(authHandler.auth(user, token, code)).thenReturn(authUser);
+        when(tokenManager.createUserToken(username)).thenReturn(userToken);
+
+        userManager.registerOAuthService(serviceName, user, token, code);
+        user.setUserToken(userToken);
+
+        verify(authHandler).auth(user, token, code);
+        verify(tokenManager).createUserToken(username);
+        verify(tokenManager, never()).deleteUserToken(Matchers.<UUID>any());
+        verify(resolver).store(serviceUserId, serviceName, user.getId(), username);
+        verify(jedis).select(0);
+        verify(jedis).set(username, mapper.writeValueAsString(user));
+        verify(jedisPool).getResource();
+        verify(jedisPool).returnResource(jedis);
+    }
+
+    @Test
+    public void registeringFacebookOAuthServiceToUserWithExistingUserTokenShouldBeSuccessful() throws Exception {
+        String serviceName = "facebook";
+        String username = "username";
+        String serviceUserId = "17473832";
+        String token = null;
+        String code = "oauth2_code";
+        UUID oldUserToken = UUID.randomUUID();
+        UUID newUserToken = UUID.randomUUID();
+
+        AuthHandler authHandler = mock(AuthHandler.class);
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(oldUserToken);
+        AuthenticatedUser authUser = new AuthenticatedUser(serviceUserId, user);
+
+        when(authManager.getService(serviceName)).thenReturn(new Service(serviceName));
+        when(authManager.getHandler(serviceName)).thenReturn(authHandler);
+        when(authHandler.auth(user, token, code)).thenReturn(authUser);
+        when(tokenManager.createUserToken(username)).thenReturn(newUserToken);
+
+        userManager.registerOAuthService(serviceName, user, token, code);
+        user.setUserToken(newUserToken);
+
+        verify(authHandler).auth(user, token, code);
+        verify(tokenManager).deleteUserToken(oldUserToken);
+        verify(tokenManager).createUserToken(username);
+        verify(resolver).store(serviceUserId, serviceName, user.getId(), username);
+        verify(jedis).select(0);
+        verify(jedis).set(username, mapper.writeValueAsString(user));
+        verify(jedisPool).getResource();
+        verify(jedisPool).returnResource(jedis);
     }
 }

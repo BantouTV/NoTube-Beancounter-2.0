@@ -34,12 +34,4 @@ public interface UserTokenManager {
      *         while interacting with Redis.
      */
     boolean deleteUserToken(UUID token) throws UserManagerException;
-
-    /**
-     * Set the number of the database in Redis that is used for storing user
-     * tokens.
-     *
-     * @param database The Redis database number.
-     */
-    void setDatabase(int database);
 }

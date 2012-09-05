@@ -33,7 +33,7 @@ public class JedisUserTokenManagerTest {
         database = Integer.parseInt(properties.getProperty("redis.db.userTokens"), 10);
 
         tokenManager = new JedisUserTokenManager(jedisPoolFactory);
-        tokenManager.setDatabase(database);
+        ((JedisUserTokenManager) tokenManager).setDatabase(database);
     }
 
     @Test
@@ -120,13 +120,13 @@ public class JedisUserTokenManagerTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void settingDatabaseToNegativeNumberShouldThrowException() throws Exception {
-        tokenManager.setDatabase(-1);
+        ((JedisUserTokenManager) tokenManager).setDatabase(-1);
     }
 
     @Test
     public void settingDatabaseToNonNegativeNumberShouldBeSuccessful() throws Exception {
-        tokenManager.setDatabase(0);
-        tokenManager.setDatabase(1);
+        ((JedisUserTokenManager) tokenManager).setDatabase(0);
+        ((JedisUserTokenManager) tokenManager).setDatabase(1);
     }
 
     @Test
