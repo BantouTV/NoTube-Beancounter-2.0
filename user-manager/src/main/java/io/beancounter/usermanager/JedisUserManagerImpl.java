@@ -446,6 +446,7 @@ public class JedisUserManagerImpl implements UserManager {
             // ok, this is the first access from this user so just add record
             // to the resolver and return
             User user = authUser.getUser();
+            // TODO: Do user token stuff here.
             mapUserToServiceInResolver(service, authUser);
             storeUser(user);
             return new AtomicSignUp(
@@ -462,6 +463,7 @@ public class JedisUserManagerImpl implements UserManager {
         }
 
         User user = authUser.getUser();
+        // TODO: Do user token stuff here.
         updateUserWithOAuthCredentials(service, user.getAuth(service), candidateUsername);
 
         return new AtomicSignUp(user.getId(), user.getUsername(), true, service, authUser.getUserId());

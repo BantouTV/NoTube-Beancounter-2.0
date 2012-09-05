@@ -434,13 +434,14 @@ public class UserService extends JsonService {
             return error(ume, "Error while doing OAuth exchange for service: [" + service + "]");
         }
 
+        /**
         User user;
         try {
             user = userManager.getUser(signUp.getUsername());
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user: [" + signUp.getUsername() + "]");
         }
-        /**
+
         final int LIMIT = 40;
         List<Activity> activities;
         try {
@@ -506,13 +507,14 @@ public class UserService extends JsonService {
             return error(ume, "Error while doing OAuth exchange for service: [" + service + "]");
         }
 
+        /**
         User user;
         try {
             user = userManager.getUser(signUp.getUsername());
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user: [" + signUp.getUsername() + "]");
         }
-        /**
+
         final int LIMIT = 40;
         List<Activity> activities;
         try {
