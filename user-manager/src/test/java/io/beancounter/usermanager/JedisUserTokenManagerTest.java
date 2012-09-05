@@ -7,7 +7,6 @@ import org.testng.annotations.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.exceptions.JedisConnectionException;
-import twitter4j.UserMentionEntity;
 
 import java.util.Properties;
 import java.util.UUID;

@@ -9,6 +9,9 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.util.UUID;
 
+/**
+ * <i>REDIS</i>-based implementation of {@link UserTokenManager}.
+ */
 public class JedisUserTokenManager implements UserTokenManager {
 
     private JedisPool jedisPool;

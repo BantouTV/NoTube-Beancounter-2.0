@@ -20,9 +20,11 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.net.URL;
+import java.util.UUID;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,6 +39,7 @@ public class JedisUserManagerImplTest {
     private JedisPool jedisPool;
     private Resolver resolver;
     private ServiceAuthorizationManager authManager;
+    private UserTokenManager tokenManager;
     private ObjectMapper mapper;
 
     @BeforeMethod
@@ -49,8 +52,9 @@ public class JedisUserManagerImplTest {
 
         resolver = mock(Resolver.class);
         authManager = mock(ServiceAuthorizationManager.class);
+        tokenManager = mock(UserTokenManager.class);
 
-        userManager = new JedisUserManagerImpl(jedisPoolFactory, resolver, authManager);
+        userManager = new JedisUserManagerImpl(jedisPoolFactory, resolver, authManager, tokenManager);
         mapper = new ObjectMapper();
     }
 
@@ -214,6 +218,7 @@ public class JedisUserManagerImplTest {
         String verifier = "oauth_verifier";
         String accessToken = "access-token-1234";
         String accessTokenSecret = "access-token-secret";
+        UUID userToken = UUID.randomUUID();
 
         AuthHandler authHandler = mock(AuthHandler.class);
         User user = new User("Test", "User", username, "password");
@@ -224,10 +229,12 @@ public class JedisUserManagerImplTest {
         when(authManager.getHandler(serviceName)).thenReturn(authHandler);
         when(authHandler.auth(token, verifier)).thenReturn(authUser);
         when(authHandler.getService()).thenReturn(serviceName);
+        when(tokenManager.createUserToken(username)).thenReturn(userToken);
         when(resolver.resolveUsername(serviceUserId, serviceName))
                 .thenThrow(new ResolverMappingNotFoundException("Means the user doesn't exist yet."));
 
         AtomicSignUp atomicSignUp = userManager.storeUserFromOAuth(serviceName, token, verifier);
+        user.setUserToken(userToken);
 
         assertEquals(atomicSignUp.getUsername(), username);
         assertEquals(atomicSignUp.getUserId(), user.getId());
@@ -236,6 +243,7 @@ public class JedisUserManagerImplTest {
         assertFalse(atomicSignUp.isReturning());
 
         verify(authHandler).auth(token, verifier);
+        verify(tokenManager).createUserToken(username);
         verify(resolver).store(serviceUserId, serviceName, user.getId(), username);
         verify(jedis).select(0);
         verify(jedis).set(username, mapper.writeValueAsString(user));
@@ -252,6 +260,54 @@ public class JedisUserManagerImplTest {
         String verifier = "oauth_verifier";
         String accessToken = "access-token-1234";
         String accessTokenSecret = "access-token-secret";
+        UUID oldUserToken = UUID.randomUUID();
+        UUID newUserToken = UUID.randomUUID();
+
+        AuthHandler authHandler = mock(AuthHandler.class);
+        User oldUser = new User("Test", "User", username, "password");
+        oldUser.setUserToken(oldUserToken);
+        User newUser = new User("Test", "User", username, "password");
+        newUser.setId(oldUser.getId());
+        newUser.addService(serviceName, new OAuthAuth(accessToken, accessTokenSecret));
+        AuthenticatedUser authUser = new AuthenticatedUser(serviceUserId, newUser);
+
+        when(authManager.getService(serviceName)).thenReturn(new Service(serviceName));
+        when(authManager.getHandler(serviceName)).thenReturn(authHandler);
+        when(authHandler.auth(token, verifier)).thenReturn(authUser);
+        when(authHandler.getService()).thenReturn(serviceName);
+        when(tokenManager.createUserToken(username)).thenReturn(newUserToken);
+        when(resolver.resolveUsername(serviceUserId, serviceName)).thenReturn(username);
+        when(jedis.get(username)).thenReturn(mapper.writeValueAsString(oldUser));
+
+        AtomicSignUp atomicSignUp = userManager.storeUserFromOAuth(serviceName, token, verifier);
+        newUser.setUserToken(newUserToken);
+
+        assertEquals(atomicSignUp.getUsername(), username);
+        assertEquals(atomicSignUp.getUserId(), newUser.getId());
+        assertEquals(atomicSignUp.getService(), serviceName);
+        assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertTrue(atomicSignUp.isReturning());
+
+        verify(tokenManager).deleteUserToken(oldUserToken);
+        verify(tokenManager).createUserToken(username);
+        verify(jedis, times(2)).select(0);
+        verify(jedis).get(username);
+        verify(jedis).set(username, mapper.writeValueAsString(newUser));
+        verify(jedisPool, times(2)).getResource();
+        verify(jedisPool, times(2)).returnResource(jedis);
+    }
+
+    @Test
+    public void storeNewTwitterOAuthCredentialsForExistingUserWithNullUserToken() throws Exception {
+        String serviceName = "twitter";
+        String username = "existing-user";
+        String serviceUserId = "17473832";
+        String token = "oauth_token";
+        String verifier = "oauth_verifier";
+        String accessToken = "access-token-1234";
+        String accessTokenSecret = "access-token-secret";
+        UUID oldUserToken = null;
+        UUID newUserToken = UUID.randomUUID();
 
         AuthHandler authHandler = mock(AuthHandler.class);
         User oldUser = new User("Test", "User", username, "password");
@@ -264,10 +320,12 @@ public class JedisUserManagerImplTest {
         when(authManager.getHandler(serviceName)).thenReturn(authHandler);
         when(authHandler.auth(token, verifier)).thenReturn(authUser);
         when(authHandler.getService()).thenReturn(serviceName);
+        when(tokenManager.createUserToken(username)).thenReturn(newUserToken);
         when(resolver.resolveUsername(serviceUserId, serviceName)).thenReturn(username);
         when(jedis.get(username)).thenReturn(mapper.writeValueAsString(oldUser));
 
         AtomicSignUp atomicSignUp = userManager.storeUserFromOAuth(serviceName, token, verifier);
+        newUser.setUserToken(newUserToken);
 
         assertEquals(atomicSignUp.getUsername(), username);
         assertEquals(atomicSignUp.getUserId(), newUser.getId());
@@ -275,6 +333,8 @@ public class JedisUserManagerImplTest {
         assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
         assertTrue(atomicSignUp.isReturning());
 
+        verify(tokenManager, never()).deleteUserToken(oldUserToken);
+        verify(tokenManager).createUserToken(username);
         verify(jedis, times(2)).select(0);
         verify(jedis).get(username);
         verify(jedis).set(username, mapper.writeValueAsString(newUser));
@@ -291,6 +351,7 @@ public class JedisUserManagerImplTest {
         String code = "oauth2_code";
         String accessToken = "access-token-1234";
         String accessTokenSecret = "access-token-secret";
+        UUID userToken = UUID.randomUUID();
 
         AuthHandler authHandler = mock(AuthHandler.class);
         User user = new User("Test", "User", username, "password");
@@ -301,10 +362,12 @@ public class JedisUserManagerImplTest {
         when(authManager.getHandler(serviceName)).thenReturn(authHandler);
         when(authHandler.auth(code)).thenReturn(authUser);
         when(authHandler.getService()).thenReturn(serviceName);
+        when(tokenManager.createUserToken(username)).thenReturn(userToken);
         when(resolver.resolveUsername(serviceUserId, serviceName))
                 .thenThrow(new ResolverMappingNotFoundException("Means the user doesn't exist yet."));
 
         AtomicSignUp atomicSignUp = userManager.storeUserFromOAuth(serviceName, token, code);
+        user.setUserToken(userToken);
 
         assertEquals(atomicSignUp.getUsername(), username);
         assertEquals(atomicSignUp.getUserId(), user.getId());
@@ -313,6 +376,7 @@ public class JedisUserManagerImplTest {
         assertFalse(atomicSignUp.isReturning());
 
         verify(authHandler).auth(code);
+        verify(tokenManager).createUserToken(username);
         verify(resolver).store(serviceUserId, serviceName, user.getId(), username);
         verify(jedis).select(0);
         verify(jedis).set(username, mapper.writeValueAsString(user));
@@ -329,6 +393,54 @@ public class JedisUserManagerImplTest {
         String code = "oauth2_code";
         String accessToken = "access-token-1234";
         String accessTokenSecret = "access-token-secret";
+        UUID oldUserToken = UUID.randomUUID();
+        UUID newUserToken = UUID.randomUUID();
+
+        AuthHandler authHandler = mock(AuthHandler.class);
+        User oldUser = new User("Test", "User", username, "password");
+        oldUser.setUserToken(oldUserToken);
+        User newUser = new User("Test", "User", username, "password");
+        newUser.setId(oldUser.getId());
+        newUser.addService(serviceName, new OAuthAuth(accessToken, accessTokenSecret));
+        AuthenticatedUser authUser = new AuthenticatedUser(serviceUserId, newUser);
+
+        when(authManager.getService(serviceName)).thenReturn(new Service(serviceName));
+        when(authManager.getHandler(serviceName)).thenReturn(authHandler);
+        when(authHandler.auth(code)).thenReturn(authUser);
+        when(authHandler.getService()).thenReturn(serviceName);
+        when(tokenManager.createUserToken(username)).thenReturn(newUserToken);
+        when(resolver.resolveUsername(serviceUserId, serviceName)).thenReturn(username);
+        when(jedis.get(username)).thenReturn(mapper.writeValueAsString(oldUser));
+
+        AtomicSignUp atomicSignUp = userManager.storeUserFromOAuth(serviceName, token, code);
+        newUser.setUserToken(newUserToken);
+
+        assertEquals(atomicSignUp.getUsername(), username);
+        assertEquals(atomicSignUp.getUserId(), newUser.getId());
+        assertEquals(atomicSignUp.getService(), serviceName);
+        assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertTrue(atomicSignUp.isReturning());
+
+        verify(tokenManager).deleteUserToken(oldUserToken);
+        verify(tokenManager).createUserToken(username);
+        verify(jedis, times(2)).select(0);
+        verify(jedis).get(username);
+        verify(jedis).set(username, mapper.writeValueAsString(newUser));
+        verify(jedisPool, times(2)).getResource();
+        verify(jedisPool, times(2)).returnResource(jedis);
+    }
+
+    @Test
+    public void storeNewFacebookOAuthCredentialsForExistingUserWithNullUserToken() throws Exception {
+        String serviceName = "facebook";
+        String username = "existing-user";
+        String serviceUserId = "17473832";
+        String token = null;
+        String code = "oauth2_code";
+        String accessToken = "access-token-1234";
+        String accessTokenSecret = "access-token-secret";
+        UUID oldUserToken = null;
+        UUID newUserToken = UUID.randomUUID();
 
         AuthHandler authHandler = mock(AuthHandler.class);
         User oldUser = new User("Test", "User", username, "password");
@@ -341,10 +453,12 @@ public class JedisUserManagerImplTest {
         when(authManager.getHandler(serviceName)).thenReturn(authHandler);
         when(authHandler.auth(code)).thenReturn(authUser);
         when(authHandler.getService()).thenReturn(serviceName);
+        when(tokenManager.createUserToken(username)).thenReturn(newUserToken);
         when(resolver.resolveUsername(serviceUserId, serviceName)).thenReturn(username);
         when(jedis.get(username)).thenReturn(mapper.writeValueAsString(oldUser));
 
         AtomicSignUp atomicSignUp = userManager.storeUserFromOAuth(serviceName, token, code);
+        newUser.setUserToken(newUserToken);
 
         assertEquals(atomicSignUp.getUsername(), username);
         assertEquals(atomicSignUp.getUserId(), newUser.getId());
@@ -352,6 +466,8 @@ public class JedisUserManagerImplTest {
         assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
         assertTrue(atomicSignUp.isReturning());
 
+        verify(tokenManager, never()).deleteUserToken(oldUserToken);
+        verify(tokenManager).createUserToken(username);
         verify(jedis, times(2)).select(0);
         verify(jedis).get(username);
         verify(jedis).set(username, mapper.writeValueAsString(newUser));
@@ -475,6 +591,54 @@ public class JedisUserManagerImplTest {
                 .thenThrow(new ResolverMappingNotFoundException("Means the service->user mapping doesn't exist yet."));
         doThrow(new ResolverException("error"))
                 .when(resolver).store(serviceUserId, serviceName, user.getId(), user.getUsername());
+
+        userManager.storeUserFromOAuth(serviceName, token, code);
+    }
+
+    @Test(expectedExceptions = UserManagerException.class)
+    public void givenNewTwitterUserWhenErrorOccursWhileCreatingUserTokenThenThrowException() throws Exception {
+        String serviceName = "twitter";
+        String username = "new-user";
+        String serviceUserId = "17473832";
+        String token = "oauth_token";
+        String verifier = "oauth_verifier";
+
+        AuthHandler authHandler = mock(AuthHandler.class);
+        User user = new User("Test", "User", username, "password");
+        AuthenticatedUser authUser = new AuthenticatedUser(serviceUserId, user);
+
+        when(authManager.getService(serviceName)).thenReturn(new Service(serviceName));
+        when(authManager.getHandler(serviceName)).thenReturn(authHandler);
+        when(authHandler.auth(token, verifier)).thenReturn(authUser);
+        when(authHandler.getService()).thenReturn(serviceName);
+        when(resolver.resolveUsername(serviceUserId, serviceName))
+                .thenThrow(new ResolverMappingNotFoundException("Means the service->user mapping doesn't exist yet."));
+        when(tokenManager.createUserToken(username))
+                .thenThrow(new UserManagerException("Error"));
+
+        userManager.storeUserFromOAuth(serviceName, token, verifier);
+    }
+
+    @Test(expectedExceptions = UserManagerException.class)
+    public void givenNewFacebookUserWhenErrorOccursWhileCreatingUserTokenThenThrowException() throws Exception {
+        String serviceName = "facebook";
+        String username = "new-user";
+        String serviceUserId = "17473832";
+        String token = null;
+        String code = "oauth2_code";
+
+        AuthHandler authHandler = mock(AuthHandler.class);
+        User user = new User("Test", "User", username, "password");
+        AuthenticatedUser authUser = new AuthenticatedUser(serviceUserId, user);
+
+        when(authManager.getService(serviceName)).thenReturn(new Service(serviceName));
+        when(authManager.getHandler(serviceName)).thenReturn(authHandler);
+        when(authHandler.auth(code)).thenReturn(authUser);
+        when(authHandler.getService()).thenReturn(serviceName);
+        when(resolver.resolveUsername(serviceUserId, serviceName))
+                .thenThrow(new ResolverMappingNotFoundException("Means the service->user mapping doesn't exist yet."));
+        when(tokenManager.createUserToken(username))
+                .thenThrow(new UserManagerException("Error"));
 
         userManager.storeUserFromOAuth(serviceName, token, code);
     }
