@@ -10,14 +10,15 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 
 /**
- * @author Enrico Candino ( enrico.candino @ gmail.com )
+ *
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class CommentPublisher implements Publisher<Comment> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommentPublisher.class);
 
     @Override
-     public Status publish(Twitter twitter, Verb verb, Comment comment) throws TwitterPublisherException {
+    public Status publish(Twitter twitter, Verb verb, Comment comment) throws TwitterPublisherException {
         Status status;
         String message = getMessage(comment);
         try {

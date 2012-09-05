@@ -9,7 +9,7 @@ import twitter4j.TwitterFactory;
 
 /**
  *
- * @author Enrico Candino ( enrico.candino @ gmail.com )
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class TwitterPublisherModule extends CamelModuleWithMatchingRoutes {
 

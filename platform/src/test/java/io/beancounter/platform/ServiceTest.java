@@ -8,7 +8,7 @@ import static org.testng.Assert.assertEquals;
 
 /**
  *
- * @author Enrico Candino ( enrico.candino @ gmail.com )
+ * @author Enrico Candino (( enrico.candino@gmail.com ))
  */
 public class ServiceTest {
 

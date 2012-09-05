@@ -6,7 +6,7 @@ import io.beancounter.commons.model.activity.Verb;
 import io.beancounter.publisher.facebook.FacebookPublisherException;
 
 /**
- * @author Enrico Candino ( enrico.candino @ gmail.com )
+ * @author Enrico Candino (( enrico.candino@gmail.com ))
  */
 public interface Publisher <T extends Object> {
 

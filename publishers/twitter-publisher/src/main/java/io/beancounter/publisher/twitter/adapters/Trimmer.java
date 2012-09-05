@@ -3,7 +3,7 @@ package io.beancounter.publisher.twitter.adapters;
 import java.net.URL;
 
 /**
- * @author Enrico Candino ( enrico.candino @ gmail.com )
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class Trimmer {
 
@@ -14,8 +14,8 @@ public class Trimmer {
     /**
      * Trims the text given to fit the Tweet length (140 chars)
      *
-     * @param text the text in input
-     * @param url the url that will be in the Tweet, if present
+     * @param text       the text in input
+     * @param url        the url that will be in the Tweet, if present
      * @param addedChars the characters eventually added after
      */
     public static String trim(String text, URL url, int addedChars) {
@@ -43,7 +43,7 @@ public class Trimmer {
      * Trims the text given to fit the Tweet length (140 chars)
      *
      * @param text the text in input
-     * @param url the url that will be in the Tweet, if present
+     * @param url  the url that will be in the Tweet, if present
      */
     public static String trim(String text, URL url) {
         return trim(text, url, 0);

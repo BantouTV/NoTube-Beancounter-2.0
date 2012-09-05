@@ -10,7 +10,8 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 
 /**
- * @author Enrico Candino ( enrico.candino @ gmail.com )
+ *
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
 public class TVEventPublisher implements Publisher<TVEvent> {
 
@@ -30,12 +31,14 @@ public class TVEventPublisher implements Publisher<TVEvent> {
         return status;
     }
 
-    private String getMessage(Verb verb, TVEvent tvEvent) {
+    private String getMessage(Verb verb, TVEvent tvEvent) throws TwitterPublisherException {
         String message = "";
-        if(verb.equals(Verb.WATCHED)) {
-            message += "Just watched at ";
-        } else if(verb.equals(Verb.CHECKIN)) {
+        if(verb.equals(Verb.CHECKIN)) {
             message += "Just joined the tv event ";
+        } else {
+            final String errMessage = "Verb [" + verb + "] not supported";
+            LOG.error(errMessage);
+            throw new TwitterPublisherException(errMessage, new UnsupportedOperationException());
         }
         message = Trimmer.trim(message + tvEvent.getName(), tvEvent.getUrl(), 3) + " - " + tvEvent.getUrl();
         return message;

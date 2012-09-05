@@ -9,7 +9,7 @@ import io.beancounter.commons.model.activity.rai.Comment;
 
 /**
  *
- * @author Enrico Candino ( enrico.candino @ gmail.com )
+ * @author Enrico Candino (( enrico.candino@gmail.com ))
  */
 public class CommentPublisher implements Publisher<Comment> {
 
@@ -25,8 +25,7 @@ public class CommentPublisher implements Publisher<Comment> {
     }
 
     private String getMessage(Comment comment) {
-        String message = "Just commented on " + comment.getUrl().toString();
-        message += "\n\"" + comment.getText() + "\"";
+        String message = comment.getText() + "\n" + comment.getUrl().toString();
         return message;
     }
 }

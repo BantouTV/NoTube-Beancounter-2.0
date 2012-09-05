@@ -6,9 +6,10 @@ import twitter4j.Status;
 import twitter4j.Twitter;
 
 /**
- * @author Enrico Candino ( enrico.candino @ gmail.com )
+ *
+ * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-public interface Publisher <T> {
+public interface Publisher<T> {
 
     public Status publish(Twitter twitter, Verb verb, T t) throws TwitterPublisherException;
 
