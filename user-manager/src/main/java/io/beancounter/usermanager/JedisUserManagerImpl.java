@@ -28,6 +28,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * <i>REDIS</i>-based implementation of {@link UserManager}.
@@ -48,6 +49,8 @@ public class JedisUserManagerImpl implements UserManager {
 
     private ServiceAuthorizationManager sam;
 
+    private UserTokenManager tokenManager;
+
     @Inject
     @Named("redis.db.users")
     private int database;
@@ -56,12 +59,13 @@ public class JedisUserManagerImpl implements UserManager {
     public JedisUserManagerImpl(
             JedisPoolFactory factory,
             Resolver resolver,
-            ServiceAuthorizationManager sam
-    ) {
+            ServiceAuthorizationManager sam,
+            UserTokenManager tokenManager) {
         pool = factory.build();
         mapper = new ObjectMapper();
         this.resolver = resolver;
         this.sam = sam;
+        this.tokenManager = tokenManager;
     }
 
     @Override
@@ -345,19 +349,27 @@ public class JedisUserManagerImpl implements UserManager {
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         }
+
+        User userWithAuth = auser.getUser();
         try {
             resolver.store(
                     auser.getUserId(),
-                    authHandler.getService(),
-                    auser.getUser().getId(),
-                    auser.getUser().getUsername()
+                    serviceName,
+                    userWithAuth.getId(),
+                    userWithAuth.getUsername()
             );
         } catch (ResolverException e) {
             final String errMsg = "Error while storing username for user [" + user.getUsername() + "] on service [" + serviceName + "]";
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         }
-        storeUser(auser.getUser());
+
+        if (userWithAuth.getUserToken() != null) {
+            tokenManager.deleteUserToken(userWithAuth.getUserToken());
+        }
+        UUID userToken = tokenManager.createUserToken(userWithAuth.getUsername());
+        userWithAuth.setUserToken(userToken);
+        storeUser(userWithAuth);
     }
 
 
@@ -443,10 +455,13 @@ public class JedisUserManagerImpl implements UserManager {
                     service
             );
         } catch (ResolverMappingNotFoundException e) {
-            // ok, this is the first access from this user so just add record
-            // to the resolver and return
+            // ok, this is the first access from this user so:
+            // 1. Create a new user token for them (no need to check if there
+            //    is an existing one because this is a new user).
+            // 2. Add a record to the resolver
             User user = authUser.getUser();
-            // TODO: Do user token stuff here.
+            UUID userToken = tokenManager.createUserToken(user.getUsername());
+            user.setUserToken(userToken);
             mapUserToServiceInResolver(service, authUser);
             storeUser(user);
             return new AtomicSignUp(
@@ -463,7 +478,6 @@ public class JedisUserManagerImpl implements UserManager {
         }
 
         User user = authUser.getUser();
-        // TODO: Do user token stuff here.
         updateUserWithOAuthCredentials(service, user.getAuth(service), candidateUsername);
 
         return new AtomicSignUp(user.getId(), user.getUsername(), true, service, authUser.getUserId());
@@ -494,6 +508,13 @@ public class JedisUserManagerImpl implements UserManager {
     ) throws UserManagerException {
         User user = getUser(username);
         user.addService(service, auth);
+
+        if (user.getUserToken() != null) {
+            tokenManager.deleteUserToken(user.getUserToken());
+        }
+        UUID userToken = tokenManager.createUserToken(user.getUsername());
+        user.setUserToken(userToken);
+
         storeUser(user);
     }
     

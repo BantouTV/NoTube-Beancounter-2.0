@@ -9,6 +9,9 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.util.UUID;
 
+/**
+ * <i>REDIS</i>-based implementation of {@link UserTokenManager}.
+ */
 public class JedisUserTokenManager implements UserTokenManager {
 
     private JedisPool jedisPool;
@@ -109,8 +112,13 @@ public class JedisUserTokenManager implements UserTokenManager {
         }
     }
 
+    /**
+     * Set the number of the database in Redis that is used for storing user
+     * tokens.
+     *
+     * @param database The Redis database number.
+     */
     @Inject
-    @Override
     public void setDatabase(@Named("redis.db.userTokens") int database) {
         if (database < 0) {
             throw new IllegalArgumentException("Database number must be at least 0");

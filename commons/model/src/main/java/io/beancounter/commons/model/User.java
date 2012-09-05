@@ -30,6 +30,8 @@ public class User implements Serializable {
 
     private Map<String, String> metadata = new HashMap<String, String>();
 
+    private UUID userToken;
+
     public User() {
         id = UUID.randomUUID();
     }
@@ -117,6 +119,14 @@ public class User implements Serializable {
 
     public void setMetadata(Map<String, String> metadata) {
         this.metadata = metadata;
+    }
+
+    public UUID getUserToken() {
+        return userToken;
+    }
+
+    public void setUserToken(UUID userToken) {
+        this.userToken = userToken;
     }
 
     @Override
