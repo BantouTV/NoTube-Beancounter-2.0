@@ -6,6 +6,8 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import io.beancounter.commons.model.Service;
 import io.beancounter.commons.model.auth.AuthHandler;
+import io.beancounter.usermanager.JedisUserTokenManager;
+import io.beancounter.usermanager.UserTokenManager;
 import io.beancounter.usermanager.services.auth.facebook.FacebookAuthHandler;
 import io.beancounter.usermanager.services.auth.twitter.TwitterAuthHandler;
 import io.beancounter.usermanager.services.auth.twitter.TwitterFactoryWrapper;
@@ -56,6 +58,7 @@ public class ResolverModule extends CamelModuleWithMatchingRoutes {
         authHandlerBinder.addBinding(twitterService).to(TwitterAuthHandler.class);
         authHandlerBinder.addBinding(facebookService).to(FacebookAuthHandler.class);
 
+        bind(UserTokenManager.class).to(JedisUserTokenManager.class).asEagerSingleton();
         bind(UserManager.class).to(JedisUserManagerImpl.class).asEagerSingleton();
         bind(Services.class).toInstance(services);
         bind(Resolver.class).to(JedisResolver.class);

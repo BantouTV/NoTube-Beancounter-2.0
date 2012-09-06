@@ -7,6 +7,8 @@ import com.google.inject.name.Names;
 import com.restfb.types.Post;
 import io.beancounter.commons.model.Service;
 import io.beancounter.commons.model.auth.AuthHandler;
+import io.beancounter.usermanager.JedisUserTokenManager;
+import io.beancounter.usermanager.UserTokenManager;
 import io.beancounter.usermanager.services.auth.facebook.FacebookAuthHandler;
 import io.beancounter.usermanager.services.auth.twitter.TwitterAuthHandler;
 import io.beancounter.usermanager.services.auth.twitter.TwitterFactoryWrapper;
@@ -66,6 +68,7 @@ public class FacebookModule extends CamelModuleWithMatchingRoutes {
         authHandlerBinder.addBinding(facebookService).to(FacebookAuthHandler.class);
 
         bind(ServiceAuthorizationManager.class).to(DefaultServiceAuthorizationManager.class);
+        bind(UserTokenManager.class).to(JedisUserTokenManager.class);
         bind(UserManager.class).to(JedisUserManagerImpl.class);
         FacebookActivityConverter fac = new FacebookActivityConverter();
         try {
