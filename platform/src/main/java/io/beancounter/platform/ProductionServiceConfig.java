@@ -11,6 +11,7 @@ import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 import io.beancounter.commons.model.auth.AuthHandler;
+import io.beancounter.platform.rai.MyRaiTVService;
 import io.beancounter.usermanager.services.auth.facebook.FacebookAuthHandler;
 import io.beancounter.usermanager.services.auth.twitter.TwitterAuthHandler;
 import io.beancounter.usermanager.services.auth.twitter.TwitterFactoryWrapper;
