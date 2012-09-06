@@ -41,7 +41,7 @@ public class JedisUserManagerIntegrationTest {
         User actual = userManager.getUser(expected.getUsername());
         Assert.assertNotNull(actual);
         Assert.assertEquals(actual, expected);
-        userManager.deleteUser(actual.getUsername());
+        userManager.deleteUser(actual);
         actual = userManager.getUser(expected.getUsername());
         Assert.assertNull(actual);
     }

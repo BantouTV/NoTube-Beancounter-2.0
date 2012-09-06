@@ -71,7 +71,7 @@ public class MockUserManager implements UserManager {
     }
 
     @Override
-    public void deleteUser(String username) throws UserManagerException {}
+    public void deleteUser(User user) throws UserManagerException {}
 
     @Override
     public OAuthToken getOAuthToken(String serviceName, String username, URL url) throws UserManagerException {
