@@ -109,6 +109,18 @@ public class MyRaiTVService extends JsonService {
             );
             return rb.build();
         } else {
+            try {
+                user.addService(SERVICE_NAME, new SimpleAuth(token, username));
+                if (user.getUserToken() != null) {
+                    tokenManager.deleteUserToken(user.getUserToken());
+                }
+                UUID userToken = tokenManager.createUserToken(username);
+                user.setUserToken(userToken);
+                userManager.storeUser(user);
+            } catch (UserManagerException ume) {
+                return error(ume, "error while storing user [" + username + "] on beancounter.io");
+            }
+
             AtomicSignUp signUp = new AtomicSignUp();
             signUp.setReturning(true);
             signUp.setService(SERVICE_NAME);

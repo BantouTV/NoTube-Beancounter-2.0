@@ -9,12 +9,14 @@ import com.sun.grizzly.http.servlet.ServletAdapter;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import io.beancounter.commons.model.User;
+import io.beancounter.commons.model.auth.SimpleAuth;
 import io.beancounter.platform.AbstractJerseyTestCase;
 import io.beancounter.platform.JacksonMixInProvider;
 import io.beancounter.platform.responses.AtomicSignUpResponse;
 import io.beancounter.platform.responses.StringPlatformResponse;
 import io.beancounter.usermanager.AtomicSignUp;
 import io.beancounter.usermanager.UserManager;
+import io.beancounter.usermanager.UserManagerException;
 import io.beancounter.usermanager.UserTokenManager;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -106,6 +108,90 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
+    public void loginWithExistingUserShouldUpdateAuthTokenAndUserToken() throws Exception {
+        String baseQuery = "rai/login";
+        String username = "username";
+        String password = "password";
+        String oldRaiToken = "old-myRai-token";
+        String newRaiToken = "new-myRai-token";
+        UUID oldUserToken = UUID.randomUUID();
+        UUID newUserToken = UUID.randomUUID();
+
+        User oldUser = new User();
+        oldUser.setUsername(username);
+        oldUser.addService(SERVICE_NAME, new SimpleAuth(oldRaiToken, username));
+        oldUser.setUserToken(oldUserToken);
+
+        ArgumentCaptor<User> userArgument = ArgumentCaptor.forClass(User.class);
+        when(userManager.getUser(username)).thenReturn(oldUser);
+        doNothing().when(userManager).storeUser(userArgument.capture());
+        when(authHandler.authOnRai(username, password)).thenReturn(newRaiToken);
+        when(tokenManager.createUserToken(username)).thenReturn(newUserToken);
+
+        PostMethod postMethod = new PostMethod(base_uri + baseQuery);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("username", username);
+        postMethod.addParameter("password", password);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
+
+        AtomicSignUpResponse response = fromJson(responseBody, AtomicSignUpResponse.class);
+        assertEquals(response.getStatus(), AtomicSignUpResponse.Status.OK);
+        assertEquals(response.getMessage(), "user with user name [" + username + "] logged in with service [" + SERVICE_NAME + "]");
+
+        AtomicSignUp atomicSignUp = response.getObject();
+        assertNotNull(atomicSignUp);
+        assertEquals(atomicSignUp.getIdentifier(), username);
+        assertEquals(atomicSignUp.getUsername(), username);
+        assertTrue(atomicSignUp.isReturning());
+        assertEquals(atomicSignUp.getService(), SERVICE_NAME);
+
+        User user = userArgument.getValue();
+        assertEquals(user.getUsername(), username);
+        assertEquals(user.getServices().get(SERVICE_NAME).getSession(), newRaiToken);
+        assertEquals(user.getUserToken(), newUserToken);
+
+        verify(tokenManager).deleteUserToken(oldUserToken);
+        verify(tokenManager).createUserToken(username);
+    }
+
+    @Test
+    public void givenErrorOccursWhenStoringUpdatesToExistingUserThenRespondWithError() throws Exception {
+        String baseQuery = "rai/login";
+        String username = "username";
+        String password = "password";
+        String oldRaiToken = "old-myRai-token";
+        String newRaiToken = "new-myRai-token";
+        UUID oldUserToken = UUID.randomUUID();
+
+        User oldUser = new User();
+        oldUser.setUsername(username);
+        oldUser.addService(SERVICE_NAME, new SimpleAuth(oldRaiToken, username));
+        oldUser.setUserToken(oldUserToken);
+
+        when(userManager.getUser(username)).thenReturn(oldUser);
+        when(authHandler.authOnRai(username, password)).thenReturn(newRaiToken);
+        when(tokenManager.createUserToken(username)).thenThrow(new UserManagerException("error"));
+
+        PostMethod postMethod = new PostMethod(base_uri + baseQuery);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("username", username);
+        postMethod.addParameter("password", password);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "error while storing user [" + username + "] on beancounter.io");
+    }
+
+    @Test
     public void loginWithNewUserUsingInvalidCredentialsShouldRespondWithError() throws Exception {
         String baseQuery = "rai/login";
         String username = "invalid-username";
@@ -149,6 +235,31 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
         assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
         assertEquals(response.getMessage(), "Error while authenticating [" + username + "] on myRai auth service");
+    }
+
+    @Test
+    public void givenUserManagerErrorOccursWhenLookingUpNewUserDuringLoginThenRespondWithError() throws Exception {
+        String baseQuery = "rai/login";
+        String username = "unknown-username";
+        String password = "password";
+        String raiToken = "myRai-token";
+
+        when(authHandler.authOnRai(username, password)).thenReturn(raiToken);
+        when(userManager.getUser(username)).thenThrow(new UserManagerException("error"));
+
+        PostMethod postMethod = new PostMethod(base_uri + baseQuery);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("username", username);
+        postMethod.addParameter("password", password);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Error while getting beancounter.io user with name [" + username + "]");
     }
 
     @Test
