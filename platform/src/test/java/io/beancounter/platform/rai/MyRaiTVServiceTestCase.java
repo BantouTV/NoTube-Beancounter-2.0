@@ -12,6 +12,7 @@ import io.beancounter.commons.model.User;
 import io.beancounter.platform.AbstractJerseyTestCase;
 import io.beancounter.platform.JacksonMixInProvider;
 import io.beancounter.platform.responses.AtomicSignUpResponse;
+import io.beancounter.platform.responses.StringPlatformResponse;
 import io.beancounter.usermanager.AtomicSignUp;
 import io.beancounter.usermanager.UserManager;
 import io.beancounter.usermanager.UserTokenManager;
@@ -102,6 +103,52 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(user.getUsername(), username);
         assertEquals(user.getServices().get(SERVICE_NAME).getSession(), raiToken);
         assertEquals(user.getUserToken(), userToken);
+    }
+
+    @Test
+    public void loginWithNewUserUsingInvalidCredentialsShouldRespondWithError() throws Exception {
+        String baseQuery = "rai/login";
+        String username = "invalid-username";
+        String password = "invalid-password";
+
+        when(authHandler.authOnRai(username, password)).thenReturn("ko");
+
+        PostMethod postMethod = new PostMethod(base_uri + baseQuery);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("username", username);
+        postMethod.addParameter("password", password);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "user [" + username + "] is not authorized from myRai auth service");
+    }
+
+    @Test
+    public void givenErrorOccursWhenAuthenticatingNewUserThenRespondWithError() throws Exception {
+        String baseQuery = "rai/login";
+        String username = "invalid-username";
+        String password = "invalid-password";
+
+        when(authHandler.authOnRai(username, password)).thenThrow(new IOException());
+
+        PostMethod postMethod = new PostMethod(base_uri + baseQuery);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("username", username);
+        postMethod.addParameter("password", password);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Error while authenticating [" + username + "] on myRai auth service");
     }
 
     @Test

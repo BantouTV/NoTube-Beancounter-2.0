@@ -58,7 +58,7 @@ public class MyRaiTVService extends JsonService {
         try {
             token = authHandler.authOnRai(username, password);
         } catch (IOException e) {
-            return  error(e, "Error while authenticating [" + username + "] on myRai auth service");
+            return error(e, "Error while authenticating [" + username + "] on myRai auth service");
         }
         if (token.equals("ko")) {
             Response.ResponseBuilder rb = Response.serverError();

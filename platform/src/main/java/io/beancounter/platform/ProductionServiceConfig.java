@@ -12,6 +12,8 @@ import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 import io.beancounter.commons.model.auth.AuthHandler;
 import io.beancounter.platform.rai.MyRaiTVService;
+import io.beancounter.usermanager.JedisUserTokenManager;
+import io.beancounter.usermanager.UserTokenManager;
 import io.beancounter.usermanager.services.auth.facebook.FacebookAuthHandler;
 import io.beancounter.usermanager.services.auth.twitter.TwitterAuthHandler;
 import io.beancounter.usermanager.services.auth.twitter.TwitterFactoryWrapper;
@@ -108,6 +110,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(Services.class).toInstance(services);
                 bind(Resolver.class).to(JedisResolver.class);
                 bind(ApplicationsManager.class).to(JedisApplicationsManagerImpl.class);
+                bind(UserTokenManager.class).to(JedisUserTokenManager.class);
                 bind(UserManager.class).to(JedisUserManagerImpl.class).asEagerSingleton();
                 bind(Profiles.class).to(JedisProfilesImpl.class);
                 bind(ActivityStore.class).toInstance(getElasticSearch());

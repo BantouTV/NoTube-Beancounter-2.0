@@ -7,6 +7,8 @@ import com.google.inject.servlet.GuiceServletContextListener;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import io.beancounter.platform.rai.MyRaiTVService;
+import io.beancounter.platform.user.MockUserTokenManager;
+import io.beancounter.usermanager.UserTokenManager;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import io.beancounter.activities.ActivityStore;
@@ -43,6 +45,7 @@ public class TestServiceConfig extends GuiceServletContextListener {
                 Map<String, String> initParams = new HashMap<String, String>();
                 // add bindings to mockups
                 bind(ApplicationsManager.class).to(MockApplicationsManager.class).asEagerSingleton();
+                bind(UserTokenManager.class).to(MockUserTokenManager.class);
                 bind(UserManager.class).to(MockUserManager.class);
                 bind(Profiles.class).to(MockProfiles.class);
                 bind(ActivityStore.class).to(MockActivityStore.class).asEagerSingleton();
