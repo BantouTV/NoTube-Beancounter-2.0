@@ -1,15 +1,12 @@
 package io.beancounter.publisher.twitter;
 
 import com.google.inject.Inject;
-import io.beancounter.commons.helper.PropertiesHelper;
-import io.beancounter.commons.model.Service;
 import io.beancounter.commons.model.activity.ResolvedActivity;
 import io.beancounter.commons.model.activity.rai.TVEvent;
 import io.beancounter.commons.model.activity.Object;
 import io.beancounter.commons.model.auth.OAuthAuth;
 import io.beancounter.publisher.twitter.adapters.Publisher;
 import io.beancounter.publisher.twitter.adapters.TVEventPublisher;
-import io.beancounter.usermanager.services.auth.DefaultServiceAuthorizationManager;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
@@ -42,36 +39,13 @@ public class TwitterPublisher implements Processor {
             LOG.error(errMessage);
             throw new TwitterPublisherException(errMessage, new NullPointerException());
         }
-        Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
-        Service service = DefaultServiceAuthorizationManager.buildService("twitter", properties);
 
-        setTwitterCredential(twitter, service);
         setAccessToken(twitter, auth);
 
         Publisher publisher = getPublisher(resolvedActivity.getActivity().getObject());
         Status status = publisher.publish(twitter, resolvedActivity.getActivity().getVerb(), object);
 
         LOG.debug("Status updated to [" + status.getText() + "]");
-    }
-
-    private void setTwitterCredential(Twitter twitter, Service service) throws TwitterPublisherException {
-        String apikey;
-        try {
-            apikey = service.getApikey();
-        } catch (NullPointerException e) {
-            final String errMessage = "Error while setting OAuth permission for the application. Twitter apikey not found!";
-            LOG.error(errMessage);
-            throw new TwitterPublisherException(errMessage, e);
-        }
-        String secret;
-        try {
-            secret = service.getSecret();
-        } catch (NullPointerException e) {
-            final String errMessage = "Error while setting OAuth permission for the application. Twitter secret not found!";
-            LOG.error(errMessage);
-            throw new TwitterPublisherException(errMessage, e);
-        }
-        twitter.setOAuthConsumer(apikey, secret);
     }
 
     private void setAccessToken(Twitter twitter, OAuthAuth auth) throws TwitterPublisherException {

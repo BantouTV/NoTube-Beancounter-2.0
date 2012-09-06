@@ -32,7 +32,7 @@ public class TVEventPublisher implements Publisher<TVEvent> {
     private String getMessage(Verb verb, TVEvent tvEvent) throws FacebookPublisherException {
         String message = "";
         if(verb.equals(Verb.CHECKIN)) {
-            message += "Just joined the tv event ";
+            message += "Mi sono appena connesso all'evento ";
         } else {
             final String errMessage = "Verb [" + verb + "] not supported";
             LOG.error(errMessage);
