@@ -61,11 +61,7 @@ import java.util.UUID;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
+import static org.testng.Assert.*;
 
 /**
  * Reference test case for {@link io.beancounter.platform.ActivitiesService}
