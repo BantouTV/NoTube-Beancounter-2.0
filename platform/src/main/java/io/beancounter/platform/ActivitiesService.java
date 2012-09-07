@@ -10,37 +10,21 @@ import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.activity.Activity;
 import io.beancounter.commons.model.activity.ResolvedActivity;
 import io.beancounter.commons.model.notifies.Notify;
-import io.beancounter.platform.responses.ResolvedActivitiesPlatformResponse;
-import io.beancounter.platform.responses.ResolvedActivityPlatformResponse;
-import io.beancounter.platform.responses.StringPlatformResponse;
-import io.beancounter.platform.responses.UUIDPlatformResponse;
-import io.beancounter.platform.validation.ActivityIdValidation;
-import io.beancounter.platform.validation.ApiKeyValidation;
-import io.beancounter.platform.validation.PageValidation;
-import io.beancounter.platform.validation.RequestValidator;
-import io.beancounter.platform.validation.UsernameValidation;
-import io.beancounter.platform.validation.VisibilityValidation;
+import io.beancounter.platform.responses.*;
+import io.beancounter.platform.validation.*;
 import io.beancounter.queues.Queues;
 import io.beancounter.queues.QueuesException;
 import io.beancounter.usermanager.UserManager;
-import org.codehaus.jackson.JsonGenerationException;
+import io.beancounter.usermanager.UserManagerException;
+import io.beancounter.usermanager.UserTokenManager;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
 
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -62,6 +46,10 @@ public class ActivitiesService extends JsonService {
 
     private ActivityStore activities;
 
+    private UserManager userManager;
+
+    private UserTokenManager tokenManager;
+
     private RequestValidator validator;
 
     @Inject
@@ -69,10 +57,13 @@ public class ActivitiesService extends JsonService {
             final ApplicationsManager am,
             final UserManager um,
             final Queues queues,
-            final ActivityStore activities
+            final ActivityStore activities,
+            final UserTokenManager tokenManager
     ) {
+        userManager = um;
         this.queues = queues;
         this.activities = activities;
+        this.tokenManager = tokenManager;
 
         validator = new RequestValidator();
         validator.addValidation(API_KEY, new ApiKeyValidation(am));
@@ -87,23 +78,28 @@ public class ActivitiesService extends JsonService {
     public Response addActivity(
             @PathParam(USERNAME) String username,
             @FormParam(ACTIVITY) String jsonActivity,
-            @QueryParam(API_KEY) String apiKey
+            @QueryParam(USER_TOKEN) String token
     ) {
-        Map<String, Object> params = RequestValidator.createParams(
-                USERNAME, username,
-                ACTIVITY, jsonActivity,
-                API_KEY, apiKey
-        );
+        // TODO (high): Simplify request parameter validation.
+        User user;
+        try {
+            user = userManager.getUser(username);
+        } catch (UserManagerException e) {
+            final String errMsg = "Error while retrieving user [" + username + "]";
+            return error(e, errMsg);
+        }
 
-        Response error = validator.validateRequest(
-                this.getClass(),
-                "addActivity",
-                ApplicationsManager.Action.CREATE,
-                ApplicationsManager.Object.ACTIVITIES,
-                params
-        );
-        if (error != null) {
-            return error;
+        if (user == null) {
+            return error("user with username [" + username + "] not found");
+        }
+
+        try {
+            UUID userToken = UUID.fromString(token);
+            if (!userToken.equals(user.getUserToken()) || !tokenManager.checkTokenExists(userToken)) {
+                return error("User token [" + token + "] is not valid");
+            }
+        } catch (Exception ex) {
+            return error(ex, "Error validating user token [" + token + "]");
         }
 
         // deserialize the given activity
@@ -116,11 +112,10 @@ public class ActivitiesService extends JsonService {
         }
 
         // if the activity has not been provided, then set it to now
-        if(activity.getContext().getDate() == null) {
+        if (activity.getContext().getDate() == null) {
             activity.getContext().setDate(DateTime.now());
         }
 
-        User user = (User) params.get(USER);
         ResolvedActivity resolvedActivity = new ResolvedActivity(user.getId(), activity, user);
         String jsonResolvedActivity;
         try {
@@ -277,6 +272,69 @@ public class ActivitiesService extends JsonService {
     }
 
     @GET
+    @Path("/{username}/{activityId}")
+    public Response getUserActivity(
+            @PathParam(USERNAME) String username,
+            @PathParam(ACTIVITY_ID) String activityId,
+            @QueryParam(USER_TOKEN) String token
+    ) {
+        // TODO (high): Simplify request parameter validation.
+        User user;
+        try {
+            user = userManager.getUser(username);
+        } catch (UserManagerException e) {
+            final String errMsg = "Error while retrieving user [" + username + "]";
+            return error(e, errMsg);
+        }
+
+        if (user == null) {
+            return error("user with username [" + username + "] not found");
+        }
+
+        try {
+            UUID userToken = UUID.fromString(token);
+            if (!userToken.equals(user.getUserToken()) || !tokenManager.checkTokenExists(userToken)) {
+                return error("User token [" + token + "] is not valid");
+            }
+        } catch (Exception ex) {
+            return error(ex, "Error validating user token [" + token + "]");
+        }
+
+        ResolvedActivity activity;
+        try {
+            activity = activities.getActivity(UUID.fromString(activityId));
+        } catch (Exception e) {
+            return error(e, "Error while getting activity [" + activityId + "]");
+        }
+
+        if (activity == null) {
+            Response.ResponseBuilder rb = Response.ok();
+            rb.entity(
+                    new ResolvedActivityPlatformResponse(
+                            ResolvedActivityPlatformResponse.Status.OK,
+                            "no activity with id [" + activityId + "]",
+                            activity
+                    )
+            );
+            return rb.build();
+        }
+
+        if (!user.getId().equals(activity.getUserId())) {
+            return error("User [" + username + "] is not authorized to see activity [" + activityId + "]");
+        }
+
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(
+                new ResolvedActivityPlatformResponse(
+                        ResolvedActivityPlatformResponse.Status.OK,
+                        "activity with id [" + activityId + "] found",
+                        activity
+                )
+        );
+        return rb.build();
+    }
+
+    @GET
     @Path("/search")
     public Response search(
             @QueryParam(PATH) String path,
@@ -350,29 +408,36 @@ public class ActivitiesService extends JsonService {
             @PathParam(USERNAME) String username,
             @QueryParam(PAGE_STRING) @DefaultValue("0") String pageString,
             @QueryParam(ORDER) @DefaultValue("desc") String order,
-            @QueryParam(API_KEY) String apiKey
+            @QueryParam(USER_TOKEN) String token
     ) {
-        Map<String, Object> params = RequestValidator.createParams(
-                USERNAME, username,
-                PAGE_STRING, pageString,
-                ORDER, order,
-                API_KEY, apiKey
-        );
-
-        Response error = validator.validateRequest(
-                this.getClass(),
-                "getAllActivities",
-                ApplicationsManager.Action.RETRIEVE,
-                ApplicationsManager.Object.ACTIVITIES,
-                params
-        );
-
-        if (error != null) {
-            return error;
+        // TODO (high): Simplify request parameter validation.
+        User user;
+        try {
+            user = userManager.getUser(username);
+        } catch (UserManagerException e) {
+            final String errMsg = "Error while retrieving user [" + username + "]";
+            return error(e, errMsg);
         }
 
-        User user = (User) params.get(USER);
-        int page = (Integer) params.get(PAGE_NUMBER);
+        if (user == null) {
+            return error("user with username [" + username + "] not found");
+        }
+
+        try {
+            UUID userToken = UUID.fromString(token);
+            if (!userToken.equals(user.getUserToken()) || !tokenManager.checkTokenExists(userToken)) {
+                return error("User token [" + token + "] is not valid");
+            }
+        } catch (Exception ex) {
+            return error(ex, "Error validating user token [" + token + "]");
+        }
+
+        int page;
+        try {
+            page = Integer.parseInt(pageString, 10);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your page number is not well formed");
+        }
 
         Collection<ResolvedActivity> allActivities;
         try {
@@ -383,15 +448,9 @@ public class ActivitiesService extends JsonService {
                     "Error while getting page " + page + " of all the activities for user [" + username + "]"
             );
         } catch (InvalidOrderException ioe) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(
-                    new StringPlatformResponse(
-                            StringPlatformResponse.Status.NOK,
-                            ioe.getMessage()
-                    )
-            );
-            return rb.build();
+            return error(ioe.getMessage());
         }
+
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
                 new ResolvedActivitiesPlatformResponse(

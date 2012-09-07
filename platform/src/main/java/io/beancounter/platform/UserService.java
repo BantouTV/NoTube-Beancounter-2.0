@@ -194,7 +194,7 @@ public class UserService extends JsonService {
 
         try {
             User user = (User) params.get(USER);
-            userManager.deleteUser(user.getUsername());
+            userManager.deleteUser(user);
         } catch (UserManagerException e) {
             throw new RuntimeException(
                     "Error while deleting user [" + username + "]",

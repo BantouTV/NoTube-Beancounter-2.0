@@ -36,10 +36,10 @@ public interface UserManager {
     /**
      * Completely flushes out all the {@link User} data.
      *
-     * @param username
+     * @param user
      * @throws UserManagerException
      */
-    public void deleteUser(String username) throws UserManagerException;
+    public void deleteUser(User user) throws UserManagerException;
 
     /**
      * Get the user <a href="http://oauth.net">OAuth</> token.

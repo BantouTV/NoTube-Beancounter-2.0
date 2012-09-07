@@ -142,7 +142,12 @@ public class JedisUserManagerImpl implements UserManager {
     }
 
     @Override
-    public synchronized void deleteUser(String username) throws UserManagerException {
+    public synchronized void deleteUser(User user) throws UserManagerException {
+        if (user.getUserToken() != null) {
+            tokenManager.deleteUserToken(user.getUserToken());
+        }
+
+        String username = user.getUsername();
         Jedis jedis = getJedisResource();
         boolean isConnectionIssue = false;
         try {
@@ -157,7 +162,7 @@ public class JedisUserManagerImpl implements UserManager {
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         } finally {
-            if(isConnectionIssue) {
+            if (isConnectionIssue) {
                 pool.returnBrokenResource(jedis);
             } else {
                 pool.returnResource(jedis);

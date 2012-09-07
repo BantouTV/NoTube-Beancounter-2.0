@@ -19,19 +19,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.net.URL;
 import java.util.UUID;
 
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 public class JedisUserManagerImplTest {
 
@@ -59,6 +54,127 @@ public class JedisUserManagerImplTest {
         mapper = new ObjectMapper();
     }
 
+    // Test: [delete]
+
+    @Test
+    public void deletingUserShouldAlsoDeleteTheirUserToken() throws Exception {
+        String username = "username";
+        UUID userToken = UUID.randomUUID();
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(userToken);
+
+        userManager.deleteUser(user);
+
+        verify(jedis).del(username);
+        verify(tokenManager).deleteUserToken(userToken);
+        verify(jedisPool, times(1)).returnResource(jedis);
+    }
+
+    @Test
+    public void deletingUserWithNoUserTokenShouldJustDeleteTheUser() throws Exception {
+        String username = "username";
+        User user = new User("Test", "User", username, "password");
+
+        userManager.deleteUser(user);
+
+        verify(jedis).del(username);
+        verify(tokenManager, never()).deleteUserToken(Matchers.<UUID>any());
+        verify(jedisPool, times(1)).returnResource(jedis);
+    }
+
+    @Test(expectedExceptions = UserManagerException.class)
+    public void givenErrorOccursWhenDeletingUserTokenDuringUserDeletionThenThrowException() throws Exception {
+        String username = "username";
+        UUID userToken = UUID.randomUUID();
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(userToken);
+
+        when(tokenManager.deleteUserToken(userToken)).thenThrow(new UserManagerException("error"));
+
+        userManager.deleteUser(user);
+    }
+
+    @Test
+    public void givenJedisResourceErrorOccursWhenDeletingUserThenThrowException() throws Exception {
+        User user = new User("Test", "User", "username", "password");
+
+        when(jedisPool.getResource())
+                .thenThrow(new JedisConnectionException("Could not get a resource from the pool"));
+
+        try {
+            userManager.deleteUser(user);
+        } catch (UserManagerException ume) {
+            assertEquals(ume.getMessage(), "Error while getting a Jedis resource");
+        }
+
+        verify(jedisPool, never()).returnResource(jedis);
+        verify(jedisPool, never()).returnBrokenResource(jedis);
+    }
+
+    @Test
+    public void givenJedisConnectionProblemWhenSelectingDatabaseToDeleteUserThenThrowException() throws Exception {
+        User user = new User("Test", "User", "username", "password");
+
+        when(jedis.select(anyInt())).thenThrow(new JedisConnectionException("error"));
+
+        try {
+            userManager.deleteUser(user);
+        } catch (UserManagerException ume) {
+            assertTrue(ume.getMessage().startsWith("Jedis Connection error while selecting database"));
+        }
+
+        verify(jedisPool).returnBrokenResource(jedis);
+    }
+
+    @Test
+    public void givenSomeOtherProblemWhenSelectingDatabaseToDeleteUserThenThrowException() throws Exception {
+        User user = new User("Test", "User", "username", "password");
+
+        when(jedis.select(anyInt())).thenThrow(new RuntimeException("error"));
+
+        try {
+            userManager.deleteUser(user);
+        } catch (UserManagerException ume) {
+            assertTrue(ume.getMessage().startsWith("Error while selecting database"));
+        }
+
+        verify(jedisPool).returnResource(jedis);
+    }
+
+    @Test
+    public void givenJedisConnectionProblemWhenDeletingUserThenThrowException() throws Exception {
+        String username = "username";
+        User user = new User("Test", "User", username, "password");
+
+        when(jedis.del(username)).thenThrow(new JedisConnectionException("error"));
+
+        try {
+            userManager.deleteUser(user);
+        } catch (UserManagerException ume) {
+            assertEquals(ume.getMessage(), "Jedis Connection error while deleting user [" + username + "]");
+        }
+
+        verify(jedisPool).returnBrokenResource(jedis);
+    }
+
+    @Test
+    public void givenSomeOtherProblemWhenDeletingUserThenThrowException() throws Exception {
+        String username = "username";
+        User user = new User("Test", "User", username, "password");
+
+        when(jedis.del(username)).thenThrow(new RuntimeException("error"));
+
+        try {
+            userManager.deleteUser(user);
+        } catch (UserManagerException ume) {
+            assertEquals(ume.getMessage(), "Error while deleting user [" + username + "]");
+        }
+
+        verify(jedisPool).returnResource(jedis);
+    }
+
+    // Test: [oauth]
+
     @Test(expectedExceptions = UserManagerException.class)
     public void checkingIfAnUnsupportedServiceIsSupportedShouldThrowAnException() throws Exception {
         String serviceName = "not-supported";
@@ -83,8 +199,6 @@ public class JedisUserManagerImplTest {
 
         ((JedisUserManagerImpl) userManager).checkServiceIsSupported(serviceName);
     }
-
-    // Test: [oauth]
 
     @Test(expectedExceptions = UserManagerException.class)
     public void gettingAuthHandlerForUnsupportedServiceShouldThrowAnException() throws Exception {

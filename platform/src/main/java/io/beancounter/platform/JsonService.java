@@ -26,4 +26,15 @@ public abstract class JsonService extends Service {
         return rb.build();
     }
 
+    public static Response error(String message) {
+        Response.ResponseBuilder rb = Response.serverError();
+        rb.entity(
+                new StringPlatformResponse(
+                        StringPlatformResponse.Status.NOK,
+                        message
+                )
+        );
+        return rb.build();
+    }
+
 }
