@@ -34,6 +34,7 @@ import io.beancounter.queues.Queues;
 import io.beancounter.usermanager.AtomicSignUp;
 import io.beancounter.usermanager.UserManager;
 import io.beancounter.usermanager.UserManagerException;
+import io.beancounter.usermanager.UserTokenManager;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
@@ -57,10 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
 /**
@@ -74,6 +72,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     private static String APIKEY;
     private static UserManager userManager;
+    private static UserTokenManager tokenManager;
     private static Queues queues;
 
     protected UserServiceTestCase() {
@@ -106,7 +105,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @BeforeMethod
     private void resetMocks() throws Exception {
-        reset(userManager, queues);
+        reset(userManager, tokenManager, queues);
     }
 
     @Test
@@ -226,65 +225,175 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    public void testGetUser() throws Exception {
-        String baseQuery = "user/%s?apikey=%s";
+    public void getUserWithValidUserToken() throws Exception {
+        String baseQuery = "user/%s?token=%s";
         String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(userToken);
         String query = String.format(
                 baseQuery,
                 username,
-                APIKEY
+                userToken
         );
 
-        User user = new User("Test", "User", username, "password");
         when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
+
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
 
-        assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        assertNotEquals(responseBody, "");
-
-        UserPlatformResponse actual = fromJson(responseBody, UserPlatformResponse.class);
-        assertNotNull(actual);
-        assertEquals(actual.getMessage(), "user [" + username + "] found");
-        assertEquals(actual.getStatus(), PlatformResponse.Status.OK);
-        assertEquals(actual.getObject().getId(), user.getId());
-        assertEquals(actual.getObject().getUsername(), user.getUsername());
-        assertEquals(actual.getObject().getName(), user.getName());
-        assertNull(actual.getObject().getPassword(), "The password should not be returned.");
+        UserPlatformResponse response = fromJson(responseBody, UserPlatformResponse.class);
+        assertEquals(response.getStatus(), UserPlatformResponse.Status.OK);
+        assertEquals(response.getMessage(), "user [" + username + "] found");
+        assertEquals(response.getObject().getId(), user.getId());
+        assertEquals(response.getObject().getUsername(), user.getUsername());
+        assertEquals(response.getObject().getName(), user.getName());
+        assertEquals(response.getObject().getUserToken(), userToken);
+        assertNull(response.getObject().getPassword(), "The password should not be returned.");
     }
     
     @Test
-    public void testGetUserMissingUser() throws Exception {
-        String baseQuery = "user/%s?apikey=%s";
+    public void getMissingUserWithValidTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "user/%s?token=%s";
         String name = "missing-user";
         String query = String.format(
                 baseQuery,
                 name,
-                APIKEY
+                UUID.randomUUID()
         );
 
         when(userManager.getUser(name)).thenReturn(null);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
+
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
-        assertNotEquals(responseBody, "");
-        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
-        APIResponse actual = fromJson(responseBody, APIResponse.class);
-        APIResponse expected = new APIResponse(
-                null,
-                "user with username [" + name + "] not found",
-                "NOK"
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "user with username [" + name + "] not found");
+    }
+
+    @Test
+    public void getUserWithMalformedUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "user/%s?token=%s";
+        String username = "test-user";
+        String userToken = "malformed-123";
+        User user = new User("Test", "User", username, "password");
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
         );
-        assertEquals(actual, expected);
+
+        when(userManager.getUser(username)).thenReturn(user);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "Error validating user token [" + userToken + "]");
+    }
+
+    @Test
+    public void getUserWithWrongUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "user/%s?token=%s";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(UUID.randomUUID());
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "User token [" + userToken + "] is not valid");
+    }
+
+    @Test
+    public void getUserWithExpiredUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "user/%s?token=%s";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(userToken);
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(false);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "User token [" + userToken + "] is not valid");
+    }
+
+    @Test
+    public void givenTokenManagerErrorOccursWhenGettingUserThenRespondWithError() throws Exception {
+        String baseQuery = "user/%s?token=%s";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(userToken);
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenThrow(new UserManagerException("error"));
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "Error validating user token [" + userToken + "]");
     }
 
     @Test
@@ -782,8 +891,10 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
                 @Override
                 protected void configureServlets() {
                     userManager = mock(UserManager.class);
+                    tokenManager = mock(UserTokenManager.class);
                     queues = mock(Queues.class);
                     bind(ApplicationsManager.class).to(MockApplicationsManager.class).asEagerSingleton();
+                    bind(UserTokenManager.class).toInstance(tokenManager);
                     bind(UserManager.class).toInstance(userManager);
                     bind(Profiles.class).to(MockProfiles.class);
                     bind(Queues.class).toInstance(queues);
