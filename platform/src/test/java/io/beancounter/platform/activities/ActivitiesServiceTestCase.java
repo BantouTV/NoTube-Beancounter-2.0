@@ -20,9 +20,11 @@ import io.beancounter.commons.model.activity.Context;
 import io.beancounter.platform.ActivitiesService;
 import io.beancounter.platform.ApplicationService;
 import io.beancounter.platform.JacksonMixInProvider;
+import io.beancounter.platform.PlatformResponse;
 import io.beancounter.platform.responses.UUIDPlatformResponse;
 import io.beancounter.queues.Queues;
 import io.beancounter.usermanager.UserManager;
+import io.beancounter.usermanager.UserManagerException;
 import io.beancounter.usermanager.UserTokenManager;
 import junit.framework.Assert;
 import org.apache.commons.httpclient.HttpClient;
@@ -568,21 +570,183 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    public void testGetAllActivitiesDescendingDefault() throws Exception {
-        String baseQuery = "activities/all/%s?apikey=%s";
+    public void getAllActivitiesForNonExistentUserShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/all/%s?token=%s";
+        String username = "non-existent-user";
+        UUID userToken = UUID.randomUUID();
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(null);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "user with username [" + username + "] not found");
+    }
+
+    @Test
+    public void getAllActivitiesWithWrongUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/all/%s?token=%s";
         String username = "test-user";
         User user = getUser(username);
+        UUID userToken = UUID.randomUUID();
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "User token [" + userToken + "] is not valid");
+    }
+
+    @Test
+    public void getAllActivitiesWithInvalidUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/all/%s?token=%s";
+        String username = "test-user";
+        User user = getUser(username);
+        String userToken = "invalid12345";
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Error validating user token [" + userToken + "]");
+    }
+
+    @Test
+    public void getAllActivitiesWithMissingUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/all/%s";
+        String username = "test-user";
+        String query = String.format(
+                baseQuery,
+                username
+        );
+
+        when(userManager.getUser(username)).thenReturn(getUser(username));
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Error validating user token [null]");
+    }
+
+    @Test
+    public void getAllActivitiesWithExpiredUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/all/%s?token=%s";
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(false);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "User token [" + userToken + "] is not valid");
+    }
+
+    @Test
+    public void givenTokenManagerErrorOccursWhenGettingAllActivitiesThenRespondWithError() throws Exception {
+        String baseQuery = "activities/all/%s?token=%s";
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenThrow(new UserManagerException("error"));
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Error validating user token [" + userToken + "]");
+    }
+
+    @Test
+    public void testGetAllActivitiesDescendingDefault() throws Exception {
+        String baseQuery = "activities/all/%s?token=%s";
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
         int page = 0;
         String order = "desc";
         String query = String.format(
                 baseQuery,
                 username,
-                APIKEY
+                userToken
         );
 
         when(userManager.getUser(username)).thenReturn(user);
         when(activityStore.getByUserPaginated(user.getId(), page, 20, order))
                 .thenReturn(createSearchResults(page, 20, order));
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -606,21 +770,23 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetAllActivitiesDescendingNormal() throws Exception {
-        String baseQuery = "activities/all/%s?page=%s&apikey=%s";
+        String baseQuery = "activities/all/%s?page=%s&token=%s";
         String username = "test-user";
         User user = getUser(username);
+        UUID userToken = user.getUserToken();
         int page = 1;
         String order = "desc";
         String query = String.format(
                 baseQuery,
                 username,
                 page,
-                APIKEY
+                userToken
         );
 
         when(userManager.getUser(username)).thenReturn(user);
         when(activityStore.getByUserPaginated(user.getId(), page, 20, order))
                 .thenReturn(createSearchResults(page, 20, order));
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -646,9 +812,10 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetAllActivitiesDescendingMore() throws Exception {
-        String baseQuery = "activities/all/%s?page=%s&order=%s&apikey=%s";
+        String baseQuery = "activities/all/%s?page=%s&order=%s&token=%s";
         String username = "test-user";
         User user = getUser(username);
+        UUID userToken = user.getUserToken();
         int page = 2;
         String order = "desc";
         String query = String.format(
@@ -656,12 +823,13 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 username,
                 page,
                 order,
-                APIKEY
+                userToken
         );
 
         when(userManager.getUser(username)).thenReturn(user);
         when(activityStore.getByUserPaginated(user.getId(), page, 20, order))
                 .thenReturn(createSearchResults(page, 20, order));
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -687,21 +855,23 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetAllActivitiesDescendingTooMany() throws Exception {
-        String baseQuery = "activities/all/%s?page=%s&apikey=%s";
+        String baseQuery = "activities/all/%s?page=%s&token=%s";
         String username = "test-user";
         User user = getUser(username);
+        UUID userToken = user.getUserToken();
         int page = 3;
         String order = "desc";
         String query = String.format(
                 baseQuery,
                 username,
                 page,
-                APIKEY
+                userToken
         );
 
         when(userManager.getUser(username)).thenReturn(user);
         when(activityStore.getByUserPaginated(user.getId(), page, 20, order))
                 .thenReturn(createSearchResults(page, 20, order));
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -720,18 +890,20 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void getAllActivitiesForUserWithNoActivities() throws Exception {
-        String baseQuery = "activities/all/%s?apikey=%s";
+        String baseQuery = "activities/all/%s?token=%s";
         String username = "user-with-no-activities";
         User user = getUser(username);
+        UUID userToken = user.getUserToken();
         String query = String.format(
                 baseQuery,
                 username,
-                APIKEY
+                userToken
         );
 
         when(userManager.getUser(username)).thenReturn(user);
         when(activityStore.getByUserPaginated(user.getId(), 0, 20, "desc"))
                 .thenReturn(Collections.<ResolvedActivity>emptyList());
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -750,20 +922,22 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetAllActivitiesAscendingDefault() throws Exception {
-        String baseQuery = "activities/all/%s?apikey=%s&order=%s";
+        String baseQuery = "activities/all/%s?token=%s&order=%s";
         String username = "test-user";
         User user = getUser(username);
+        UUID userToken = user.getUserToken();
         String order = "asc";
         String query = String.format(
                 baseQuery,
                 username,
-                APIKEY,
+                userToken,
                 order
         );
 
         when(userManager.getUser(username)).thenReturn(user);
         when(activityStore.getByUserPaginated(user.getId(), 0, 20, order))
                 .thenReturn(createSearchResults(0, 20, order));
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -787,9 +961,10 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetAllActivitiesAscendingNormal() throws Exception {
-        String baseQuery = "activities/all/%s?page=%s&order=%s&apikey=%s";
+        String baseQuery = "activities/all/%s?page=%s&order=%s&token=%s";
         String username = "test-user";
         User user = getUser(username);
+        UUID userToken = user.getUserToken();
         int page = 1;
         String order = "asc";
         String query = String.format(
@@ -797,12 +972,13 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 username,
                 page,
                 order,
-                APIKEY
+                userToken
         );
 
         when(userManager.getUser(username)).thenReturn(user);
         when(activityStore.getByUserPaginated(user.getId(), page, 20, order))
                 .thenReturn(createSearchResults(page, 20, order));
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -828,9 +1004,10 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testGetAllActivitiesAscendingMore() throws Exception {
-        String baseQuery = "activities/all/%s?page=%s&order=%s&apikey=%s";
+        String baseQuery = "activities/all/%s?page=%s&order=%s&token=%s";
         String username = "test-user";
         User user = getUser(username);
+        UUID userToken = user.getUserToken();
         int page = 2;
         String order = "asc";
         String query = String.format(
@@ -838,12 +1015,13 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 username,
                 page,
                 order,
-                APIKEY
+                userToken
         );
 
         when(userManager.getUser(username)).thenReturn(user);
         when(activityStore.getByUserPaginated(user.getId(), page, 20, order))
                 .thenReturn(createSearchResults(page, 20, order));
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -870,20 +1048,22 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void getAllUserActivitiesWithInvalidSortOrderParameterReturnsErrorResponse() throws Exception {
-        String baseQuery = "activities/all/%s?order=%s&apikey=%s";
+        String baseQuery = "activities/all/%s?order=%s&token=%s";
         String username = "test-user";
         String order = "invalid-order";
         User user = getUser(username);
+        UUID userToken = user.getUserToken();
         String query = String.format(
                 baseQuery,
                 username,
                 order,
-                APIKEY
+                userToken
         );
 
         when(userManager.getUser(username)).thenReturn(user);
         when(activityStore.getByUserPaginated(user.getId(), 0, 20, order))
                 .thenThrow(new InvalidOrderException(order + " is not a valid sort order."));
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -899,45 +1079,6 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual.getMessage(), order + " is not a valid sort order.");
         assertEquals(actual.getStatus().toString(), "NOK");
         assertNull(actual.getObject());
-    }
-
-    // TODO (low): Not sure if we need this test anymore.
-    @Test
-    public void testGetAllActivitiesDifferentPages() throws IOException {
-        final String baseQuery1 = "activities/all/%s?apikey=%s";
-        final String username = "test-user";
-        final String query = String.format(
-                baseQuery1,
-                username,
-                APIKEY
-        );
-
-        GetMethod getMethod = new GetMethod(base_uri + query);
-        HttpClient client = new HttpClient();
-
-        int result = client.executeMethod(getMethod);
-        String responseBody1 = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody1);
-
-        final String baseQuery2 = "activities/all/%s?page=1&apikey=%s";
-        final String query2 = String.format(
-                baseQuery2,
-                username,
-                APIKEY
-        );
-
-        getMethod = new GetMethod(base_uri + query2);
-        client = new HttpClient();
-
-        int result2 = client.executeMethod(getMethod);
-        String responseBody2 = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result2);
-        logger.info("response body: " + responseBody2);
-
-        ResolvedActivitiesPlatformResponse actual1 = fromJson(responseBody1, ResolvedActivitiesPlatformResponse.class);
-        ResolvedActivitiesPlatformResponse actual2 = fromJson(responseBody2, ResolvedActivitiesPlatformResponse.class);
-        assertNotEquals(actual1, actual2);
     }
 
     @Test

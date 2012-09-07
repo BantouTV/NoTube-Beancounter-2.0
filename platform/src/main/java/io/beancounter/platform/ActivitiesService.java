@@ -345,29 +345,36 @@ public class ActivitiesService extends JsonService {
             @PathParam(USERNAME) String username,
             @QueryParam(PAGE_STRING) @DefaultValue("0") String pageString,
             @QueryParam(ORDER) @DefaultValue("desc") String order,
-            @QueryParam(API_KEY) String apiKey
+            @QueryParam("token") String token
     ) {
-        Map<String, Object> params = RequestValidator.createParams(
-                USERNAME, username,
-                PAGE_STRING, pageString,
-                ORDER, order,
-                API_KEY, apiKey
-        );
-
-        Response error = validator.validateRequest(
-                this.getClass(),
-                "getAllActivities",
-                ApplicationsManager.Action.RETRIEVE,
-                ApplicationsManager.Object.ACTIVITIES,
-                params
-        );
-
-        if (error != null) {
-            return error;
+        // TODO (high): Simplify request parameter validation.
+        User user;
+        try {
+            user = userManager.getUser(username);
+        } catch (UserManagerException e) {
+            final String errMsg = "Error while retrieving user [" + username + "]";
+            return error(e, errMsg);
         }
 
-        User user = (User) params.get(USER);
-        int page = (Integer) params.get(PAGE_NUMBER);
+        if (user == null) {
+            return error("user with username [" + username + "] not found");
+        }
+
+        try {
+            UUID userToken = UUID.fromString(token);
+            if (!userToken.equals(user.getUserToken()) || !tokenManager.checkTokenExists(userToken)) {
+                return error("User token [" + token + "] is not valid");
+            }
+        } catch (Exception ex) {
+            return error(ex, "Error validating user token [" + token + "]");
+        }
+
+        int page;
+        try {
+            page = Integer.parseInt(pageString, 10);
+        } catch (IllegalArgumentException e) {
+            return error(e, "Your page number is not well formed");
+        }
 
         Collection<ResolvedActivity> allActivities;
         try {
@@ -378,15 +385,9 @@ public class ActivitiesService extends JsonService {
                     "Error while getting page " + page + " of all the activities for user [" + username + "]"
             );
         } catch (InvalidOrderException ioe) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(
-                    new StringPlatformResponse(
-                            StringPlatformResponse.Status.NOK,
-                            ioe.getMessage()
-                    )
-            );
-            return rb.build();
+            return error(ioe.getMessage());
         }
+
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
                 new ResolvedActivitiesPlatformResponse(
