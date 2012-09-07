@@ -15,6 +15,8 @@ import io.beancounter.platform.validation.*;
 import io.beancounter.queues.Queues;
 import io.beancounter.queues.QueuesException;
 import io.beancounter.usermanager.UserManager;
+import io.beancounter.usermanager.UserManagerException;
+import io.beancounter.usermanager.UserTokenManager;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
 
@@ -44,6 +46,10 @@ public class ActivitiesService extends JsonService {
 
     private ActivityStore activities;
 
+    private UserManager userManager;
+
+    private UserTokenManager tokenManager;
+
     private RequestValidator validator;
 
     @Inject
@@ -51,10 +57,13 @@ public class ActivitiesService extends JsonService {
             final ApplicationsManager am,
             final UserManager um,
             final Queues queues,
-            final ActivityStore activities
+            final ActivityStore activities,
+            final UserTokenManager tokenManager
     ) {
+        userManager = um;
         this.queues = queues;
         this.activities = activities;
+        this.tokenManager = tokenManager;
 
         validator = new RequestValidator();
         validator.addValidation(API_KEY, new ApiKeyValidation(am));
@@ -69,23 +78,28 @@ public class ActivitiesService extends JsonService {
     public Response addActivity(
             @PathParam(USERNAME) String username,
             @FormParam(ACTIVITY) String jsonActivity,
-            @QueryParam(API_KEY) String apiKey
+            @QueryParam("token") String token
     ) {
-        Map<String, Object> params = RequestValidator.createParams(
-                USERNAME, username,
-                ACTIVITY, jsonActivity,
-                API_KEY, apiKey
-        );
+        // TODO (high): Simplify request parameter validation.
+        User user;
+        try {
+            user = userManager.getUser(username);
+        } catch (UserManagerException e) {
+            final String errMsg = "Error while retrieving user [" + username + "]";
+            return error(e, errMsg);
+        }
 
-        Response error = validator.validateRequest(
-                this.getClass(),
-                "addActivity",
-                ApplicationsManager.Action.CREATE,
-                ApplicationsManager.Object.ACTIVITIES,
-                params
-        );
-        if (error != null) {
-            return error;
+        if (user == null) {
+            return error("user with username [" + username + "] not found");
+        }
+
+        try {
+            UUID userToken = UUID.fromString(token);
+            if (!userToken.equals(user.getUserToken()) || !tokenManager.checkTokenExists(userToken)) {
+                return error("User token [" + token + "] is not valid");
+            }
+        } catch (Exception ex) {
+            return error(ex, "Error validating user token [" + token + "]");
         }
 
         // deserialize the given activity
@@ -98,11 +112,10 @@ public class ActivitiesService extends JsonService {
         }
 
         // if the activity has not been provided, then set it to now
-        if(activity.getContext().getDate() == null) {
+        if (activity.getContext().getDate() == null) {
             activity.getContext().setDate(DateTime.now());
         }
 
-        User user = (User) params.get(USER);
         ResolvedActivity resolvedActivity = new ResolvedActivity(user.getId(), activity, user);
         String jsonResolvedActivity;
         try {

@@ -20,8 +20,10 @@ import io.beancounter.commons.model.activity.Context;
 import io.beancounter.platform.ActivitiesService;
 import io.beancounter.platform.ApplicationService;
 import io.beancounter.platform.JacksonMixInProvider;
+import io.beancounter.platform.responses.UUIDPlatformResponse;
 import io.beancounter.queues.Queues;
 import io.beancounter.usermanager.UserManager;
+import io.beancounter.usermanager.UserTokenManager;
 import junit.framework.Assert;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
@@ -75,6 +77,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     private static ActivityStore activityStore;
     private static Queues queues;
     private static UserManager userManager;
+    private static UserTokenManager tokenManager;
 
     protected ActivitiesServiceTestCase() {
         super(9995);
@@ -106,58 +109,16 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @BeforeMethod
     private void resetMocks() throws Exception {
-        reset(activityStore, queues, userManager);
+        reset(activityStore, queues, userManager, tokenManager);
     }
 
     @Test
-    public void testAddActivity() throws Exception {
-        final String baseQuery = "activities/add/%s?apikey=%s";
-        final String username = "test-user";
-        final String activity = "{\"object\":" +
-                "{\"type\":\"TWEET\"," +
-                "\"text\":\"Just a fake tweet!\"," +
-                "\"hashTags\":[\"testingBeancounter\"]," +
-                "\"urls\":[\"http://fakeUrlToTest.io\"]," +
-                "\"name\":\"tweet_name\"," +
-                "\"description\":null," +
-                "\"url\":\"http://twitter.com\"}," +
-                "\"context\":" +
-                "{\"date\":null," +
-                "\"service\":null," +
-                "\"mood\":null}," +
-                "\"verb\":\"TWEET\"}";
-        final String query = String.format(
-                baseQuery,
-                username,
-                APIKEY
-        );
-
-        when(userManager.getUser(username)).thenReturn(getUser(username));
-
-        PostMethod postMethod = new PostMethod(base_uri + query);
-        HttpClient client = new HttpClient();
-        postMethod.addParameter("activity", activity);
-        int result = client.executeMethod(postMethod);
-        String responseBody = new String(postMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
-        assertNotEquals(responseBody, "");
-        assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-
-        APIResponse actual = fromJson(responseBody, APIResponse.class);
-        assertEquals(actual.getMessage(), "activity successfully registered");
-        assertEquals(actual.getStatus(), "OK");
-        assertNotNull(actual.getObject());
-        assertNotNull(UUID.fromString(actual.getObject()));
-
-        verify(queues).push(anyString());
-    }
-
-    @Test
-    public void testAddActivityWithANullDate() throws Exception {
-        String baseQuery = "activities/add/%s?apikey=%s";
-        final String username = "test-user";
-        final String activity = "{\"object\":" +
+    public void addActivityWithValidUserTokenShouldBeSuccessful() throws Exception {
+        String baseQuery = "activities/add/%s?token=%s";
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+        String activity = "{\"object\":" +
                 "{\"type\":\"TWEET\"," +
                 "\"text\":\"Just a fake tweet!\"," +
                 "\"hashTags\":[\"testingBeancounter\"]," +
@@ -173,7 +134,99 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         String query = String.format(
                 baseQuery,
                 username,
-                APIKEY
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
+
+        PostMethod postMethod = new PostMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("activity", activity);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
+
+        UUIDPlatformResponse response = fromJson(responseBody, UUIDPlatformResponse.class);
+        assertEquals(response.getStatus(), UUIDPlatformResponse.Status.OK);
+        assertEquals(response.getMessage(), "activity successfully registered");
+        assertNotNull(response.getObject());
+
+        verify(tokenManager).checkTokenExists(userToken);
+        verify(queues).push(anyString());
+    }
+
+    @Test
+    public void addActivityWithExpiredUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/add/%s?token=%s";
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+        String activity = "{}";
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(false);
+
+        PostMethod postMethod = new PostMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("activity", activity);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "User token [" + userToken + "] is not valid");
+
+        verify(tokenManager).checkTokenExists(userToken);
+    }
+
+    @Test
+    public void addActivityWithExistingWrongUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/add/%s?token=%s";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        String activity = "{}";
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(getUser(username));
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
+
+        PostMethod postMethod = new PostMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("activity", activity);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "User token [" + userToken + "] is not valid");
+    }
+
+    @Test
+    public void addActivityWithMissingUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/add/%s";
+        String username = "test-user";
+        String activity = "{}";
+        String query = String.format(
+                baseQuery,
+                username
         );
 
         when(userManager.getUser(username)).thenReturn(getUser(username));
@@ -181,12 +234,111 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         PostMethod postMethod = new PostMethod(base_uri + query);
         HttpClient client = new HttpClient();
         postMethod.addParameter("activity", activity);
+
         int result = client.executeMethod(postMethod);
         String responseBody = new String(postMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
-        assertNotEquals(responseBody, "");
-        assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Error validating user token [null]");
+    }
+
+    @Test
+    public void addActivityWithValidUserTokenForUserWithNoUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/add/%s?token=%s";
+        String username = "test-user";
+        String activity = "{}";
+        UUID userToken = UUID.randomUUID();
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        User user = getUser(username);
+        user.setUserToken(null);
+        when(userManager.getUser(username)).thenReturn(user);
+
+        PostMethod postMethod = new PostMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("activity", activity);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "User token [" + userToken + "] is not valid");
+    }
+
+    @Test
+    public void addActivityForNonExistentUserShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/add/%s?token=%s";
+        String username = "non-existent-user";
+        String activity = "{}";
+        UUID userToken = UUID.randomUUID();
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(null);
+
+        PostMethod postMethod = new PostMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("activity", activity);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "user with username [" + username + "] not found");
+    }
+
+    @Test
+    public void testAddActivityWithANullDate() throws Exception {
+        String baseQuery = "activities/add/%s?token=%s";
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+        String activity = "{\"object\":" +
+                "{\"type\":\"TWEET\"," +
+                "\"text\":\"Just a fake tweet!\"," +
+                "\"hashTags\":[\"testingBeancounter\"]," +
+                "\"urls\":[\"http://fakeUrlToTest.io\"]," +
+                "\"name\":\"tweet_name\"," +
+                "\"description\":null," +
+                "\"url\":\"http://twitter.com\"}," +
+                "\"context\":" +
+                "{\"date\":null," +
+                "\"service\":null," +
+                "\"mood\":null}," +
+                "\"verb\":\"TWEET\"}";
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
+
+        PostMethod postMethod = new PostMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("activity", activity);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
 
         APIResponse actual = fromJson(responseBody, APIResponse.class);
         assertEquals(actual.getMessage(), "activity successfully registered");
@@ -204,14 +356,15 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    public void addActivityWithInvalidApiKeyShouldRespondWithError() throws Exception {
-        String baseQuery = "activities/add/%s?apikey=%s";
+    public void addActivityWithInvalidUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/add/%s?token=%s";
         String username = "test-user";
         String activity = "{}";
+        String userToken = "123456abcdef";
         String query = String.format(
                 baseQuery,
                 username,
-                "123456abcdef"
+                userToken
         );
 
         when(userManager.getUser(username)).thenReturn(getUser(username));
@@ -226,7 +379,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertFalse(responseBody.isEmpty());
 
         APIResponse actual = fromJson(responseBody, APIResponse.class);
-        assertEquals(actual.getMessage(), "Your apikey is not well formed");
+        assertEquals(actual.getMessage(), "Error validating user token [" + userToken + "]");
         assertEquals(actual.getStatus(), "NOK");
     }
 
@@ -1064,8 +1217,10 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testCustomActivityContentItem() throws Exception {
-        String baseQuery = "activities/add/%s?apikey=%s";
+        String baseQuery = "activities/add/%s?token=%s";
         String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
         String activity = "{\n" +
                 "    \"verb\": \"WATCHED\",\n" +
                 "    \"object\": {\n" +
@@ -1085,10 +1240,11 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         String query = String.format(
                 baseQuery,
                 username,
-                APIKEY
+                userToken
         );
 
-        when(userManager.getUser(username)).thenReturn(getUser(username));
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
 
         PostMethod postMethod = new PostMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -1105,9 +1261,11 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testCustomActivityTvEvent() throws Exception {
-        final String baseQuery = "activities/add/%s?apikey=%s";
-        final String username = "test-user";
-        final String activity = "{\n" +
+        String baseQuery = "activities/add/%s?token=%s";
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+        String activity = "{\n" +
                 "    \"verb\": \"CHECKIN\",\n" +
                 "    \"object\": {\n" +
                 "        \"type\": \"RAI-TV-EVENT\",\n" +
@@ -1123,13 +1281,14 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 "        \"username\": \"dpalmisano\"\n" +
                 "    }\n" +
                 "}";
-        final String query = String.format(
+        String query = String.format(
                 baseQuery,
                 username,
-                APIKEY
+                userToken
         );
 
-        when(userManager.getUser(username)).thenReturn(getUser(username));
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
 
         PostMethod postMethod = new PostMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -1146,9 +1305,11 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testCustomActivityComment() throws Exception {
-        final String baseQuery = "activities/add/%s?apikey=%s";
-        final String username = "test-user";
-        final String activity = "{\n" +
+        String baseQuery = "activities/add/%s?token=%s";
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+        String activity = "{\n" +
                 "    \"verb\": \"COMMENT\",\n" +
                 "    \"object\": {\n" +
                 "        \"type\": \"RAI-TV-COMMENT\",\n" +
@@ -1165,13 +1326,14 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 "        \"username\": \"dpalmisano\"\n" +
                 "    }\n" +
                 "}";
-        final String query = String.format(
+        String query = String.format(
                 baseQuery,
                 username,
-                APIKEY
+                userToken
         );
 
-        when(userManager.getUser(username)).thenReturn(getUser(username));
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
 
         PostMethod postMethod = new PostMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -1188,9 +1350,11 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testAddActivityObject() throws Exception {
-        final String baseQuery = "activities/add/%s?apikey=%s";
-        final String username = "test-user";
-        final String activity = "{\n" +
+        String baseQuery = "activities/add/%s?token=%s";
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+        String activity = "{\n" +
                 "    \"verb\": \"WATCHED\",\n" +
                 "    \"object\": {\n" +
                 "        \"type\": \"OBJECT\",\n" +
@@ -1204,13 +1368,14 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                 "        \"mood\": null\n" +
                 "    }\n" +
                 "}";
-        final String query = String.format(
+        String query = String.format(
                 baseQuery,
                 username,
-                APIKEY
+                userToken
         );
 
-        when(userManager.getUser(username)).thenReturn(getUser(username));
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
 
         PostMethod postMethod = new PostMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -1228,7 +1393,9 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     }
 
     private User getUser(String username) {
-        return new User("Test", "User", username, "password");
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(UUID.randomUUID());
+        return user;
     }
 
     private ResolvedActivity createCustomActivity() throws Exception {
@@ -1296,9 +1463,11 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
                     queues = mock(Queues.class);
                     activityStore = mock(ActivityStore.class);
                     userManager = mock(UserManager.class);
+                    tokenManager = mock(UserTokenManager.class);
                     bind(ApplicationsManager.class).to(MockApplicationsManager.class).asEagerSingleton();
                     bind(ActivityStore.class).toInstance(activityStore);
                     bind(Queues.class).toInstance(queues);
+                    bind(UserTokenManager.class).toInstance(tokenManager);
                     bind(UserManager.class).toInstance(userManager);
 
                     // add REST services
