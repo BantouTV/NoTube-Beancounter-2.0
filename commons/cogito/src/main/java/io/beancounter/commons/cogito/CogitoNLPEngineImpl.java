@@ -51,6 +51,11 @@ public class CogitoNLPEngineImpl implements NLPEngine {
 
     @Override
     public NLPEngineResult enrich(String text) throws NLPEngineException {
+        if (text==null || text.equals("")) {
+            final String errMsg = "Impossible to enrich null or empty text";
+            LOGGER.error(errMsg);
+            throw new NLPEngineException(errMsg, new UnsupportedOperationException());
+        }
         PostMethod postMethod = new PostMethod(service);
         postMethod.setParameter("text", text);
         HttpClient client = new HttpClient();

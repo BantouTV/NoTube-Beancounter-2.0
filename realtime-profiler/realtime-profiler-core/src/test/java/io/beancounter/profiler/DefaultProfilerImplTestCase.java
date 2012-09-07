@@ -114,7 +114,7 @@ public class DefaultProfilerImplTestCase {
 
     private void dumpInterests(UserProfile actual, PrintStream out) {
         for(Interest i : actual.getInterests()) {
-            out.println(i.getResource() + " | " + i.getWeight());
+            out.println(i.getLabel() + " | " + i.getWeight());
         }
         out.println();
     }

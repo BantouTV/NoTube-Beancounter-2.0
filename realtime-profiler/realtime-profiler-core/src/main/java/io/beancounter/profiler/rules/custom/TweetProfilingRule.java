@@ -1,8 +1,8 @@
 package io.beancounter.profiler.rules.custom;
 
 import io.beancounter.commons.linking.LinkingEngine;
+import io.beancounter.commons.model.Interest;
 import io.beancounter.commons.model.activity.Tweet;
-import io.beancounter.commons.nlp.Entity;
 import io.beancounter.commons.nlp.NLPEngine;
 import io.beancounter.commons.nlp.NLPEngineException;
 import io.beancounter.commons.nlp.NLPEngineResult;
@@ -11,7 +11,6 @@ import io.beancounter.commons.tagdef.TagDefException;
 import io.beancounter.profiler.rules.ProfilingRuleException;
 import io.beancounter.profiler.rules.ObjectProfilingRule;
 
-import java.net.URI;
 import java.net.URL;
 import java.util.*;
 
@@ -23,7 +22,7 @@ import java.util.*;
 // TODO: make a better use of the new stuff coming from NLPengine
 public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
 
-    private Set<URI> result = new HashSet<URI>();
+    private Set<Interest> result = new HashSet<Interest>();
 
     public TweetProfilingRule(Tweet tweet, NLPEngine nlpEngine, LinkingEngine linkingEngine) {
         super(tweet, nlpEngine, linkingEngine);
@@ -47,7 +46,7 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
         }
     }
 
-    private Collection<URI> getResources(String text) throws ProfilingRuleException {
+    private Collection<Interest> getResources(String text) throws ProfilingRuleException {
         NLPEngineResult nlpResult;
         try {
             nlpResult = getNLPEngine().enrich(text);
@@ -57,18 +56,10 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
                     e
             );
         }
-        return toURICollection(nlpResult);
+        return InterestConverter.convert(nlpResult);
     }
 
-    private Collection<URI> toURICollection(NLPEngineResult nlpResult) {
-        Collection<URI> result = new HashSet<URI>();
-        for(Entity entity : nlpResult.getEntities()) {
-            result.add(entity.getResource());
-        }
-        return result;
-    }
-
-    private Collection<URI> getResources(URL url) throws ProfilingRuleException {
+    private Collection<Interest> getResources(URL url) throws ProfilingRuleException {
         NLPEngineResult nlpResult;
         try {
             nlpResult = getNLPEngine().enrich(url);
@@ -78,10 +69,10 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
                     e
             );
         }
-        return toURICollection(nlpResult);
+        return InterestConverter.convert(nlpResult);
     }
 
-    private Collection<URI> getResourcesFromHashTag(String hashTag) throws ProfilingRuleException {
+    private Collection<Interest> getResourcesFromHashTag(String hashTag) throws ProfilingRuleException {
         TagDef tagDef = new TagDef();
         List<String> defs;
         try {
@@ -92,11 +83,11 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
                     e
             );
         }
-        Collection<URI> resources = new ArrayList<URI>();
+        Collection<Interest> resources = new HashSet<Interest>();
         for (String def : defs) {
             try {
                 resources.addAll(
-                        toURICollection(getNLPEngine().enrich(def))
+                        InterestConverter.convert(getNLPEngine().enrich(def))
                 );
             } catch (NLPEngineException e) {
                 throw new ProfilingRuleException(
@@ -108,7 +99,7 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
         return resources;
     }
 
-    public Collection<URI> getResult() throws ProfilingRuleException {
+    public Collection<Interest> getResult() throws ProfilingRuleException {
         return result;
     }
 

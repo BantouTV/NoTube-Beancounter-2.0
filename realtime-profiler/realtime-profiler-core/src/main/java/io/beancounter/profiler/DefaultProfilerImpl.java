@@ -110,15 +110,15 @@ public final class DefaultProfilerImpl implements Profiler {
             throw new ProfilerException(errMsg, e);
         }
         double multiplier = getMultiplier(activity.getVerb());
-        Collection<URI> activityReferences;
+        Collection<Interest> newInterests;
         try {
-            activityReferences = opr.getResult();
+            newInterests = opr.getResult();
         } catch (ProfilingRuleException e) {
             final String errMsg = "Error while getting rule result";
             LOGGER.error(errMsg, e);
             throw new ProfilerException(errMsg, e);
         }
-        if (activityReferences.size() == 0) {
+        if (newInterests.size() == 0) {
             if (old != null) {
                 return old;
             } else {
@@ -134,9 +134,9 @@ public final class DefaultProfilerImpl implements Profiler {
                 return up;
             }
         }
-        Collection<Interest> interests = toInterests(
-                activity,
-                activityReferences,
+        Collection<Interest> interests = setIdAndWeight(
+                activity.getId(),
+                newInterests,
                 multiplier
         );
         if (old == null) {
@@ -237,17 +237,13 @@ public final class DefaultProfilerImpl implements Profiler {
         return up;
     }
 
-    private Collection<Interest> toInterests(Activity activity, Collection<URI> activityReferences, double multiplier) {
-        Collection<Interest> interests = new HashSet<Interest>();
-        int numOfRefs = activityReferences.size();
-        for(URI reference : activityReferences) {
-            Interest i = new Interest(reference);
-            i.addActivity(activity.getId());
+    private Collection<Interest> setIdAndWeight(UUID activityId, Collection<Interest> newInterests, double multiplier) {
+        for (Interest i : newInterests) {
+            i.addActivity(activityId);
             i.setVisible(true);
-            i.setWeight((7.5/multiplier) / numOfRefs);
-            interests.add(i);
+            i.setWeight((7.5 / multiplier) / newInterests.size());
         }
-        return interests;
+        return newInterests;
     }
 
     private double getMultiplier(Verb verb) {

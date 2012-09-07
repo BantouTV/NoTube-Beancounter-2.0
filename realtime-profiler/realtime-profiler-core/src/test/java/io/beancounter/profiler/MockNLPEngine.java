@@ -20,10 +20,7 @@ public class MockNLPEngine implements NLPEngine {
         NLPEngineResult result = new NLPEngineResult();
         try {
             for (int i = 0; i < random.nextInt(5); i++) {
-                result.addEntity(Entity.build(
-                        getRandomInterest(),
-                        getRandomInterest())
-                );
+                result.addEntity(getRandomInterest());
             }
         } catch (Exception e) {
             throw new NLPEngineException("Something went wrong in the MockEngine!", e);
@@ -44,7 +41,7 @@ public class MockNLPEngine implements NLPEngine {
         return result;
     }
 
-    private String getRandomInterest() {
+    private Entity getRandomInterest() {
         String interest;
         int i = random.nextInt(15)+1;
         switch (i) {
@@ -80,6 +77,10 @@ public class MockNLPEngine implements NLPEngine {
                 break;
             default: interest = "BBC";
         }
-        return interest;
+        return buildFakeEntity(interest);
+    }
+
+    private Entity buildFakeEntity(String interest) {
+        return Entity.build(interest, interest);
     }
 }

@@ -51,7 +51,7 @@ public final class MockProfiles implements Profiles {
         Set<Interest> interests = new HashSet<Interest>();
         for(int i = 0; i<10; i++) {
             try {
-                Interest interest = new Interest(new URI("http://random.test"));
+                Interest interest = new Interest("Test label", new URI("http://random.test"));
                 Collection<UUID> uuids = new ArrayList<UUID>();
                 for(int x = 0; x<5; x++) {
                     uuids.add(UUID.randomUUID());

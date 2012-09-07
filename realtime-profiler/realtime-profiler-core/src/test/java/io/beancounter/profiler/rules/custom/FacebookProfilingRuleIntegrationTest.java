@@ -1,9 +1,9 @@
 package io.beancounter.profiler.rules.custom;
 
+import io.beancounter.commons.model.Interest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import io.beancounter.commons.cogito.CogitoNLPEngineImpl;
-import io.beancounter.commons.lupedia.LUpediaNLPEngineImpl;
 import io.beancounter.commons.model.activity.Object;
 import io.beancounter.profiler.rules.ObjectProfilingRule;
 import io.beancounter.profiler.rules.ProfilingRuleException;
@@ -19,21 +19,21 @@ import java.util.Collection;
  *
  * @author Enrico Candino ( enrico.candino@gmail.com )
  */
-public class FacebookProfilingRuleTestCase {
+public class FacebookProfilingRuleIntegrationTest {
 
     private static final String endpoint = "http://test.expertsystem.it/IPTC_ITA/EssexWS.asmx/ESSEXIndexdata";
 
     private ObjectProfilingRule<io.beancounter.commons.model.activity.Object> rule;
 
-    @Test
+    @Test(expectedExceptions = ProfilingRuleException.class)
     public void testSimpleLike() throws ProfilingRuleException, URISyntaxException, MalformedURLException {
         rule = new GenericObjectProfilingRule(
                 getSimpleLike(),
-                new LUpediaNLPEngineImpl(),
+                new CogitoNLPEngineImpl(endpoint),
                 null
         );
         rule.run(null);
-        Collection<URI> actual = rule.getResult();
+        Collection<Interest> actual = rule.getResult();
         Assert.assertEquals(actual.size(), 0);
     }
 
@@ -45,11 +45,11 @@ public class FacebookProfilingRuleTestCase {
                 null
         );
         rule.run(null);
-        Collection<URI> actual = rule.getResult();
+        Collection<Interest> actual = rule.getResult();
         Assert.assertEquals(actual.size(), 4);
-        Assert.assertTrue(actual.contains(new URI("http://dati.rai.tv/category/software")));
-        Assert.assertTrue(actual.contains(new URI("http://dati.rai.tv/category/computer+science")));
-        Assert.assertTrue(actual.contains(new URI("http://dati.rai.tv/category/internet")));
+        Assert.assertTrue(actual.contains(new Interest("software", new URI("http://dati.rai.tv/category/software"))));
+        Assert.assertTrue(actual.contains(new Interest("computer science", new URI("http://dati.rai.tv/category/computer+science"))));
+        Assert.assertTrue(actual.contains(new Interest("internet", new URI("http://dati.rai.tv/category/internet"))));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class FacebookProfilingRuleTestCase {
                 null
         );
         rule.run(null);
-        Collection<URI> actual = rule.getResult();
+        Collection<Interest> actual = rule.getResult();
         Assert.assertEquals(actual.size(), 4);
     }
 
@@ -72,11 +72,11 @@ public class FacebookProfilingRuleTestCase {
                 null
         );
         rule.run(null);
-        Collection<URI> actual = rule.getResult();
+        Collection<Interest> actual = rule.getResult();
         Assert.assertEquals(actual.size(), 8);
-        Assert.assertTrue(actual.contains(new URI("http://dati.rai.tv/category/sport")));
-        Assert.assertTrue(actual.contains(new URI("http://dati.rai.tv/category/cinema")));
-        Assert.assertTrue(actual.contains(new URI("http://dati.rai.tv/category/internet")));
+        Assert.assertTrue(actual.contains(new Interest("sport", new URI("http://dati.rai.tv/category/sport"))));
+        Assert.assertTrue(actual.contains(new Interest("cinema", new URI("http://dati.rai.tv/category/cinema"))));
+        Assert.assertTrue(actual.contains(new Interest("internet", new URI("http://dati.rai.tv/category/internet"))));
     }
 
     private io.beancounter.commons.model.activity.Object getSimpleLike() throws MalformedURLException {
