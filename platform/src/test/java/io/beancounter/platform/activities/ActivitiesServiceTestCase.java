@@ -570,6 +570,313 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
+    public void getSingleUserActivityWithValidUserToken() throws Exception {
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+
+        UUID activityId = UUID.randomUUID();
+        Activity activity = new Activity();
+        activity.setId(activityId);
+        ResolvedActivity resolvedActivity = new ResolvedActivity(user.getId(), activity, null);
+
+        String baseQuery = "activities/%s/%s?token=%s";
+        String query = String.format(
+                baseQuery,
+                username,
+                activityId.toString(),
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
+        when(activityStore.getActivity(activityId)).thenReturn(resolvedActivity);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
+
+        ResolvedActivityPlatformResponse response = fromJson(responseBody, ResolvedActivityPlatformResponse.class);
+        assertEquals(response.getStatus(), ResolvedActivityPlatformResponse.Status.OK);
+        assertEquals(response.getMessage(), "activity with id [" + activityId + "] found");
+
+        ResolvedActivity responseActivity = response.getObject();
+        assertNotNull(responseActivity);
+        assertEquals(responseActivity.getActivity().getId(), activityId);
+    }
+
+    @Test
+    public void getSingleNonExistentUserActivityWithValidUserToken() throws Exception {
+        String baseQuery = "activities/%s/%s?token=%s";
+        UUID activityId = UUID.randomUUID();
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+        String query = String.format(
+                baseQuery,
+                username,
+                activityId.toString(),
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
+        when(activityStore.getActivity(activityId)).thenReturn(null);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
+
+        ResolvedActivityPlatformResponse response = fromJson(responseBody, ResolvedActivityPlatformResponse.class);
+        assertEquals(response.getStatus(), ResolvedActivityPlatformResponse.Status.OK);
+        assertEquals(response.getMessage(), "no activity with id [" + activityId + "]");
+        assertNull(response.getObject());
+    }
+
+    @Test
+    public void getSingleUserActivityWithInvalidActivityIdShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/%s/%s?token=%s";
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+        String activityId = "invalid-id-123";
+        String query = String.format(
+                baseQuery,
+                username,
+                activityId,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Error while getting activity [" + activityId + "]");
+    }
+
+    @Test
+    public void givenActivityStoreExceptionWhenGettingSingleUserActivityThenRespondWithError() throws Exception {
+        String baseQuery = "activities/%s/%s?token=%s";
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+        UUID activityId = UUID.randomUUID();
+        String query = String.format(
+                baseQuery,
+                username,
+                activityId,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
+        when(activityStore.getActivity(activityId)).thenThrow(new ActivityStoreException("error"));
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Error while getting activity [" + activityId + "]");
+    }
+
+    @Test
+    public void getSingleUserActivityForNonExistentUserShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/%s/%s?token=%s";
+        String username = "non-existent-user";
+        String query = String.format(
+                baseQuery,
+                username,
+                UUID.randomUUID(),
+                UUID.randomUUID()
+        );
+
+        when(userManager.getUser(username)).thenReturn(null);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "user with username [" + username + "] not found");
+    }
+
+    @Test
+    public void getSingleUserActivityWithWrongUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/%s/%s?token=%s";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        String query = String.format(
+                baseQuery,
+                username,
+                UUID.randomUUID(),
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(getUser(username));
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "User token [" + userToken + "] is not valid");
+    }
+
+    @Test
+    public void getSingleUserActivityWithMalformedUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/%s/%s?token=%s";
+        String username = "test-user";
+        String userToken = "invalid-token-123";
+        String query = String.format(
+                baseQuery,
+                username,
+                UUID.randomUUID(),
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(getUser(username));
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Error validating user token [" + userToken + "]");
+    }
+
+    @Test
+    public void getSingleUserActivityWithExpiredUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "activities/%s/%s?token=%s";
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+        String query = String.format(
+                baseQuery,
+                username,
+                UUID.randomUUID(),
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(false);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "User token [" + userToken + "] is not valid");
+    }
+
+    @Test
+    public void givenTokenManagerErrorWhenGettingSingleUserActivityThenRespondWithError() throws Exception {
+        String baseQuery = "activities/%s/%s?token=%s";
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+        String query = String.format(
+                baseQuery,
+                username,
+                UUID.randomUUID(),
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenThrow(new UserManagerException("error"));
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Error validating user token [" + userToken + "]");
+    }
+
+    @Test
+    public void getSingleActivityOfUserWithoutCorrectAuthShouldRespondWithError() throws Exception {
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+
+        UUID activityId = UUID.randomUUID();
+        Activity activity = new Activity();
+        activity.setId(activityId);
+        ResolvedActivity resolvedActivity = new ResolvedActivity(null, activity, getUser("other-user"));
+
+        String baseQuery = "activities/%s/%s?token=%s";
+        String query = String.format(
+                baseQuery,
+                username,
+                activityId,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
+        when(activityStore.getActivity(activityId)).thenReturn(resolvedActivity);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "User [" + username + "] is not authorized to see activity [" + activityId + "]");
+    }
+
+    @Test
     public void getAllActivitiesForNonExistentUserShouldRespondWithError() throws Exception {
         String baseQuery = "activities/all/%s?token=%s";
         String username = "non-existent-user";

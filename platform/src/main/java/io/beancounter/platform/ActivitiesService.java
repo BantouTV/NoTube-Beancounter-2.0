@@ -78,7 +78,7 @@ public class ActivitiesService extends JsonService {
     public Response addActivity(
             @PathParam(USERNAME) String username,
             @FormParam(ACTIVITY) String jsonActivity,
-            @QueryParam("token") String token
+            @QueryParam(USER_TOKEN) String token
     ) {
         // TODO (high): Simplify request parameter validation.
         User user;
@@ -272,6 +272,69 @@ public class ActivitiesService extends JsonService {
     }
 
     @GET
+    @Path("/{username}/{activityId}")
+    public Response getUserActivity(
+            @PathParam(USERNAME) String username,
+            @PathParam(ACTIVITY_ID) String activityId,
+            @QueryParam(USER_TOKEN) String token
+    ) {
+        // TODO (high): Simplify request parameter validation.
+        User user;
+        try {
+            user = userManager.getUser(username);
+        } catch (UserManagerException e) {
+            final String errMsg = "Error while retrieving user [" + username + "]";
+            return error(e, errMsg);
+        }
+
+        if (user == null) {
+            return error("user with username [" + username + "] not found");
+        }
+
+        try {
+            UUID userToken = UUID.fromString(token);
+            if (!userToken.equals(user.getUserToken()) || !tokenManager.checkTokenExists(userToken)) {
+                return error("User token [" + token + "] is not valid");
+            }
+        } catch (Exception ex) {
+            return error(ex, "Error validating user token [" + token + "]");
+        }
+
+        ResolvedActivity activity;
+        try {
+            activity = activities.getActivity(UUID.fromString(activityId));
+        } catch (Exception e) {
+            return error(e, "Error while getting activity [" + activityId + "]");
+        }
+
+        if (activity == null) {
+            Response.ResponseBuilder rb = Response.ok();
+            rb.entity(
+                    new ResolvedActivityPlatformResponse(
+                            ResolvedActivityPlatformResponse.Status.OK,
+                            "no activity with id [" + activityId + "]",
+                            activity
+                    )
+            );
+            return rb.build();
+        }
+
+        if (!user.getId().equals(activity.getUserId())) {
+            return error("User [" + username + "] is not authorized to see activity [" + activityId + "]");
+        }
+
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(
+                new ResolvedActivityPlatformResponse(
+                        ResolvedActivityPlatformResponse.Status.OK,
+                        "activity with id [" + activityId + "] found",
+                        activity
+                )
+        );
+        return rb.build();
+    }
+
+    @GET
     @Path("/search")
     public Response search(
             @QueryParam(PATH) String path,
@@ -345,7 +408,7 @@ public class ActivitiesService extends JsonService {
             @PathParam(USERNAME) String username,
             @QueryParam(PAGE_STRING) @DefaultValue("0") String pageString,
             @QueryParam(ORDER) @DefaultValue("desc") String order,
-            @QueryParam("token") String token
+            @QueryParam(USER_TOKEN) String token
     ) {
         // TODO (high): Simplify request parameter validation.
         User user;
