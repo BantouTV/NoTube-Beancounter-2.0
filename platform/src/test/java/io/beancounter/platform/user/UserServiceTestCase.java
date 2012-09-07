@@ -13,6 +13,7 @@ import io.beancounter.applications.MockApplicationsManager;
 import io.beancounter.commons.helper.UriUtils;
 import io.beancounter.commons.model.OAuthToken;
 import io.beancounter.commons.model.User;
+import io.beancounter.commons.model.UserProfile;
 import io.beancounter.commons.model.activity.Activity;
 import io.beancounter.commons.model.activity.ActivityBuilder;
 import io.beancounter.commons.model.activity.DefaultActivityBuilder;
@@ -28,8 +29,9 @@ import io.beancounter.platform.PlatformResponse;
 import io.beancounter.platform.UserService;
 import io.beancounter.platform.responses.StringPlatformResponse;
 import io.beancounter.platform.responses.UserPlatformResponse;
-import io.beancounter.profiles.MockProfiles;
+import io.beancounter.platform.responses.UserProfilePlatformResponse;
 import io.beancounter.profiles.Profiles;
+import io.beancounter.profiles.ProfilesException;
 import io.beancounter.queues.Queues;
 import io.beancounter.usermanager.AtomicSignUp;
 import io.beancounter.usermanager.UserManager;
@@ -74,6 +76,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
     private static UserManager userManager;
     private static UserTokenManager tokenManager;
     private static Queues queues;
+    private static Profiles profiles;
 
     protected UserServiceTestCase() {
         super(9995);
@@ -105,7 +108,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @BeforeMethod
     private void resetMocks() throws Exception {
-        reset(userManager, tokenManager, queues);
+        reset(userManager, tokenManager, queues, profiles);
     }
 
     @Test
@@ -651,24 +654,265 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual, expected);
     }
 
-    // TODO (mid) review this test, we need to store the profile first
-    @Test(enabled = false)
-    public void testGetProfile() throws IOException {
-        String baseQuery = "user/%s/profile?apikey=%s";
+    @Test
+    public void getProfileWithValidUserTokenShouldBeSuccessful() throws Exception {
+        String baseQuery = "user/%s/profile?token=%s";
         String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(userToken);
         String query = String.format(
                 baseQuery,
                 username,
-                APIKEY
+                userToken
         );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
+        when(profiles.lookup(user.getId())).thenReturn(new UserProfile(username));
+
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
+
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
-        assertNotEquals(responseBody, "");
-        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
+
+        UserProfilePlatformResponse response = fromJson(responseBody, UserProfilePlatformResponse.class);
+        assertEquals(response.getStatus(), UserProfilePlatformResponse.Status.OK);
+        assertEquals(response.getMessage(), "profile for user [" + username + "] found");
+
+        UserProfile userProfile = response.getObject();
+        assertNotNull(userProfile);
+        assertEquals(userProfile.getUsername(), username);
+        assertEquals(userProfile.getVisibility(), UserProfile.Visibility.PUBLIC);
+    }
+
+    @Test
+    public void getProfileForMissingUserShouldRespondWithError() throws Exception {
+        String baseQuery = "user/%s/profile?token=%s";
+        String username = "missing-user";
+        String query = String.format(
+                baseQuery,
+                username,
+                UUID.randomUUID()
+        );
+
+        when(userManager.getUser(username)).thenReturn(null);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "user with username [" + username + "] not found");
+    }
+
+    @Test
+    public void getProfileWithMalformedUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "user/%s/profile?token=%s";
+        String username = "test-user";
+        User user = new User("Test", "User", username, "password");
+        String userToken = "malformed-token-123";
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "Error validating user token [" + userToken + "]");
+    }
+
+    @Test
+    public void getProfileWithWrongUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "user/%s/profile?token=%s";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(UUID.randomUUID());
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "User token [" + userToken + "] is not valid");
+    }
+
+    @Test
+    public void getProfileWithMissingUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "user/%s/profile?token=%s";
+        String username = "test-user";
+        UUID userToken = null;
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(UUID.randomUUID());
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "Error validating user token [" + userToken + "]");
+    }
+
+    @Test
+    public void getProfileWithExpiredUserTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "user/%s/profile?token=%s";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(userToken);
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(false);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "User token [" + userToken + "] is not valid");
+    }
+
+    @Test
+    public void givenTokenManagerErrorWhenGettingProfileThenRespondWithError() throws Exception {
+        String baseQuery = "user/%s/profile?token=%s";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(userToken);
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenThrow(new UserManagerException("error"));
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "Error validating user token [" + userToken + "]");
+    }
+
+    @Test
+    public void getProfileWhenNoProfileExistsShouldRespondWithError() throws Exception {
+        String baseQuery = "user/%s/profile?token=%s";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(userToken);
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
+        when(profiles.lookup(user.getId())).thenReturn(null);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "Profile for user [" + username + "] not found");
+    }
+
+    @Test
+    public void givenProfilesErrorWhenGettingProfileThenRespondWithError() throws Exception {
+        String baseQuery = "user/%s/profile?token=%s";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(userToken);
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
+        when(profiles.lookup(user.getId())).thenThrow(new ProfilesException("error", new Exception()));
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "Error while retrieving profile for user [" + username + "]");
     }
 
     @Test
@@ -893,10 +1137,11 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
                     userManager = mock(UserManager.class);
                     tokenManager = mock(UserTokenManager.class);
                     queues = mock(Queues.class);
+                    profiles = mock(Profiles.class);
                     bind(ApplicationsManager.class).to(MockApplicationsManager.class).asEagerSingleton();
                     bind(UserTokenManager.class).toInstance(tokenManager);
                     bind(UserManager.class).toInstance(userManager);
-                    bind(Profiles.class).to(MockProfiles.class);
+                    bind(Profiles.class).toInstance(profiles);
                     bind(Queues.class).toInstance(queues);
 
                     // add REST services

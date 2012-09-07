@@ -25,4 +25,8 @@ public class UserProfilePlatformResponse extends PlatformResponse<UserProfile> {
     public UserProfile getObject() {
         return userProfile;
     }
+
+    public void setObject(UserProfile userProfile) {
+        this.userProfile = userProfile;
+    }
 }

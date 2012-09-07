@@ -731,71 +731,47 @@ public class UserService extends JsonService {
     @GET
     @Path("/{username}/profile")
     public Response getProfile(
-            @PathParam("username") String username,
-            @QueryParam("apikey") String apiKey
+            @PathParam(USERNAME) String username,
+            @QueryParam(USER_TOKEN) String token
     ) {
+        User user;
         try {
-            check(
-                    this.getClass(),
-                    "getProfile",
-                    username,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
-        }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.RETRIEVE,
-                    ApplicationsManager.Object.PROFILE
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating you application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry. You're not allowed to do that.")
-            );
-            return rb.build();
-        }
-        User userObj;
-        try {
-            userObj = userManager.getUser(username);
+            user = userManager.getUser(username);
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
-        if (userObj == null) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry. User [" + username + "] has not been found")
-            );
-            return rb.build();
+
+        if (user == null) {
+            return error("user with username [" + username + "] not found");
         }
+
+        try {
+            UUID userToken = UUID.fromString(token);
+            if (!userToken.equals(user.getUserToken()) || !tokenManager.checkTokenExists(userToken)) {
+                return error("User token [" + token + "] is not valid");
+            }
+        } catch (Exception ex) {
+            return error(ex, "Error validating user token [" + token + "]");
+        }
+
         UserProfile up;
         try {
-            up = profiles.lookup(userObj.getId());
+            up = profiles.lookup(user.getId());
         } catch (ProfilesException e) {
             return error(e, "Error while retrieving profile for user [" + username + "]");
         }
+
         if (up == null) {
-            return error(new RuntimeException(), "Profile for user [" + username + "] not found");
+            return error("Profile for user [" + username + "] not found");
         }
+
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new UserProfilePlatformResponse(
-                UserProfilePlatformResponse.Status.OK,
-                "profile for user [" + username + "] found",
-                up
-        )
+        rb.entity(
+                new UserProfilePlatformResponse(
+                        UserProfilePlatformResponse.Status.OK,
+                        "profile for user [" + username + "] found",
+                        up
+                )
         );
         return rb.build();
     }
