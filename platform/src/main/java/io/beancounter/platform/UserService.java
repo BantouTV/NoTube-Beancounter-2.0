@@ -6,20 +6,16 @@ import io.beancounter.platform.validation.ApiKeyValidation;
 import io.beancounter.platform.validation.RequestValidator;
 import io.beancounter.platform.validation.UsernameValidation;
 import io.beancounter.usermanager.UserTokenManager;
-import org.codehaus.jackson.map.ObjectMapper;
 import io.beancounter.applications.ApplicationsManager;
 import io.beancounter.applications.ApplicationsManagerException;
 import io.beancounter.commons.model.OAuthToken;
 import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.UserProfile;
-import io.beancounter.commons.model.activity.Activity;
-import io.beancounter.commons.model.activity.ResolvedActivity;
 import io.beancounter.commons.model.auth.OAuthAuth;
 import io.beancounter.platform.responses.*;
 import io.beancounter.profiles.Profiles;
 import io.beancounter.profiles.ProfilesException;
 import io.beancounter.queues.Queues;
-import io.beancounter.queues.QueuesException;
 import io.beancounter.usermanager.AtomicSignUp;
 import io.beancounter.usermanager.UserManager;
 import io.beancounter.usermanager.UserManagerException;
@@ -27,7 +23,6 @@ import io.beancounter.usermanager.UserManagerException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.util.*;
@@ -206,10 +201,7 @@ public class UserService extends JsonService {
             User user = (User) params.get(USER);
             userManager.deleteUser(user);
         } catch (UserManagerException e) {
-            throw new RuntimeException(
-                    "Error while deleting user [" + username + "]",
-                    e
-            );
+            return error(e, "Error while deleting user [" + username + "]");
         }
 
         Response.ResponseBuilder rb = Response.ok();
