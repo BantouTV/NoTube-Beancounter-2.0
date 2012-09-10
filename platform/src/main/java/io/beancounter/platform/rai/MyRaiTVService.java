@@ -6,8 +6,7 @@ import io.beancounter.commons.model.auth.SimpleAuth;
 import io.beancounter.platform.JsonService;
 import io.beancounter.platform.PlatformResponse;
 import io.beancounter.platform.responses.AtomicSignUpResponse;
-import io.beancounter.platform.responses.StringPlatformResponse;
-import io.beancounter.usermanager.AtomicSignUp;
+import io.beancounter.platform.responses.MyRaiTVSignUpResponse;
 import io.beancounter.usermanager.UserManager;
 import io.beancounter.usermanager.UserManagerException;
 import io.beancounter.usermanager.UserTokenManager;
@@ -15,7 +14,6 @@ import io.beancounter.usermanager.UserTokenManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -89,15 +87,16 @@ public class MyRaiTVService extends JsonService {
             } catch (UserManagerException e) {
                 return error(e, "error while storing user [" + username + "] on beancounter.io");
             }
-            AtomicSignUp signUp = new AtomicSignUp();
+            MyRaiTVSignUp signUp = new MyRaiTVSignUp();
             signUp.setReturning(false);
             signUp.setService(SERVICE_NAME);
             signUp.setUserId(user.getId());
             signUp.setUsername(username);
             signUp.setIdentifier(username);
+            signUp.setToken(token);
             Response.ResponseBuilder rb = Response.ok();
             rb.entity(
-                    new AtomicSignUpResponse(
+                    new MyRaiTVSignUpResponse(
                             PlatformResponse.Status.OK,
                             "user with user name [" + signUp.getUsername() + "] logged in with service [" + signUp.getService() + "]",
                             signUp
@@ -117,15 +116,16 @@ public class MyRaiTVService extends JsonService {
                 return error(ume, "error while storing user [" + username + "] on beancounter.io");
             }
 
-            AtomicSignUp signUp = new AtomicSignUp();
+            MyRaiTVSignUp signUp = new MyRaiTVSignUp();
             signUp.setReturning(true);
             signUp.setService(SERVICE_NAME);
             signUp.setUserId(user.getId());
             signUp.setUsername(username);
             signUp.setIdentifier(username);
+            signUp.setToken(token);
             Response.ResponseBuilder rb = Response.ok();
             rb.entity(
-                    new AtomicSignUpResponse(
+                    new MyRaiTVSignUpResponse(
                             PlatformResponse.Status.OK,
                             "user with user name [" + signUp.getUsername() + "] logged in with service [" + signUp.getService() + "]",
                             signUp

@@ -13,6 +13,7 @@ import io.beancounter.commons.model.auth.SimpleAuth;
 import io.beancounter.platform.AbstractJerseyTestCase;
 import io.beancounter.platform.JacksonMixInProvider;
 import io.beancounter.platform.responses.AtomicSignUpResponse;
+import io.beancounter.platform.responses.MyRaiTVSignUpResponse;
 import io.beancounter.platform.responses.StringPlatformResponse;
 import io.beancounter.usermanager.AtomicSignUp;
 import io.beancounter.usermanager.UserManager;
@@ -90,16 +91,17 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(result, HttpStatus.SC_OK);
         assertFalse(responseBody.isEmpty());
 
-        AtomicSignUpResponse response = fromJson(responseBody, AtomicSignUpResponse.class);
-        assertEquals(response.getStatus(), AtomicSignUpResponse.Status.OK);
+        MyRaiTVSignUpResponse response = fromJson(responseBody, MyRaiTVSignUpResponse.class);
+        assertEquals(response.getStatus(), MyRaiTVSignUpResponse.Status.OK);
         assertEquals(response.getMessage(), "user with user name [" + username + "] logged in with service [" + SERVICE_NAME + "]");
 
-        AtomicSignUp atomicSignUp = response.getObject();
-        assertNotNull(atomicSignUp);
-        assertEquals(atomicSignUp.getIdentifier(), username);
-        assertEquals(atomicSignUp.getUsername(), username);
-        assertFalse(atomicSignUp.isReturning());
-        assertEquals(atomicSignUp.getService(), SERVICE_NAME);
+        MyRaiTVSignUp signUp = response.getObject();
+        assertNotNull(signUp);
+        assertEquals(signUp.getIdentifier(), username);
+        assertEquals(signUp.getUsername(), username);
+        assertFalse(signUp.isReturning());
+        assertEquals(signUp.getService(), SERVICE_NAME);
+        assertEquals(signUp.getToken(), raiToken);
 
         User user = userArgument.getValue();
         assertEquals(user.getUsername(), username);
@@ -138,16 +140,17 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(result, HttpStatus.SC_OK);
         assertFalse(responseBody.isEmpty());
 
-        AtomicSignUpResponse response = fromJson(responseBody, AtomicSignUpResponse.class);
-        assertEquals(response.getStatus(), AtomicSignUpResponse.Status.OK);
+        MyRaiTVSignUpResponse response = fromJson(responseBody, MyRaiTVSignUpResponse.class);
+        assertEquals(response.getStatus(), MyRaiTVSignUpResponse.Status.OK);
         assertEquals(response.getMessage(), "user with user name [" + username + "] logged in with service [" + SERVICE_NAME + "]");
 
-        AtomicSignUp atomicSignUp = response.getObject();
-        assertNotNull(atomicSignUp);
-        assertEquals(atomicSignUp.getIdentifier(), username);
-        assertEquals(atomicSignUp.getUsername(), username);
-        assertTrue(atomicSignUp.isReturning());
-        assertEquals(atomicSignUp.getService(), SERVICE_NAME);
+        MyRaiTVSignUp signUp = response.getObject();
+        assertNotNull(signUp);
+        assertEquals(signUp.getIdentifier(), username);
+        assertEquals(signUp.getUsername(), username);
+        assertTrue(signUp.isReturning());
+        assertEquals(signUp.getService(), SERVICE_NAME);
+        assertEquals(signUp.getToken(), newRaiToken);
 
         User user = userArgument.getValue();
         assertEquals(user.getUsername(), username);
@@ -183,16 +186,17 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(result, HttpStatus.SC_OK);
         assertFalse(responseBody.isEmpty());
 
-        AtomicSignUpResponse response = fromJson(responseBody, AtomicSignUpResponse.class);
-        assertEquals(response.getStatus(), AtomicSignUpResponse.Status.OK);
+        MyRaiTVSignUpResponse response = fromJson(responseBody, MyRaiTVSignUpResponse.class);
+        assertEquals(response.getStatus(), MyRaiTVSignUpResponse.Status.OK);
         assertEquals(response.getMessage(), "user with user name [" + raiUsername + "] logged in with service [" + SERVICE_NAME + "]");
 
-        AtomicSignUp atomicSignUp = response.getObject();
-        assertNotNull(atomicSignUp);
-        assertEquals(atomicSignUp.getIdentifier(), raiUsername);
-        assertEquals(atomicSignUp.getUsername(), raiUsername);
-        assertFalse(atomicSignUp.isReturning());
-        assertEquals(atomicSignUp.getService(), SERVICE_NAME);
+        MyRaiTVSignUp signUp = response.getObject();
+        assertNotNull(signUp);
+        assertEquals(signUp.getIdentifier(), raiUsername);
+        assertEquals(signUp.getUsername(), raiUsername);
+        assertFalse(signUp.isReturning());
+        assertEquals(signUp.getService(), SERVICE_NAME);
+        assertEquals(signUp.getToken(), raiToken);
 
         User user = userArgument.getValue();
         assertEquals(user.getUsername(), raiUsername);
@@ -230,16 +234,17 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(result, HttpStatus.SC_OK);
         assertFalse(responseBody.isEmpty());
 
-        AtomicSignUpResponse response = fromJson(responseBody, AtomicSignUpResponse.class);
-        assertEquals(response.getStatus(), AtomicSignUpResponse.Status.OK);
+        MyRaiTVSignUpResponse response = fromJson(responseBody, MyRaiTVSignUpResponse.class);
+        assertEquals(response.getStatus(), MyRaiTVSignUpResponse.Status.OK);
         assertEquals(response.getMessage(), "user with user name [" + raiUsername + "] logged in with service [" + SERVICE_NAME + "]");
 
-        AtomicSignUp atomicSignUp = response.getObject();
-        assertNotNull(atomicSignUp);
-        assertEquals(atomicSignUp.getIdentifier(), raiUsername);
-        assertEquals(atomicSignUp.getUsername(), raiUsername);
-        assertTrue(atomicSignUp.isReturning());
-        assertEquals(atomicSignUp.getService(), SERVICE_NAME);
+        MyRaiTVSignUp signUp = response.getObject();
+        assertNotNull(signUp);
+        assertEquals(signUp.getIdentifier(), raiUsername);
+        assertEquals(signUp.getUsername(), raiUsername);
+        assertTrue(signUp.isReturning());
+        assertEquals(signUp.getService(), SERVICE_NAME);
+        assertEquals(signUp.getToken(), newRaiToken);
 
         User user = userArgument.getValue();
         assertEquals(user.getUsername(), raiUsername);
@@ -377,16 +382,17 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(result, HttpStatus.SC_OK);
         assertFalse(responseBody.isEmpty());
 
-        AtomicSignUpResponse response = fromJson(responseBody, AtomicSignUpResponse.class);
-        assertEquals(response.getStatus(), AtomicSignUpResponse.Status.OK);
+        MyRaiTVSignUpResponse response = fromJson(responseBody, MyRaiTVSignUpResponse.class);
+        assertEquals(response.getStatus(), MyRaiTVSignUpResponse.Status.OK);
         assertEquals(response.getMessage(), "user with user name [" + username + "] logged in with service [" + SERVICE_NAME + "]");
 
-        AtomicSignUp atomicSignUp = response.getObject();
-        assertNotNull(atomicSignUp);
-        assertEquals(atomicSignUp.getIdentifier(), username);
-        assertEquals(atomicSignUp.getUsername(), username);
-        assertFalse(atomicSignUp.isReturning());
-        assertEquals(atomicSignUp.getService(), SERVICE_NAME);
+        MyRaiTVSignUp signUp = response.getObject();
+        assertNotNull(signUp);
+        assertEquals(signUp.getIdentifier(), username);
+        assertEquals(signUp.getUsername(), username);
+        assertFalse(signUp.isReturning());
+        assertEquals(signUp.getService(), SERVICE_NAME);
+        assertEquals(signUp.getToken(), raiToken);
 
         User user = userArgument.getValue();
         assertEquals(user.getUsername(), username);
