@@ -141,8 +141,8 @@ public class UserService extends JsonService {
     }
 
     @GET
-    @Path("/{username}")
-    public Response getUser(
+    @Path("/{username}/me")
+    public Response getUserWithUserToken(
             @PathParam(USERNAME) String username,
             @QueryParam(USER_TOKEN) String token
     ) {
@@ -174,6 +174,72 @@ public class UserService extends JsonService {
                     UserPlatformResponse.Status.OK,
                     "user [" + username + "] found",
                     user
+                )
+        );
+        return rb.build();
+    }
+
+    @GET
+    @Path("/{username}")
+    public Response getUserWithApiKey(
+            @PathParam(USERNAME) String username,
+            @QueryParam(API_KEY) String apiKey
+    ) {
+        // TODO (high): Simplify request parameter validation.
+        try {
+            check(
+                    this.getClass(),
+                    "getUserWithApiKey",
+                    username,
+                    apiKey
+            );
+        } catch (ServiceException e) {
+            return error(e, "Error while checking parameters");
+        }
+
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return RequestValidator.error(e, "Your apikey is not well formed");
+        }
+
+        boolean isAuth;
+        try {
+            isAuth = applicationsManager.isAuthorized(
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.RETRIEVE,
+                    ApplicationsManager.Object.USER
+            );
+        } catch (ApplicationsManagerException e) {
+            return RequestValidator.error(e, "Error while authorizing your application");
+        }
+        if (!isAuth) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    "application with key [" + apiKey + "] is not authorized")
+            );
+            return rb.build();
+        }
+
+        User user;
+        try {
+            user = userManager.getUser(username);
+        } catch (UserManagerException e) {
+            final String errMsg = "Error while retrieving user [" + username + "]";
+            return error(e, errMsg);
+        }
+
+        if (user == null) {
+            return error("user with username [" + username + "] not found");
+        }
+
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(
+                new UserPlatformResponse(
+                        UserPlatformResponse.Status.OK,
+                        "user [" + username + "] found",
+                        user
                 )
         );
         return rb.build();

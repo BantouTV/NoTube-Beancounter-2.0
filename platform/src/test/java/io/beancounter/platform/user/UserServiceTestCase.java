@@ -229,7 +229,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void getUserWithValidUserToken() throws Exception {
-        String baseQuery = "user/%s?token=%s";
+        String baseQuery = "user/%s/me?token=%s";
         String username = "test-user";
         UUID userToken = UUID.randomUUID();
         User user = new User("Test", "User", username, "password");
@@ -260,10 +260,10 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(response.getObject().getUserToken(), userToken);
         assertNull(response.getObject().getPassword(), "The password should not be returned.");
     }
-    
+
     @Test
     public void getMissingUserWithValidTokenShouldRespondWithError() throws Exception {
-        String baseQuery = "user/%s?token=%s";
+        String baseQuery = "user/%s/me?token=%s";
         String name = "missing-user";
         String query = String.format(
                 baseQuery,
@@ -288,7 +288,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void getUserWithMalformedUserTokenShouldRespondWithError() throws Exception {
-        String baseQuery = "user/%s?token=%s";
+        String baseQuery = "user/%s/me?token=%s";
         String username = "test-user";
         String userToken = "malformed-123";
         User user = new User("Test", "User", username, "password");
@@ -315,7 +315,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void getUserWithWrongUserTokenShouldRespondWithError() throws Exception {
-        String baseQuery = "user/%s?token=%s";
+        String baseQuery = "user/%s/me?token=%s";
         String username = "test-user";
         UUID userToken = UUID.randomUUID();
         User user = new User("Test", "User", username, "password");
@@ -343,7 +343,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void getUserWithExpiredUserTokenShouldRespondWithError() throws Exception {
-        String baseQuery = "user/%s?token=%s";
+        String baseQuery = "user/%s/me?token=%s";
         String username = "test-user";
         UUID userToken = UUID.randomUUID();
         User user = new User("Test", "User", username, "password");
@@ -372,7 +372,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void givenTokenManagerErrorOccursWhenGettingUserThenRespondWithError() throws Exception {
-        String baseQuery = "user/%s?token=%s";
+        String baseQuery = "user/%s/me?token=%s";
         String username = "test-user";
         UUID userToken = UUID.randomUUID();
         User user = new User("Test", "User", username, "password");
@@ -397,6 +397,132 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         APIResponse response = fromJson(responseBody, APIResponse.class);
         assertEquals(response.getStatus(), "NOK");
         assertEquals(response.getMessage(), "Error validating user token [" + userToken + "]");
+    }
+
+    @Test
+    public void getUserWithValidApiKey() throws Exception {
+        String baseQuery = "user/%s?apikey=%s";
+        String username = "test-user";
+        User user = new User("Test", "User", username, "password");
+        String query = String.format(
+                baseQuery,
+                username,
+                APIKEY
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
+
+        UserPlatformResponse response = fromJson(responseBody, UserPlatformResponse.class);
+        assertEquals(response.getStatus(), UserPlatformResponse.Status.OK);
+        assertEquals(response.getMessage(), "user [" + username + "] found");
+        assertEquals(response.getObject().getId(), user.getId());
+        assertEquals(response.getObject().getUsername(), user.getUsername());
+        assertEquals(response.getObject().getName(), user.getName());
+        assertNull(response.getObject().getPassword(), "The password should not be returned.");
+    }
+
+    @Test
+    public void getMissingUserWithValidApiKeyShouldRespondWithError() throws Exception {
+        String baseQuery = "user/%s?apikey=%s";
+        String name = "missing-user";
+        String query = String.format(
+                baseQuery,
+                name,
+                APIKEY
+        );
+
+        when(userManager.getUser(name)).thenReturn(null);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "user with username [" + name + "] not found");
+    }
+
+    @Test
+    public void getUserWithMalformedApiKeyShouldRespondWithError() throws Exception {
+        String baseQuery = "user/%s?apikey=%s";
+        String username = "test-user";
+        String apiKey = "malformed-123";
+        String query = String.format(
+                baseQuery,
+                username,
+                apiKey
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "Your apikey is not well formed");
+    }
+
+    @Test
+    public void getUserWithMissingApiKeyShouldRespondWithError() throws Exception {
+        String baseQuery = "user/%s";
+        String username = "test-user";
+        String query = String.format(
+                baseQuery,
+                username
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "Error while checking parameters");
+    }
+
+    @Test
+    public void givenUserManagerErrorWhenGettingUserWithValidApiKeyThenRespondWithError() throws Exception {
+        String baseQuery = "user/%s?apikey=%s";
+        String username = "test-user";
+        String query = String.format(
+                baseQuery,
+                username,
+                APIKEY
+        );
+
+        when(userManager.getUser(username)).thenThrow(new UserManagerException("error"));
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse response = fromJson(responseBody, APIResponse.class);
+        assertEquals(response.getStatus(), "NOK");
+        assertEquals(response.getMessage(), "Error while retrieving user [" + username + "]");
     }
 
     @Test

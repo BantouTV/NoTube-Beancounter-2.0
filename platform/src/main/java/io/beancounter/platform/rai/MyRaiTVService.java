@@ -5,7 +5,6 @@ import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.auth.SimpleAuth;
 import io.beancounter.platform.JsonService;
 import io.beancounter.platform.PlatformResponse;
-import io.beancounter.platform.responses.AtomicSignUpResponse;
 import io.beancounter.platform.responses.MyRaiTVSignUpResponse;
 import io.beancounter.usermanager.UserManager;
 import io.beancounter.usermanager.UserManagerException;
