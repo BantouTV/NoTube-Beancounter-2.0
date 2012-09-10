@@ -1,9 +1,6 @@
 package io.beancounter.profiler;
 
-import io.beancounter.commons.nlp.Entity;
-import io.beancounter.commons.nlp.NLPEngine;
-import io.beancounter.commons.nlp.NLPEngineException;
-import io.beancounter.commons.nlp.NLPEngineResult;
+import io.beancounter.commons.nlp.*;
 
 import java.net.URL;
 import java.util.Random;
@@ -19,8 +16,11 @@ public class MockNLPEngine implements NLPEngine {
     public NLPEngineResult enrich(String text) throws NLPEngineException {
         NLPEngineResult result = new NLPEngineResult();
         try {
-            for (int i = 0; i < random.nextInt(5); i++) {
-                result.addEntity(getRandomInterest());
+            for (int i = 0; i < random.nextInt(3); i++) {
+                result.addEntity(buildFakeEntity(getRandomInterest()));
+            }
+            for (int i = 0; i < random.nextInt(3); i++) {
+                result.addCategory(buildFakeCategory(getRandomInterest()));
             }
         } catch (Exception e) {
             throw new NLPEngineException("Something went wrong in the MockEngine!", e);
@@ -41,7 +41,7 @@ public class MockNLPEngine implements NLPEngine {
         return result;
     }
 
-    private Entity getRandomInterest() {
+    private String getRandomInterest() {
         String interest;
         int i = random.nextInt(15)+1;
         switch (i) {
@@ -77,10 +77,16 @@ public class MockNLPEngine implements NLPEngine {
                 break;
             default: interest = "BBC";
         }
-        return buildFakeEntity(interest);
+        return interest;
     }
 
     private Entity buildFakeEntity(String interest) {
         return Entity.build(interest, interest);
+    }
+
+    private Category buildFakeCategory(String interest) {
+        Category category = Category.build(interest, interest);
+        category.setScore(random.nextDouble()*20);
+        return category;
     }
 }

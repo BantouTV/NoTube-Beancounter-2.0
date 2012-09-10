@@ -32,9 +32,9 @@ public class DefaultProfilerImplTestCase {
 
     private Properties properties;
 
-    private static final int LIMIT = 5;
+    private static final int LIMIT = 10;
 
-    private static final int ACTIVITIES_PER_INTEREST = 2;
+    private static final int ACTIVITIES_PER_INTEREST = 5;
 
     @BeforeTest
     public void setUp() throws ProfilerException {
@@ -42,7 +42,7 @@ public class DefaultProfilerImplTestCase {
         // look into hashtags definition
         properties.setProperty("tagdef.enable", "true");
         // tweets are more important than other
-        properties.setProperty("verb.multiplier.TWEET", "10");
+        properties.setProperty("verb.multiplier.TWEET", "1.1");
         // likes are nothing atm
         properties.setProperty("verb.multiplier.LIKE", "1");
         // profiles are made only of top 5 interests

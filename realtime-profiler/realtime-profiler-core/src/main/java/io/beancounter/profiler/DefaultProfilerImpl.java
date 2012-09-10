@@ -238,10 +238,11 @@ public final class DefaultProfilerImpl implements Profiler {
     }
 
     private Collection<Interest> setIdAndWeight(UUID activityId, Collection<Interest> newInterests, double multiplier) {
+        normalize(newInterests);
         for (Interest i : newInterests) {
             i.addActivity(activityId);
             i.setVisible(true);
-            i.setWeight((7.5 / multiplier) / newInterests.size());
+            i.setWeight((i.getWeight() * multiplier));
         }
         return newInterests;
     }

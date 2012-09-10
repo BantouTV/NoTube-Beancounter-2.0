@@ -29,7 +29,7 @@ public class InterestConverter {
             interests.add(interest);
             totScore += c.getScore();
         }
-        return normalize(interests, totScore);
+        return interests;
     }
 
     private static Collection<Interest> normalize(HashSet<Interest> interests, double totalScore) {
