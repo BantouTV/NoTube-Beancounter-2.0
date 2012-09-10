@@ -14,6 +14,8 @@ public class Interest implements Comparable<Interest> {
 
     private URI resource;
 
+    private String label;
+
     private boolean visible;
 
     private double weight;
@@ -24,8 +26,9 @@ public class Interest implements Comparable<Interest> {
 
     public Interest() {}
 
-    public Interest(URI resource) {
+    public Interest(String label, URI resource) {
         super();
+        this.label = label;
         this.resource = resource;
     }
 
@@ -35,6 +38,14 @@ public class Interest implements Comparable<Interest> {
 
     public URI getResource() {
         return resource;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     public double getWeight() {
@@ -88,9 +99,7 @@ public class Interest implements Comparable<Interest> {
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (resource != null ? resource.hashCode() : 0);
-        return result;
+        return resource != null ? resource.hashCode() : 0;
     }
 
     @Override

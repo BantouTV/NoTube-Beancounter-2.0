@@ -5,6 +5,7 @@ import java.util.Properties;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
 
+import io.beancounter.commons.cogito.CogitoNLPEngineImpl;
 import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.guice.CamelModuleWithMatchingRoutes;
 import org.guiceyfruit.jndi.JndiBind;
@@ -14,7 +15,6 @@ import io.beancounter.commons.helper.jedis.DefaultJedisPoolFactory;
 import io.beancounter.commons.helper.jedis.JedisPoolFactory;
 import io.beancounter.commons.linking.FacebookCogitoLinkingEngine;
 import io.beancounter.commons.linking.LinkingEngine;
-import io.beancounter.commons.lupedia.LUpediaNLPEngineImpl;
 import io.beancounter.commons.nlp.NLPEngine;
 import io.beancounter.profiler.DefaultProfilerImpl;
 import io.beancounter.profiler.Profiler;
@@ -35,13 +35,18 @@ public class ProfilerModule extends CamelModuleWithMatchingRoutes {
         bind(Profiles.class).to(JedisProfilesImpl.class);
 
         // bind NLP and linking engine
-        bind(NLPEngine.class).to(LUpediaNLPEngineImpl.class);
+        bind(NLPEngine.class).toInstance(initCogito());
         bind(LinkingEngine.class).toInstance(new FacebookCogitoLinkingEngine());
 
         // bind profiler
         bind(Profiler.class).to(DefaultProfilerImpl.class);
 
         bind(ProfilerRoute.class);
+    }
+
+    private NLPEngine initCogito() {
+        // TODO (low) make this configurable
+        return new CogitoNLPEngineImpl("http://test.expertsystem.it/IPTC_ITA/EssexWS.asmx/ESSEXIndexdata");
     }
 
     @Provides

@@ -1,9 +1,10 @@
 package io.beancounter.profiler.rules.custom;
 
+import io.beancounter.commons.cogito.CogitoNLPEngineImpl;
+import io.beancounter.commons.model.Interest;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import io.beancounter.commons.lupedia.LUpediaNLPEngineImpl;
 import io.beancounter.commons.model.activity.Tweet;
 import io.beancounter.profiler.rules.ObjectProfilingRule;
 import io.beancounter.profiler.rules.ProfilingRuleException;
@@ -20,7 +21,9 @@ import java.util.Properties;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class TweetProfilingRuleTestCase {
+public class TweetProfilingRuleIntegrationTest {
+
+    private static final String endpoint = "http://test.expertsystem.it/IPTC_ITA/EssexWS.asmx/ESSEXIndexdata";
 
     private ObjectProfilingRule<Tweet> rule;
 
@@ -36,28 +39,28 @@ public class TweetProfilingRuleTestCase {
     public void testJustText() throws ProfilingRuleException, URISyntaxException, MalformedURLException {
         rule = new TweetProfilingRule(
                 getSimpleTweet(),
-                new LUpediaNLPEngineImpl(),
+                new CogitoNLPEngineImpl(endpoint),
                 null
         );
         rule.run(properties);
-        Collection<URI> actual = rule.getResult();
+        Collection<Interest> actual = rule.getResult();
         Assert.assertEquals(actual.size(), 1);
-        Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/London")));
+        Assert.assertTrue(actual.contains(new Interest("Londra", new URI("http://dati.rai.tv/entity/12631236"))));
     }
 
     @Test
     public void testTextAndAnHashTag() throws ProfilingRuleException, URISyntaxException, MalformedURLException {
         rule = new TweetProfilingRule(
                 getTweetWithHashTag(),
-                new LUpediaNLPEngineImpl(),
+                new CogitoNLPEngineImpl(endpoint),
                 null
         );
         rule.run(properties);
-        Collection<URI> actual = rule.getResult();
-        Assert.assertEquals(actual.size(), 3);
-        Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/London")));
-        Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/World")));
-        Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/BBC")));
+        Collection<Interest> actual = rule.getResult();
+        Assert.assertEquals(actual.size(), 5);
+        Assert.assertTrue(actual.contains(new Interest("Londra", new URI("http://dati.rai.tv/entity/12631236"))));
+        Assert.assertTrue(actual.contains(new Interest("science fiction", new URI("http://dati.rai.tv/category/science+fiction"))));
+        Assert.assertTrue(actual.contains(new Interest("BBC", new URI("http://dati.rai.tv/entity/278188"))));
     }
 
     @Test
@@ -65,17 +68,17 @@ public class TweetProfilingRuleTestCase {
             URISyntaxException, MalformedURLException {
         rule = new TweetProfilingRule(
                 getTweetWithHashTagAndUrl(),
-                new LUpediaNLPEngineImpl(),
+                new CogitoNLPEngineImpl(endpoint),
                 null
         );
         rule.run(properties);
-        Collection<URI> actual = rule.getResult();
-        Assert.assertEquals(actual.size(), 8);
-        Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/London")));
-        Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/World")));
-        Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/BBC")));
-        Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/Cardiff")));
-        Assert.assertTrue(actual.contains(new URI("http://dbpedia.org/resource/Barnsley")));
+        Collection<Interest> actual = rule.getResult();
+        Assert.assertEquals(actual.size(), 11);
+        Assert.assertTrue(actual.contains(new Interest("Londra", new URI("http://dati.rai.tv/entity/12631236"))));
+        Assert.assertTrue(actual.contains(new Interest("science fiction", new URI("http://dati.rai.tv/category/science+fiction"))));
+        Assert.assertTrue(actual.contains(new Interest("BBC", new URI("http://dati.rai.tv/entity/278188"))));
+        Assert.assertTrue(actual.contains(new Interest("Cardiff", new URI("http://dati.rai.tv/entity/12641124"))));
+        Assert.assertTrue(actual.contains(new Interest("Barnsley", new URI("http://dati.rai.tv/entity/12643544"))));
     }
 
     private Tweet getTweetWithHashTagAndUrl() throws MalformedURLException {
