@@ -69,4 +69,25 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
         Assert.assertEquals(actual, expected);
     }
 
+    @Test
+    public void testDeregisterNotExistingApplication() throws IOException {
+        final UUID applicationKey = UUID.randomUUID();
+        String baseQuery = "application/" + applicationKey;
+        HttpClient client = new HttpClient();
+        DeleteMethod deleteMethod = new DeleteMethod(base_uri + baseQuery);
+        int result = client.executeMethod(deleteMethod);
+        String responseBody = new String(deleteMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+        Assert.assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
+        APIResponse actual = fromJson(responseBody, APIResponse.class);
+        Assert.assertNotNull(actual);
+        APIResponse expected = new APIResponse(
+                "Application with api key [" + applicationKey + "] not found",
+                "Error while deregistering application with api key [" + applicationKey + "]",
+                "NOK"
+        );
+        Assert.assertEquals(actual, expected);
+    }
+
 }

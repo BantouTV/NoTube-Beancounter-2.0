@@ -77,10 +77,7 @@ public class ApplicationService extends JsonService {
                     UUID.fromString(apiKey)
             );
         } catch (ApplicationsManagerException e) {
-            throw new RuntimeException(
-                    "Error while deregistering application with api key [" + apiKey + "]",
-                    e
-            );
+            return error(e, "Error while deregistering application with api key [" + apiKey + "]");
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new StringPlatformResponse(
