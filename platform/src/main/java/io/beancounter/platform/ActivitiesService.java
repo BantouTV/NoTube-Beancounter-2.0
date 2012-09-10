@@ -244,10 +244,7 @@ public class ActivitiesService extends JsonService {
         try {
             activity = activities.getActivity(UUID.fromString(activityId));
         } catch (ActivityStoreException e) {
-            return error(
-                    e,
-                    "Error while getting activity [" + activityId + "]"
-            );
+            return error(e, "Error while getting activity [" + activityId + "]");
         }
 
         Response.ResponseBuilder rb = Response.ok();
