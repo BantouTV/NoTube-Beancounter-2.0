@@ -77,7 +77,7 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         ArgumentCaptor<User> userArgument = ArgumentCaptor.forClass(User.class);
         when(userManager.getUser(username)).thenReturn(null);
         doNothing().when(userManager).storeUser(userArgument.capture());
-        when(authHandler.authOnRai(username, password)).thenReturn(raiToken);
+        when(authHandler.authOnRai(username, password)).thenReturn(new MyRaiTVAuthResponse(raiToken, username));
         when(tokenManager.createUserToken(username)).thenReturn(userToken);
 
         PostMethod postMethod = new PostMethod(base_uri + baseQuery);
@@ -125,7 +125,7 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         ArgumentCaptor<User> userArgument = ArgumentCaptor.forClass(User.class);
         when(userManager.getUser(username)).thenReturn(oldUser);
         doNothing().when(userManager).storeUser(userArgument.capture());
-        when(authHandler.authOnRai(username, password)).thenReturn(newRaiToken);
+        when(authHandler.authOnRai(username, password)).thenReturn(new MyRaiTVAuthResponse(newRaiToken, username));
         when(tokenManager.createUserToken(username)).thenReturn(newUserToken);
 
         PostMethod postMethod = new PostMethod(base_uri + baseQuery);
@@ -159,6 +159,98 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
+    public void loginWithNewUserShouldUseTheCaseInsensitiveRaiTvUsernameRatherThanUserInput() throws Exception {
+        String baseQuery = "rai/login";
+        String inputUsername = "UseRnAmE";
+        String raiUsername = "username";
+        String password = "password";
+        String raiToken = "myRai-token";
+        UUID userToken = UUID.randomUUID();
+
+        ArgumentCaptor<User> userArgument = ArgumentCaptor.forClass(User.class);
+        when(authHandler.authOnRai(inputUsername, password)).thenReturn(new MyRaiTVAuthResponse(raiToken, raiUsername));
+        when(userManager.getUser(raiUsername)).thenReturn(null);
+        doNothing().when(userManager).storeUser(userArgument.capture());
+        when(tokenManager.createUserToken(raiUsername)).thenReturn(userToken);
+
+        PostMethod postMethod = new PostMethod(base_uri + baseQuery);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("username", inputUsername);
+        postMethod.addParameter("password", password);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
+
+        AtomicSignUpResponse response = fromJson(responseBody, AtomicSignUpResponse.class);
+        assertEquals(response.getStatus(), AtomicSignUpResponse.Status.OK);
+        assertEquals(response.getMessage(), "user with user name [" + raiUsername + "] logged in with service [" + SERVICE_NAME + "]");
+
+        AtomicSignUp atomicSignUp = response.getObject();
+        assertNotNull(atomicSignUp);
+        assertEquals(atomicSignUp.getIdentifier(), raiUsername);
+        assertEquals(atomicSignUp.getUsername(), raiUsername);
+        assertFalse(atomicSignUp.isReturning());
+        assertEquals(atomicSignUp.getService(), SERVICE_NAME);
+
+        User user = userArgument.getValue();
+        assertEquals(user.getUsername(), raiUsername);
+        assertEquals(user.getServices().get(SERVICE_NAME).getSession(), raiToken);
+        assertEquals(user.getUserToken(), userToken);
+    }
+
+    @Test
+    public void loginWithAuthWithExistingUserShouldBeCaseInsensitive() throws Exception {
+        String baseQuery = "rai/login/auth";
+        String inputUsername = "UseRnAmE";
+        String raiUsername = "username";
+        String oldRaiToken = "old-myRai-token";
+        String newRaiToken = "new-myRai-token";
+        UUID oldUserToken = UUID.randomUUID();
+        UUID newUserToken = UUID.randomUUID();
+
+        User oldUser = new User();
+        oldUser.setUsername(raiUsername);
+        oldUser.addService(SERVICE_NAME, new SimpleAuth(oldRaiToken, raiUsername));
+        oldUser.setUserToken(oldUserToken);
+
+        ArgumentCaptor<User> userArgument = ArgumentCaptor.forClass(User.class);
+        when(userManager.getUser(raiUsername)).thenReturn(oldUser);
+        doNothing().when(userManager).storeUser(userArgument.capture());
+        when(tokenManager.createUserToken(raiUsername)).thenReturn(newUserToken);
+
+        PostMethod postMethod = new PostMethod(base_uri + baseQuery);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("username", inputUsername);
+        postMethod.addParameter("token", newRaiToken);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
+
+        AtomicSignUpResponse response = fromJson(responseBody, AtomicSignUpResponse.class);
+        assertEquals(response.getStatus(), AtomicSignUpResponse.Status.OK);
+        assertEquals(response.getMessage(), "user with user name [" + raiUsername + "] logged in with service [" + SERVICE_NAME + "]");
+
+        AtomicSignUp atomicSignUp = response.getObject();
+        assertNotNull(atomicSignUp);
+        assertEquals(atomicSignUp.getIdentifier(), raiUsername);
+        assertEquals(atomicSignUp.getUsername(), raiUsername);
+        assertTrue(atomicSignUp.isReturning());
+        assertEquals(atomicSignUp.getService(), SERVICE_NAME);
+
+        User user = userArgument.getValue();
+        assertEquals(user.getUsername(), raiUsername);
+        assertEquals(user.getServices().get(SERVICE_NAME).getSession(), newRaiToken);
+        assertEquals(user.getUserToken(), newUserToken);
+
+        verify(tokenManager).deleteUserToken(oldUserToken);
+        verify(tokenManager).createUserToken(raiUsername);
+    }
+
+    @Test
     public void givenErrorOccursWhenStoringUpdatesToExistingUserThenRespondWithError() throws Exception {
         String baseQuery = "rai/login";
         String username = "username";
@@ -173,7 +265,7 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         oldUser.setUserToken(oldUserToken);
 
         when(userManager.getUser(username)).thenReturn(oldUser);
-        when(authHandler.authOnRai(username, password)).thenReturn(newRaiToken);
+        when(authHandler.authOnRai(username, password)).thenReturn(new MyRaiTVAuthResponse(newRaiToken, username));
         when(tokenManager.createUserToken(username)).thenThrow(new UserManagerException("error"));
 
         PostMethod postMethod = new PostMethod(base_uri + baseQuery);
@@ -196,8 +288,9 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         String baseQuery = "rai/login";
         String username = "invalid-username";
         String password = "invalid-password";
+        String expectedMessage = "user [" + username + "] is not authorized from myRai auth service";
 
-        when(authHandler.authOnRai(username, password)).thenReturn("ko");
+        when(authHandler.authOnRai(username, password)).thenThrow(new MyRaiTVAuthException(expectedMessage));
 
         PostMethod postMethod = new PostMethod(base_uri + baseQuery);
         HttpClient client = new HttpClient();
@@ -211,7 +304,7 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
 
         StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
         assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
-        assertEquals(response.getMessage(), "user [" + username + "] is not authorized from myRai auth service");
+        assertEquals(response.getMessage(), expectedMessage);
     }
 
     @Test
@@ -244,7 +337,7 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         String password = "password";
         String raiToken = "myRai-token";
 
-        when(authHandler.authOnRai(username, password)).thenReturn(raiToken);
+        when(authHandler.authOnRai(username, password)).thenReturn(new MyRaiTVAuthResponse(raiToken, username));
         when(userManager.getUser(username)).thenThrow(new UserManagerException("error"));
 
         PostMethod postMethod = new PostMethod(base_uri + baseQuery);

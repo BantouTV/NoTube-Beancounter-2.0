@@ -16,6 +16,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -54,22 +55,16 @@ public class MyRaiTVService extends JsonService {
             @FormParam("username") String username,
             @FormParam("password") String password
     ) {
-        String token;
+        MyRaiTVAuthResponse response;
         try {
-            token = authHandler.authOnRai(username, password);
-        } catch (IOException e) {
+            response = authHandler.authOnRai(username, password);
+        } catch (MyRaiTVAuthException e) {
+            return error(e.getMessage());
+        } catch (Exception e) {
             return error(e, "Error while authenticating [" + username + "] on myRai auth service");
         }
-        if (token.equals("ko")) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "user [" + username + "] is not authorized from myRai auth service")
-            );
-            return rb.build();
-        }
 
-        return loginWithAuth(username, token);
+        return loginWithAuth(response.getUsername(), response.getToken());
     }
 
     @POST
@@ -79,6 +74,7 @@ public class MyRaiTVService extends JsonService {
             @FormParam("token") String token
 
     ) {
+        username = username.toLowerCase(Locale.ENGLISH);
         User user;
         try {
             user = userManager.getUser(username);
