@@ -87,11 +87,12 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
     }
 
     @Override
-    public void deregisterApplication(UUID key) throws ApplicationsManagerException {
+    public boolean deregisterApplication(UUID key) throws ApplicationsManagerException {
         Jedis jedis = getJedisResource();
         boolean isConnectionIssue = false;
+        long result;
         try {
-            jedis.del(key.toString());
+            result = jedis.del(key.toString());
         } catch (JedisConnectionException e) {
             isConnectionIssue = true;
             final String errMsg = "Jedis Connection error while deleting application with id [" + key.toString() + "]";
@@ -108,6 +109,7 @@ public class JedisApplicationsManagerImpl implements ApplicationsManager {
                 pool.returnResource(jedis);
             }
         }
+        return !(result == 0);
     }
 
     @Override

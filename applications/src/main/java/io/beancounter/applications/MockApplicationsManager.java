@@ -36,7 +36,7 @@ public class MockApplicationsManager implements ApplicationsManager {
     }
 
     @Override
-    public void deregisterApplication(UUID key) throws ApplicationsManagerException {
+    public boolean deregisterApplication(UUID key) throws ApplicationsManagerException {
         int size = applications.size();
         int originalSize = size;
         Iterator it = applications.iterator();
@@ -47,9 +47,7 @@ public class MockApplicationsManager implements ApplicationsManager {
                 size--;
             }
         }
-        if (originalSize == size) {
-            throw new ApplicationsManagerException("Application with api key [" + key.toString() + "] not found");
-        }
+        return !(originalSize == size);
     }
 
     @Override

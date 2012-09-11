@@ -83,8 +83,8 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
         APIResponse actual = fromJson(responseBody, APIResponse.class);
         Assert.assertNotNull(actual);
         APIResponse expected = new APIResponse(
-                "Application with api key [" + applicationKey + "] not found",
-                "Error while deregistering application with api key [" + applicationKey + "]",
+                null,
+                "Application with api key'" + applicationKey + "' not found",
                 "NOK"
         );
         Assert.assertEquals(actual, expected);
