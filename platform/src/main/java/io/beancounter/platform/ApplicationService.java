@@ -78,14 +78,14 @@ public class ApplicationService extends JsonService {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(new StringPlatformResponse(
                     StringPlatformResponse.Status.NOK,
-                    "Application with api key'" + apiKey + "' not found")
+                    "Application with api key '" + apiKey + "' not found")
             );
             return rb.build();
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new StringPlatformResponse(
                 StringPlatformResponse.Status.OK,
-                "Application with api key'" + apiKey + "' successfully removed")
+                "Application with api key '" + apiKey + "' successfully removed")
         );
         return rb.build();
     }

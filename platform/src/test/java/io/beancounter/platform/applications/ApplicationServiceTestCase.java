@@ -63,7 +63,7 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
         Assert.assertNotNull(actual);
         expected = new APIResponse(
                 null,
-                "Application with api key'" + applicationKey + "' successfully removed",
+                "Application with api key '" + applicationKey + "' successfully removed",
                 "OK"
         );
         Assert.assertEquals(actual, expected);
@@ -84,7 +84,7 @@ public class ApplicationServiceTestCase extends AbstractJerseyTestCase {
         Assert.assertNotNull(actual);
         APIResponse expected = new APIResponse(
                 null,
-                "Application with api key'" + applicationKey + "' not found",
+                "Application with api key '" + applicationKey + "' not found",
                 "NOK"
         );
         Assert.assertEquals(actual, expected);

@@ -1,7 +1,9 @@
 package io.beancounter.filter;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.inject.Inject;
@@ -23,7 +25,7 @@ public final class InMemoryFilterServiceImpl implements FilterService {
 
     private FilterManager filterManager;
 
-    private Set<Filter> filters = new HashSet<Filter>();
+    private Map<String, Filter> filters = new HashMap<String, Filter>();
 
     @Inject
     public InMemoryFilterServiceImpl(FilterManager filterManager) {
@@ -32,15 +34,15 @@ public final class InMemoryFilterServiceImpl implements FilterService {
 
     @Override
     public synchronized void refresh() throws FilterServiceException {
-        Collection<String> filters;
+        Collection<String> filterNames;
         try {
-            filters = filterManager.getRegisteredFilters();
+            filterNames = filterManager.getRegisteredFilters();
         } catch (FilterManagerException e) {
             final String errMsg = "Error while getting registered filters";
             LOGGER.error(errMsg, e);
             throw new FilterServiceException(errMsg, e);
         }
-        for (String filter : filters) {
+        for (String filter : filterNames) {
             Filter filterObj;
             try {
                 filterObj = filterManager.get(filter);
@@ -49,7 +51,8 @@ public final class InMemoryFilterServiceImpl implements FilterService {
                 LOGGER.error(errMsg, e);
                 throw new FilterServiceException(errMsg, e);
             }
-            this.filters.add(filterObj);
+
+            filters.put(filter, filterObj);
         }
     }
 
@@ -63,13 +66,13 @@ public final class InMemoryFilterServiceImpl implements FilterService {
             LOGGER.error(errMsg, e);
             throw new FilterServiceException(errMsg, e);
         }
-        if (filter == null) {
-            return;
-        }
-        if (filter.isActive()) {
-            filters.add(filter);
+
+        // Keep the in-memory filters up-to-date with the actual filters stored
+        // in Redis.
+        if (filter != null && filter.isActive()) {
+            filters.put(name, filter);
         } else {
-            filters.remove(filter);
+            filters.remove(name);
         }
     }
 
@@ -77,7 +80,7 @@ public final class InMemoryFilterServiceImpl implements FilterService {
     public Set<String> processActivity(ResolvedActivity resolvedActivity) {
         LOGGER.debug("processing activity {}", resolvedActivity);
         Set<String> result = new HashSet<String>();
-        for(Filter filter : filters) {
+        for (Filter filter : filters.values()) {
             try {
                 if (filter.getActivityPattern().matches(resolvedActivity)) {
                     LOGGER.debug("activity {} filtered", resolvedActivity);
