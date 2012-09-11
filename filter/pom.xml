@@ -4,13 +4,13 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>io.beancounter</groupId>
-        <version>1.4-SNAPSHOT</version>
+        <version>1.4</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>filter</artifactId>
-  <version>1.4-SNAPSHOT</version>
+  <version>1.4</version>
     <groupId>io.beancounter.filter</groupId>
     <packaging>pom</packaging>
     <name>Beancounter Filter</name>

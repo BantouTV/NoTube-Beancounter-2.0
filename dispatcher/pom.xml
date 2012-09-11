@@ -4,13 +4,13 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>io.beancounter</groupId>
-        <version>1.4-SNAPSHOT</version>
+        <version>1.4</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>dispatcher</artifactId>
-    <version>1.4-SNAPSHOT</version>
+    <version>1.4</version>
     <name>Beancounter Dispatcher Camel Process</name>
 
     <dependencies>
