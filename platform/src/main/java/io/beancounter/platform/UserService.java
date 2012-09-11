@@ -645,7 +645,6 @@ public class UserService extends JsonService {
         return handleOAuthCallback("facebook", username, null, verifier);
     }
 
-    @Deprecated
     @GET
     @Path("/oauth/callback/{service}/{username}/")
     public Response handleOAuthCallback(
