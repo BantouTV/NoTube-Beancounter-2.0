@@ -346,11 +346,12 @@ public class ActivitiesService extends JsonService {
                 VALUE, value,
                 PAGE_STRING, pageString,
                 ORDER, order,
-                "filters", filters
+                "filters", filters,
+                USER_TOKEN, token
         );
         Response error = validator.validateRequest(
                 this.getClass(),
-                "search",
+                "searchWithToken",
                 ApplicationsManager.Action.RETRIEVE,
                 ApplicationsManager.Object.ACTIVITIES,
                 params

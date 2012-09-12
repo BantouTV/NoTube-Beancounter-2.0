@@ -20,7 +20,6 @@ import io.beancounter.commons.model.activity.Context;
 import io.beancounter.platform.ActivitiesService;
 import io.beancounter.platform.ApplicationService;
 import io.beancounter.platform.JacksonMixInProvider;
-import io.beancounter.platform.PlatformResponse;
 import io.beancounter.platform.responses.UUIDPlatformResponse;
 import io.beancounter.queues.Queues;
 import io.beancounter.usermanager.UserManager;
@@ -1386,6 +1385,81 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual.getMessage(), order + " is not a valid sort order.");
         assertEquals(actual.getStatus().toString(), "NOK");
         assertNull(actual.getObject());
+    }
+
+    @Test
+    public void searchForCustomActivityWithToken() throws Exception {
+        String baseQuery = "activities/search/me?path=%s&value=%s&order=%s&token=%s";
+        String path = "type";
+        String value = "RAI-CONTENT-ITEM";
+        String order = "desc";
+        User user = getUser("test-user");
+        UUID userToken = user.getUserToken();
+        String query = String.format(
+                baseQuery,
+                path,
+                value,
+                order,
+                userToken
+        );
+
+        List<ResolvedActivity> results = new ArrayList<ResolvedActivity>();
+        results.add(createCustomActivity());
+        when(activityStore.search(path, value, 0, 20, order, Collections.<String>emptyList())).thenReturn(results);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
+
+        ResolvedActivitiesPlatformResponse response = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
+        assertEquals(response.getMessage(), "search for [type=RAI-CONTENT-ITEM] found activities.");
+        assertEquals(response.getStatus().toString(), "OK");
+
+        List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>(response.getObject());
+        assertEquals(activities.size(), 1);
+
+        TVEvent tvEvent = (TVEvent) activities.get(0).getActivity().getObject();
+        assertEquals(tvEvent.getName(), "Euro 2012");
+    }
+
+    @Test
+    public void searchForCustomActivityWithNotValidToken() throws Exception {
+        String baseQuery = "activities/search/me?path=%s&value=%s&order=%s&token=%s";
+        String path = "type";
+        String value = "RAI-CONTENT-ITEM";
+        String order = "desc";
+        User user = getUser("test-user");
+        UUID userToken = user.getUserToken();
+        String query = String.format(
+                baseQuery,
+                path,
+                value,
+                order,
+                userToken
+        );
+
+        List<ResolvedActivity> results = new ArrayList<ResolvedActivity>();
+        results.add(createCustomActivity());
+        when(activityStore.search(path, value, 0, 20, order, Collections.<String>emptyList())).thenReturn(results);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(false);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        ResolvedActivitiesPlatformResponse response = fromJson(responseBody, ResolvedActivitiesPlatformResponse.class);
+        assertEquals(response.getMessage(), "User token [" + userToken.toString() + "] is not valid");
+        assertEquals(response.getStatus().toString(), "NOK");
+        assertNull(response.getObject());
     }
 
     @Test

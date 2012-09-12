@@ -544,11 +544,33 @@ public class UserService extends JsonService {
         } **/
 
         URI finalRedirectUri;
+        URI uri;
         try {
-            finalRedirectUri = new URI(decodedFinalRedirect + "?username=" + signUp.getUsername());
+            uri = new URI(decodedFinalRedirect);
         } catch (URISyntaxException use) {
             return error(use, "Malformed redirect URL");
         }
+        if (uri.getQuery() == null) {
+            try {
+                finalRedirectUri = new URI(decodedFinalRedirect + "?username=" + signUp.getUsername() + "&token=" + token);
+            } catch (URISyntaxException use) {
+                return error(use, "Malformed redirect URL");
+            }
+        } else {
+            String[] paramsAndValue = uri.getQuery().split("&");
+            for(String p : paramsAndValue) {
+                String[] param = p.split("=");
+                if(param[0].equals("username") || param[0].equals("token")) {
+                    return error("[username] and [token] are reserved parameters");
+                }
+            }
+            try {
+                finalRedirectUri = new URI(decodedFinalRedirect + "&username=" + signUp.getUsername() + "&token=" + token);
+            } catch (URISyntaxException use) {
+                return error(use, "Malformed redirect URL");
+            }
+        }
+
         return Response.temporaryRedirect(finalRedirectUri).build();
     }
 

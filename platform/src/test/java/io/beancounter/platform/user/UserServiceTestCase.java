@@ -1228,6 +1228,95 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         verify(userManager).storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl);
     }
 
+    @Test
+    public void handlingAtomicTwitterOAuthCallbackFromWebWithParameter() throws Exception {
+        String baseQuery = "user/oauth/atomic/callback/%s/web/%s?oauth_token=%s&oauth_verifier=%s";
+        String service = "twitter";
+        String serviceUserId = "1234564321";
+        String username = "test-user";
+        String token = "twitter-oauth-token";
+        String verifier = "twitter-oauth-verifier";
+        String decodedFinalRedirectUrl = "http://example.com/final/redirect?otherParam=value";
+        String encodedFinalRedirectUrl = UriUtils.encodeBase64(decodedFinalRedirectUrl);
+        String query = String.format(
+                baseQuery,
+                service,
+                encodedFinalRedirectUrl,
+                token,
+                verifier
+        );
+
+        User user = new User("Test", "User", username, "password");
+        AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId);
+        List<Activity> activities = generateActivities(service, serviceUserId, 3);
+
+        when(userManager.storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl))
+                .thenReturn(signUp);
+        when(userManager.getUser(username)).thenReturn(user);
+        when(userManager.grabUserActivities(user, serviceUserId, service, 40))
+                .thenReturn(activities);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+
+        assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        assertFalse(responseBody.isEmpty());
+        assertEquals(getMethod.getURI().getHost(), "www.iana.org");
+
+        verify(userManager).storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl);
+    }
+
+    @Test
+    public void handlingAtomicTwitterOAuthCallbackFromWebWithUsernameAndToken() throws Exception {
+        String baseQuery = "user/oauth/atomic/callback/%s/web/%s?oauth_token=%s&oauth_verifier=%s";
+        String service = "twitter";
+        String serviceUserId = "1234564321";
+        String username = "test-user";
+        String token = "twitter-oauth-token";
+        String verifier = "twitter-oauth-verifier";
+        String decodedFinalRedirectUrl = "http://example.com/final/redirect?username=fake&token=dsfsfdsf";
+        String encodedFinalRedirectUrl = UriUtils.encodeBase64(decodedFinalRedirectUrl);
+        String query = String.format(
+                baseQuery,
+                service,
+                encodedFinalRedirectUrl,
+                token,
+                verifier
+        );
+
+        User user = new User("Test", "User", username, "password");
+        AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId);
+        List<Activity> activities = generateActivities(service, serviceUserId, 3);
+
+        when(userManager.storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl))
+                .thenReturn(signUp);
+        when(userManager.getUser(username)).thenReturn(user);
+        when(userManager.grabUserActivities(user, serviceUserId, service, 40))
+                .thenReturn(activities);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        logger.info("result code: " + result);
+        logger.info("response body: " + responseBody);
+
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR, "\"Unexpected result: [" + result + "]");
+        assertFalse(responseBody.isEmpty());
+        APIResponse actual = fromJson(responseBody, APIResponse.class);
+        APIResponse expected = new APIResponse(
+                null,
+                "[username] and [token] are reserved parameters",
+                "NOK"
+
+        );
+        assertEquals(actual, expected);
+    }
+
     private List<Activity> generateActivities(
             String service,
             String serviceUserId,
