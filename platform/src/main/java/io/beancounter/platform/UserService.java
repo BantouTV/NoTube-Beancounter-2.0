@@ -545,10 +545,23 @@ public class UserService extends JsonService {
 
         URI finalRedirectUri;
         try {
-            finalRedirectUri = new URI(decodedFinalRedirect + "?username=" + signUp.getUsername() + "&token=" + signUp.getUserToken());
+            finalRedirectUri = new URI(decodedFinalRedirect);
+            if (finalRedirectUri.getQuery() == null) {
+                finalRedirectUri = new URI(decodedFinalRedirect + "?username=" + signUp.getUsername() + "&token=" + signUp.getUserToken());
+            } else {
+                String[] paramsAndValue = finalRedirectUri.getQuery().split("&");
+                for (String p : paramsAndValue) {
+                    String[] param = p.split("=");
+                    if (param[0].equals("username") || param[0].equals("token")) {
+                        return error("[username] and [token] are reserved parameters");
+                    }
+                }
+                finalRedirectUri = new URI(decodedFinalRedirect + "&username=" + signUp.getUsername() + "&token=" + signUp.getUserToken());
+            }
         } catch (Exception ex) {
             return error(ex, "Malformed redirect URL");
         }
+
         return Response.temporaryRedirect(finalRedirectUri).build();
     }
 
