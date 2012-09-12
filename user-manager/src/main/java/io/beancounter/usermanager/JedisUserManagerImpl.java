@@ -474,7 +474,8 @@ public class JedisUserManagerImpl implements UserManager {
                     user.getUsername(),
                     false,
                     service,
-                    authUser.getUserId()
+                    authUser.getUserId(),
+                    userToken
             );
         } catch (ResolverException e) {
             final String errMsg = "Error while asking mapping for user [" + authUser.getUser().getUsername() + "] with identifier [" + authUser.getUserId() + "] on service [" + service + "]";
@@ -483,9 +484,9 @@ public class JedisUserManagerImpl implements UserManager {
         }
 
         User user = authUser.getUser();
-        updateUserWithOAuthCredentials(service, user.getAuth(service), candidateUsername);
+        UUID userToken = updateUserWithOAuthCredentials(service, user.getAuth(service), candidateUsername).getUserToken();
 
-        return new AtomicSignUp(user.getId(), user.getUsername(), true, service, authUser.getUserId());
+        return new AtomicSignUp(user.getId(), user.getUsername(), true, service, authUser.getUserId(), userToken);
     }
 
     private void mapUserToServiceInResolver(
@@ -506,7 +507,7 @@ public class JedisUserManagerImpl implements UserManager {
         }
     }
 
-    private void updateUserWithOAuthCredentials(
+    private User updateUserWithOAuthCredentials(
             String service,
             Auth auth,
             String username
@@ -521,6 +522,8 @@ public class JedisUserManagerImpl implements UserManager {
         user.setUserToken(userToken);
 
         storeUser(user);
+
+        return user;
     }
     
     private Jedis getJedisResource() throws UserManagerException {

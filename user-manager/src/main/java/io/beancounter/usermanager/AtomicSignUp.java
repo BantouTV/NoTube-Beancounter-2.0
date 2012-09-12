@@ -33,14 +33,26 @@ public class AtomicSignUp {
      */
     private String identifier;
 
+    /**
+     * The user token assigned to the user to be used for REST API requests.
+     */
+    private UUID userToken;
+
     public AtomicSignUp() {}
 
-    public AtomicSignUp(UUID userId, String username, boolean returning, String service, String identifier) {
+    public AtomicSignUp(
+            UUID userId,
+            String username,
+            boolean returning,
+            String service,
+            String identifier,
+            UUID userToken) {
         this.userId = userId;
         this.username = username;
         this.returning = returning;
         this.service = service;
         this.identifier = identifier;
+        this.userToken = userToken;
     }
 
     public UUID getUserId() {
@@ -83,6 +95,14 @@ public class AtomicSignUp {
         this.identifier = identifier;
     }
 
+    public UUID getUserToken() {
+        return userToken;
+    }
+
+    public void setUserToken(UUID userToken) {
+        this.userToken = userToken;
+    }
+
     @Override
     public String toString() {
         return "AtomicSignUp{" +
@@ -91,6 +111,7 @@ public class AtomicSignUp {
                 ", returning=" + returning +
                 ", service='" + service + '\'' +
                 ", identifier='" + identifier + '\'' +
+                ", userToken='" + userToken + '\'' +
                 '}';
     }
 }

@@ -1389,7 +1389,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    public void searchForCustomActivity() throws Exception {
+    public void searchForCustomActivityWithValidApiKey() throws Exception {
         String baseQuery = "activities/search?path=%s&value=%s&order=%s&apikey=%s";
         String path = "type";
         String value = "RAI-CONTENT-ITEM";

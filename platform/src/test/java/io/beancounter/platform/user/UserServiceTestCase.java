@@ -27,6 +27,7 @@ import io.beancounter.platform.ApplicationService;
 import io.beancounter.platform.JacksonMixInProvider;
 import io.beancounter.platform.PlatformResponse;
 import io.beancounter.platform.UserService;
+import io.beancounter.platform.responses.AtomicSignUpResponse;
 import io.beancounter.platform.responses.StringPlatformResponse;
 import io.beancounter.platform.responses.UserPlatformResponse;
 import io.beancounter.platform.responses.UserProfilePlatformResponse;
@@ -50,9 +51,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1182,6 +1186,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String service = "twitter";
         String serviceUserId = "1234564321";
         String username = "test-user";
+        UUID userToken = UUID.randomUUID();
         String token = "twitter-oauth-token";
         String verifier = "twitter-oauth-verifier";
         String decodedFinalRedirectUrl = "http://example.com/final/redirect";
@@ -1195,7 +1200,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         );
 
         User user = new User("Test", "User", username, "password");
-        AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId);
+        AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
         List<Activity> activities = generateActivities(service, serviceUserId, 3);
 
         when(userManager.storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl))
@@ -1214,6 +1219,8 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         assertFalse(responseBody.isEmpty());
         assertEquals(getMethod.getURI().getHost(), "www.iana.org");
+        // TODO: Uncomment this once the UserManager.grabUserActivities() issue
+        // is resolved.
         /*
         ObjectMapper mapper = new ObjectMapper();
         for (Activity activity : activities) {
@@ -1226,6 +1233,184 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         }
         */
         verify(userManager).storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl);
+    }
+
+    @Test
+    public void handlingAtomicTwitterOAuthCallbackFromMobileShouldRespondCorrectly() throws Exception {
+        String baseQuery = "user/oauth/atomic/callback/%s?oauth_token=%s&oauth_verifier=%s";
+        String service = "twitter";
+        String serviceUserId = "1234564321";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        String token = "twitter-oauth-token";
+        String verifier = "twitter-oauth-verifier";
+        String query = String.format(
+                baseQuery,
+                service,
+                token,
+                verifier
+        );
+
+        User user = new User("Test", "User", username, "password");
+        user.setUserToken(userToken);
+        AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
+
+        when(userManager.storeUserFromOAuth(service, token, verifier)).thenReturn(signUp);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
+
+        AtomicSignUpResponse response = fromJson(responseBody, AtomicSignUpResponse.class);
+        assertEquals(response.getStatus(), AtomicSignUpResponse.Status.OK);
+        assertEquals(response.getMessage(), "user with user name [" + username + "] logged in with service [" + service + "]");
+        assertEquals(response.getObject().getService(), service);
+        assertEquals(response.getObject().getIdentifier(), serviceUserId);
+        assertEquals(response.getObject().getUserId(), user.getId());
+        assertEquals(response.getObject().getUsername(), username);
+        assertEquals(response.getObject().getUserToken(), userToken);
+
+        // TODO: Uncomment this once the UserManager.grabUserActivities() issue
+        // is resolved.
+        /*
+        ObjectMapper mapper = new ObjectMapper();
+        for (Activity activity : activities) {
+            ResolvedActivity ra = new ResolvedActivity();
+            ra.setActivity(activity);
+            ra.setUserId(user.getId());
+            ra.setUser(user);
+
+            verify(queues).push(mapper.writeValueAsString(ra));
+        }
+        */
+        verify(userManager).storeUserFromOAuth(service, token, verifier);
+    }
+
+    @Test
+    public void handlingAtomicTwitterOAuthCallbackFromWebWithBadRedirectUrlShouldRespondWithError() throws Exception {
+        String baseQuery = "user/oauth/atomic/callback/%s/web/%s?oauth_token=%s&oauth_verifier=%s";
+        String service = "twitter";
+        String serviceUserId = "1234564321";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        String token = "twitter-oauth-token";
+        String verifier = "twitter-oauth-verifier";
+        String decodedFinalRedirectUrl = "\\";
+        String encodedFinalRedirectUrl = UriUtils.encodeBase64(decodedFinalRedirectUrl);
+        String query = String.format(
+                baseQuery,
+                service,
+                encodedFinalRedirectUrl,
+                token,
+                verifier
+        );
+
+        User user = new User("Test", "User", username, "password");
+        AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
+
+        when(userManager.storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl))
+                .thenReturn(signUp);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Malformed redirect URL");
+
+        verify(userManager).storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl);
+    }
+
+    @Test
+    public void handlingAtomicTwitterOAuthCallbackFromWebWithMissingRedirectUrlShouldRespondWithError() throws Exception {
+        String baseQuery = "user/oauth/atomic/callback/%s/web/%s?oauth_token=%s&oauth_verifier=%s";
+        String service = "twitter";
+        String serviceUserId = "1234564321";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        String token = "twitter-oauth-token";
+        String verifier = "twitter-oauth-verifier";
+        String redirectUrl = null;
+        String query = String.format(
+                baseQuery,
+                service,
+                redirectUrl,
+                token,
+                verifier
+        );
+
+        User user = new User("Test", "User", username, "password");
+        AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
+
+        when(userManager.storeUserFromOAuth(service, token, verifier, redirectUrl)).thenReturn(signUp);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Malformed redirect URL");
+    }
+
+    @Test
+    public void handlingAtomicOAuthCallbackFromWebShouldRedirectWithCorrectParameters() throws Exception {
+        UserService userService = new UserService(new MockApplicationsManager(), userManager, tokenManager, profiles, queues);
+
+        String service = "twitter";
+        String serviceUserId = "1234564321";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        String token = "twitter-oauth-token";
+        String verifier = "twitter-oauth-verifier";
+        String baseRedirectUrl = "http://example.com/final/redirect";
+        String encodedFinalRedirectUrl = UriUtils.encodeBase64(baseRedirectUrl);
+        String finalRedirectUrl = String.format(baseRedirectUrl + "?username=%s&token=%s", username, userToken);
+
+        User user = new User("Test", "User", username, "password");
+        AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
+        when(userManager.storeUserFromOAuth(service, token, verifier, baseRedirectUrl))
+                .thenReturn(signUp);
+
+        Response response = userService.handleAtomicOAuthCallbackWeb(service, encodedFinalRedirectUrl, token, verifier);
+        assertEquals(response.getStatus(), HttpStatus.SC_TEMPORARY_REDIRECT);
+        URI actualRedirectUrl = (URI) response.getMetadata().get(HttpHeaders.LOCATION).get(0);
+        assertEquals(actualRedirectUrl, new URI(finalRedirectUrl));
+    }
+
+    @Test(enabled = false)
+    public void handlingAtomicOAuthCallbackFromWebShouldAppendParametersToExistingUrlParameters() throws Exception {
+        UserService userService = new UserService(new MockApplicationsManager(), userManager, tokenManager, profiles, queues);
+
+        String service = "twitter";
+        String serviceUserId = "1234564321";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        String token = "twitter-oauth-token";
+        String verifier = "twitter-oauth-verifier";
+        String baseRedirectUrl = "http://example.com/final/redirect?param=1&another=2";
+        String encodedFinalRedirectUrl = UriUtils.encodeBase64(baseRedirectUrl);
+        String finalRedirectUrl = String.format(baseRedirectUrl + "&username=%s&token=%s", username, userToken);
+
+        User user = new User("Test", "User", username, "password");
+        AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
+        when(userManager.storeUserFromOAuth(service, token, verifier, baseRedirectUrl))
+                .thenReturn(signUp);
+
+        Response response = userService.handleAtomicOAuthCallbackWeb(service, encodedFinalRedirectUrl, token, verifier);
+        assertEquals(response.getStatus(), HttpStatus.SC_TEMPORARY_REDIRECT);
+        URI actualRedirectUrl = (URI) response.getMetadata().get(HttpHeaders.LOCATION).get(0);
+        assertEquals(actualRedirectUrl, new URI(finalRedirectUrl));
     }
 
     private List<Activity> generateActivities(

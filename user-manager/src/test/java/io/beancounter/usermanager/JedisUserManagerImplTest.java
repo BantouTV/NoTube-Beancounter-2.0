@@ -355,6 +355,7 @@ public class JedisUserManagerImplTest {
         assertEquals(atomicSignUp.getUserId(), user.getId());
         assertEquals(atomicSignUp.getService(), serviceName);
         assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertEquals(atomicSignUp.getUserToken(), userToken);
         assertFalse(atomicSignUp.isReturning());
 
         verify(authHandler).auth(token, verifier);
@@ -401,6 +402,7 @@ public class JedisUserManagerImplTest {
         assertEquals(atomicSignUp.getUserId(), newUser.getId());
         assertEquals(atomicSignUp.getService(), serviceName);
         assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertEquals(atomicSignUp.getUserToken(), newUserToken);
         assertTrue(atomicSignUp.isReturning());
 
         verify(tokenManager).deleteUserToken(oldUserToken);
@@ -446,6 +448,7 @@ public class JedisUserManagerImplTest {
         assertEquals(atomicSignUp.getUserId(), newUser.getId());
         assertEquals(atomicSignUp.getService(), serviceName);
         assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertEquals(atomicSignUp.getUserToken(), newUserToken);
         assertTrue(atomicSignUp.isReturning());
 
         verify(tokenManager, never()).deleteUserToken(oldUserToken);
@@ -488,6 +491,7 @@ public class JedisUserManagerImplTest {
         assertEquals(atomicSignUp.getUserId(), user.getId());
         assertEquals(atomicSignUp.getService(), serviceName);
         assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertEquals(atomicSignUp.getUserToken(), userToken);
         assertFalse(atomicSignUp.isReturning());
 
         verify(authHandler).auth(code);
@@ -534,6 +538,7 @@ public class JedisUserManagerImplTest {
         assertEquals(atomicSignUp.getUserId(), newUser.getId());
         assertEquals(atomicSignUp.getService(), serviceName);
         assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertEquals(atomicSignUp.getUserToken(), newUserToken);
         assertTrue(atomicSignUp.isReturning());
 
         verify(tokenManager).deleteUserToken(oldUserToken);
@@ -579,6 +584,7 @@ public class JedisUserManagerImplTest {
         assertEquals(atomicSignUp.getUserId(), newUser.getId());
         assertEquals(atomicSignUp.getService(), serviceName);
         assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertEquals(atomicSignUp.getUserToken(), newUserToken);
         assertTrue(atomicSignUp.isReturning());
 
         verify(tokenManager, never()).deleteUserToken(oldUserToken);

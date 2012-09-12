@@ -25,7 +25,7 @@ public class MyRaiTVSignUp extends AtomicSignUp {
             String identifier,
             String token
     ) {
-        super(userId, username, returning, service, identifier);
+        super(userId, username, returning, service, identifier, UUID.randomUUID());
         this.token = token;
     }
 

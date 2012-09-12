@@ -545,9 +545,9 @@ public class UserService extends JsonService {
 
         URI finalRedirectUri;
         try {
-            finalRedirectUri = new URI(decodedFinalRedirect + "?username=" + signUp.getUsername());
-        } catch (URISyntaxException use) {
-            return error(use, "Malformed redirect URL");
+            finalRedirectUri = new URI(decodedFinalRedirect + "?username=" + signUp.getUsername() + "&token=" + signUp.getUserToken());
+        } catch (Exception ex) {
+            return error(ex, "Malformed redirect URL");
         }
         return Response.temporaryRedirect(finalRedirectUri).build();
     }
