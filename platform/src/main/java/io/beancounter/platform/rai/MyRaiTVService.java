@@ -92,7 +92,8 @@ public class MyRaiTVService extends JsonService {
             signUp.setUserId(user.getId());
             signUp.setUsername(username);
             signUp.setIdentifier(username);
-            signUp.setToken(token);
+            signUp.setRaiToken(token);
+            signUp.setUserToken(user.getUserToken());
             Response.ResponseBuilder rb = Response.ok();
             rb.entity(
                     new MyRaiTVSignUpResponse(
@@ -121,7 +122,8 @@ public class MyRaiTVService extends JsonService {
             signUp.setUserId(user.getId());
             signUp.setUsername(username);
             signUp.setIdentifier(username);
-            signUp.setToken(token);
+            signUp.setRaiToken(token);
+            signUp.setUserToken(user.getUserToken());
             Response.ResponseBuilder rb = Response.ok();
             rb.entity(
                     new MyRaiTVSignUpResponse(

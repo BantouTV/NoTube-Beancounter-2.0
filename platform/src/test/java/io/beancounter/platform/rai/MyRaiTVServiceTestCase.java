@@ -99,7 +99,8 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(signUp.getUsername(), username);
         assertFalse(signUp.isReturning());
         assertEquals(signUp.getService(), SERVICE_NAME);
-        assertEquals(signUp.getToken(), raiToken);
+        assertEquals(signUp.getRaiToken(), raiToken);
+        assertEquals(signUp.getUserToken(), userToken);
 
         User user = userArgument.getValue();
         assertEquals(user.getUsername(), username);
@@ -148,7 +149,8 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(signUp.getUsername(), username);
         assertTrue(signUp.isReturning());
         assertEquals(signUp.getService(), SERVICE_NAME);
-        assertEquals(signUp.getToken(), newRaiToken);
+        assertEquals(signUp.getRaiToken(), newRaiToken);
+        assertEquals(signUp.getUserToken(), newUserToken);
 
         User user = userArgument.getValue();
         assertEquals(user.getUsername(), username);
@@ -194,7 +196,8 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(signUp.getUsername(), raiUsername);
         assertFalse(signUp.isReturning());
         assertEquals(signUp.getService(), SERVICE_NAME);
-        assertEquals(signUp.getToken(), raiToken);
+        assertEquals(signUp.getRaiToken(), raiToken);
+        assertEquals(signUp.getUserToken(), userToken);
 
         User user = userArgument.getValue();
         assertEquals(user.getUsername(), raiUsername);
@@ -242,7 +245,8 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(signUp.getUsername(), raiUsername);
         assertTrue(signUp.isReturning());
         assertEquals(signUp.getService(), SERVICE_NAME);
-        assertEquals(signUp.getToken(), newRaiToken);
+        assertEquals(signUp.getRaiToken(), newRaiToken);
+        assertEquals(signUp.getUserToken(), newUserToken);
 
         User user = userArgument.getValue();
         assertEquals(user.getUsername(), raiUsername);
@@ -390,7 +394,8 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(signUp.getUsername(), username);
         assertFalse(signUp.isReturning());
         assertEquals(signUp.getService(), SERVICE_NAME);
-        assertEquals(signUp.getToken(), raiToken);
+        assertEquals(signUp.getRaiToken(), raiToken);
+        assertEquals(signUp.getUserToken(), userToken);
 
         User user = userArgument.getValue();
         assertEquals(user.getUsername(), username);
