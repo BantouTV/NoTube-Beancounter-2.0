@@ -332,6 +332,47 @@ public class ActivitiesService extends JsonService {
     }
 
     @GET
+    @Path("/search/me")
+    public Response searchWithToken(
+            @QueryParam(PATH) String path,
+            @QueryParam(VALUE) String value,
+            @QueryParam(PAGE_STRING) @DefaultValue("0") String pageString,
+            @QueryParam(ORDER) @DefaultValue("desc") String order,
+            @QueryParam("filter") List<String> filters,
+            @QueryParam(USER_TOKEN) String token
+    ) {
+        Map<String, Object> params = RequestValidator.createParams(
+                PATH, path,
+                VALUE, value,
+                PAGE_STRING, pageString,
+                ORDER, order,
+                "filters", filters
+        );
+        Response error = validator.validateRequest(
+                this.getClass(),
+                "search",
+                ApplicationsManager.Action.RETRIEVE,
+                ApplicationsManager.Object.ACTIVITIES,
+                params
+        );
+
+        if (error != null) {
+            return error;
+        }
+
+        try {
+            UUID userToken = UUID.fromString(token);
+            if (!tokenManager.checkTokenExists(userToken)) {
+                return error("User token [" + token + "] is not valid");
+            }
+        } catch (Exception ex) {
+            return error(ex, "Error validating user token [" + token + "]");
+        }
+
+        return doSearch(params, path, value, order, filters);
+    }
+
+    @GET
     @Path("/search")
     public Response search(
             @QueryParam(PATH) String path,
@@ -349,7 +390,6 @@ public class ActivitiesService extends JsonService {
                 "filters", filters,
                 API_KEY, apiKey
         );
-
         Response error = validator.validateRequest(
                 this.getClass(),
                 "search",
@@ -362,13 +402,23 @@ public class ActivitiesService extends JsonService {
             return error;
         }
 
+        return doSearch(params, path, value, order, filters);
+    }
+
+    private Response doSearch(
+            Map<String, Object> params,
+            String path,
+            String value,
+            String order,
+            List<String> filters
+    ) {
         Collection<ResolvedActivity> activitiesRetrieved;
         int page = (Integer) params.get(PAGE_NUMBER);
         try {
             activitiesRetrieved = activities.search(path, value, page, ACTIVITIES_LIMIT, order, filters);
         } catch (ActivityStoreException ase) {
             return error(ase, "Error while getting page " + page
-                    + " of activities where [" + path + "=" + value +"]");
+                    + " of activities where [" + path + "=" + value + "]");
         } catch (WildcardSearchException wse) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(new StringPlatformResponse(
@@ -391,7 +441,7 @@ public class ActivitiesService extends JsonService {
                         ResolvedActivitiesPlatformResponse.Status.OK,
                         (activitiesRetrieved.isEmpty())
                                 ? "search for [" + path + "=" + value + "] found no "
-                                    + (page != 0 ? "more " : "") + "activities."
+                                + (page != 0 ? "more " : "") + "activities."
                                 : "search for [" + path + "=" + value + "] found activities.",
                         activitiesRetrieved
                 )
@@ -453,8 +503,8 @@ public class ActivitiesService extends JsonService {
                 new ResolvedActivitiesPlatformResponse(
                         ResolvedActivitiesPlatformResponse.Status.OK,
                         (allActivities.isEmpty())
-                            ? "user '" + username + "' has no " + (page != 0 ? "more " : "") + "activities."
-                            : "user '" + username + "' activities found.",
+                                ? "user '" + username + "' has no " + (page != 0 ? "more " : "") + "activities."
+                                : "user '" + username + "' activities found.",
                         allActivities
                 )
         );

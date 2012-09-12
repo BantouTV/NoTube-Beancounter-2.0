@@ -257,7 +257,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(response.getObject().getId(), user.getId());
         assertEquals(response.getObject().getUsername(), user.getUsername());
         assertEquals(response.getObject().getName(), user.getName());
-        assertEquals(response.getObject().getUserToken(), userToken);
+        assertNull(response.getObject().getUserToken(), "The token should not be returned.");
         assertNull(response.getObject().getPassword(), "The password should not be returned.");
     }
 
