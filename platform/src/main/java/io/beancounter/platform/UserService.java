@@ -672,22 +672,41 @@ public class UserService extends JsonService {
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
+
+        User user;
         try {
-            userManager.registerOAuthService(service, userObj, token, verifier);
+            user = userManager.registerOAuthService(service, userObj, token, verifier);
         } catch (UserManagerException e) {
             return error(e, "Error while OAuth-like exchange for service: '" + service + "'");
         }
-        URL finalRedirectUrl;
+
+        String finalRedirect;
         try {
-            finalRedirectUrl = userManager.consumeUserFinalRedirect(userObj.getUsername());
+            finalRedirect = userManager.consumeUserFinalRedirect(userObj.getUsername()).toString();
         } catch (UserManagerException e) {
             return error(e, "Error while getting final redirect URL for user '" + username + "' for service '" + service + "'");
         }
+
+        URI finalRedirectUri;
         try {
-            return Response.temporaryRedirect(finalRedirectUrl.toURI()).build();
-        } catch (URISyntaxException e) {
-            return error(e, "Malformed redirect URL");
+            finalRedirectUri = new URI(finalRedirect);
+            if (finalRedirectUri.getQuery() == null) {
+                finalRedirectUri = new URI(finalRedirect + "?username=" + username + "&token=" + user.getUserToken());
+            } else {
+                String[] paramsAndValue = finalRedirectUri.getQuery().split("&");
+                for (String p : paramsAndValue) {
+                    String[] param = p.split("=");
+                    if (param[0].equals("username") || param[0].equals("token")) {
+                        return error("[username] and [token] are reserved parameters");
+                    }
+                }
+                finalRedirectUri = new URI(finalRedirect + "&username=" + username + "&token=" + user.getUserToken());
+            }
+        } catch (Exception ex) {
+            return error(ex, "Malformed redirect URL");
         }
+
+        return Response.temporaryRedirect(finalRedirectUri).build();
     }
 
     @Deprecated

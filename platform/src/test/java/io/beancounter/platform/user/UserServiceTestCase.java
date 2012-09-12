@@ -639,6 +639,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         URL finalRedirect = new URL("http://example.com/final/redirect");
         User user = new User("Test", "User", username, "password");
         when(userManager.getUser(username)).thenReturn(user);
+        when(userManager.registerOAuthService(service, user, token, code)).thenReturn(user);
         when(userManager.consumeUserFinalRedirect(username)).thenReturn(finalRedirect);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
@@ -650,8 +651,6 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
         assertFalse(responseBody.isEmpty());
         assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-
-        verify(userManager).registerOAuthService(service, user, token, code);
     }
 
     @Test
@@ -672,6 +671,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         URL finalRedirect = new URL("http://example.com/final/redirect");
         User user = new User("Test", "User", username, "password");
         when(userManager.getUser(username)).thenReturn(user);
+        when(userManager.registerOAuthService(service, user, oauthToken, oauthVerifier)).thenReturn(user);
         when(userManager.consumeUserFinalRedirect(username)).thenReturn(finalRedirect);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
@@ -683,8 +683,31 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
         assertFalse(responseBody.isEmpty());
         assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+    }
 
-        verify(userManager).registerOAuthService(service, user, oauthToken, oauthVerifier);
+    @Test
+    public void handlingOAuthCallbackForUserShouldRedirectWithCorrectParameters() throws Exception {
+        UserService userService = new UserService(new MockApplicationsManager(), userManager, tokenManager, profiles, queues);
+
+        String service = "twitter";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        String token = "twitter-oauth-token";
+        String verifier = "twitter-oauth-verifier";
+        String redirectUrl = "http://example.com/final/redirect";
+        String finalRedirectUrl = String.format(redirectUrl + "?username=%s&token=%s", username, userToken);
+
+        User user = new User("Test", "User", username, "password");
+        User authenticatedUser = new User("Test", "User", username, "password");
+        authenticatedUser.setUserToken(userToken);
+        when(userManager.getUser(username)).thenReturn(user);
+        when(userManager.registerOAuthService(service, user, token, verifier)).thenReturn(authenticatedUser);
+        when(userManager.consumeUserFinalRedirect(username)).thenReturn(new URL(redirectUrl));
+
+        Response response = userService.handleOAuthCallback(service, username, token, verifier);
+        assertEquals(response.getStatus(), HttpStatus.SC_TEMPORARY_REDIRECT);
+        URI actualRedirectUrl = (URI) response.getMetadata().get(HttpHeaders.LOCATION).get(0);
+        assertEquals(actualRedirectUrl, new URI(finalRedirectUrl));
     }
 
     @Test
