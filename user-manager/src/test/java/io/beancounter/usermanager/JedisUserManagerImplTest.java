@@ -764,6 +764,56 @@ public class JedisUserManagerImplTest {
         userManager.storeUserFromOAuth(serviceName, token, code);
     }
 
+    @Test(
+            expectedExceptions = UserManagerException.class,
+            expectedExceptionsMessageRegExp = "User \\[deleted-user\\] does not exist"
+    )
+    public void givenDeletedTwitterUserWhenLoggingInThenThrowAnException() throws Exception {
+        String serviceName = "twitter";
+        String username = "deleted-user";
+        String serviceUserId = "17473832";
+        String token = "oauth_token";
+        String verifier = "oauth_verifier";
+
+        AuthHandler authHandler = mock(AuthHandler.class);
+        User user = new User("Test", "User", username, "password");
+        AuthenticatedUser authUser = new AuthenticatedUser(serviceUserId, user);
+
+        when(authManager.getService(serviceName)).thenReturn(new Service(serviceName));
+        when(authManager.getHandler(serviceName)).thenReturn(authHandler);
+        when(authHandler.auth(token, verifier)).thenReturn(authUser);
+        when(authHandler.getService()).thenReturn(serviceName);
+        when(resolver.resolveUsername(serviceUserId, serviceName)).thenReturn(username);
+        when(jedis.get(username)).thenReturn(null);
+
+        userManager.storeUserFromOAuth(serviceName, token, verifier);
+    }
+
+    @Test(
+            expectedExceptions = UserManagerException.class,
+            expectedExceptionsMessageRegExp = "User \\[deleted-user\\] does not exist"
+    )
+    public void givenDeletedFacebookUserWhenLoggingInThenThrowAnException() throws Exception {
+        String serviceName = "facebook";
+        String username = "deleted-user";
+        String serviceUserId = "17473832";
+        String token = null;
+        String code = "oauth2_code";
+
+        AuthHandler authHandler = mock(AuthHandler.class);
+        User user = new User("Test", "User", username, "password");
+        AuthenticatedUser authUser = new AuthenticatedUser(serviceUserId, user);
+
+        when(authManager.getService(serviceName)).thenReturn(new Service(serviceName));
+        when(authManager.getHandler(serviceName)).thenReturn(authHandler);
+        when(authHandler.auth(code)).thenReturn(authUser);
+        when(authHandler.getService()).thenReturn(serviceName);
+        when(resolver.resolveUsername(serviceUserId, serviceName)).thenReturn(username);
+        when(jedis.get(username)).thenReturn(null);
+
+        userManager.storeUserFromOAuth(serviceName, token, code);
+    }
+
     @Test
     public void registeringTwitterOAuthServiceToUserWithNoUserTokenShouldBeSuccessful() throws Exception {
         String serviceName = "twiter";

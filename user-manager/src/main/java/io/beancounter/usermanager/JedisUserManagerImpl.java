@@ -515,6 +515,9 @@ public class JedisUserManagerImpl implements UserManager {
             String username
     ) throws UserManagerException {
         User user = getUser(username);
+        if (user == null) {
+            throw new UserManagerException("User [" + username + "] does not exist");
+        }
         user.addService(service, auth);
 
         if (user.getUserToken() != null) {
