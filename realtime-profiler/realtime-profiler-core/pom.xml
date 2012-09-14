@@ -3,7 +3,7 @@
     <parent>
         <groupId>io.beancounter</groupId>
         <artifactId>realtime-profiler</artifactId>
-        <version>1.5-SNAPSHOT</version>
+        <version>1.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>realtime-profiler-core</artifactId>
