@@ -6,7 +6,7 @@
     <parent>
         <artifactId>commons</artifactId>
         <groupId>io.beancounter</groupId>
-        <version>1.4</version>
+        <version>1.5-SNAPSHOT</version>
     </parent>
 
     <groupId>io.beancounter.commons</groupId>
