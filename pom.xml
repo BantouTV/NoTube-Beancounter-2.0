@@ -609,7 +609,6 @@
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
-                                <phase>install</phase>
                                 <goals>
                                     <goal>jar-no-fork</goal>
                                 </goals>
@@ -622,7 +621,6 @@
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
-                                <phase>install</phase>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
@@ -723,8 +721,8 @@
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                     <useReleaseProfile>false</useReleaseProfile>
-                    <releaseProfiles>dev release</releaseProfiles>
-                    <goals>clean install deploy</goals>
+                    <releaseProfiles>dev,release</releaseProfiles>
+                    <goals>deploy</goals>
                 </configuration>
             </plugin>
             <plugin>
