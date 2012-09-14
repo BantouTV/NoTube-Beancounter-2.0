@@ -609,7 +609,7 @@
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
-                                <phase>package</phase>
+                                <phase>install</phase>
                                 <goals>
                                     <goal>jar-no-fork</goal>
                                 </goals>
@@ -622,7 +622,7 @@
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
-                                <phase>package</phase>
+                                <phase>install</phase>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
@@ -724,7 +724,7 @@
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                     <useReleaseProfile>false</useReleaseProfile>
                     <releaseProfiles>dev release</releaseProfiles>
-                    <goals>source:jar-no-fork javadoc:jar deploy</goals>
+                    <goals>clean install deploy</goals>
                 </configuration>
             </plugin>
             <plugin>
