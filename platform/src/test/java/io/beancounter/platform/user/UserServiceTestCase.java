@@ -598,7 +598,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String service = "fake-service-1";
         URL serviceRedirectUrl = new URL("http://example.com/fake-service/oauth/token-1234");
         String username = "test-user";
-        String redirect = "http://testurl.com/";
+        String redirect = "http://api.beancounter.io/";
         String query = String.format(
                 baseQuery,
                 service,
@@ -715,7 +715,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String baseQuery = "user/auth/callback/%s/%s/%s?token=%s";
         String service = "fake-service-1";
         String username = "test-user";
-        String redirect = "testurl.com";
+        String redirect = "example.com";
         String token = "TOKEN";
         String query = String.format(
                 baseQuery,
@@ -730,13 +730,12 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
+
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
-
-        assertEquals(responseBody, "");
-        assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        assertFalse(responseBody.isEmpty());
+        assertEquals(result, HttpStatus.SC_OK);
+        assertEquals(getMethod.getURI().getHost(), "www.iana.org");
 
         verify(userManager).registerService(service, user, token);
     }
