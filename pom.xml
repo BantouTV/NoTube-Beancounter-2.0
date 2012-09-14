@@ -722,7 +722,7 @@
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                     <useReleaseProfile>false</useReleaseProfile>
                     <releaseProfiles>dev release</releaseProfiles>
-                    <goals>deploy</goals>
+                    <goals>clean install deploy</goals>
                 </configuration>
             </plugin>
             <plugin>
