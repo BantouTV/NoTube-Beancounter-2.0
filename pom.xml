@@ -722,7 +722,7 @@
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                     <useReleaseProfile>false</useReleaseProfile>
                     <releaseProfiles>dev release</releaseProfiles>
-                    <goals>clean install deploy</goals>
+                    <goals>source:jar-no-fork javadoc:jar deploy</goals>
                 </configuration>
             </plugin>
             <plugin>
