@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>io.beancounter.resolver</groupId>
-    <artifactId>process</artifactId>
+    <artifactId>resolver-process</artifactId>
     <name>Beancounter Resolver: Camel Process</name>
 
     <dependencies>
