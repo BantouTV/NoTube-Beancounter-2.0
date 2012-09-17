@@ -8,15 +8,15 @@
         <version>1.5-SNAPSHOT</version>
     </parent>
 
+    <groupId>io.beancounter.publishers</groupId>
     <artifactId>facebook-publisher</artifactId>
-    <name>Beancounter Facebook Timeline Publisher</name>
+    <name>Beancounter Publishers: Facebook</name>
 
     <dependencies>
         <dependency>
             <groupId>io.beancounter.commons</groupId>
             <artifactId>model</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.beancounter.resolver</groupId>
             <artifactId>core</artifactId>
@@ -25,7 +25,6 @@
             <groupId>io.beancounter</groupId>
             <artifactId>user-manager</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.restfb</groupId>
             <artifactId>restfb</artifactId>

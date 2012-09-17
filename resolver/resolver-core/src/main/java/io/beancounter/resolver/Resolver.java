@@ -11,8 +11,7 @@ import java.util.UUID;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public interface
-        Resolver {
+public interface Resolver {
 
     /**
      * Given an anonymous {@link Activity}, it will be able to give the

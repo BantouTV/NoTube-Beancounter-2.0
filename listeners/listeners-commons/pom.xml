@@ -8,8 +8,9 @@
         <version>1.5-SNAPSHOT</version>
     </parent>
 
+    <groupId>io.beancounter.listeners</groupId>
     <artifactId>listeners-commons</artifactId>
-    <name>Beancounter Listeners Commons</name>
+    <name>Beancounter Listeners: Commons</name>
 
     <dependencies>
         <dependency>

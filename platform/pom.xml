@@ -85,10 +85,6 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <scope>provided</scope>
@@ -132,7 +128,7 @@
     </dependencies>
 
     <build>
-        <finalName>notube-platform</finalName>
+        <finalName>beancounter-platform</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -152,6 +148,7 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <configuration>
                     <encoding>${project.build.sourceEncoding}</encoding>
+                    <outputDirectory>${project.build.outputDirectory}</outputDirectory>
                 </configuration>
             </plugin>
             <plugin>
@@ -159,26 +156,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <forkMode>always</forkMode>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.cargo</groupId>
-                <artifactId>cargo-maven2-plugin</artifactId>
-                <configuration>
-                    <container>
-                        <containerId>tomcat7x</containerId>
-                        <type>remote</type>
-                    </container>
-                    <configuration>
-                        <type>runtime</type>
-                        <properties>
-                            <cargo.hostname>46.4.89.183</cargo.hostname>
-                            <cargo.protocol>http</cargo.protocol>
-                            <cargo.servlet.port>8080</cargo.servlet.port>
-                            <cargo.remote.username>admin</cargo.remote.username>
-                            <cargo.remote.password>4dm1n</cargo.remote.password>
-                        </properties>
-                    </configuration>
                 </configuration>
             </plugin>
         </plugins>

@@ -10,7 +10,7 @@
 
     <artifactId>activities</artifactId>
     <version>1.5-SNAPSHOT</version>
-    <name>Beancounter Activities Store</name>
+    <name>Beancounter Activity Store</name>
 
     <dependencies>
         <dependency>

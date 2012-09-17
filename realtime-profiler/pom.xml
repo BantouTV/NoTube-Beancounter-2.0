@@ -2,6 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <artifactId>parent</artifactId>
         <groupId>io.beancounter</groupId>
@@ -9,9 +10,9 @@
     </parent>
 
     <artifactId>realtime-profiler</artifactId>
-  <version>1.5-SNAPSHOT</version>
+    <version>1.5-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Beancounter Profiler</name>
+    <name>Beancounter Realtime Profiler</name>
 
     <modules>
         <module>realtime-profiler-core</module>
@@ -19,10 +20,6 @@
     </modules>
 
     <dependencies>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.beancounter.commons</groupId>
             <artifactId>model</artifactId>

@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>applications</artifactId>
-  <version>1.5-SNAPSHOT</version>
+    <version>1.5-SNAPSHOT</version>
     <name>Beancounter Applications</name>
 
     <dependencies>

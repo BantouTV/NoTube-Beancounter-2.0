@@ -12,8 +12,9 @@
         <version>1.5-SNAPSHOT</version>
     </parent>
 
+    <groupId>io.beancounter.publishers</groupId>
     <artifactId>jms-publisher</artifactId>
-    <name>Beancounter JMS Publisher Camel Process</name>
+    <name>Beancounter Publishers: JMS</name>
 
     <dependencies>
         <dependency>

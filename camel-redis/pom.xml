@@ -28,7 +28,7 @@
     </parent>
 
     <artifactId>camel-redis</artifactId>
-  <version>1.5-SNAPSHOT</version>
+    <version>1.5-SNAPSHOT</version>
     <name>A Camel Redis Component</name>
 
     <dependencies>

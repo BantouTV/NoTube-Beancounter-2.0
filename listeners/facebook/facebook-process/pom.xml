@@ -7,18 +7,16 @@
         <version>1.5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>facebook-process</artifactId>
-    <groupId>io.beancounter.listeners.facebook</groupId>
-    <packaging>jar</packaging>
-    <name>Beancounter Facebook Camel Process</name>
-
     <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.beancounter.listeners.facebook</groupId>
+    <artifactId>facebook-process</artifactId>
+    <name>Beancounter Listeners: Facebook: Camel Process</name>
 
     <dependencies>
          <dependency>
             <groupId>io.beancounter.listeners.facebook</groupId>
             <artifactId>facebook-core</artifactId>
-             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.beancounter.resolver</groupId>
@@ -68,6 +66,7 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
+                    <finalName>facebook-listener-${project.version}</finalName>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>

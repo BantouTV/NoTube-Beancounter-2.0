@@ -8,10 +8,9 @@
         <version>1.5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>facebook-core</artifactId>
     <groupId>io.beancounter.listeners.facebook</groupId>
-    <packaging>jar</packaging>
-    <name>Beancounter Facebook Core</name>
+    <artifactId>facebook-core</artifactId>
+    <name>Beancounter Listeners: Facebook: Core</name>
 
     <dependencies>
         <dependency>
@@ -41,30 +40,4 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <mainClass>org.apache.camel.guice.Main</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

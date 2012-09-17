@@ -11,7 +11,7 @@
 
     <groupId>io.beancounter</groupId>
     <artifactId>queues</artifactId>
-  <version>1.5-SNAPSHOT</version>
+    <version>1.5-SNAPSHOT</version>
     <name>Beancounter Queues</name>
 
     <dependencies>
