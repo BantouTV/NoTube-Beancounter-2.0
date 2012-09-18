@@ -127,7 +127,7 @@
             </dependency>
             <dependency>
                 <groupId>io.beancounter.resolver</groupId>
-                <artifactId>core</artifactId>
+                <artifactId>resolver-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -522,6 +522,7 @@
             </snapshots>
         </repository>
     </repositories>
+
     <developers>
         <developer>
             <id>dpalmisano</id>

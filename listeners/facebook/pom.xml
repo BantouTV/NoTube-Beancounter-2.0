@@ -23,6 +23,10 @@
             <groupId>io.beancounter.listeners</groupId>
             <artifactId>listeners-commons</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.beancounter.resolver</groupId>
+            <artifactId>resolver-core</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

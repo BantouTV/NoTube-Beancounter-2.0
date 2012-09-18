@@ -19,7 +19,7 @@
         </dependency>
         <dependency>
             <groupId>io.beancounter.resolver</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>resolver-core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.beancounter</groupId>

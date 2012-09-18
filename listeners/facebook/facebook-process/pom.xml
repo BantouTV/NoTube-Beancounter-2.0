@@ -19,10 +19,6 @@
             <artifactId>facebook-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.beancounter.resolver</groupId>
-            <artifactId>core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.beancounter</groupId>
             <artifactId>user-manager</artifactId>
         </dependency>
