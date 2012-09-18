@@ -9,7 +9,7 @@ public class MyRaiTVAuthHandler {
 
     private static String SERVICE_PATTERN = "http://www.rai.tv/MyRaiTv/login.do?username=%s&password=%s";
 
-    public String authOnRai(String username, String password) throws IOException {
+    public MyRaiTVAuthResponse authOnRai(String username, String password) throws IOException, MyRaiTVAuthException {
         URL url = new URL(
                 String.format(SERVICE_PATTERN, username, password)
         );
@@ -21,10 +21,12 @@ public class MyRaiTVAuthHandler {
         } finally {
             is.close();
         }
+
         String splitResponse[] = response.split("-");
-        if (splitResponse.length != 2) {
-            return "ko";
+        if (response.equals("ko") || splitResponse.length != 2) {
+            throw new MyRaiTVAuthException("user [" + username + "] is not authorized from myRai auth service");
         }
-        return splitResponse[0];
+
+        return new MyRaiTVAuthResponse(splitResponse[0], splitResponse[1]);
     }
 }

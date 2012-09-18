@@ -42,15 +42,17 @@ public abstract class Feature {
 
         Feature feature = (Feature) o;
 
-        if (resource != null ? !resource.equals(feature.resource) : feature.resource != null)
-            return false;
+        if (label != null ? !label.equals(feature.label) : feature.label != null) return false;
+        if (resource != null ? !resource.equals(feature.resource) : feature.resource != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return resource != null ? resource.hashCode() : 0;
+        int result = resource != null ? resource.hashCode() : 0;
+        result = 31 * result + (label != null ? label.hashCode() : 0);
+        return result;
     }
 
     @Override

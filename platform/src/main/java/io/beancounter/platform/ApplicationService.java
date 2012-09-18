@@ -39,19 +39,13 @@ public class ApplicationService extends JsonService {
         try {
             oauthUrl = new URL(oauth);
         } catch (MalformedURLException e) {
-            throw new RuntimeException(
-                    "Provided URL '" + oauth + "' is not well formed",
-                    e
-            );
+            return error(e, "Provided URL '" + oauth + "' is not well formed");
         }
         UUID apiKey;
         try {
             apiKey = applicationsManager.registerApplication(name, description, email, oauthUrl);
         } catch (ApplicationsManagerException e) {
-            throw new RuntimeException(
-                    "Error while registering application '" + name + "'",
-                    e
-            );
+            return error(e, "Error while registering application [" + name + "]");
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new UUIDPlatformResponse(
@@ -72,20 +66,26 @@ public class ApplicationService extends JsonService {
         } catch (IllegalArgumentException e) {
             return error(e, "Your apikey is not well formed");
         }
+        boolean found;
         try {
-            applicationsManager.deregisterApplication(
+            found = applicationsManager.deregisterApplication(
                     UUID.fromString(apiKey)
             );
         } catch (ApplicationsManagerException e) {
-            throw new RuntimeException(
-                    "Error while deregistering application with api key [" + apiKey + "]",
-                    e
+            return error(e, "Error while deregistering application with api key [" + apiKey + "]");
+        }
+        if (!found) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    "Application with api key '" + apiKey + "' not found")
             );
+            return rb.build();
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new StringPlatformResponse(
                 StringPlatformResponse.Status.OK,
-                "Application with api key'" + apiKey + "' successfully removed")
+                "Application with api key '" + apiKey + "' successfully removed")
         );
         return rb.build();
     }

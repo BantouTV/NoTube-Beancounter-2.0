@@ -1,15 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>io.beancounter</groupId>
         <artifactId>parent</artifactId>
-        <version>1.4-SNAPSHOT</version>
+        <version>1.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>platform</artifactId>
-    <version>1.4-SNAPSHOT</version>
+    <version>1.5-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Beancounter Web REST API</name>
 
@@ -86,10 +85,6 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <scope>provided</scope>
@@ -133,7 +128,7 @@
     </dependencies>
 
     <build>
-        <finalName>notube-platform</finalName>
+        <finalName>beancounter-platform</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -153,6 +148,7 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <configuration>
                     <encoding>${project.build.sourceEncoding}</encoding>
+                    <outputDirectory>${project.build.outputDirectory}</outputDirectory>
                 </configuration>
             </plugin>
             <plugin>
@@ -160,26 +156,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <forkMode>always</forkMode>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.cargo</groupId>
-                <artifactId>cargo-maven2-plugin</artifactId>
-                <configuration>
-                    <container>
-                        <containerId>tomcat7x</containerId>
-                        <type>remote</type>
-                    </container>
-                    <configuration>
-                        <type>runtime</type>
-                        <properties>
-                            <cargo.hostname>46.4.89.183</cargo.hostname>
-                            <cargo.protocol>http</cargo.protocol>
-                            <cargo.servlet.port>8080</cargo.servlet.port>
-                            <cargo.remote.username>admin</cargo.remote.username>
-                            <cargo.remote.password>4dm1n</cargo.remote.password>
-                        </properties>
-                    </configuration>
                 </configuration>
             </plugin>
         </plugins>

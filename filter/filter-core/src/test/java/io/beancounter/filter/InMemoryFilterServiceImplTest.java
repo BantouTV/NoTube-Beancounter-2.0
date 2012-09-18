@@ -103,4 +103,105 @@ public class InMemoryFilterServiceImplTest {
         expectedQueues.add("queue3");
         assertEquals(sendingQueues, expectedQueues);
     }
+
+    @Test
+    public void refreshingAnActiveFilterThatHasBeenStoppedShouldRemoveItFromTheInternalFilters() throws Exception {
+        String filterName = "name";
+        Set<String> queues = new HashSet<String>();
+        queues.add("queue1");
+        Filter stoppedFilter = new Filter(filterName, "description", ActivityPattern.ANY, queues);
+        Filter activeFilter = new Filter(filterName, "description", ActivityPattern.ANY, queues);
+        activeFilter.setActive(true);
+
+        // Load active filter.
+        when(filterManager.get(filterName)).thenReturn(activeFilter);
+        filterService.refresh(filterName);
+
+        // Verify it is active.
+        Set<String> sendingQueues = filterService.processActivity(new ResolvedActivity());
+        assertEquals(sendingQueues, queues);
+
+        // The filter has been stopped using the API.
+        when(filterManager.get(filterName)).thenReturn(stoppedFilter);
+        filterService.refresh(filterName);
+
+        // Verify it is no longer active.
+        sendingQueues = filterService.processActivity(new ResolvedActivity());
+        assertTrue(sendingQueues.isEmpty());
+    }
+
+    @Test
+    public void refreshingAnInactiveFilterThatHasBeenStartedShouldAddItToTheInternalFilters() throws Exception {
+        String filterName = "name";
+        Set<String> queues = new HashSet<String>();
+        queues.add("queue1");
+        Filter stoppedFilter = new Filter(filterName, "description", ActivityPattern.ANY, queues);
+        Filter activeFilter = new Filter(filterName, "description", ActivityPattern.ANY, queues);
+        activeFilter.setActive(true);
+
+        // Load inactive filter.
+        when(filterManager.get(filterName)).thenReturn(stoppedFilter);
+        filterService.refresh(filterName);
+
+        // Verify it is inactive.
+        Set<String> sendingQueues = filterService.processActivity(new ResolvedActivity());
+        assertTrue(sendingQueues.isEmpty());
+
+        // The filter has been started using the API.
+        when(filterManager.get(filterName)).thenReturn(activeFilter);
+        filterService.refresh(filterName);
+
+        // Verify it is now active.
+        sendingQueues = filterService.processActivity(new ResolvedActivity());
+        assertEquals(sendingQueues, queues);
+    }
+
+    @Test
+    public void refreshingAnActiveFilterThanHasBeenDeletedShouldRemoveItFromTheInternalFilters() throws Exception {
+        String filterName = "name";
+        Set<String> queues = new HashSet<String>();
+        queues.add("queue1");
+        Filter activeFilter = new Filter(filterName, "description", ActivityPattern.ANY, queues);
+        activeFilter.setActive(true);
+
+        // Load active filter.
+        when(filterManager.get(filterName)).thenReturn(activeFilter);
+        filterService.refresh(filterName);
+
+        // Verify it is active.
+        Set<String> sendingQueues = filterService.processActivity(new ResolvedActivity());
+        assertEquals(sendingQueues, queues);
+
+        // The filter has been deleted using the API.
+        when(filterManager.get(filterName)).thenReturn(null);
+        filterService.refresh(filterName);
+
+        // Verify it is no longer active.
+        sendingQueues = filterService.processActivity(new ResolvedActivity());
+        assertTrue(sendingQueues.isEmpty());
+    }
+
+    @Test
+    public void refreshingAnInactiveFilterThanHasBeenDeletedShouldRemoveItFromTheInternalFilters() throws Exception {
+        String filterName = "name";
+        Set<String> queues = new HashSet<String>();
+        queues.add("queue1");
+        Filter inactiveFilter = new Filter(filterName, "description", ActivityPattern.ANY, queues);
+
+        // Load inactive filter.
+        when(filterManager.get(filterName)).thenReturn(inactiveFilter);
+        filterService.refresh(filterName);
+
+        // Verify it is inactive.
+        Set<String> sendingQueues = filterService.processActivity(new ResolvedActivity());
+        assertTrue(sendingQueues.isEmpty());
+
+        // The filter has been deleted using the API.
+        when(filterManager.get(filterName)).thenReturn(null);
+        filterService.refresh(filterName);
+
+        // Verify it is not active.
+        sendingQueues = filterService.processActivity(new ResolvedActivity());
+        assertTrue(sendingQueues.isEmpty());
+    }
 }

@@ -1,32 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <artifactId>publishers</artifactId>
         <groupId>io.beancounter</groupId>
-        <version>1.4-SNAPSHOT</version>
+        <version>1.5-SNAPSHOT</version>
     </parent>
 
+    <groupId>io.beancounter.publishers</groupId>
     <artifactId>facebook-publisher</artifactId>
-    <name>Beancounter Facebook Timeline Publisher</name>
+    <name>Beancounter Publishers: Facebook</name>
 
     <dependencies>
         <dependency>
             <groupId>io.beancounter.commons</groupId>
             <artifactId>model</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.beancounter.resolver</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>resolver-core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.beancounter</groupId>
             <artifactId>user-manager</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.restfb</groupId>
             <artifactId>restfb</artifactId>

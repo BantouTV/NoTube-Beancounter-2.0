@@ -25,15 +25,8 @@ import java.net.URL;
 import java.util.UUID;
 
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 public class JedisUserManagerImplTest {
 
@@ -362,6 +355,7 @@ public class JedisUserManagerImplTest {
         assertEquals(atomicSignUp.getUserId(), user.getId());
         assertEquals(atomicSignUp.getService(), serviceName);
         assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertEquals(atomicSignUp.getUserToken(), userToken);
         assertFalse(atomicSignUp.isReturning());
 
         verify(authHandler).auth(token, verifier);
@@ -408,6 +402,7 @@ public class JedisUserManagerImplTest {
         assertEquals(atomicSignUp.getUserId(), newUser.getId());
         assertEquals(atomicSignUp.getService(), serviceName);
         assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertEquals(atomicSignUp.getUserToken(), newUserToken);
         assertTrue(atomicSignUp.isReturning());
 
         verify(tokenManager).deleteUserToken(oldUserToken);
@@ -453,6 +448,7 @@ public class JedisUserManagerImplTest {
         assertEquals(atomicSignUp.getUserId(), newUser.getId());
         assertEquals(atomicSignUp.getService(), serviceName);
         assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertEquals(atomicSignUp.getUserToken(), newUserToken);
         assertTrue(atomicSignUp.isReturning());
 
         verify(tokenManager, never()).deleteUserToken(oldUserToken);
@@ -495,6 +491,7 @@ public class JedisUserManagerImplTest {
         assertEquals(atomicSignUp.getUserId(), user.getId());
         assertEquals(atomicSignUp.getService(), serviceName);
         assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertEquals(atomicSignUp.getUserToken(), userToken);
         assertFalse(atomicSignUp.isReturning());
 
         verify(authHandler).auth(code);
@@ -541,6 +538,7 @@ public class JedisUserManagerImplTest {
         assertEquals(atomicSignUp.getUserId(), newUser.getId());
         assertEquals(atomicSignUp.getService(), serviceName);
         assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertEquals(atomicSignUp.getUserToken(), newUserToken);
         assertTrue(atomicSignUp.isReturning());
 
         verify(tokenManager).deleteUserToken(oldUserToken);
@@ -586,6 +584,7 @@ public class JedisUserManagerImplTest {
         assertEquals(atomicSignUp.getUserId(), newUser.getId());
         assertEquals(atomicSignUp.getService(), serviceName);
         assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertEquals(atomicSignUp.getUserToken(), newUserToken);
         assertTrue(atomicSignUp.isReturning());
 
         verify(tokenManager, never()).deleteUserToken(oldUserToken);
@@ -761,6 +760,56 @@ public class JedisUserManagerImplTest {
                 .thenThrow(new ResolverMappingNotFoundException("Means the service->user mapping doesn't exist yet."));
         when(tokenManager.createUserToken(username))
                 .thenThrow(new UserManagerException("Error"));
+
+        userManager.storeUserFromOAuth(serviceName, token, code);
+    }
+
+    @Test(
+            expectedExceptions = UserManagerException.class,
+            expectedExceptionsMessageRegExp = "User \\[deleted-user\\] does not exist"
+    )
+    public void givenDeletedTwitterUserWhenLoggingInThenThrowAnException() throws Exception {
+        String serviceName = "twitter";
+        String username = "deleted-user";
+        String serviceUserId = "17473832";
+        String token = "oauth_token";
+        String verifier = "oauth_verifier";
+
+        AuthHandler authHandler = mock(AuthHandler.class);
+        User user = new User("Test", "User", username, "password");
+        AuthenticatedUser authUser = new AuthenticatedUser(serviceUserId, user);
+
+        when(authManager.getService(serviceName)).thenReturn(new Service(serviceName));
+        when(authManager.getHandler(serviceName)).thenReturn(authHandler);
+        when(authHandler.auth(token, verifier)).thenReturn(authUser);
+        when(authHandler.getService()).thenReturn(serviceName);
+        when(resolver.resolveUsername(serviceUserId, serviceName)).thenReturn(username);
+        when(jedis.get(username)).thenReturn(null);
+
+        userManager.storeUserFromOAuth(serviceName, token, verifier);
+    }
+
+    @Test(
+            expectedExceptions = UserManagerException.class,
+            expectedExceptionsMessageRegExp = "User \\[deleted-user\\] does not exist"
+    )
+    public void givenDeletedFacebookUserWhenLoggingInThenThrowAnException() throws Exception {
+        String serviceName = "facebook";
+        String username = "deleted-user";
+        String serviceUserId = "17473832";
+        String token = null;
+        String code = "oauth2_code";
+
+        AuthHandler authHandler = mock(AuthHandler.class);
+        User user = new User("Test", "User", username, "password");
+        AuthenticatedUser authUser = new AuthenticatedUser(serviceUserId, user);
+
+        when(authManager.getService(serviceName)).thenReturn(new Service(serviceName));
+        when(authManager.getHandler(serviceName)).thenReturn(authHandler);
+        when(authHandler.auth(code)).thenReturn(authUser);
+        when(authHandler.getService()).thenReturn(serviceName);
+        when(resolver.resolveUsername(serviceUserId, serviceName)).thenReturn(username);
+        when(jedis.get(username)).thenReturn(null);
 
         userManager.storeUserFromOAuth(serviceName, token, code);
     }

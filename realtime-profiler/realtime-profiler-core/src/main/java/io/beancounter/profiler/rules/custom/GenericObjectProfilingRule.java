@@ -1,5 +1,6 @@
 package io.beancounter.profiler.rules.custom;
 
+import io.beancounter.commons.model.Interest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.beancounter.commons.linking.LinkingEngine;
@@ -8,7 +9,6 @@ import io.beancounter.commons.nlp.*;
 import io.beancounter.profiler.rules.ObjectProfilingRule;
 import io.beancounter.profiler.rules.ProfilingRuleException;
 
-import java.net.URI;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
@@ -27,7 +27,7 @@ public class GenericObjectProfilingRule
 
     private static final Logger logger = LoggerFactory.getLogger(GenericObjectProfilingRule.class);
 
-    private Set<URI> result = new HashSet<URI>();
+    private Set<Interest> result = new HashSet<Interest>();
 
     public GenericObjectProfilingRule(
             io.beancounter.commons.model.activity.Object object,
@@ -49,16 +49,11 @@ public class GenericObjectProfilingRule
             logger.error(errMsg, e);
             throw new ProfilingRuleException(errMsg, e);
         }
-        for (Entity entity : result.getEntities()) {
-            this.result.add(entity.getResource());
-        }
-        for (Category category : result.getCategories()) {
-            this.result.add(category.getResource());
-        }
+        this.result.addAll(InterestConverter.convert(result));
     }
 
     @Override
-    public Collection<URI> getResult() throws ProfilingRuleException {
+    public Collection<Interest> getResult() throws ProfilingRuleException {
         return result;
     }
 

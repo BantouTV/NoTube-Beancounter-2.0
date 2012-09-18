@@ -83,7 +83,7 @@ public interface UserManager {
      * @param user
      * @param token   @throws UserManagerException
      */
-    public void registerOAuthService(
+    public User registerOAuthService(
             String service,
             User user,
             String token,

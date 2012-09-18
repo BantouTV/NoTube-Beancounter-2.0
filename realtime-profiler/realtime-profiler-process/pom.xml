@@ -6,11 +6,12 @@
     <parent>
         <artifactId>realtime-profiler</artifactId>
         <groupId>io.beancounter</groupId>
-        <version>1.4-SNAPSHOT</version>
+        <version>1.5-SNAPSHOT</version>
     </parent>
 
+    <groupId>io.beancounter.realtime-profiler</groupId>
     <artifactId>realtime-profiler-process</artifactId>
-    <name>Beancounter Realtime Profiler Camel Process</name>
+    <name>Beancounter Realtime Profiler: Camel Process</name>
 
     <dependencies>
         <dependency>
@@ -18,7 +19,7 @@
             <artifactId>configuration</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.beancounter</groupId>
+            <groupId>io.beancounter.realtime-profiler</groupId>
             <artifactId>realtime-profiler-core</artifactId>
         </dependency>
         <dependency>
@@ -62,13 +63,9 @@
             <artifactId>camel-testng</artifactId>
             <scope>test</scope>
         </dependency>
-
-
     </dependencies>
 
     <build>
-        <!-- Allows to be run via 'mvn compile exec:java' -->
-        <!-- java -jar filter-process-1.0-SNAPSHOT-jar-with-dependencies.jar -jndiProperties /guicejndi.properties -->
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>

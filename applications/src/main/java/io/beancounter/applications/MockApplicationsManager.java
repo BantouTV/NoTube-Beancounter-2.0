@@ -36,14 +36,18 @@ public class MockApplicationsManager implements ApplicationsManager {
     }
 
     @Override
-    public void deregisterApplication(UUID key) throws ApplicationsManagerException {
+    public boolean deregisterApplication(UUID key) throws ApplicationsManagerException {
+        int size = applications.size();
+        int originalSize = size;
         Iterator it = applications.iterator();
         while(it.hasNext()) {
             Application app = (Application) it.next();
             if(app.getApiKey().equals(key)) {
                it.remove();
+                size--;
             }
         }
+        return !(originalSize == size);
     }
 
     @Override

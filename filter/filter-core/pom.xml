@@ -3,15 +3,15 @@
 
     <parent>
         <artifactId>filter</artifactId>
-        <groupId>io.beancounter.filter</groupId>
-        <version>1.4-SNAPSHOT</version>
+        <groupId>io.beancounter</groupId>
+        <version>1.5-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.beancounter.filter</groupId>
     <artifactId>filter-core</artifactId>
-    <name>Beancounter Filter Core</name>
+    <name>Beancounter Filter: Core</name>
 
     <dependencies>
         <dependency>

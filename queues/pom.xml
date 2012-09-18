@@ -6,12 +6,12 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>io.beancounter</groupId>
-        <version>1.4-SNAPSHOT</version>
+        <version>1.5-SNAPSHOT</version>
     </parent>
 
     <groupId>io.beancounter</groupId>
     <artifactId>queues</artifactId>
-  <version>1.4-SNAPSHOT</version>
+    <version>1.5-SNAPSHOT</version>
     <name>Beancounter Queues</name>
 
     <dependencies>

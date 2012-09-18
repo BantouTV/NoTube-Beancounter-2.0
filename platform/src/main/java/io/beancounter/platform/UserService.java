@@ -5,20 +5,17 @@ import io.beancounter.commons.helper.UriUtils;
 import io.beancounter.platform.validation.ApiKeyValidation;
 import io.beancounter.platform.validation.RequestValidator;
 import io.beancounter.platform.validation.UsernameValidation;
-import org.codehaus.jackson.map.ObjectMapper;
+import io.beancounter.usermanager.UserTokenManager;
 import io.beancounter.applications.ApplicationsManager;
 import io.beancounter.applications.ApplicationsManagerException;
 import io.beancounter.commons.model.OAuthToken;
 import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.UserProfile;
-import io.beancounter.commons.model.activity.Activity;
-import io.beancounter.commons.model.activity.ResolvedActivity;
 import io.beancounter.commons.model.auth.OAuthAuth;
 import io.beancounter.platform.responses.*;
 import io.beancounter.profiles.Profiles;
 import io.beancounter.profiles.ProfilesException;
 import io.beancounter.queues.Queues;
-import io.beancounter.queues.QueuesException;
 import io.beancounter.usermanager.AtomicSignUp;
 import io.beancounter.usermanager.UserManager;
 import io.beancounter.usermanager.UserManagerException;
@@ -26,7 +23,6 @@ import io.beancounter.usermanager.UserManagerException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.util.*;
@@ -44,6 +40,8 @@ public class UserService extends JsonService {
 
     private UserManager userManager;
 
+    private UserTokenManager tokenManager;
+
     private Profiles profiles;
 
     private Queues queues;
@@ -54,10 +52,12 @@ public class UserService extends JsonService {
     public UserService(
             final ApplicationsManager am,
             final UserManager um,
+            final UserTokenManager tokenManager,
             final Profiles ps,
             final Queues queues
     ) {
         this.applicationsManager = am;
+        this.tokenManager = tokenManager;
         this.userManager = um;
         this.profiles = ps;
         this.queues = queues;
@@ -136,26 +136,31 @@ public class UserService extends JsonService {
     }
 
     @GET
-    @Path("/{username}")
-    public Response getUser(
-            @PathParam("username") String username,
-            @QueryParam("apikey") String apiKey
+    @Path("/{username}/me")
+    public Response getUserWithUserToken(
+            @PathParam(USERNAME) String username,
+            @QueryParam(USER_TOKEN) String token
     ) {
-        Map<String, Object> params = createParams(
-                USERNAME, username,
-                API_KEY, apiKey
-        );
+        // TODO (high): Simplify request parameter validation.
+        User user;
+        try {
+            user = userManager.getUser(username);
+        } catch (UserManagerException e) {
+            final String errMsg = "Error while retrieving user [" + username + "]";
+            return error(e, errMsg);
+        }
 
-        Response error = validator.validateRequest(
-                this.getClass(),
-                "getUser",
-                ApplicationsManager.Action.RETRIEVE,
-                ApplicationsManager.Object.USER,
-                params
-        );
+        if (user == null) {
+            return error("user with username [" + username + "] not found");
+        }
 
-        if (error != null) {
-            return error;
+        try {
+            UUID userToken = UUID.fromString(token);
+            if (!userToken.equals(user.getUserToken()) || !tokenManager.checkTokenExists(userToken)) {
+                return error("User token [" + token + "] is not valid");
+            }
+        } catch (Exception ex) {
+            return error(ex, "Error validating user token [" + token + "]");
         }
 
         Response.ResponseBuilder rb = Response.ok();
@@ -163,7 +168,73 @@ public class UserService extends JsonService {
                 new UserPlatformResponse(
                     UserPlatformResponse.Status.OK,
                     "user [" + username + "] found",
-                    (User) params.get(USER)
+                    user
+                )
+        );
+        return rb.build();
+    }
+
+    @GET
+    @Path("/{username}")
+    public Response getUserWithApiKey(
+            @PathParam(USERNAME) String username,
+            @QueryParam(API_KEY) String apiKey
+    ) {
+        // TODO (high): Simplify request parameter validation.
+        try {
+            check(
+                    this.getClass(),
+                    "getUserWithApiKey",
+                    username,
+                    apiKey
+            );
+        } catch (ServiceException e) {
+            return error(e, "Error while checking parameters");
+        }
+
+        try {
+            UUID.fromString(apiKey);
+        } catch (IllegalArgumentException e) {
+            return RequestValidator.error(e, "Your apikey is not well formed");
+        }
+
+        boolean isAuth;
+        try {
+            isAuth = applicationsManager.isAuthorized(
+                    UUID.fromString(apiKey),
+                    ApplicationsManager.Action.RETRIEVE,
+                    ApplicationsManager.Object.USER
+            );
+        } catch (ApplicationsManagerException e) {
+            return RequestValidator.error(e, "Error while authorizing your application");
+        }
+        if (!isAuth) {
+            Response.ResponseBuilder rb = Response.serverError();
+            rb.entity(new StringPlatformResponse(
+                    StringPlatformResponse.Status.NOK,
+                    "application with key [" + apiKey + "] is not authorized")
+            );
+            return rb.build();
+        }
+
+        User user;
+        try {
+            user = userManager.getUser(username);
+        } catch (UserManagerException e) {
+            final String errMsg = "Error while retrieving user [" + username + "]";
+            return error(e, errMsg);
+        }
+
+        if (user == null) {
+            return error("user with username [" + username + "] not found");
+        }
+
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(
+                new UserPlatformResponse(
+                        UserPlatformResponse.Status.OK,
+                        "user [" + username + "] found",
+                        user
                 )
         );
         return rb.build();
@@ -196,10 +267,7 @@ public class UserService extends JsonService {
             User user = (User) params.get(USER);
             userManager.deleteUser(user);
         } catch (UserManagerException e) {
-            throw new RuntimeException(
-                    "Error while deleting user [" + username + "]",
-                    e
-            );
+            return error(e, "Error while deleting user [" + username + "]");
         }
 
         Response.ResponseBuilder rb = Response.ok();
@@ -477,10 +545,23 @@ public class UserService extends JsonService {
 
         URI finalRedirectUri;
         try {
-            finalRedirectUri = new URI(decodedFinalRedirect + "?username=" + signUp.getUsername());
-        } catch (URISyntaxException use) {
-            return error(use, "Malformed redirect URL");
+            finalRedirectUri = new URI(decodedFinalRedirect);
+            if (finalRedirectUri.getQuery() == null) {
+                finalRedirectUri = new URI(decodedFinalRedirect + "?username=" + signUp.getUsername() + "&token=" + signUp.getUserToken());
+            } else {
+                String[] paramsAndValue = finalRedirectUri.getQuery().split("&");
+                for (String p : paramsAndValue) {
+                    String[] param = p.split("=");
+                    if (param[0].equals("username") || param[0].equals("token")) {
+                        return error("[username] and [token] are reserved parameters");
+                    }
+                }
+                finalRedirectUri = new URI(decodedFinalRedirect + "&username=" + signUp.getUsername() + "&token=" + signUp.getUserToken());
+            }
+        } catch (Exception ex) {
+            return error(ex, "Malformed redirect URL");
         }
+
         return Response.temporaryRedirect(finalRedirectUri).build();
     }
 
@@ -591,24 +672,44 @@ public class UserService extends JsonService {
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
+
+        User user;
         try {
-            userManager.registerOAuthService(service, userObj, token, verifier);
+            user = userManager.registerOAuthService(service, userObj, token, verifier);
         } catch (UserManagerException e) {
             return error(e, "Error while OAuth-like exchange for service: '" + service + "'");
         }
-        URL finalRedirectUrl;
+
+        String finalRedirect;
         try {
-            finalRedirectUrl = userManager.consumeUserFinalRedirect(userObj.getUsername());
+            finalRedirect = userManager.consumeUserFinalRedirect(userObj.getUsername()).toString();
         } catch (UserManagerException e) {
             return error(e, "Error while getting final redirect URL for user '" + username + "' for service '" + service + "'");
         }
+
+        URI finalRedirectUri;
         try {
-            return Response.temporaryRedirect(finalRedirectUrl.toURI()).build();
-        } catch (URISyntaxException e) {
-            return error(e, "Malformed redirect URL");
+            finalRedirectUri = new URI(finalRedirect);
+            if (finalRedirectUri.getQuery() == null) {
+                finalRedirectUri = new URI(finalRedirect + "?username=" + username + "&token=" + user.getUserToken());
+            } else {
+                String[] paramsAndValue = finalRedirectUri.getQuery().split("&");
+                for (String p : paramsAndValue) {
+                    String[] param = p.split("=");
+                    if (param[0].equals("username") || param[0].equals("token")) {
+                        return error("[username] and [token] are reserved parameters");
+                    }
+                }
+                finalRedirectUri = new URI(finalRedirect + "&username=" + username + "&token=" + user.getUserToken());
+            }
+        } catch (Exception ex) {
+            return error(ex, "Malformed redirect URL");
         }
+
+        return Response.temporaryRedirect(finalRedirectUri).build();
     }
 
+    @Deprecated
     @GET
     @Path("/auth/callback/{service}/{username}/{redirect}")
     public Response handleAuthCallback(
@@ -721,71 +822,47 @@ public class UserService extends JsonService {
     @GET
     @Path("/{username}/profile")
     public Response getProfile(
-            @PathParam("username") String username,
-            @QueryParam("apikey") String apiKey
+            @PathParam(USERNAME) String username,
+            @QueryParam(USER_TOKEN) String token
     ) {
+        User user;
         try {
-            check(
-                    this.getClass(),
-                    "getProfile",
-                    username,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
-        }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.RETRIEVE,
-                    ApplicationsManager.Object.PROFILE
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while authenticating you application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry. You're not allowed to do that.")
-            );
-            return rb.build();
-        }
-        User userObj;
-        try {
-            userObj = userManager.getUser(username);
+            user = userManager.getUser(username);
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user '" + username + "'");
         }
-        if (userObj == null) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "Sorry. User [" + username + "] has not been found")
-            );
-            return rb.build();
+
+        if (user == null) {
+            return error("user with username [" + username + "] not found");
         }
+
+        try {
+            UUID userToken = UUID.fromString(token);
+            if (!userToken.equals(user.getUserToken()) || !tokenManager.checkTokenExists(userToken)) {
+                return error("User token [" + token + "] is not valid");
+            }
+        } catch (Exception ex) {
+            return error(ex, "Error validating user token [" + token + "]");
+        }
+
         UserProfile up;
         try {
-            up = profiles.lookup(userObj.getId());
+            up = profiles.lookup(user.getId());
         } catch (ProfilesException e) {
             return error(e, "Error while retrieving profile for user [" + username + "]");
         }
+
         if (up == null) {
-            return error(new RuntimeException(), "Profile for user [" + username + "] not found");
+            return error("Profile for user [" + username + "] not found");
         }
+
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new UserProfilePlatformResponse(
-                UserProfilePlatformResponse.Status.OK,
-                "profile for user [" + username + "] found",
-                up
-        )
+        rb.entity(
+                new UserProfilePlatformResponse(
+                        UserProfilePlatformResponse.Status.OK,
+                        "profile for user [" + username + "] found",
+                        up
+                )
         );
         return rb.build();
     }

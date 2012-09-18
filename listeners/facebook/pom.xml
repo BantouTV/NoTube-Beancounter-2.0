@@ -5,13 +5,13 @@
     <parent>
         <artifactId>listeners</artifactId>
         <groupId>io.beancounter</groupId>
-        <version>1.4-SNAPSHOT</version>
+        <version>1.5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>facebook</artifactId>
     <groupId>io.beancounter.listeners</groupId>
+    <artifactId>facebook</artifactId>
     <packaging>pom</packaging>
-    <name>Beancounter Facebook</name>
+    <name>Beancounter Listeners: Facebook</name>
 
     <modules>
         <module>facebook-core</module>
@@ -20,9 +20,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.beancounter</groupId>
+            <groupId>io.beancounter.listeners</groupId>
             <artifactId>listeners-commons</artifactId>
-            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.beancounter.resolver</groupId>
+            <artifactId>resolver-core</artifactId>
         </dependency>
     </dependencies>
 

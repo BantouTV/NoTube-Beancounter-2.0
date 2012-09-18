@@ -1,5 +1,6 @@
 package io.beancounter.profiler.rules.custom;
 
+import io.beancounter.commons.model.Interest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.beancounter.commons.linking.LinkNotFoundException;
@@ -31,7 +32,7 @@ public class FacebookLikeProfilingRule extends ObjectProfilingRule<Like> {
 
     private final static String RELEVANT ="category/";
 
-    private Set<URI> result = new HashSet<URI>();
+    private Set<Interest> result = new HashSet<Interest>();
 
     public FacebookLikeProfilingRule(
             Like like,
@@ -60,7 +61,7 @@ public class FacebookLikeProfilingRule extends ObjectProfilingRule<Like> {
             }
             try {
                 result.add(
-                        new URI(BASE_URI + RELEVANT + cogitoCategory)
+                        new Interest(cogitoCategory, new URI(BASE_URI + RELEVANT + cogitoCategory))
                 );
             } catch (URISyntaxException e) {
                 final String errMsg = "error while trying to link [" + category + "]";
@@ -71,7 +72,7 @@ public class FacebookLikeProfilingRule extends ObjectProfilingRule<Like> {
     }
 
     @Override
-    public Collection<URI> getResult() throws ProfilingRuleException {
+    public Collection<Interest> getResult() throws ProfilingRuleException {
         return result;
     }
 

@@ -234,13 +234,16 @@ public class ElasticSearchActivityStore implements ActivityStore {
                 .prepareGet(INDEX_NAME, INDEX_TYPE, activityId.toString())
                 .execute().actionGet();
 
-        ResolvedActivity activity;
+        if (response.getSource() == null) {
+            return null;
+        }
 
+        ResolvedActivity activity;
         try {
             activity = mapper.readValue(response.source(), ResolvedActivity.class);
-        } catch (IOException ioe) {
+        } catch (Exception ex) {
             final String errMsg = "Error while deserializing from json [" + response.getSource() + "]";
-            throw new ActivityStoreException(errMsg, ioe);
+            throw new ActivityStoreException(errMsg, ex);
         }
 
         return (activity != null && activity.isVisible()) ? activity : null;

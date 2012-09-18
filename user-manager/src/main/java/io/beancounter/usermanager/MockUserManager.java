@@ -94,8 +94,10 @@ public class MockUserManager implements UserManager {
             throws UserManagerException {}
 
     @Override
-    public void registerOAuthService(String service, User user, String token, String verifier)
-            throws UserManagerException {}
+    public User registerOAuthService(String service, User user, String token, String verifier)
+            throws UserManagerException {
+        return null;
+    }
 
     @Override
     public synchronized ServiceAuthorizationManager getServiceAuthorizationManager()

@@ -183,7 +183,7 @@ public class FilterService extends JsonService {
         try {
             check(
                     this.getClass(),
-                    "get",
+                    "delete",
                     name,
                     apikey
             );

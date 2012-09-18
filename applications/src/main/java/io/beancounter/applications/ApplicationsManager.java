@@ -51,7 +51,7 @@ public interface ApplicationsManager {
             URL callback
     ) throws ApplicationsManagerException;
 
-    public void deregisterApplication(UUID key) throws ApplicationsManagerException;
+    public boolean deregisterApplication(UUID key) throws ApplicationsManagerException;
 
     /**
      * Returns an {@link Application} by its key.
