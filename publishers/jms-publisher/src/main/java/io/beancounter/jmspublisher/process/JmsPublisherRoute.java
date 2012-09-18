@@ -52,7 +52,7 @@ public class JmsPublisherRoute extends RouteBuilder {
                         LightstreamerDTO lightstreamerDTO = null;
                         if (obj instanceof Notify) {
                             Notify notify = (Notify) obj;
-                            activityToJmsConverter.wrapNotifyInExternalObject(notify, originalBody);
+                            lightstreamerDTO = activityToJmsConverter.wrapNotifyInExternalObject(notify, originalBody);
                         }
                         if (obj instanceof ResolvedActivity) {
                             ResolvedActivity ra = (ResolvedActivity) obj;

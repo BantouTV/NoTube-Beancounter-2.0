@@ -31,7 +31,12 @@ public class ActivityToJmsConverter {
 
     public LightstreamerDTO wrapNotifyInExternalObject(Notify notify, String json) {
         LOG.debug("Converting activity: {}", json);
-        return new LightstreamerDTO("", json, TYPE);
+        String onEvent;
+        onEvent = notify.getMetadataValue("onEvent");
+        if (onEvent == null) {
+            onEvent = "UNDEFINED";
+        }
+        return new LightstreamerDTO(onEvent, json, TYPE);
     }
 }
 

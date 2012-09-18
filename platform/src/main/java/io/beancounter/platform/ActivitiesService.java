@@ -9,6 +9,7 @@ import io.beancounter.applications.ApplicationsManager;
 import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.activity.Activity;
 import io.beancounter.commons.model.activity.ResolvedActivity;
+import io.beancounter.commons.model.activity.rai.Comment;
 import io.beancounter.commons.model.notifies.Notify;
 import io.beancounter.platform.responses.ResolvedActivitiesPlatformResponse;
 import io.beancounter.platform.responses.ResolvedActivityPlatformResponse;
@@ -181,6 +182,14 @@ public class ActivitiesService extends JsonService {
 
         boolean vObj = (Boolean) params.get(VISIBILITY_OBJ);
         UUID activityIdObj = (UUID) params.get(ACTIVITY_ID_OBJ);
+
+        ResolvedActivity resolvedActivity;
+        try {
+            resolvedActivity = activities.getActivity(activityIdObj);
+        } catch (ActivityStoreException e) {
+            return error(e, "Error while getting activity [" + activityId + "] from the storage");
+        }
+
         try {
             activities.setVisible(activityIdObj, vObj);
         } catch (ActivityStoreException e) {
@@ -191,7 +200,7 @@ public class ActivitiesService extends JsonService {
         // just a workaround for the 1.4 release.
         String jsonNotifyMessage;
         try {
-            jsonNotifyMessage = getDeleteMessage(activityIdObj, vObj);
+            jsonNotifyMessage = getDeleteMessage(activityIdObj, vObj, resolvedActivity);
         } catch (IOException e) {
             return error(e, "Error serializing the notification for [" + activityId + "] to [" + vObj + "]");
         }
@@ -212,12 +221,21 @@ public class ActivitiesService extends JsonService {
         return rb.build();
     }
 
-    private String getDeleteMessage(UUID activityIdObj, boolean vObj) throws IOException {
+    private String getDeleteMessage(UUID activityIdObj, boolean vObj, ResolvedActivity resolvedActivity) throws IOException {
         Notify notify = new Notify(
                 "setVisibility",
                 activityIdObj.toString(),
                 String.valueOf(vObj)
         );
+        if (resolvedActivity != null) {
+            Comment comment;
+            try {
+                comment = (Comment) resolvedActivity.getActivity().getObject();
+                notify.addMetadata("onEvent", comment.getOnEvent());
+            } catch (ClassCastException e) {
+                // just avoid to set the onEvent
+            }
+        }
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writeValueAsString(notify);
     }
