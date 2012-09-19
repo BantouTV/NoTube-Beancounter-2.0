@@ -20,6 +20,7 @@ import io.beancounter.commons.model.activity.Context;
 import io.beancounter.platform.ActivitiesService;
 import io.beancounter.platform.ApplicationService;
 import io.beancounter.platform.JacksonMixInProvider;
+import io.beancounter.platform.PlatformResponse;
 import io.beancounter.platform.responses.UUIDPlatformResponse;
 import io.beancounter.queues.Queues;
 import io.beancounter.usermanager.UserManager;
@@ -486,10 +487,9 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         assertFalse(responseBody.isEmpty());
 
-        StringPlatformResponse actual = fromJson(responseBody, StringPlatformResponse.class);
-
-        assertEquals(actual.getMessage(), "Error while checking parameters");
-        assertEquals(actual.getStatus().toString(), "NOK");
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus().toString(), "NOK");
+        assertEquals(response.getMessage(), "Missing api key parameter");
     }
 
     @Test
@@ -566,6 +566,30 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
         StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
         assertEquals(response.getMessage(), expectedMessage);
         assertEquals(response.getStatus().toString(), "NOK");
+    }
+
+    @Test
+    public void changingTheVisibilityOfAnActivityWithInvalidVisibilityWillDefaultToFalse() throws Exception {
+        UUID activityId = UUID.randomUUID();
+        String baseQuery = "activities/%s/visible/%s?apikey=%s";
+        String query = String.format(
+                baseQuery,
+                activityId.toString(),
+                "not-valid",
+                APIKEY
+        );
+
+        PutMethod getMethod = new PutMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse actual = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(actual.getMessage(), "activity [" + activityId + "] visibility has been modified to [false]");
+        assertEquals(actual.getStatus().toString(), "OK");
     }
 
     @Test
@@ -1735,6 +1759,34 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
             assertEquals(response.getMessage(), "Error while getting page " + 0 + " of activities where [" + path + "=" + value +"]");
             assertEquals(response.getObject(), expectedMessage);
         }
+    }
+
+    @Test
+    public void searchingWithNegativePageParameterReturnsErrorResponse() throws Exception {
+        String baseQuery = "activities/search?path=%s&value=%s&page=%s&apikey=%s";
+        int page = -1;
+        String order = "desc";
+        String path = "type";
+        String value = "TWEET";
+        String query = String.format(
+                baseQuery,
+                path,
+                value,
+                page,
+                APIKEY
+        );
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), PlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Page must be at least 0 (zero)");
     }
 
     @Test

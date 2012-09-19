@@ -15,7 +15,6 @@ import io.beancounter.platform.validation.*;
 import io.beancounter.queues.Queues;
 import io.beancounter.queues.QueuesException;
 import io.beancounter.usermanager.UserManager;
-import io.beancounter.usermanager.UserManagerException;
 import io.beancounter.usermanager.UserTokenManager;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
@@ -26,8 +25,11 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+
+import static io.beancounter.applications.ApplicationsManager.Action.DELETE;
+import static io.beancounter.applications.ApplicationsManager.Action.RETRIEVE;
+import static io.beancounter.applications.ApplicationsManager.Object.ACTIVITIES;
 
 /**
  * This service implements all the <i>REST</i> APIs needed to manage
@@ -46,11 +48,11 @@ public class ActivitiesService extends JsonService {
 
     private ActivityStore activities;
 
+    private ApplicationsManager applicationsManager;
+
     private UserManager userManager;
 
     private UserTokenManager tokenManager;
-
-    private RequestValidator validator;
 
     @Inject
     public ActivitiesService(
@@ -60,17 +62,11 @@ public class ActivitiesService extends JsonService {
             final ActivityStore activities,
             final UserTokenManager tokenManager
     ) {
+        applicationsManager = am;
         userManager = um;
         this.queues = queues;
         this.activities = activities;
         this.tokenManager = tokenManager;
-
-        validator = new RequestValidator();
-        validator.addValidation(API_KEY, new ApiKeyValidation(am));
-        validator.addValidation(ACTIVITY_ID, new ActivityIdValidation());
-        validator.addValidation(IS_VISIBLE, new VisibilityValidation());
-        validator.addValidation(PAGE_STRING, new PageValidation());
-        validator.addValidation(USERNAME, new UsernameValidation(um));
     }
 
     @POST
@@ -80,26 +76,14 @@ public class ActivitiesService extends JsonService {
             @FormParam(ACTIVITY) String jsonActivity,
             @QueryParam(USER_TOKEN) String token
     ) {
-        // TODO (high): Simplify request parameter validation.
         User user;
         try {
+            Validations.checkNotEmpty(username);
             user = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            final String errMsg = "Error while retrieving user [" + username + "]";
-            return error(e, errMsg);
-        }
-
-        if (user == null) {
-            return error("user with username [" + username + "] not found");
-        }
-
-        try {
-            UUID userToken = UUID.fromString(token);
-            if (!userToken.equals(user.getUserToken()) || !tokenManager.checkTokenExists(userToken)) {
-                return error("User token [" + token + "] is not valid");
-            }
+            Validations.checkNotNull(user, "user with username [" + username + "] not found");
+            Validations.validateUserToken(token, user, tokenManager);
         } catch (Exception ex) {
-            return error(ex, "Error validating user token [" + token + "]");
+            return error(ex.getMessage());
         }
 
         // deserialize the given activity
@@ -153,31 +137,22 @@ public class ActivitiesService extends JsonService {
     @Path("/{activityId}/visible/{isVisible}")
     public Response setVisibility(
             @PathParam(ACTIVITY_ID) String activityId,
-            @PathParam(IS_VISIBLE) String isVisible,
+            @PathParam(IS_VISIBLE) boolean isVisible,
             @QueryParam(API_KEY) String apiKey
     ) {
-        Map<String, Object> params = RequestValidator.createParams(
-                ACTIVITY_ID, activityId,
-                IS_VISIBLE, isVisible,
-                API_KEY, apiKey
-        );
-
-        Response error = validator.validateRequest(
-                this.getClass(),
-                "setVisibility",
-                ApplicationsManager.Action.DELETE,
-                ApplicationsManager.Object.ACTIVITIES,
-                params
-        );
-
-        if (error != null) {
-            return error;
+        try {
+            Validations.checkNotEmpty(activityId);
+            Validations.checkNotNull(isVisible);
+            Validations.checkNotEmpty(apiKey);
+            Validations.validateApiKey(apiKey, applicationsManager, DELETE, ACTIVITIES);
+        } catch (Exception ex) {
+            return error(ex.getMessage());
         }
 
-        boolean vObj = (Boolean) params.get(VISIBILITY_OBJ);
-        UUID activityIdObj = (UUID) params.get(ACTIVITY_ID_OBJ);
+        UUID activityIdObj;
         try {
-            activities.setVisible(activityIdObj, vObj);
+            activityIdObj = UUID.fromString(activityId);
+            activities.setVisible(activityIdObj, isVisible);
         } catch (ActivityStoreException e) {
             return error(e, "Error modifying the visibility of activity with id [" + activityId + "]");
         }
@@ -186,9 +161,9 @@ public class ActivitiesService extends JsonService {
         // just a workaround for the 1.4 release.
         String jsonNotifyMessage;
         try {
-            jsonNotifyMessage = getDeleteMessage(activityIdObj, vObj);
+            jsonNotifyMessage = getDeleteMessage(activityIdObj, isVisible);
         } catch (IOException e) {
-            return error(e, "Error serializing the notification for [" + activityId + "] to [" + vObj + "]");
+            return error(e, "Error serializing the notification for [" + activityId + "] to [" + isVisible + "]");
         }
         try {
             queues.push(jsonNotifyMessage, "social");
@@ -201,7 +176,7 @@ public class ActivitiesService extends JsonService {
         rb.entity(
                 new StringPlatformResponse(
                         StringPlatformResponse.Status.OK,
-                        "activity [" + activityId + "] visibility has been modified to [" + vObj + "]"
+                        "activity [" + activityId + "] visibility has been modified to [" + isVisible + "]"
                 )
         );
         return rb.build();
@@ -223,21 +198,12 @@ public class ActivitiesService extends JsonService {
             @PathParam(ACTIVITY_ID) String activityId,
             @QueryParam(API_KEY) String apiKey
     ) {
-        Map<String, Object> params = RequestValidator.createParams(
-                ACTIVITY_ID, activityId,
-                API_KEY, apiKey
-        );
-
-        Response error = validator.validateRequest(
-                this.getClass(),
-                "getActivity",
-                ApplicationsManager.Action.RETRIEVE,
-                ApplicationsManager.Object.ACTIVITIES,
-                params
-        );
-
-        if (error != null) {
-            return error;
+        try {
+            Validations.checkNotEmpty(activityId, "Missing activity id parameter");
+            Validations.checkNotEmpty(apiKey, "Missing api key parameter");
+            Validations.validateApiKey(apiKey, applicationsManager, DELETE, ACTIVITIES);
+        } catch (Exception ex) {
+            return error(ex.getMessage());
         }
 
         ResolvedActivity activity;
@@ -275,26 +241,15 @@ public class ActivitiesService extends JsonService {
             @PathParam(ACTIVITY_ID) String activityId,
             @QueryParam(USER_TOKEN) String token
     ) {
-        // TODO (high): Simplify request parameter validation.
         User user;
         try {
+            Validations.checkNotEmpty(username);
+            Validations.checkNotEmpty(activityId);
             user = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            final String errMsg = "Error while retrieving user [" + username + "]";
-            return error(e, errMsg);
-        }
-
-        if (user == null) {
-            return error("user with username [" + username + "] not found");
-        }
-
-        try {
-            UUID userToken = UUID.fromString(token);
-            if (!userToken.equals(user.getUserToken()) || !tokenManager.checkTokenExists(userToken)) {
-                return error("User token [" + token + "] is not valid");
-            }
+            Validations.checkNotNull(user, "user with username [" + username + "] not found");
+            Validations.validateUserToken(token, user, tokenManager);
         } catch (Exception ex) {
-            return error(ex, "Error validating user token [" + token + "]");
+            return error(ex.getMessage());
         }
 
         ResolvedActivity activity;
@@ -336,41 +291,24 @@ public class ActivitiesService extends JsonService {
     public Response searchWithToken(
             @QueryParam(PATH) String path,
             @QueryParam(VALUE) String value,
-            @QueryParam(PAGE_STRING) @DefaultValue("0") String pageString,
+            @QueryParam(PAGE_STRING) @DefaultValue("0") int page,
             @QueryParam(ORDER) @DefaultValue("desc") String order,
             @QueryParam("filter") List<String> filters,
             @QueryParam(USER_TOKEN) String token
     ) {
-        Map<String, Object> params = RequestValidator.createParams(
-                PATH, path,
-                VALUE, value,
-                PAGE_STRING, pageString,
-                ORDER, order,
-                "filters", filters,
-                USER_TOKEN, token
-        );
-        Response error = validator.validateRequest(
-                this.getClass(),
-                "searchWithToken",
-                ApplicationsManager.Action.RETRIEVE,
-                ApplicationsManager.Object.ACTIVITIES,
-                params
-        );
-
-        if (error != null) {
-            return error;
-        }
-
         try {
-            UUID userToken = UUID.fromString(token);
-            if (!tokenManager.checkTokenExists(userToken)) {
-                return error("User token [" + token + "] is not valid");
-            }
+            Validations.checkNotEmpty(path);
+            Validations.checkNotEmpty(value);
+            Validations.check(page >= 0, "Page must be at least 0 (zero)");
+            Validations.check(
+                    tokenManager.checkTokenExists(UUID.fromString(token)),
+                    "User token [" + token + "] is not valid"
+            );
         } catch (Exception ex) {
-            return error(ex, "Error validating user token [" + token + "]");
+            return error(ex.getMessage());
         }
 
-        return doSearch(params, path, value, order, filters);
+        return doSearch(path, value, page, order, filters);
     }
 
     @GET
@@ -378,43 +316,32 @@ public class ActivitiesService extends JsonService {
     public Response search(
             @QueryParam(PATH) String path,
             @QueryParam(VALUE) String value,
-            @QueryParam(PAGE_STRING) @DefaultValue("0") String pageString,
+            @QueryParam(PAGE_STRING) @DefaultValue("0") int page,
             @QueryParam(ORDER) @DefaultValue("desc") String order,
             @QueryParam("filter") List<String> filters,
             @QueryParam(API_KEY) String apiKey
     ) {
-        Map<String, Object> params = RequestValidator.createParams(
-                PATH, path,
-                VALUE, value,
-                PAGE_STRING, pageString,
-                ORDER, order,
-                "filters", filters,
-                API_KEY, apiKey
-        );
-        Response error = validator.validateRequest(
-                this.getClass(),
-                "search",
-                ApplicationsManager.Action.RETRIEVE,
-                ApplicationsManager.Object.ACTIVITIES,
-                params
-        );
-
-        if (error != null) {
-            return error;
+        try {
+            Validations.checkNotEmpty(path);
+            Validations.checkNotEmpty(value);
+            Validations.check(page >= 0, "Page must be at least 0 (zero)");
+            Validations.checkNotEmpty(apiKey);
+            Validations.validateApiKey(apiKey, applicationsManager, RETRIEVE, ACTIVITIES);
+        } catch (Exception ex) {
+            return error(ex.getMessage());
         }
 
-        return doSearch(params, path, value, order, filters);
+        return doSearch(path, value, page, order, filters);
     }
 
     private Response doSearch(
-            Map<String, Object> params,
             String path,
             String value,
+            int page,
             String order,
             List<String> filters
     ) {
         Collection<ResolvedActivity> activitiesRetrieved;
-        int page = (Integer) params.get(PAGE_NUMBER);
         try {
             activitiesRetrieved = activities.search(path, value, page, ACTIVITIES_LIMIT, order, filters);
         } catch (ActivityStoreException ase) {
@@ -454,37 +381,18 @@ public class ActivitiesService extends JsonService {
     @Path("/all/{username}")
     public Response getAllActivities(
             @PathParam(USERNAME) String username,
-            @QueryParam(PAGE_STRING) @DefaultValue("0") String pageString,
+            @QueryParam(PAGE_STRING) @DefaultValue("0") int page,
             @QueryParam(ORDER) @DefaultValue("desc") String order,
             @QueryParam(USER_TOKEN) String token
     ) {
-        // TODO (high): Simplify request parameter validation.
         User user;
         try {
+            Validations.checkNotEmpty(username);
             user = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            final String errMsg = "Error while retrieving user [" + username + "]";
-            return error(e, errMsg);
-        }
-
-        if (user == null) {
-            return error("user with username [" + username + "] not found");
-        }
-
-        try {
-            UUID userToken = UUID.fromString(token);
-            if (!userToken.equals(user.getUserToken()) || !tokenManager.checkTokenExists(userToken)) {
-                return error("User token [" + token + "] is not valid");
-            }
+            Validations.checkNotNull(user, "user with username [" + username + "] not found");
+            Validations.validateUserToken(token, user, tokenManager);
         } catch (Exception ex) {
-            return error(ex, "Error validating user token [" + token + "]");
-        }
-
-        int page;
-        try {
-            page = Integer.parseInt(pageString, 10);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your page number is not well formed");
+            return error(ex.getMessage());
         }
 
         Collection<ResolvedActivity> allActivities;
