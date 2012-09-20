@@ -2,6 +2,9 @@ package io.beancounter.commons.model.notifies;
 
 import org.joda.time.DateTime;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * put class description here
  *
@@ -16,6 +19,8 @@ public class Notify {
     private String value;
 
     private DateTime dateTime;
+
+    private Map<String, String> metadata = new HashMap<String, String>();
 
     public Notify() {}
 
@@ -58,6 +63,18 @@ public class Notify {
         this.dateTime = dateTime;
     }
 
+    public void addMetadata(String k, String v) {
+        metadata.put(k, v);
+    }
+
+    public String getMetadataValue(String k) {
+        return metadata.get(k);
+    }
+
+    public Map<String, String> getMetadata() {
+        return metadata;
+    }
+
     @Override
     public String toString() {
         return "Notify{" +
@@ -65,6 +82,7 @@ public class Notify {
                 ", object='" + object + '\'' +
                 ", value='" + value + '\'' +
                 ", dateTime=" + dateTime +
+                ", metadata=" + metadata +
                 '}';
     }
 }

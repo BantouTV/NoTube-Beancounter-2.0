@@ -501,20 +501,21 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
         APIResponse response = fromJson(responseBody, APIResponse.class);
         assertEquals(response.getStatus(), "NOK");
-        assertEquals(response.getMessage(), "Error while checking parameters");
+        assertEquals(response.getMessage(), "Missing api key");
     }
 
     @Test
     public void givenUserManagerErrorWhenGettingUserWithValidApiKeyThenRespondWithError() throws Exception {
         String baseQuery = "user/%s?apikey=%s";
         String username = "test-user";
+        String expectedMessage = "Error while retrieving user [" + username + "]";
         String query = String.format(
                 baseQuery,
                 username,
                 APIKEY
         );
 
-        when(userManager.getUser(username)).thenThrow(new UserManagerException("error"));
+        when(userManager.getUser(username)).thenThrow(new UserManagerException(expectedMessage));
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -526,7 +527,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
         APIResponse response = fromJson(responseBody, APIResponse.class);
         assertEquals(response.getStatus(), "NOK");
-        assertEquals(response.getMessage(), "Error while retrieving user [" + username + "]");
+        assertEquals(response.getMessage(), expectedMessage);
     }
 
     @Test

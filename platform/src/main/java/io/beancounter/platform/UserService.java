@@ -5,9 +5,9 @@ import io.beancounter.commons.helper.UriUtils;
 import io.beancounter.platform.validation.ApiKeyValidation;
 import io.beancounter.platform.validation.RequestValidator;
 import io.beancounter.platform.validation.UsernameValidation;
+import io.beancounter.platform.validation.Validations;
 import io.beancounter.usermanager.UserTokenManager;
 import io.beancounter.applications.ApplicationsManager;
-import io.beancounter.applications.ApplicationsManagerException;
 import io.beancounter.commons.model.OAuthToken;
 import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.UserProfile;
@@ -25,9 +25,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
-import java.util.*;
 
-import static io.beancounter.platform.validation.RequestValidator.createParams;
+import static io.beancounter.applications.ApplicationsManager.Action.*;
+import static io.beancounter.applications.ApplicationsManager.Action.UPDATE;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
@@ -46,8 +46,6 @@ public class UserService extends JsonService {
 
     private Queues queues;
 
-    private RequestValidator validator;
-
     @Inject
     public UserService(
             final ApplicationsManager am,
@@ -61,10 +59,6 @@ public class UserService extends JsonService {
         this.userManager = um;
         this.profiles = ps;
         this.queues = queues;
-
-        validator = new RequestValidator();
-        validator.addValidation(API_KEY, new ApiKeyValidation(am));
-        validator.addValidation(USERNAME, new UsernameValidation(um));
     }
 
     @POST
@@ -76,50 +70,20 @@ public class UserService extends JsonService {
             @FormParam("password") String password,
             @QueryParam("apikey") String apiKey
     ) {
-        Map<String, Object> params = createParams(
-                "name", name,
-                "surname", surname,
-                USERNAME, username,
-                "password", password,
-                API_KEY, apiKey
-        );
-
-        // TODO: eurgh....
-        validator.removeValidation(USERNAME);
-
-        Response error = validator.validateRequest(
-                this.getClass(),
-                "signUp",
-                ApplicationsManager.Action.CREATE,
-                ApplicationsManager.Object.USER,
-                params
-        );
-
-        validator.addValidation(USERNAME, new UsernameValidation(userManager));
-
-        if (error != null) {
-            return error;
-        }
-
+        User user;
         try {
-            if (userManager.getUser(username) != null) {
-                final String errMsg = "username [" + username + "] is already taken";
-                Response.ResponseBuilder rb = Response.serverError();
-                rb.entity(new StringPlatformResponse(
-                        StringPlatformResponse.Status.NOK,
-                        errMsg)
-                );
-                return rb.build();
-            }
-        } catch (UserManagerException e) {
-            final String errMsg = "Error while calling the UserManager";
-            return error(e, errMsg);
+            Validations.checkNotEmpty(name);
+            Validations.checkNotEmpty(surname);
+            Validations.checkNotEmpty(username);
+            Validations.checkNotEmpty(password);
+            user = userManager.getUser(username);
+            Validations.check(user == null, "username [" + username + "] is already taken");
+            Validations.validateApiKey(apiKey, applicationsManager, CREATE, ApplicationsManager.Object.USER);
+        } catch (Exception ex) {
+            return error(ex.getMessage());
         }
-        User user = new User();
-        user.setName(name);
-        user.setSurname(surname);
-        user.setUsername(username);
-        user.setPassword(password);
+
+        user = new User(name, surname, username, password);
         try {
             userManager.storeUser(user);
         } catch (UserManagerException e) {
@@ -141,26 +105,14 @@ public class UserService extends JsonService {
             @PathParam(USERNAME) String username,
             @QueryParam(USER_TOKEN) String token
     ) {
-        // TODO (high): Simplify request parameter validation.
         User user;
         try {
+            Validations.checkNotEmpty(username);
             user = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            final String errMsg = "Error while retrieving user [" + username + "]";
-            return error(e, errMsg);
-        }
-
-        if (user == null) {
-            return error("user with username [" + username + "] not found");
-        }
-
-        try {
-            UUID userToken = UUID.fromString(token);
-            if (!userToken.equals(user.getUserToken()) || !tokenManager.checkTokenExists(userToken)) {
-                return error("User token [" + token + "] is not valid");
-            }
+            Validations.checkNotNull(user, "user with username [" + username + "] not found");
+            Validations.validateUserToken(token, user, tokenManager);
         } catch (Exception ex) {
-            return error(ex, "Error validating user token [" + token + "]");
+            return error(ex.getMessage());
         }
 
         Response.ResponseBuilder rb = Response.ok();
@@ -180,53 +132,15 @@ public class UserService extends JsonService {
             @PathParam(USERNAME) String username,
             @QueryParam(API_KEY) String apiKey
     ) {
-        // TODO (high): Simplify request parameter validation.
-        try {
-            check(
-                    this.getClass(),
-                    "getUserWithApiKey",
-                    username,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
-        }
-
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return RequestValidator.error(e, "Your apikey is not well formed");
-        }
-
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.RETRIEVE,
-                    ApplicationsManager.Object.USER
-            );
-        } catch (ApplicationsManagerException e) {
-            return RequestValidator.error(e, "Error while authorizing your application");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "application with key [" + apiKey + "] is not authorized")
-            );
-            return rb.build();
-        }
-
         User user;
         try {
+            Validations.checkNotEmpty(username);
+            Validations.checkNotEmpty(apiKey, "Missing api key");
+            Validations.validateApiKey(apiKey, applicationsManager, RETRIEVE, ApplicationsManager.Object.USER);
             user = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            final String errMsg = "Error while retrieving user [" + username + "]";
-            return error(e, errMsg);
-        }
-
-        if (user == null) {
-            return error("user with username [" + username + "] not found");
+            Validations.checkNotNull(user, "user with username [" + username + "] not found");
+        } catch (Exception ex) {
+            return error(ex.getMessage());
         }
 
         Response.ResponseBuilder rb = Response.ok();
@@ -246,25 +160,18 @@ public class UserService extends JsonService {
             @PathParam("username") String username,
             @QueryParam("apikey") String apiKey
     ) {
-        Map<String, Object> params = createParams(
-                USERNAME, username,
-                API_KEY, apiKey
-        );
-
-        Response error = validator.validateRequest(
-                this.getClass(),
-                "deleteUser",
-                ApplicationsManager.Action.DELETE,
-                ApplicationsManager.Object.USER,
-                params
-        );
-
-        if (error != null) {
-            return error;
+        User user;
+        try {
+            Validations.checkNotEmpty(username, "Must specify a username to delete");
+            Validations.checkNotEmpty(apiKey, "Missing api key");
+            Validations.validateApiKey(apiKey, applicationsManager, RETRIEVE, ApplicationsManager.Object.USER);
+            user = userManager.getUser(username);
+            Validations.checkNotNull(user, "user with username [" + username + "] not found");
+        } catch (Exception ex) {
+            return error(ex.getMessage());
         }
 
         try {
-            User user = (User) params.get(USER);
             userManager.deleteUser(user);
         } catch (UserManagerException e) {
             return error(e, "Error while deleting user [" + username + "]");
@@ -285,25 +192,18 @@ public class UserService extends JsonService {
             @PathParam("service") String service,
             @QueryParam("apikey") String apiKey
     ) {
-        Map<String, Object> params = createParams(
-                USERNAME, username,
-                "service", service,
-                API_KEY, apiKey
-        );
-
-        Response error = validator.validateRequest(
-                this.getClass(),
-                "checkToken",
-                ApplicationsManager.Action.RETRIEVE,
-                ApplicationsManager.Object.USER,
-                params
-        );
-
-        if (error != null) {
-            return error;
+        User user;
+        try {
+            Validations.checkNotEmpty(username, "Must specify a username");
+            Validations.checkNotEmpty(service, "Must specify a valid service");
+            Validations.checkNotEmpty(apiKey, "Missing api key");
+            Validations.validateApiKey(apiKey, applicationsManager, RETRIEVE, ApplicationsManager.Object.USER);
+            user = userManager.getUser(username);
+            Validations.checkNotNull(user, "user with username [" + username + "] not found");
+        } catch (Exception ex) {
+            return error(ex.getMessage());
         }
 
-        User user = (User) params.get(USER);
         OAuthAuth auth = (OAuthAuth) user.getAuth(service);
         if (auth == null) {
             Response.ResponseBuilder rb = Response.serverError();
@@ -336,25 +236,18 @@ public class UserService extends JsonService {
             @FormParam("password") String password,
             @QueryParam("apikey") String apiKey
     ) {
-        Map<String, Object> params = createParams(
-                USERNAME, username,
-                "password", password,
-                API_KEY, apiKey
-        );
-
-        Response error = validator.validateRequest(
-                this.getClass(),
-                "authenticate",
-                ApplicationsManager.Action.RETRIEVE,
-                ApplicationsManager.Object.USER,
-                params
-        );
-
-        if (error != null) {
-            return error;
+        User user;
+        try {
+            Validations.checkNotEmpty(username, "Must specify a username");
+            Validations.checkNotEmpty(password, "Must specify a password");
+            Validations.checkNotEmpty(apiKey, "Missing api key");
+            Validations.validateApiKey(apiKey, applicationsManager, RETRIEVE, ApplicationsManager.Object.USER);
+            user = userManager.getUser(username);
+            Validations.checkNotNull(user, "user with username [" + username + "] not found");
+        } catch (Exception ex) {
+            return error(ex.getMessage());
         }
 
-        User user = (User) params.get(USER);
         if (!user.getPassword().equals(password)) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(new StringPlatformResponse(
@@ -432,23 +325,20 @@ public class UserService extends JsonService {
             @PathParam("username") String username,
             @QueryParam("redirect") String finalRedirect
     ) {
-        User userObj;
+        User user;
         try {
-            userObj = userManager.getUser(username);
-            if (userObj == null) {
-                Response.ResponseBuilder rb = Response.serverError();
-                rb.entity(new StringPlatformResponse(
-                        StringPlatformResponse.Status.NOK,
-                        "user with username [" + username + "] not found")
-                );
-                return rb.build();
-            }
-        } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user [" + username + "]");
+            Validations.checkNotEmpty(username, "Must specify a username");
+            Validations.checkNotEmpty(service, "Must specify a valid service");
+            Validations.checkNotEmpty(finalRedirect, "Must specify a valid final redirect URL");
+            user = userManager.getUser(username);
+            Validations.checkNotNull(user, "user with username [" + username + "] not found");
+        } catch (Exception ex) {
+            return error(ex.getMessage());
         }
+
         OAuthToken oAuthToken;
         try {
-            oAuthToken = userManager.getOAuthToken(service, userObj.getUsername());
+            oAuthToken = userManager.getOAuthToken(service, user.getUsername());
         } catch (UserManagerException e) {
             return error(
                     e,
@@ -465,7 +355,7 @@ public class UserService extends JsonService {
             );
         }
         try {
-            userManager.setUserFinalRedirect(userObj.getUsername(), finalRedirectUrl);
+            userManager.setUserFinalRedirect(user.getUsername(), finalRedirectUrl);
         } catch (UserManagerException e) {
             return error(
                     e,
@@ -666,23 +556,26 @@ public class UserService extends JsonService {
             @QueryParam("oauth_token") String token,
             @QueryParam("oauth_verifier") String verifier
     ) {
-        User userObj;
-        try {
-            userObj = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user '" + username + "'");
-        }
-
         User user;
         try {
-            user = userManager.registerOAuthService(service, userObj, token, verifier);
+            Validations.checkNotEmpty(username, "Must specify a username");
+            Validations.checkNotEmpty(service, "Must specify a valid service");
+            Validations.checkNotEmpty(verifier, "Missing oauth_verifier");
+            user = userManager.getUser(username);
+            Validations.checkNotNull(user, "user with username [" + username + "] not found");
+        } catch (Exception ex) {
+            return error(ex.getMessage());
+        }
+
+        try {
+            user = userManager.registerOAuthService(service, user, token, verifier);
         } catch (UserManagerException e) {
             return error(e, "Error while OAuth-like exchange for service: '" + service + "'");
         }
 
         String finalRedirect;
         try {
-            finalRedirect = userManager.consumeUserFinalRedirect(userObj.getUsername()).toString();
+            finalRedirect = userManager.consumeUserFinalRedirect(user.getUsername()).toString();
         } catch (UserManagerException e) {
             return error(e, "Error while getting final redirect URL for user '" + username + "' for service '" + service + "'");
         }
@@ -718,14 +611,19 @@ public class UserService extends JsonService {
             @PathParam("redirect") String redirect,
             @QueryParam("token") String token
     ) {
-        User userObj;
+        User user;
         try {
-            userObj = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user [" + username + "]");
+            Validations.checkNotEmpty(username, "Must specify a username");
+            Validations.checkNotEmpty(service, "Must specify a valid service");
+            Validations.checkNotEmpty(redirect, "Must specify a valid redirect URL");
+            user = userManager.getUser(username);
+            Validations.checkNotNull(user, "user with username [" + username + "] not found");
+        } catch (Exception ex) {
+            return error(ex.getMessage());
         }
+
         try {
-            userManager.registerService(service, userObj, token);
+            userManager.registerService(service, user, token);
         } catch (UserManagerException e) {
             return error(
                     e,
@@ -762,55 +660,24 @@ public class UserService extends JsonService {
             @PathParam("service") String service,
             @QueryParam("apikey") String apiKey
     ) {
+        User user;
         try {
-            check(
-                    this.getClass(),
-                    "removeSource",
-                    username,
-                    service,
-                    apiKey
-            );
-        } catch (ServiceException e) {
-            return error(e, "Error while checking parameters");
-        }
-        try {
-            UUID.fromString(apiKey);
-        } catch (IllegalArgumentException e) {
-            return error(e, "Your apikey is not well formed");
-        }
-        User userObj;
-        try {
-            userObj = userManager.getUser(username);
-            if (userObj == null) {
-                return error(new NullPointerException(), "User [" + username + "] not found!");
-            }
-        } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user '" + username + "'");
-        }
-        boolean isAuth;
-        try {
-            isAuth = applicationsManager.isAuthorized(
-                    UUID.fromString(apiKey),
-                    ApplicationsManager.Action.UPDATE,
-                    ApplicationsManager.Object.USER
-            );
-        } catch (ApplicationsManagerException e) {
-            return error(e, "Error while asking for permissions");
-        }
-        if (!isAuth) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "You're not allow to do that. Sorry.")
-            );
-            return rb.build();
+            Validations.checkNotEmpty(username, "Must specify a username");
+            Validations.checkNotEmpty(service, "Must specify a valid service");
+            Validations.checkNotEmpty(apiKey, "Missing api key");
+            Validations.validateApiKey(apiKey, applicationsManager, UPDATE, ApplicationsManager.Object.USER);
+            user = userManager.getUser(username);
+            Validations.checkNotNull(user, "User [" + username + "] not found!");
+        } catch (Exception ex) {
+            return error(ex.getMessage());
         }
 
         try {
-            userManager.deregisterService(service, userObj);
+            userManager.deregisterService(service, user);
         } catch (UserManagerException e) {
             return error(e, "Error while retrieving user [" + username + "]");
         }
+
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new StringPlatformResponse(
                 StringPlatformResponse.Status.OK,
@@ -827,22 +694,12 @@ public class UserService extends JsonService {
     ) {
         User user;
         try {
+            Validations.checkNotEmpty(username, "Must specify a username");
             user = userManager.getUser(username);
-        } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user '" + username + "'");
-        }
-
-        if (user == null) {
-            return error("user with username [" + username + "] not found");
-        }
-
-        try {
-            UUID userToken = UUID.fromString(token);
-            if (!userToken.equals(user.getUserToken()) || !tokenManager.checkTokenExists(userToken)) {
-                return error("User token [" + token + "] is not valid");
-            }
+            Validations.checkNotNull(user, "user with username [" + username + "] not found");
+            Validations.validateUserToken(token, user, tokenManager);
         } catch (Exception ex) {
-            return error(ex, "Error validating user token [" + token + "]");
+            return error(ex.getMessage());
         }
 
         UserProfile up;
