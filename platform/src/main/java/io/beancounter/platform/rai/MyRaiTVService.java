@@ -6,6 +6,7 @@ import io.beancounter.commons.model.auth.SimpleAuth;
 import io.beancounter.platform.JsonService;
 import io.beancounter.platform.PlatformResponse;
 import io.beancounter.platform.responses.MyRaiTVSignUpResponse;
+import io.beancounter.platform.validation.Validations;
 import io.beancounter.usermanager.UserManager;
 import io.beancounter.usermanager.UserManagerException;
 import io.beancounter.usermanager.UserTokenManager;
@@ -13,7 +14,6 @@ import io.beancounter.usermanager.UserTokenManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -52,6 +52,13 @@ public class MyRaiTVService extends JsonService {
             @FormParam("username") String username,
             @FormParam("password") String password
     ) {
+        try {
+            Validations.checkNotEmpty(username, "Missing username parameter");
+            Validations.checkNotEmpty(password, "Missing password parameter");
+        } catch (Exception ex) {
+            return error(ex.getMessage());
+        }
+
         MyRaiTVAuthResponse response;
         try {
             response = authHandler.authOnRai(username, password);
@@ -71,7 +78,13 @@ public class MyRaiTVService extends JsonService {
             @FormParam("token") String token
 
     ) {
-        username = username.toLowerCase(Locale.ENGLISH);
+        try {
+            Validations.checkNotEmpty(username, "Missing username parameter");
+            Validations.checkNotEmpty(token, "Missing MyRaiTV token parameter");
+        } catch (Exception ex) {
+            return error(ex.getMessage());
+        }
+
         User user;
         try {
             user = userManager.getUser(username);

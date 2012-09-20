@@ -12,6 +12,7 @@ import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.auth.SimpleAuth;
 import io.beancounter.platform.AbstractJerseyTestCase;
 import io.beancounter.platform.JacksonMixInProvider;
+import io.beancounter.platform.PlatformResponse;
 import io.beancounter.platform.responses.MyRaiTVSignUpResponse;
 import io.beancounter.platform.responses.StringPlatformResponse;
 import io.beancounter.usermanager.UserManager;
@@ -162,10 +163,10 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    public void loginWithNewUserShouldUseTheCaseInsensitiveRaiTvUsernameRatherThanUserInput() throws Exception {
+    public void loginWithNewUserShouldUseTheRaiTvUsernameRatherThanUserInput() throws Exception {
         String baseQuery = "rai/login";
-        String inputUsername = "UseRnAmE";
-        String raiUsername = "username";
+        String inputUsername = "foobar";
+        String raiUsername = "FooBar";
         String password = "password";
         String raiToken = "myRai-token";
         UUID userToken = UUID.randomUUID();
@@ -206,10 +207,11 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
-    public void loginWithAuthWithExistingUserShouldBeCaseInsensitive() throws Exception {
-        String baseQuery = "rai/login/auth";
-        String inputUsername = "UseRnAmE";
-        String raiUsername = "username";
+    public void loginWithExistingUserShouldUseTheRaiTvUsernameRatherThanUserInput() throws Exception {
+        String baseQuery = "rai/login";
+        String inputUsername = "foobar";
+        String raiUsername = "FooBar";
+        String password = "password";
         String oldRaiToken = "old-myRai-token";
         String newRaiToken = "new-myRai-token";
         UUID oldUserToken = UUID.randomUUID();
@@ -221,6 +223,7 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         oldUser.setUserToken(oldUserToken);
 
         ArgumentCaptor<User> userArgument = ArgumentCaptor.forClass(User.class);
+        when(authHandler.authOnRai(inputUsername, password)).thenReturn(new MyRaiTVAuthResponse(newRaiToken, raiUsername));
         when(userManager.getUser(raiUsername)).thenReturn(oldUser);
         doNothing().when(userManager).storeUser(userArgument.capture());
         when(tokenManager.createUserToken(raiUsername)).thenReturn(newUserToken);
@@ -228,7 +231,7 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         PostMethod postMethod = new PostMethod(base_uri + baseQuery);
         HttpClient client = new HttpClient();
         postMethod.addParameter("username", inputUsername);
-        postMethod.addParameter("token", newRaiToken);
+        postMethod.addParameter("password", password);
 
         int result = client.executeMethod(postMethod);
         String responseBody = new String(postMethod.getResponseBody());
@@ -255,6 +258,48 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
 
         verify(tokenManager).deleteUserToken(oldUserToken);
         verify(tokenManager).createUserToken(raiUsername);
+    }
+
+    @Test
+    public void loginWithNewUserWithMissingUsernameShouldRespondWithError() throws Exception {
+        String baseQuery = "rai/login";
+        String username = "";
+        String password = "password";
+
+        PostMethod postMethod = new PostMethod(base_uri + baseQuery);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("username", username);
+        postMethod.addParameter("password", password);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), PlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Missing username parameter");
+    }
+
+    @Test
+    public void loginWithNewUserWithMissingPasswordShouldRespondWithError() throws Exception {
+        String baseQuery = "rai/login";
+        String username = "username";
+        String password = "";
+
+        PostMethod postMethod = new PostMethod(base_uri + baseQuery);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("username", username);
+        postMethod.addParameter("password", password);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), PlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Missing password parameter");
     }
 
     @Test
@@ -363,6 +408,57 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
+    public void loginWithAuthForExistingUserShouldUpdateRaiTokenAndUserToken() throws Exception {
+        String baseQuery = "rai/login/auth";
+        String username = "username";
+        String oldRaiToken = "old-myRai-token";
+        String newRaiToken = "new-myRai-token";
+        UUID oldUserToken = UUID.randomUUID();
+        UUID newUserToken = UUID.randomUUID();
+
+        User oldUser = new User();
+        oldUser.setUsername(username);
+        oldUser.addService(SERVICE_NAME, new SimpleAuth(oldRaiToken, username));
+        oldUser.setUserToken(oldUserToken);
+
+        ArgumentCaptor<User> userArgument = ArgumentCaptor.forClass(User.class);
+        when(userManager.getUser(username)).thenReturn(oldUser);
+        doNothing().when(userManager).storeUser(userArgument.capture());
+        when(tokenManager.createUserToken(username)).thenReturn(newUserToken);
+
+        PostMethod postMethod = new PostMethod(base_uri + baseQuery);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("username", username);
+        postMethod.addParameter("token", newRaiToken);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
+
+        MyRaiTVSignUpResponse response = fromJson(responseBody, MyRaiTVSignUpResponse.class);
+        assertEquals(response.getStatus(), MyRaiTVSignUpResponse.Status.OK);
+        assertEquals(response.getMessage(), "user with user name [" + username + "] logged in with service [" + SERVICE_NAME + "]");
+
+        MyRaiTVSignUp signUp = response.getObject();
+        assertNotNull(signUp);
+        assertEquals(signUp.getIdentifier(), username);
+        assertEquals(signUp.getUsername(), username);
+        assertTrue(signUp.isReturning());
+        assertEquals(signUp.getService(), SERVICE_NAME);
+        assertEquals(signUp.getRaiToken(), newRaiToken);
+        assertEquals(signUp.getUserToken(), newUserToken);
+
+        User user = userArgument.getValue();
+        assertEquals(user.getUsername(), username);
+        assertEquals(user.getServices().get(SERVICE_NAME).getSession(), newRaiToken);
+        assertEquals(user.getUserToken(), newUserToken);
+
+        verify(tokenManager).deleteUserToken(oldUserToken);
+        verify(tokenManager).createUserToken(username);
+    }
+
+    @Test
     public void loginWithAuthWithNewUserShouldCreateUser() throws Exception {
         String baseQuery = "rai/login/auth";
         String username = "username";
@@ -401,6 +497,48 @@ public class MyRaiTVServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(user.getUsername(), username);
         assertEquals(user.getServices().get(SERVICE_NAME).getSession(), raiToken);
         assertEquals(user.getUserToken(), userToken);
+    }
+
+    @Test
+    public void loginWithAuthWithMissingUsernameShouldRespondWithError() throws Exception {
+        String baseQuery = "rai/login/auth";
+        String username = "";
+        String raiToken = "myRai-token";
+
+        PostMethod postMethod = new PostMethod(base_uri + baseQuery);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("username", username);
+        postMethod.addParameter("token", raiToken);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), PlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Missing username parameter");
+    }
+
+    @Test
+    public void loginWithAuthWithMissingTokenShouldRespondWithError() throws Exception {
+        String baseQuery = "rai/login/auth";
+        String username = "username";
+        String raiToken = "";
+
+        PostMethod postMethod = new PostMethod(base_uri + baseQuery);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("username", username);
+        postMethod.addParameter("token", raiToken);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        assertFalse(responseBody.isEmpty());
+
+        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
+        assertEquals(response.getStatus(), PlatformResponse.Status.NOK);
+        assertEquals(response.getMessage(), "Missing MyRaiTV token parameter");
     }
 
     public static class MyRaiTVServiceTestConfig extends GuiceServletContextListener {
