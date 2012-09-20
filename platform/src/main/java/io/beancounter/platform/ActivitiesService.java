@@ -308,7 +308,7 @@ public class ActivitiesService extends JsonService {
     public Response searchWithToken(
             @QueryParam(PATH) String path,
             @QueryParam(VALUE) String value,
-            @QueryParam(PAGE_STRING) @DefaultValue("0") int page,
+            @QueryParam(PAGE) @DefaultValue("0") int page,
             @QueryParam(ORDER) @DefaultValue("desc") String order,
             @QueryParam("filter") List<String> filters,
             @QueryParam(USER_TOKEN) String token
@@ -333,7 +333,7 @@ public class ActivitiesService extends JsonService {
     public Response search(
             @QueryParam(PATH) String path,
             @QueryParam(VALUE) String value,
-            @QueryParam(PAGE_STRING) @DefaultValue("0") int page,
+            @QueryParam(PAGE) @DefaultValue("0") int page,
             @QueryParam(ORDER) @DefaultValue("desc") String order,
             @QueryParam("filter") List<String> filters,
             @QueryParam(API_KEY) String apiKey
@@ -386,7 +386,7 @@ public class ActivitiesService extends JsonService {
                         ResolvedActivitiesPlatformResponse.Status.OK,
                         (activitiesRetrieved.isEmpty())
                                 ? "search for [" + path + "=" + value + "] found no "
-                                + (page != 0 ? "more " : "") + "activities."
+                                        + (page != 0 ? "more " : "") + "activities."
                                 : "search for [" + path + "=" + value + "] found activities.",
                         activitiesRetrieved
                 )
@@ -398,7 +398,7 @@ public class ActivitiesService extends JsonService {
     @Path("/all/{username}")
     public Response getAllActivities(
             @PathParam(USERNAME) String username,
-            @QueryParam(PAGE_STRING) @DefaultValue("0") int page,
+            @QueryParam(PAGE) @DefaultValue("0") int page,
             @QueryParam(ORDER) @DefaultValue("desc") String order,
             @QueryParam(USER_TOKEN) String token
     ) {

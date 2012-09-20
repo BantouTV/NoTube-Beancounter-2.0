@@ -17,19 +17,14 @@ public abstract class Service {
 
     public static final String ACTIVITY = "activity";
     public static final String ACTIVITY_ID = "activityId";
-    public static final String ACTIVITY_ID_OBJ = "activityIdObj";
-    public static final String APPLICATION_ACTION = "application.action";
-    public static final String APPLICATION_OBJECT = "application.object";
     public static final String API_KEY = "apikey";
     public static final String IS_VISIBLE = "isVisible";
     public static final String ORDER = "order";
-    public static final String PAGE_STRING = "page";
-    public static final String PAGE_NUMBER = "pageNumber";
+    public static final String PAGE = "page";
     public static final String PATH = "path";
     public static final String USERNAME = "username";
     public static final String USER_TOKEN = "token";
     public static final String VALUE = "value";
-    public static final String VISIBILITY_OBJ = "vObj";
 
     private static class Param<T> {
 
