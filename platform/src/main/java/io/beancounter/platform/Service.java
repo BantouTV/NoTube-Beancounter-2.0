@@ -26,7 +26,6 @@ public abstract class Service {
     public static final String PAGE_STRING = "page";
     public static final String PAGE_NUMBER = "pageNumber";
     public static final String PATH = "path";
-    public static final String USER = "user";
     public static final String USERNAME = "username";
     public static final String USER_TOKEN = "token";
     public static final String VALUE = "value";

@@ -2,9 +2,6 @@ package io.beancounter.platform;
 
 import com.google.inject.Inject;
 import io.beancounter.commons.helper.UriUtils;
-import io.beancounter.platform.validation.ApiKeyValidation;
-import io.beancounter.platform.validation.RequestValidator;
-import io.beancounter.platform.validation.UsernameValidation;
 import io.beancounter.platform.validation.Validations;
 import io.beancounter.usermanager.UserTokenManager;
 import io.beancounter.applications.ApplicationsManager;
@@ -27,7 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.*;
 
 import static io.beancounter.applications.ApplicationsManager.Action.*;
-import static io.beancounter.applications.ApplicationsManager.Action.UPDATE;
+import static io.beancounter.applications.ApplicationsManager.Object.USER;
 
 /**
  * @author Davide Palmisano ( dpalmisano@gmail.com )
@@ -78,7 +75,7 @@ public class UserService extends JsonService {
             Validations.checkNotEmpty(password);
             user = userManager.getUser(username);
             Validations.check(user == null, "username [" + username + "] is already taken");
-            Validations.validateApiKey(apiKey, applicationsManager, CREATE, ApplicationsManager.Object.USER);
+            Validations.validateApiKey(apiKey, applicationsManager, CREATE, USER);
         } catch (Exception ex) {
             return error(ex.getMessage());
         }
@@ -136,7 +133,7 @@ public class UserService extends JsonService {
         try {
             Validations.checkNotEmpty(username);
             Validations.checkNotEmpty(apiKey, "Missing api key");
-            Validations.validateApiKey(apiKey, applicationsManager, RETRIEVE, ApplicationsManager.Object.USER);
+            Validations.validateApiKey(apiKey, applicationsManager, RETRIEVE, USER);
             user = userManager.getUser(username);
             Validations.checkNotNull(user, "user with username [" + username + "] not found");
         } catch (Exception ex) {
@@ -164,7 +161,7 @@ public class UserService extends JsonService {
         try {
             Validations.checkNotEmpty(username, "Must specify a username to delete");
             Validations.checkNotEmpty(apiKey, "Missing api key");
-            Validations.validateApiKey(apiKey, applicationsManager, RETRIEVE, ApplicationsManager.Object.USER);
+            Validations.validateApiKey(apiKey, applicationsManager, RETRIEVE, USER);
             user = userManager.getUser(username);
             Validations.checkNotNull(user, "user with username [" + username + "] not found");
         } catch (Exception ex) {
@@ -197,7 +194,7 @@ public class UserService extends JsonService {
             Validations.checkNotEmpty(username, "Must specify a username");
             Validations.checkNotEmpty(service, "Must specify a valid service");
             Validations.checkNotEmpty(apiKey, "Missing api key");
-            Validations.validateApiKey(apiKey, applicationsManager, RETRIEVE, ApplicationsManager.Object.USER);
+            Validations.validateApiKey(apiKey, applicationsManager, RETRIEVE, USER);
             user = userManager.getUser(username);
             Validations.checkNotNull(user, "user with username [" + username + "] not found");
         } catch (Exception ex) {
@@ -241,7 +238,7 @@ public class UserService extends JsonService {
             Validations.checkNotEmpty(username, "Must specify a username");
             Validations.checkNotEmpty(password, "Must specify a password");
             Validations.checkNotEmpty(apiKey, "Missing api key");
-            Validations.validateApiKey(apiKey, applicationsManager, RETRIEVE, ApplicationsManager.Object.USER);
+            Validations.validateApiKey(apiKey, applicationsManager, RETRIEVE, USER);
             user = userManager.getUser(username);
             Validations.checkNotNull(user, "user with username [" + username + "] not found");
         } catch (Exception ex) {
@@ -544,6 +541,12 @@ public class UserService extends JsonService {
             @PathParam("username") String username,
             @QueryParam("code") String verifier
     ) {
+        try {
+            Validations.checkNotEmpty(verifier, "Missing OAuth 2.0 code");
+        } catch (Exception ex) {
+            return error(ex.getMessage());
+        }
+
         // Facebook OAuth exchange quite different from Twitter's one.
         return handleOAuthCallback("facebook", username, null, verifier);
     }
@@ -560,7 +563,7 @@ public class UserService extends JsonService {
         try {
             Validations.checkNotEmpty(username, "Must specify a username");
             Validations.checkNotEmpty(service, "Must specify a valid service");
-            Validations.checkNotEmpty(verifier, "Missing oauth_verifier");
+            Validations.checkNotEmpty(verifier, "Missing OAuth 1.0a verifier");
             user = userManager.getUser(username);
             Validations.checkNotNull(user, "user with username [" + username + "] not found");
         } catch (Exception ex) {
@@ -665,7 +668,7 @@ public class UserService extends JsonService {
             Validations.checkNotEmpty(username, "Must specify a username");
             Validations.checkNotEmpty(service, "Must specify a valid service");
             Validations.checkNotEmpty(apiKey, "Missing api key");
-            Validations.validateApiKey(apiKey, applicationsManager, UPDATE, ApplicationsManager.Object.USER);
+            Validations.validateApiKey(apiKey, applicationsManager, UPDATE, USER);
             user = userManager.getUser(username);
             Validations.checkNotNull(user, "User [" + username + "] not found!");
         } catch (Exception ex) {
@@ -723,5 +726,4 @@ public class UserService extends JsonService {
         );
         return rb.build();
     }
-
 }
