@@ -358,6 +358,63 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
+    public void testAddActivityWithMallPlaceObject() throws Exception {
+        String baseQuery = "activities/add/%s?token=%s";
+        String username = "test-user";
+        User user = getUser(username);
+        UUID userToken = user.getUserToken();
+        String activity = "{\n" +
+                "    \"object\": {\n" +
+                "        \"type\": \"MALL-PLACE\",\n" +
+                "        \"url\": null,\n" +
+                "        \"name\": null,\n" +
+                "        \"description\": null,\n" +
+                "        \"lat\": 32343,\n" +
+                "        \"lon\": 4321,\n" +
+                "        \"mall\": \"mall-id\",\n" +
+                "        \"sensor\": \"sensor-id\"\n" +
+                "    },\n" +
+                "    \"context\": {\n" +
+                "        \"date\": null,\n" +
+                "        \"service\": null,\n" +
+                "        \"mood\": null\n" +
+                "    },\n" +
+                "    \"verb\": \"LOCATED\"\n" +
+                "}";
+        String query = String.format(
+                baseQuery,
+                username,
+                userToken
+        );
+
+        when(userManager.getUser(username)).thenReturn(user);
+        when(tokenManager.checkTokenExists(userToken)).thenReturn(true);
+
+        PostMethod postMethod = new PostMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        postMethod.addParameter("activity", activity);
+
+        int result = client.executeMethod(postMethod);
+        String responseBody = new String(postMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
+
+        APIResponse actual = fromJson(responseBody, APIResponse.class);
+        assertEquals(actual.getMessage(), "activity successfully registered");
+        assertEquals(actual.getStatus(), "OK");
+        assertNotNull(actual.getObject());
+        UUID returnedActivityId = UUID.fromString(actual.getObject());
+        assertNotNull(returnedActivityId);
+
+        ArgumentCaptor captor = ArgumentCaptor.forClass(String.class);
+        verify(queues).push((String) captor.capture());
+        String resolvedActivity = (String) captor.getValue();
+        ObjectMapper mapper = new ObjectMapper();
+        ResolvedActivity expected = mapper.readValue(resolvedActivity, ResolvedActivity.class);
+        Assert.assertNotNull(expected.getActivity().getContext().getDate());
+    }
+
+    @Test
     public void addActivityWithInvalidUserTokenShouldRespondWithError() throws Exception {
         String baseQuery = "activities/add/%s?token=%s";
         String username = "test-user";

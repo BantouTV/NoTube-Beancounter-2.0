@@ -22,6 +22,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
+import java.util.UUID;
 
 import static io.beancounter.applications.ApplicationsManager.Action.*;
 import static io.beancounter.applications.ApplicationsManager.Object.USER;
@@ -79,8 +80,15 @@ public class UserService extends JsonService {
         } catch (Exception ex) {
             return error(ex.getMessage());
         }
-
         user = new User(name, surname, username, password);
+        UUID userToken;
+        try {
+            userToken = tokenManager.createUserToken(username);
+        } catch (UserManagerException e) {
+            final String errMsg = "Error while getting token for user [" + user + "]";
+            return error(e, errMsg);
+        }
+        user.setUserToken(userToken);
         try {
             userManager.storeUser(user);
         } catch (UserManagerException e) {
@@ -244,7 +252,6 @@ public class UserService extends JsonService {
         } catch (Exception ex) {
             return error(ex.getMessage());
         }
-
         if (!user.getPassword().equals(password)) {
             Response.ResponseBuilder rb = Response.serverError();
             rb.entity(new StringPlatformResponse(
@@ -253,10 +260,21 @@ public class UserService extends JsonService {
             );
             return rb.build();
         }
+        AtomicSignUp signUp = new AtomicSignUp(
+                user.getId(),
+                user.getUsername(),
+                true,
+                "beancounter",
+                user.getUsername(),
+                user.getUserToken()
+        );
         Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new StringPlatformResponse(
-                StringPlatformResponse.Status.OK,
-                "user [" + username + "] authenticated")
+        rb.entity(
+                new AtomicSignUpResponse(
+                        PlatformResponse.Status.OK,
+                        "user with user name [" + signUp.getUsername() + "] logged in with service [" + signUp.getService() + "]",
+                        signUp
+                )
         );
         return rb.build();
     }
@@ -388,7 +406,6 @@ public class UserService extends JsonService {
         } catch (UserManagerException ume) {
             return error(ume, "Error while doing OAuth exchange for service: [" + service + "]");
         }
-
         /**
         User user;
         try {
@@ -429,7 +446,6 @@ public class UserService extends JsonService {
                 return error(e, "Error while pushing down json resolved activity: [" + raJson + "] for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
             }
         } **/
-
         URI finalRedirectUri;
         try {
             finalRedirectUri = new URI(decodedFinalRedirect);
@@ -448,7 +464,6 @@ public class UserService extends JsonService {
         } catch (Exception ex) {
             return error(ex, "Malformed redirect URL");
         }
-
         return Response.temporaryRedirect(finalRedirectUri).build();
     }
 
@@ -515,7 +530,6 @@ public class UserService extends JsonService {
                 return error(e, "Error while pushing down json resolved activity: [" + raJson + "] for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
             }
         } **/
-
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
                 new AtomicSignUpResponse(
@@ -546,7 +560,6 @@ public class UserService extends JsonService {
         } catch (Exception ex) {
             return error(ex.getMessage());
         }
-
         // Facebook OAuth exchange quite different from Twitter's one.
         return handleOAuthCallback("facebook", username, null, verifier);
     }

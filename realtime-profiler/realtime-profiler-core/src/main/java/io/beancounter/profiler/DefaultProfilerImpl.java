@@ -2,6 +2,7 @@ package io.beancounter.profiler;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.beancounter.commons.linking.LinkingEngine;
@@ -158,6 +159,7 @@ public final class DefaultProfilerImpl implements Profiler {
         interests = limit(new ArrayList<Interest>(interests));
         interests = normalize(interests);
         UserProfile up = toProfile(userId, interests);
+        up.setLastUpdated(DateTime.now());
         try {
             ps.store(up);
         } catch (ProfilesException e) {

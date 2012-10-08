@@ -1,5 +1,7 @@
 package io.beancounter.commons.model;
 
+import org.joda.time.DateTime;
+
 import java.util.*;
 
 /**
@@ -22,6 +24,8 @@ public class UserProfile {
     private UUID userId;
 
     private Set<Interest> interests = new HashSet<Interest>();
+
+    private DateTime lastUpdated;
 
     public UserProfile() {}
 
@@ -67,6 +71,14 @@ public class UserProfile {
         this.userId = userId;
     }
 
+    public DateTime getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(DateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -90,7 +102,9 @@ public class UserProfile {
         return "UserProfile{" +
                 "visibility=" + visibility +
                 ", username='" + username + '\'' +
+                ", userId=" + userId +
                 ", interests=" + interests +
-                "} " + super.toString();
+                ", lastUpdated=" + lastUpdated +
+                '}';
     }
 }
