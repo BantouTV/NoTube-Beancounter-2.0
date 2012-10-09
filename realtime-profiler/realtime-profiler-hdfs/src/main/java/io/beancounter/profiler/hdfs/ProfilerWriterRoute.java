@@ -2,7 +2,6 @@ package io.beancounter.profiler.hdfs;
 
 import com.google.inject.Inject;
 import io.beancounter.commons.model.UserProfile;
-import io.beancounter.commons.model.activity.ResolvedActivity;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
@@ -12,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
-public class ProfilterWriterRoute extends RouteBuilder {
+public class ProfilerWriterRoute extends RouteBuilder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProfilterWriterRoute.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProfilerWriterRoute.class);
 
     @Inject
     private ProfileWriter profileWriter;
@@ -26,6 +25,7 @@ public class ProfilterWriterRoute extends RouteBuilder {
 
     public void configure() {
         errorHandler(deadLetterChannel(errorEndpoint()));
+
         from(fromKestrel())
                 .unmarshal().json(JsonLibrary.Jackson, UserProfile.class)
                 .process(new Processor() {
@@ -44,6 +44,4 @@ public class ProfilterWriterRoute extends RouteBuilder {
     protected String errorEndpoint() {
         return "log:" + getClass().getSimpleName() + "?{{camel.log.options.error}}";
     }
-
-
 }

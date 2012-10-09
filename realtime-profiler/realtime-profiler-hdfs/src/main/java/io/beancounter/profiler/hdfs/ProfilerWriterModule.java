@@ -5,8 +5,6 @@ import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.guice.CamelModuleWithMatchingRoutes;
 import org.guiceyfruit.jndi.JndiBind;
 
-import java.util.Properties;
-
 public class ProfilerWriterModule extends CamelModuleWithMatchingRoutes {
 
     @Override
