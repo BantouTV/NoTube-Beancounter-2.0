@@ -23,7 +23,12 @@ public class ProfilerWriterRoute extends RouteBuilder {
     // the application identifier.
     private UUID application = UUID.fromString("18b70337-c7f0-4c9b-a38f-1d6dfddc6b22");
 
+    @Override
     public void configure() {
+        ProfileWriterShutdownStrategy shutdownStrategy = new ProfileWriterShutdownStrategy();
+        shutdownStrategy.setProfileWriter(profileWriter);
+        getContext().setShutdownStrategy(shutdownStrategy);
+
         errorHandler(deadLetterChannel(errorEndpoint()));
 
         from(fromKestrel())

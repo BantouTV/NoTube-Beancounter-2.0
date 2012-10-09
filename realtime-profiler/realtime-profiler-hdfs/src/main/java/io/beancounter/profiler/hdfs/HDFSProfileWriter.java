@@ -28,12 +28,14 @@ public class HDFSProfileWriter implements ProfileWriter {
 
     private ObjectMapper mapper;
 
+    @Inject
     public HDFSProfileWriter(DistributedFileSystem dfs, Configuration configuration) {
         this.dfs = dfs;
         this.configuration = configuration;
         mapper = new ObjectMapper();
     }
 
+    @Override
     public void init() throws ProfileWriterException {
         try {
             dfs.initialize(new URI("hdfs://10.224.86.144:9000"), configuration);
@@ -42,6 +44,7 @@ public class HDFSProfileWriter implements ProfileWriter {
         }
     }
 
+    @Override
     public void close() throws ProfileWriterException {
         try {
             dfs.close();
@@ -50,6 +53,7 @@ public class HDFSProfileWriter implements ProfileWriter {
         }
     }
 
+    @Override
     public void write(UUID application, UserProfile profile) throws ProfileWriterException {
         UUID userId = profile.getUserId();
         DFSClient client = dfs.getClient();
