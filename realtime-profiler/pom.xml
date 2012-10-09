@@ -17,7 +17,8 @@
     <modules>
         <module>realtime-profiler-core</module>
         <module>realtime-profiler-process</module>
-    </modules>
+        <module>realtime-profiler-hdfs</module>
+  </modules>
 
     <dependencies>
         <dependency>

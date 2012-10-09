@@ -76,6 +76,7 @@
         <maven-shade-plugin.version>1.7.1</maven-shade-plugin.version>
         <maven-source-plugin.version>2.2</maven-source-plugin.version>
         <jms.version>1.1</jms.version>
+        <hadoop.version>1.0.3</hadoop.version>
     </properties>
 
     <dependencyManagement>
@@ -320,6 +321,11 @@
                 <groupId>org.apache.camel</groupId>
                 <artifactId>camel-jms</artifactId>
                 <version>${camel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-core</artifactId>
+                <version>${hadoop.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.jms</groupId>

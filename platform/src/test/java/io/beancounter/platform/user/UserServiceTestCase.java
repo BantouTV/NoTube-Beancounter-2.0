@@ -572,6 +572,8 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         );
 
         User user = new User("Test", "User", username, password);
+        final UUID expected = UUID.randomUUID();
+        user.setUserToken(expected);
         when(userManager.getUser(username)).thenReturn(user);
 
         PostMethod postMethod = new PostMethod(base_uri + query);
@@ -583,14 +585,18 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         logger.info("response body: " + responseBody);
         assertNotEquals(responseBody, "");
         assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
-        assertEquals(responseBody, "{\"status\":\"OK\",\"message\":\"user [test-user] authenticated\"}");
-        APIResponse actual = fromJson(responseBody, APIResponse.class);
-        APIResponse expected = new APIResponse(
+        AtomicSignUpResponse actual = fromJson(responseBody, AtomicSignUpResponse.class);
+        AtomicSignUpResponse expectedResponse = new AtomicSignUpResponse(
                 null,
                 "user [" + username + "] authenticated",
-                "OK"
+                new AtomicSignUp(user.getId(), username, true, "beancounter", username, expected)
         );
-        assertEquals(actual, expected);
+        assertEquals(actual.getObject().getIdentifier(), expectedResponse.getObject().getIdentifier());
+        assertEquals(actual.getObject().getUserId(), expectedResponse.getObject().getUserId());
+        assertEquals(actual.getObject().getService(), expectedResponse.getObject().getService());
+        assertEquals(actual.getObject().getUsername(), expectedResponse.getObject().getUsername());
+        assertEquals(actual.getObject().getUserToken(), expectedResponse.getObject().getUserToken());
+        assertEquals(actual.getObject().isReturning(), expectedResponse.getObject().isReturning());
     }
 
     @Test

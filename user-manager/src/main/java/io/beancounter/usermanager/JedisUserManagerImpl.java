@@ -454,7 +454,6 @@ public class JedisUserManagerImpl implements UserManager {
 
     private AtomicSignUp signUpAuthenticatedUser(String service, AuthenticatedUser authUser) throws UserManagerException {
         String candidateUsername;
-
         try {
             // Check if the user already exists
             candidateUsername = resolver.resolveUsername(
