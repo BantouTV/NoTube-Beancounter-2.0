@@ -174,12 +174,7 @@ public class UserService extends JsonService {
             return error(e, "Error while deleting user [" + username + "]");
         }
 
-        Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new StringPlatformResponse(
-                StringPlatformResponse.Status.OK,
-                "user with username [" + username + "] deleted")
-        );
-        return rb.build();
+        return success("user with username [" + username + "] deleted");
     }
 
     @GET
@@ -203,27 +198,12 @@ public class UserService extends JsonService {
 
         OAuthAuth auth = (OAuthAuth) user.getAuth(service);
         if (auth == null) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "user with username [" + username + "] has not a token for service [" + service + "]")
-            );
-            return rb.build();
+            return error("user with username [" + username + "] has not a token for service [" + service + "]");
         }
         if (auth.isExpired()) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "[" + service + "] token for [" + username + "] has expired")
-            );
-            return rb.build();
+            return error("[" + service + "] token for [" + username + "] has expired");
         }
-        Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new StringPlatformResponse(
-                StringPlatformResponse.Status.OK,
-                "[" + service + "] token for [" + username + "] is valid")
-        );
-        return rb.build();
+        return success("[" + service + "] token for [" + username + "] is valid");
     }
 
     @POST
@@ -246,19 +226,9 @@ public class UserService extends JsonService {
         }
 
         if (!user.getPassword().equals(password)) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(new StringPlatformResponse(
-                    StringPlatformResponse.Status.NOK,
-                    "password for [" + username + "] incorrect")
-            );
-            return rb.build();
+            return error("password for [" + username + "] incorrect");
         }
-        Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new StringPlatformResponse(
-                StringPlatformResponse.Status.OK,
-                "user [" + username + "] authenticated")
-        );
-        return rb.build();
+        return success("user [" + username + "] authenticated");
     }
 
     @GET
@@ -271,11 +241,9 @@ public class UserService extends JsonService {
         try {
             oAuthToken = userManager.getOAuthToken(service);
         } catch (UserManagerException e) {
-            return error(
-                    e,
-                    "Error while getting token from [" + service + "]"
-            );
+            return error(e, "Error while getting token from [" + service + "]");
         }
+
         // token asked, let's redirect
         URL redirect = oAuthToken.getRedirectPage();
         try {
@@ -301,11 +269,9 @@ public class UserService extends JsonService {
         try {
             oAuthToken = userManager.getOAuthToken(service, finalRedirectURL);
         } catch (UserManagerException e) {
-            return error(
-                    e,
-                    "Error while getting token from [" + service + "]"
-            );
+            return error(e, "Error while getting token from [" + service + "]");
         }
+
         // token asked, let's redirect
         URL redirect = oAuthToken.getRedirectPage();
         try {
@@ -346,10 +312,7 @@ public class UserService extends JsonService {
         try {
             finalRedirectUrl = new URL(finalRedirect);
         } catch (MalformedURLException e) {
-            return error(
-                    e,
-                    "Final redirect URL [" + finalRedirect + "] is ill-formed"
-            );
+            return error(e, "Final redirect URL [" + finalRedirect + "] is ill-formed");
         }
         try {
             userManager.setUserFinalRedirect(user.getUsername(), finalRedirectUrl);
@@ -681,12 +644,7 @@ public class UserService extends JsonService {
             return error(e, "Error while retrieving user [" + username + "]");
         }
 
-        Response.ResponseBuilder rb = Response.ok();
-        rb.entity(new StringPlatformResponse(
-                StringPlatformResponse.Status.OK,
-                "service [" + service + "] removed from user [" + username + "]")
-        );
-        return rb.build();
+        return success("service [" + service + "] removed from user [" + username + "]");
     }
 
     @GET

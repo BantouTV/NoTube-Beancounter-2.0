@@ -180,14 +180,7 @@ public class ActivitiesService extends JsonService {
         }
         // the code above should be soon-ish replaced with something more general.
 
-        Response.ResponseBuilder rb = Response.ok();
-        rb.entity(
-                new StringPlatformResponse(
-                        StringPlatformResponse.Status.OK,
-                        "activity [" + activityId + "] visibility has been modified to [" + isVisible + "]"
-                )
-        );
-        return rb.build();
+        return success("activity [" + activityId + "] visibility has been modified to [" + isVisible + "]");
     }
 
     private String getDeleteMessage(UUID activityIdObj, boolean vObj, ResolvedActivity resolvedActivity) throws IOException {
@@ -230,25 +223,11 @@ public class ActivitiesService extends JsonService {
             return error(e, "Error while getting activity [" + activityId + "]");
         }
 
-        Response.ResponseBuilder rb = Response.ok();
         if (activity == null) {
-            rb.entity(
-                    new ResolvedActivityPlatformResponse(
-                            ResolvedActivityPlatformResponse.Status.OK,
-                            "no activity with id [" + activityId + "]",
-                            activity
-                    )
-            );
+            return success("no activity with id [" + activityId + "]", activity);
         } else {
-            rb.entity(
-                    new ResolvedActivityPlatformResponse(
-                            ResolvedActivityPlatformResponse.Status.OK,
-                            "activity with id [" + activityId + "] found",
-                            activity
-                    )
-            );
+            return success("activity with id [" + activityId + "] found", activity);
         }
-        return rb.build();
     }
 
     @GET
@@ -277,30 +256,14 @@ public class ActivitiesService extends JsonService {
         }
 
         if (activity == null) {
-            Response.ResponseBuilder rb = Response.ok();
-            rb.entity(
-                    new ResolvedActivityPlatformResponse(
-                            ResolvedActivityPlatformResponse.Status.OK,
-                            "no activity with id [" + activityId + "]",
-                            activity
-                    )
-            );
-            return rb.build();
+            return success("no activity with id [" + activityId + "]", activity);
         }
 
         if (!user.getId().equals(activity.getUserId())) {
             return error("User [" + username + "] is not authorized to see activity [" + activityId + "]");
         }
 
-        Response.ResponseBuilder rb = Response.ok();
-        rb.entity(
-                new ResolvedActivityPlatformResponse(
-                        ResolvedActivityPlatformResponse.Status.OK,
-                        "activity with id [" + activityId + "] found",
-                        activity
-                )
-        );
-        return rb.build();
+        return success("activity with id [" + activityId + "] found", activity);
     }
 
     @GET
@@ -380,18 +343,13 @@ public class ActivitiesService extends JsonService {
             return rb.build();
         }
 
-        Response.ResponseBuilder rb = Response.ok();
-        rb.entity(
-                new ResolvedActivitiesPlatformResponse(
-                        ResolvedActivitiesPlatformResponse.Status.OK,
-                        (activitiesRetrieved.isEmpty())
-                                ? "search for [" + path + "=" + value + "] found no "
-                                        + (page != 0 ? "more " : "") + "activities."
-                                : "search for [" + path + "=" + value + "] found activities.",
-                        activitiesRetrieved
-                )
+        return success(
+                (activitiesRetrieved.isEmpty())
+                        ? "search for [" + path + "=" + value + "] found no "
+                            + (page != 0 ? "more " : "") + "activities."
+                        : "search for [" + path + "=" + value + "] found activities.",
+                activitiesRetrieved
         );
-        return rb.build();
     }
 
     @GET
@@ -424,14 +382,33 @@ public class ActivitiesService extends JsonService {
             return error(ioe.getMessage());
         }
 
+        return success(
+                (allActivities.isEmpty())
+                        ? "user '" + username + "' has no " + (page != 0 ? "more " : "") + "activities."
+                        : "user '" + username + "' activities found.",
+                allActivities
+        );
+    }
+
+    private static Response success(String message, Collection<ResolvedActivity> activities) {
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
                 new ResolvedActivitiesPlatformResponse(
-                        ResolvedActivitiesPlatformResponse.Status.OK,
-                        (allActivities.isEmpty())
-                                ? "user '" + username + "' has no " + (page != 0 ? "more " : "") + "activities."
-                                : "user '" + username + "' activities found.",
-                        allActivities
+                        PlatformResponse.Status.OK,
+                        message,
+                        activities
+                )
+        );
+        return rb.build();
+    }
+
+    private static Response success(String message, ResolvedActivity activity) {
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(
+                new ResolvedActivityPlatformResponse(
+                        PlatformResponse.Status.OK,
+                        message,
+                        activity
                 )
         );
         return rb.build();

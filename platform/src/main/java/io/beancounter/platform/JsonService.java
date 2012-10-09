@@ -37,4 +37,26 @@ public abstract class JsonService extends Service {
         return rb.build();
     }
 
+    public static Response success(String message) {
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(
+                new StringPlatformResponse(
+                        StringPlatformResponse.Status.OK,
+                        message
+                )
+        );
+        return rb.build();
+    }
+
+    public static Response success(String message, String object) {
+        Response.ResponseBuilder rb = Response.ok();
+        rb.entity(
+                new StringPlatformResponse(
+                        StringPlatformResponse.Status.OK,
+                        message,
+                        object
+                )
+        );
+        return rb.build();
+    }
 }
