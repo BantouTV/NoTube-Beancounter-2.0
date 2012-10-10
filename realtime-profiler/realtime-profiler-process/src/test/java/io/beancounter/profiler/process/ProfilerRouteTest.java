@@ -57,10 +57,14 @@ public class ProfilerRouteTest extends CamelTestSupport {
                     public String errorEndpoint() {
                         return "mock:error";
                     }
+
+                    @Override
+                    protected String toKestrel() {
+                        return "direct:writer";
+                    }
                 });
             }
         });
-
         super.setUp();
     }
 
@@ -68,6 +72,17 @@ public class ProfilerRouteTest extends CamelTestSupport {
     @Test
     public void activityReachesProfiler() throws Exception {
         MockEndpoint error = getMockEndpoint("mock:error");
+        error.expectedMessageCount(0);
+
+        template.sendBody("direct:start", activityAsJson());
+
+        error.assertIsSatisfied();
+        verify(profiler).profile(any(UUID.class), any(Activity.class));
+    }
+
+    @Test
+    public void activityReachesWriter() throws Exception {
+        MockEndpoint error = getMockEndpoint("mock:writer");
         error.expectedMessageCount(0);
 
         template.sendBody("direct:start", activityAsJson());

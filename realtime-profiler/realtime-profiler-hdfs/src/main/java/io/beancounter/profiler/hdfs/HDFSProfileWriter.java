@@ -24,6 +24,8 @@ public class HDFSProfileWriter implements ProfileWriter {
 
     private DistributedFileSystem dfs;
 
+    private DFSClient client;
+
     private Configuration configuration;
 
     private ObjectMapper mapper;
@@ -42,10 +44,16 @@ public class HDFSProfileWriter implements ProfileWriter {
         } catch (Exception e) {
             throw new ProfileWriterException("Error while initializing HDFS", e);
         }
+        client = dfs.getClient();
     }
 
     @Override
     public void close() throws ProfileWriterException {
+        try {
+            client.close();
+        } catch (IOException e) {
+            throw new ProfileWriterException("Error while client to HDFS", e);
+        }
         try {
             dfs.close();
         } catch (IOException e) {
@@ -54,9 +62,8 @@ public class HDFSProfileWriter implements ProfileWriter {
     }
 
     @Override
-    public void write(UUID application, UserProfile profile) throws ProfileWriterException {
+    public synchronized void write(UUID application, UserProfile profile) throws ProfileWriterException {
         UUID userId = profile.getUserId();
-        DFSClient client = dfs.getClient();
         String jsonProfile = getJsonRepresentation(profile);
 
         if (!checkIfApplicationDirExists(client, application)) {
@@ -91,14 +98,17 @@ public class HDFSProfileWriter implements ProfileWriter {
         } catch (IOException e) {
             throw new ProfileWriterException("Error while creating file [" + filename + "] on HDFS", e);
         }
-
         PrintWriter pw = new PrintWriter(os);
         pw.write(jsonProfile);
         pw.println();
         pw.close();
-
         if (pw.checkError()) {
-            throw new ProfileWriterException("Error while writing stream to file [" + filename + "] on HDFS");
+            throw new ProfileWriterException("Error while closing writer to file [" + filename + "] on HDFS");
+        }
+        try {
+            os.close();
+        } catch (IOException e) {
+            throw new ProfileWriterException("Error while closing stream to file [" + filename + "] on HDFS");
         }
     }
 
@@ -109,14 +119,17 @@ public class HDFSProfileWriter implements ProfileWriter {
         } catch (IOException e) {
             throw new ProfileWriterException("Error while opening file [" + filename + "] on HDFS", e);
         }
-
         PrintWriter pw = new PrintWriter(os);
         pw.append(jsonProfile);
         pw.println();
         pw.close();
-
         if (pw.checkError()) {
-            throw new ProfileWriterException("Error while writing stream to file [" + filename + "] on HDFS");
+            throw new ProfileWriterException("Error while closing writer to file [" + filename + "] on HDFS");
+        }
+        try {
+            os.close();
+        } catch (IOException e) {
+            throw new ProfileWriterException("Error while closing stream from file [" + filename + "] on HDFS", e);
         }
     }
 

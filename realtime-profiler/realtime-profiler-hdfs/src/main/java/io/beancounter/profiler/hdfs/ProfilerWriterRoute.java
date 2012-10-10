@@ -28,6 +28,12 @@ public class ProfilerWriterRoute extends RouteBuilder {
         ProfileWriterShutdownStrategy shutdownStrategy = new ProfileWriterShutdownStrategy();
         shutdownStrategy.setProfileWriter(profileWriter);
         getContext().setShutdownStrategy(shutdownStrategy);
+        try {
+            profileWriter.init();
+        } catch (ProfileWriterException e) {
+            LOGGER.error("error while init connection to HDFS", e);
+            throw new RuntimeException("error while init connection to HDFS", e);
+        }
 
         errorHandler(deadLetterChannel(errorEndpoint()));
 
@@ -38,6 +44,7 @@ public class ProfilerWriterRoute extends RouteBuilder {
                     public void process(Exchange exchange) throws Exception {
                         UserProfile userProfile = exchange.getIn().getBody(UserProfile.class);
                         profileWriter.write(application, userProfile);
+                        LOGGER.info("successfully updating profile for user [" + userProfile.getUsername() + "]");
                     }
                 });
     }

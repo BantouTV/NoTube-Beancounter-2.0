@@ -11,7 +11,6 @@ public class ProfileWriterShutdownStrategy extends DefaultShutdownStrategy {
         if (profileWriter != null) {
             profileWriter.close();
         }
-
         super.doShutdown();
     }
 

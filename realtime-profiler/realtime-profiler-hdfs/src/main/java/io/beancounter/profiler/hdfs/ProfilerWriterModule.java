@@ -14,14 +14,14 @@ public class ProfilerWriterModule extends CamelModuleWithMatchingRoutes {
 
     @Override
     protected void configure() {
+        super.configure();
         Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
-
         // TODO: Get the hadoop namenode URI from the properties and pass it
         // to the HDFSProfileWriter
-
         bind(DistributedFileSystem.class).toInstance(new DistributedFileSystem());
         bind(Configuration.class).toInstance(new Configuration());
         bind(ProfileWriter.class).to(HDFSProfileWriter.class);
+        bind(ProfilerWriterRoute.class);
     }
 
     @Provides

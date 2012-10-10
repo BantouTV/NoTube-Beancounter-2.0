@@ -62,12 +62,18 @@ public class HDFSProfileWriterTest {
 
     @Test
     public void givenNoErrorsWhenClosingTheWriterThenCloseTheDFS() throws Exception {
+        DFSClient client = mock(DFSClient.class);
+        when(dfs.getClient()).thenReturn(client);
+        profileWriter.init();
         profileWriter.close();
         verify(dfs).close();
     }
 
     @Test(expectedExceptions = ProfileWriterException.class)
     public void givenErrorWhenClosingTheWriterThenThrowException() throws Exception {
+        DFSClient client = mock(DFSClient.class);
+        when(dfs.getClient()).thenReturn(client);
+        profileWriter.init();
         doThrow(new IOException()).when(dfs).close();
         profileWriter.close();
     }
@@ -87,6 +93,7 @@ public class HDFSProfileWriterTest {
         when(client.create("/" + applicationId + "/" + userId, true)).thenReturn(outputStream);
         doNothing().when(outputStream).write(writtenBytesCaptor.capture(), anyInt(), anyInt());
 
+        profileWriter.init();
         profileWriter.write(applicationId, profile);
 
         String actual = new String(writtenBytesCaptor.getValue()).replace("\u0000", "");
@@ -94,7 +101,6 @@ public class HDFSProfileWriterTest {
         assertEquals(actual, expected);
 
         verify(client).mkdirs("/" + applicationId);
-        verify(outputStream).close();
     }
 
     @Test(expectedExceptions = ProfileWriterException.class)
@@ -111,6 +117,7 @@ public class HDFSProfileWriterTest {
         when(client.create("/" + applicationId + "/" + userId, true)).thenReturn(outputStream);
         doThrow(new IOException()).when(outputStream).write(any(byte[].class), anyInt(), anyInt());
 
+        profileWriter.init();
         profileWriter.write(applicationId, profile);
     }
 
@@ -128,6 +135,7 @@ public class HDFSProfileWriterTest {
         when(client.create("/" + applicationId + "/" + userId, true)).thenReturn(outputStream);
         doThrow(new IOException()).when(outputStream).close();
 
+        profileWriter.init();
         profileWriter.write(applicationId, profile);
     }
 
@@ -146,12 +154,12 @@ public class HDFSProfileWriterTest {
         when(client.create("/" + applicationId + "/" + userId, true)).thenReturn(outputStream);
         doNothing().when(outputStream).write(writtenBytesCaptor.capture(), anyInt(), anyInt());
 
+        profileWriter.init();
         profileWriter.write(applicationId, profile);
 
         String actual = new String(writtenBytesCaptor.getValue()).replace("\u0000", "");
         String expected = mapper.writeValueAsString(profile) + "\n";
         assertEquals(actual, expected);
-        verify(outputStream).close();
     }
 
     @Test(expectedExceptions = ProfileWriterException.class)
@@ -168,6 +176,7 @@ public class HDFSProfileWriterTest {
         when(client.create("/" + applicationId + "/" + userId, true)).thenReturn(outputStream);
         doThrow(new IOException()).when(outputStream).write(any(byte[].class), anyInt(), anyInt());
 
+        profileWriter.init();
         profileWriter.write(applicationId, profile);
     }
 
@@ -185,6 +194,7 @@ public class HDFSProfileWriterTest {
         when(client.create("/" + applicationId + "/" + userId, true)).thenReturn(outputStream);
         doThrow(new IOException()).when(outputStream).close();
 
+        profileWriter.init();
         profileWriter.write(applicationId, profile);
     }
 
@@ -204,12 +214,12 @@ public class HDFSProfileWriterTest {
         when(client.append("/" + applicationId + "/" + userId, BUFFER_SIZE, null, null)).thenReturn(outputStream);
         doNothing().when(outputStream).write(writtenBytesCaptor.capture(), anyInt(), anyInt());
 
+        profileWriter.init();
         profileWriter.write(applicationId, profile);
 
         String actual = new String(writtenBytesCaptor.getValue()).replace("\u0000", "");
         String expected = mapper.writeValueAsString(profile) + "\n";
         assertEquals(actual, expected);
-        verify(outputStream).close();
     }
 
     @Test(expectedExceptions = ProfileWriterException.class)
@@ -227,6 +237,7 @@ public class HDFSProfileWriterTest {
         when(client.append("/" + applicationId + "/" + userId, BUFFER_SIZE, null, null)).thenReturn(outputStream);
         doThrow(new IOException()).when(outputStream).write(any(byte[].class), anyInt(), anyInt());
 
+        profileWriter.init();
         profileWriter.write(applicationId, profile);
     }
 
@@ -245,6 +256,7 @@ public class HDFSProfileWriterTest {
         when(client.append("/" + applicationId + "/" + userId, BUFFER_SIZE, null, null)).thenReturn(outputStream);
         doThrow(new IOException()).when(outputStream).close();
 
+        profileWriter.init();
         profileWriter.write(applicationId, profile);
     }
 
@@ -264,6 +276,7 @@ public class HDFSProfileWriterTest {
         when(client.exists("/" + applicationId + "/" + userId)).thenReturn(true);
         when(client.append("/" + applicationId + "/" + userId, BUFFER_SIZE, null, null)).thenReturn(outputStream);
 
+        profileWriter.init();
         profileWriter.write(applicationId, profile);
 
         String actual = outputStream.toString().replace("\u0000", "");
@@ -287,6 +300,7 @@ public class HDFSProfileWriterTest {
         when(client.exists("/" + applicationId + "/" + userId)).thenReturn(true);
         when(client.append("/" + applicationId + "/" + userId, BUFFER_SIZE, null, null)).thenReturn(outputStream);
 
+        profileWriter.init();
         profileWriter.write(applicationId, profile);
 
         String actual = outputStream.toString().replace("\u0000", "");

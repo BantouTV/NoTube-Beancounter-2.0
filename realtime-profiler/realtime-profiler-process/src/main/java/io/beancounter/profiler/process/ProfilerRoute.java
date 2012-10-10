@@ -30,31 +30,30 @@ public class ProfilerRoute extends RouteBuilder {
                     public void process(Exchange exchange) throws Exception {
                         ResolvedActivity resolvedActivity = exchange.getIn().getBody(ResolvedActivity.class);
                         LOGGER.debug("Profiling activity {}.", resolvedActivity);
+                        UserProfile profile;
                         try {
-                            UserProfile profile = profiler.profile(
+                            profile = profiler.profile(
                                     resolvedActivity.getUserId(),
                                     resolvedActivity.getActivity()
                             );
+                            exchange.getIn().setBody(profile);
                         } catch (Exception e) {
                             // log the error but do not raise an exception
                             final String errMsg = "Error while profiling user [" + resolvedActivity
                                     .getUserId() + "]";
-                            LOGGER.error(errMsg, e);
+                            LOGGER.warn(errMsg, e);
+                            exchange.getIn().setBody(null);
                         }
-                        // (TODO) (low) profile will be sent in a down stream queue
-                        // meant to persist all the profiles of every user
-                        // and yes, even to other real-time processes
-                        // exchange.getIn().setBody(profile);
                     }
-                }
-                );
-        // TODO (out of release 1.0) turn on profiling analytics
-        /**
-         .marshal().json(JsonLibrary.Jackson)
-         .convertBodyTo(String.class)
-         .to("kestrel://{{kestrel.queue.analytics}}");
-         **/
+                })
+                .filter(body().isNotNull())
+                .marshal().json(JsonLibrary.Jackson)
+                .convertBodyTo(String.class)
+                .to(toKestrel());
+    }
 
+    protected String toKestrel() {
+        return "kestrel://{{kestrel.queue.profiles.url}}";
     }
 
     protected String fromKestrel() {
