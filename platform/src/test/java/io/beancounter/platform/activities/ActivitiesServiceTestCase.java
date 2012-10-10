@@ -551,7 +551,9 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void hideAnExistingVisibleActivity() throws Exception {
-        UUID activityId = UUID.randomUUID();
+        ResolvedActivity ra = createCustomActivity();
+        UUID activityId = ra.getActivity().getId();
+        when(activityStore.getActivityEvenIfHidden(activityId)).thenReturn(ra);
         String baseQuery = "activities/%s/visible/%s?apikey=%s";
         String query = String.format(
                 baseQuery,
@@ -575,7 +577,10 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void unhideAnExistingInvisibleActivity() throws Exception {
-        UUID activityId = UUID.randomUUID();
+        ResolvedActivity ra = createCustomActivity();
+        ra.setVisible(false);
+        UUID activityId = ra.getActivity().getId();
+        when(activityStore.getActivityEvenIfHidden(activityId)).thenReturn(ra);
         String baseQuery = "activities/%s/visible/%s?apikey=%s";
         String query = String.format(
                 baseQuery,
@@ -601,7 +606,7 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
     public void hidingANonExistentActivityShouldRespondWithAnError() throws Exception {
         UUID activityId = UUID.randomUUID();
         String baseQuery = "activities/%s/visible/%s?apikey=%s";
-        String expectedMessage = "Error modifying the visibility of activity with id [" + activityId + "]";
+        String expectedMessage = "Activity [" + activityId +  "] not found";
         String query = String.format(
                 baseQuery,
                 activityId.toString(),
@@ -627,7 +632,9 @@ public class ActivitiesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void changingTheVisibilityOfAnActivityWithInvalidVisibilityWillDefaultToFalse() throws Exception {
-        UUID activityId = UUID.randomUUID();
+        ResolvedActivity ra = createCustomActivity();
+        UUID activityId = ra.getActivity().getId();
+        when(activityStore.getActivityEvenIfHidden(activityId)).thenReturn(ra);
         String baseQuery = "activities/%s/visible/%s?apikey=%s";
         String query = String.format(
                 baseQuery,

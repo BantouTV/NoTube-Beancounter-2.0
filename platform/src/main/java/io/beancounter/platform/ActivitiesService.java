@@ -154,9 +154,12 @@ public class ActivitiesService extends JsonService {
         ResolvedActivity resolvedActivity;
         try {
             activityIdObj = UUID.fromString(activityId);
-            resolvedActivity = activities.getActivity(activityIdObj);
+            resolvedActivity = activities.getActivityEvenIfHidden(activityIdObj);
         } catch (ActivityStoreException e) {
             return error(e, "Error while getting activity [" + activityId + "] from the storage");
+        }
+        if(resolvedActivity == null) {
+            return error("Activity [" + activityIdObj + "] not found");
         }
 
         try {
@@ -189,14 +192,12 @@ public class ActivitiesService extends JsonService {
                 activityIdObj.toString(),
                 String.valueOf(vObj)
         );
-        if (resolvedActivity != null) {
-            Comment comment;
-            try {
-                comment = (Comment) resolvedActivity.getActivity().getObject();
-                notify.addMetadata("onEvent", comment.getOnEvent());
-            } catch (ClassCastException e) {
-                // just avoid to set the onEvent
-            }
+        Comment comment;
+        try {
+            comment = (Comment) resolvedActivity.getActivity().getObject();
+            notify.addMetadata("onEvent", comment.getOnEvent());
+        } catch (ClassCastException e) {
+            // just avoid to set the onEvent
         }
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writeValueAsString(notify);

@@ -228,8 +228,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
         return searchAndPaginateResults(path + ":" + value, pageNumber, size, order, filters);
     }
 
-    @Override
-    public ResolvedActivity getActivity(UUID activityId) throws ActivityStoreException {
+    private ResolvedActivity getActivity(UUID activityId, boolean overrideVisibility) throws ActivityStoreException {
         GetResponse response = client
                 .prepareGet(INDEX_NAME, INDEX_TYPE, activityId.toString())
                 .execute().actionGet();
@@ -245,8 +244,18 @@ public class ElasticSearchActivityStore implements ActivityStore {
             final String errMsg = "Error while deserializing from json [" + response.getSource() + "]";
             throw new ActivityStoreException(errMsg, ex);
         }
+        return (activity != null && (activity.isVisible()) || overrideVisibility) ? activity : null;
+    }
 
-        return (activity != null && activity.isVisible()) ? activity : null;
+    @Override
+    public ResolvedActivity getActivityEvenIfHidden(UUID activityId) throws ActivityStoreException {
+        return getActivity(activityId, true);
+    }
+
+
+    @Override
+    public ResolvedActivity getActivity(UUID activityId) throws ActivityStoreException {
+        return getActivity(activityId, false);
     }
 
     @Override

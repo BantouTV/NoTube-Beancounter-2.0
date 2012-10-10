@@ -151,6 +151,17 @@ public interface ActivityStore {
     ResolvedActivity getActivity(UUID activityId) throws ActivityStoreException;
 
     /**
+     * Get an activity given its id. Visible and hidden activities will be returned.
+     *
+     * @param activityId The id of the activity to retrieve.
+     * @return The activity if it exists. <tt>null</tt> otherwise.
+     * @throws ActivityStoreException If the JSON response couldn't be converted
+     *                                to a ResolvedActivity.
+     */
+    ResolvedActivity getActivityEvenIfHidden(UUID activityId) throws ActivityStoreException;
+
+
+    /**
      * This method sets an internal {@link Activity} <code>boolean</code> flag to make
      * it no longer visible (or to make it visible) in all the other search methods.
      *

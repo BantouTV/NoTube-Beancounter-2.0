@@ -107,6 +107,23 @@ public class MockActivityStore implements ActivityStore {
     }
 
     @Override
+    public ResolvedActivity getActivityEvenIfHidden(UUID activityId) throws ActivityStoreException {
+        if ("0ad77722-1338-4c32-9209-5b952530959a".equals(activityId.toString())) {
+            return null;
+        }
+
+        ResolvedActivity activity;
+        try {
+             activity = createFakeActivity(1);
+        } catch (TestsException e) {
+            throw new ActivityStoreException("Error while creating fake activity!", e);
+        }
+
+        activity.getActivity().setId(activityId);
+        return activity;
+    }
+
+    @Override
     public Collection<ResolvedActivity> getByUser(UUID userId, Collection<UUID> activityIds) throws ActivityStoreException {
         throw new UnsupportedOperationException("NIY");
     }
