@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import io.beancounter.commons.helper.jedis.JedisPoolFactory;
 
 public class ResourceCleanupStrategy extends LifecycleStrategySupport {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceCleanupStrategy.class);
 
     JedisPoolFactory factory;

@@ -6,6 +6,10 @@ package io.beancounter.publisher.facebook;
  */
 public class FacebookPublisherException extends Exception {
 
+    public FacebookPublisherException(String message) {
+        super(message);
+    }
+
     public FacebookPublisherException(String message, Exception e) {
         super(message, e);
     }

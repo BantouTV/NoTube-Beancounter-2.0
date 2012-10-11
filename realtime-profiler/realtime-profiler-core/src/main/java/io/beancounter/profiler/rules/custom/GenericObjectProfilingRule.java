@@ -25,7 +25,7 @@ import java.util.Set;
 public class GenericObjectProfilingRule
         extends ObjectProfilingRule<io.beancounter.commons.model.activity.Object> {
 
-    private static final Logger logger = LoggerFactory.getLogger(GenericObjectProfilingRule.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GenericObjectProfilingRule.class);
 
     private Set<Interest> result = new HashSet<Interest>();
 
@@ -39,6 +39,7 @@ public class GenericObjectProfilingRule
 
     @Override
     public void run(Properties properties) throws ProfilingRuleException {
+        LOGGER.debug("rule started");
         Object object = getObject();
         URL url = object.getUrl();
         NLPEngineResult result;
@@ -46,10 +47,11 @@ public class GenericObjectProfilingRule
             result = getNLPEngine().enrich(url);
         } catch (NLPEngineException e) {
             final String errMsg = "error while trying to extract knowledge from [" + url + "]";
-            logger.error(errMsg, e);
+            LOGGER.error(errMsg, e);
             throw new ProfilingRuleException(errMsg, e);
         }
         this.result.addAll(InterestConverter.convert(result));
+        LOGGER.debug("rule ended with {} interests found", this.result.size());
     }
 
     @Override

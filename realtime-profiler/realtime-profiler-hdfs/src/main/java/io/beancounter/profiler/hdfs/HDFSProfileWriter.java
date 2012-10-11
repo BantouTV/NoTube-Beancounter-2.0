@@ -6,6 +6,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.DFSClient;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -19,6 +21,8 @@ import java.util.UUID;
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 public class HDFSProfileWriter implements ProfileWriter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProfilerWriterRoute.class);
 
     static final int BUFFER_SIZE = 4096;
 
@@ -39,10 +43,13 @@ public class HDFSProfileWriter implements ProfileWriter {
 
     @Override
     public void init() throws ProfileWriterException {
+        LOGGER.debug("inizializing connection to HDFS");
         try {
             dfs.initialize(new URI("hdfs://10.224.86.144:9000"), configuration);
         } catch (Exception e) {
-            throw new ProfileWriterException("Error while initializing HDFS", e);
+            final String errMsg = "Error while initializing HDFS";
+            LOGGER.error(errMsg, e);
+            throw new ProfileWriterException(errMsg, e);
         }
         client = dfs.getClient();
     }
@@ -52,17 +59,22 @@ public class HDFSProfileWriter implements ProfileWriter {
         try {
             client.close();
         } catch (IOException e) {
-            throw new ProfileWriterException("Error while client to HDFS", e);
+            final String errMsg = "Error while closing client to HDFS";
+            LOGGER.error(errMsg, e);
+            throw new ProfileWriterException(errMsg, e);
         }
         try {
             dfs.close();
         } catch (IOException e) {
-            throw new ProfileWriterException("Error while closing HDFS", e);
+            final String errMsg = "Error while closing HDFS";
+            LOGGER.error(errMsg, e);
+            throw new ProfileWriterException(errMsg, e);
         }
     }
 
     @Override
     public synchronized void write(UUID application, UserProfile profile) throws ProfileWriterException {
+        LOGGER.debug("write to HDFS started");
         UUID userId = profile.getUserId();
         String jsonProfile = getJsonRepresentation(profile);
 
@@ -80,13 +92,16 @@ public class HDFSProfileWriter implements ProfileWriter {
             // uhm, ok we should create the file from scratch
             write(client, filename, jsonProfile);
         }
+        LOGGER.debug("write to HDFS ended");
     }
 
     private String createApplicationDir(DFSClient client, UUID application) throws ProfileWriterException {
         try {
             client.mkdirs("/" + application);
         } catch (IOException e) {
-            throw new ProfileWriterException("Error while creating directory [" + application + "] on HDFS", e);
+            final String errMsg = "Error while creating directory [" + application + "] on HDFS";
+            LOGGER.error(errMsg, e);
+            throw new ProfileWriterException(errMsg, e);
         }
         return application.toString();
     }
@@ -96,19 +111,25 @@ public class HDFSProfileWriter implements ProfileWriter {
         try {
             os = client.create(filename, true);
         } catch (IOException e) {
-            throw new ProfileWriterException("Error while creating file [" + filename + "] on HDFS", e);
+            final String errMsg = "Error while creating file [" + filename + "] on HDFS";
+            LOGGER.error(errMsg, e);
+            throw new ProfileWriterException(errMsg, e);
         }
         PrintWriter pw = new PrintWriter(os);
         pw.write(jsonProfile);
         pw.println();
         pw.close();
         if (pw.checkError()) {
-            throw new ProfileWriterException("Error while closing writer to file [" + filename + "] on HDFS");
+            final String errMsg = "Error while closing writer to file [" + filename + "] on HDFS";
+            LOGGER.error(errMsg);
+            throw new ProfileWriterException(errMsg);
         }
         try {
             os.close();
         } catch (IOException e) {
-            throw new ProfileWriterException("Error while closing stream to file [" + filename + "] on HDFS");
+            final String errMsg = "Error while closing stream to file [" + filename + "] on HDFS";
+            LOGGER.error(errMsg);
+            throw new ProfileWriterException(errMsg);
         }
     }
 
@@ -124,12 +145,16 @@ public class HDFSProfileWriter implements ProfileWriter {
         pw.println();
         pw.close();
         if (pw.checkError()) {
-            throw new ProfileWriterException("Error while closing writer to file [" + filename + "] on HDFS");
+            final String errMsg = "Error while closing writer to file [" + filename + "] on HDFS";
+            LOGGER.error(errMsg);
+            throw new ProfileWriterException(errMsg);
         }
         try {
             os.close();
         } catch (IOException e) {
-            throw new ProfileWriterException("Error while closing stream from file [" + filename + "] on HDFS", e);
+            final String errMsg = "Error while closing stream from file [" + filename + "] on HDFS";
+            LOGGER.error(errMsg);
+            throw new ProfileWriterException(errMsg, e);
         }
     }
 
@@ -137,7 +162,9 @@ public class HDFSProfileWriter implements ProfileWriter {
         try {
             return mapper.writeValueAsString(profile);
         } catch (IOException e) {
-            throw new ProfileWriterException("error while serializing [" + profile +  "] to JSON", e);
+            final String errMsg = "error while serializing [" + profile +  "] to JSON";
+            LOGGER.error(errMsg);
+            throw new ProfileWriterException(errMsg, e);
         }
     }
 
@@ -145,7 +172,9 @@ public class HDFSProfileWriter implements ProfileWriter {
         try {
             return client.exists("/" + application);
         } catch (IOException e) {
-            throw new ProfileWriterException("Error while checking if directory [" + application + "] exists", e);
+            final String errMsg = "Error while checking if directory [" + application + "] exists";
+            LOGGER.error(errMsg);
+            throw new ProfileWriterException(errMsg, e);
         }
     }
 
@@ -153,7 +182,9 @@ public class HDFSProfileWriter implements ProfileWriter {
         try {
             return client.exists("/" + application + "/" + userId);
         } catch (IOException e) {
-            throw new ProfileWriterException("Error while checking if file [" + userId + "] exists", e);
+            final String errMsg = "Error while checking if file [" + userId + "] exists";
+            LOGGER.error(errMsg);
+            throw new ProfileWriterException(errMsg, e);
         }
     }
 }

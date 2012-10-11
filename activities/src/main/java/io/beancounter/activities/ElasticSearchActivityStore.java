@@ -164,6 +164,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
                 activity = mapper.readValue(hit.source(), ResolvedActivity.class);
             } catch (IOException ioe) {
                 final String errMsg = "Error while deserializing [" + hit.getSource() + "]";
+                LOGGER.error(errMsg, errMsg);
                 throw new ActivityStoreException(errMsg, ioe);
             }
 
@@ -216,6 +217,8 @@ public class ElasticSearchActivityStore implements ActivityStore {
             List<String> filters
     ) throws ActivityStoreException, WildcardSearchException, InvalidOrderException {
         if (path.contains("*") || value.contains("*")) {
+            final String errMsg = "Wildcard searches are not allowed.";
+            LOGGER.error(errMsg);
             throw new WildcardSearchException("Wildcard searches are not allowed.");
         }
 
@@ -242,6 +245,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
             activity = mapper.readValue(response.source(), ResolvedActivity.class);
         } catch (Exception ex) {
             final String errMsg = "Error while deserializing from json [" + response.getSource() + "]";
+            LOGGER.error(errMsg, ex);
             throw new ActivityStoreException(errMsg, ex);
         }
         return (activity != null && (activity.isVisible()) || overrideVisibility) ? activity : null;
@@ -268,8 +272,8 @@ public class ElasticSearchActivityStore implements ActivityStore {
 
             LOGGER.debug("activity {} visibility set to {}", activityId, visible);
         } catch (ElasticSearchException ese) {
-            String message = "Error setting the visibility of activity "
-                    + activityId.toString();
+            String message = "Error setting the visibility of activity " + activityId.toString();
+            LOGGER.error(message, ese);
             throw new ActivityStoreException(message, ese);
         }
     }
@@ -280,6 +284,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
             client.close();
         } catch (Exception e) {
             final String errMsg = "Error while closing the client";
+            LOGGER.error(errMsg, e);
             throw new ActivityStoreException(errMsg, e);
         }
     }
@@ -294,6 +299,7 @@ public class ElasticSearchActivityStore implements ActivityStore {
             jsonActivity = createActivityJson(activity);
         } catch (IOException e) {
             final String errMsg = "Error while serializing to json [" + activity + "]";
+            LOGGER.error(errMsg, e);
             throw new ActivityStoreException(errMsg, e);
         }
         client.prepareIndex(INDEX_NAME, INDEX_TYPE)
@@ -380,9 +386,9 @@ public class ElasticSearchActivityStore implements ActivityStore {
                 );
             } catch (IOException e) {
                 final String errMsg = "Error while deserializing from json [" + hit.getSource() + "]";
+                LOGGER.error(errMsg, e);
                 throw new ActivityStoreException(errMsg, e);
             }
-
             activities.add(activity);
         }
 
@@ -401,9 +407,11 @@ public class ElasticSearchActivityStore implements ActivityStore {
         }
         ImmutableList<DiscoveryNode> nodes = transportClient.connectedNodes();
         if (nodes.isEmpty()) {
+            final String errMsg = "Could not connect to elasticsearch cluster. " +
+                    "Please check the settings in the es.properties file.";
             transportClient.close();
-            throw new RuntimeException("Could not connect to elasticsearch cluster."
-                    + " Please check the settings in the es.properties file.");
+            LOGGER.error(errMsg);
+            throw new RuntimeException(errMsg);
         }
         return transportClient;
     }

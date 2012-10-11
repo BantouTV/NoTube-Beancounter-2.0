@@ -1359,37 +1359,20 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void handlingAtomicTwitterOAuthCallbackFromWebWithMissingRedirectUrlShouldRespondWithError() throws Exception {
-        String baseQuery = "user/oauth/atomic/callback/%s/web/%s?oauth_token=%s&oauth_verifier=%s";
+        String baseQuery = "user/oauth/atomic/callback/%s/web/?oauth_token=%s&oauth_verifier=%s";
         String service = "twitter";
-        String serviceUserId = "1234564321";
-        String username = "test-user";
-        UUID userToken = UUID.randomUUID();
         String token = "twitter-oauth-token";
         String verifier = "twitter-oauth-verifier";
-        String redirectUrl = null;
         String query = String.format(
                 baseQuery,
                 service,
-                redirectUrl,
                 token,
                 verifier
         );
-
-        User user = new User("Test", "User", username, "password");
-        AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
-
-        when(userManager.storeUserFromOAuth(service, token, verifier, redirectUrl)).thenReturn(signUp);
-
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
         int result = client.executeMethod(getMethod);
-        String responseBody = new String(getMethod.getResponseBody());
-        assertEquals(result, HttpStatus.SC_INTERNAL_SERVER_ERROR);
-        assertFalse(responseBody.isEmpty());
-
-        StringPlatformResponse response = fromJson(responseBody, StringPlatformResponse.class);
-        assertEquals(response.getStatus(), StringPlatformResponse.Status.NOK);
-        assertEquals(response.getMessage(), "Malformed redirect URL");
+        assertEquals(result, HttpStatus.SC_NOT_FOUND);
     }
 
     @Test

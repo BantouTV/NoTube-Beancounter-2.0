@@ -10,6 +10,8 @@ import io.beancounter.commons.tagdef.TagDef;
 import io.beancounter.commons.tagdef.TagDefException;
 import io.beancounter.profiler.rules.ProfilingRuleException;
 import io.beancounter.profiler.rules.ObjectProfilingRule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.util.*;
@@ -22,6 +24,8 @@ import java.util.*;
 // TODO: make a better use of the new stuff coming from NLPengine
 public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GenericObjectProfilingRule.class);
+
     private Set<Interest> result = new HashSet<Interest>();
 
     public TweetProfilingRule(Tweet tweet, NLPEngine nlpEngine, LinkingEngine linkingEngine) {
@@ -29,6 +33,7 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
     }
 
     public void run(Properties properties) throws ProfilingRuleException {
+        LOGGER.debug("rule started");
         Tweet tweet = getObject();
         // grab interests from pure tweet text
         result.addAll(
@@ -44,6 +49,7 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
                 result.addAll(getResourcesFromHashTag(hashTag));
             }
         }
+        LOGGER.debug("rule ended with {} interests found", result.size());
     }
 
     private Collection<Interest> getResources(String text) throws ProfilingRuleException {
@@ -51,8 +57,10 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
         try {
             nlpResult = getNLPEngine().enrich(text);
         } catch (NLPEngineException e) {
+            final String errMsg = "Error while extracting interests from text [" + text + "]";
+            LOGGER.error(errMsg, e);
             throw new ProfilingRuleException(
-                    "Error while extracting interests from text [" + text + "]",
+                    errMsg,
                     e
             );
         }
@@ -64,6 +72,8 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
         try {
             nlpResult = getNLPEngine().enrich(url);
         } catch (NLPEngineException e) {
+            final String errMsg = "Error while extracting interests from url [" + url + "]";
+            LOGGER.error(errMsg, e);
             throw new ProfilingRuleException(
                     "Error while extracting interests from url [" + url + "]",
                     e
@@ -78,8 +88,10 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
         try {
             defs = tagDef.getDefinitions(hashTag);
         } catch (TagDefException e) {
+            final String errMsg = "Error while accessing to TagDef for '" + hashTag + "'";
+            LOGGER.error(errMsg, e);
             throw new ProfilingRuleException(
-                    "Error while accessing to TagDef for '" + hashTag + "'",
+                    errMsg,
                     e
             );
         }
@@ -90,8 +102,10 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
                         InterestConverter.convert(getNLPEngine().enrich(def))
                 );
             } catch (NLPEngineException e) {
+                final String errMsg = "Error while extracting interests from #hashtag '" + hashTag + "'";
+                LOGGER.error(errMsg, e);
                 throw new ProfilingRuleException(
-                        "Error while extracting interests from #hashtag '" + hashTag + "'",
+                        errMsg,
                         e
                 );
             }

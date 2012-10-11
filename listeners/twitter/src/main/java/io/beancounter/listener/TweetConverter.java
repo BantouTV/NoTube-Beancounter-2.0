@@ -28,15 +28,12 @@ public class TweetConverter {
         } catch (MalformedURLException e) {
             // leave it null
         }
-
         for (URLEntity urlEntity : status.getURLEntities()) {
             tweet.addUrl(urlEntity.getExpandedURL());
         }
-
         for (HashtagEntity hashtagEntity : status.getHashtagEntities()) {
             tweet.addHashTag(hashtagEntity.getText());
         }
-
         return tweet;
     }
 }

@@ -43,7 +43,7 @@ public class ResolverRoute extends RouteBuilder {
                     @Override
                     public void process(Exchange exchange) throws Exception {
                         Activity activity = exchange.getIn().getBody(Activity.class);
-                        LOGGER.debug("Resolving username {}.", activity);
+                        LOGGER.debug("resolving username {}.", activity);
                         UUID userId = resolver.resolve(activity);
                         String username = resolver.resolveUsername(
                                 activity.getContext().getUsername(),

@@ -2,7 +2,10 @@ package io.beancounter.platform;
 
 import com.google.inject.Inject;
 import io.beancounter.commons.helper.UriUtils;
+import io.beancounter.commons.model.activity.Activity;
+import io.beancounter.commons.model.activity.ResolvedActivity;
 import io.beancounter.platform.validation.Validations;
+import io.beancounter.queues.QueuesException;
 import io.beancounter.usermanager.UserTokenManager;
 import io.beancounter.applications.ApplicationsManager;
 import io.beancounter.commons.model.OAuthToken;
@@ -16,12 +19,15 @@ import io.beancounter.queues.Queues;
 import io.beancounter.usermanager.AtomicSignUp;
 import io.beancounter.usermanager.UserManager;
 import io.beancounter.usermanager.UserManagerException;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
+import java.util.List;
 import java.util.UUID;
 
 import static io.beancounter.applications.ApplicationsManager.Action.*;
@@ -376,46 +382,17 @@ public class UserService extends JsonService {
         } catch (UserManagerException ume) {
             return error(ume, "Error while doing OAuth exchange for service: [" + service + "]");
         }
-        /**
-        User user;
+
         try {
-            user = userManager.getUser(signUp.getUsername());
+            grabInitialActivities(signUp);
         } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user: [" + signUp.getUsername() + "]");
+            return error(e, "Error while grabbing the first set of activities " +
+                    "for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
+        } catch (QueuesException e) {
+            return error(e, "Error while grabbing the first set of activities " +
+                    "for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
         }
 
-        final int LIMIT = 40;
-        List<Activity> activities;
-        try {
-            activities = userManager.grabUserActivities(
-                    user,
-                    signUp.getIdentifier(),
-                    signUp.getService(),
-                    LIMIT
-            );
-        } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user: [" + signUp.getUsername() + "] initial activities");
-        }
-
-        ObjectMapper mapper = new ObjectMapper();
-        for (Activity activity : activities) {
-            ResolvedActivity ra = new ResolvedActivity();
-            ra.setActivity(activity);
-            ra.setUserId(signUp.getUserId());
-            ra.setUser(user);
-            String raJson;
-            try {
-                raJson = mapper.writeValueAsString(ra);
-            } catch (IOException e) {
-                // just skip this one
-                continue;
-            }
-            try {
-                queues.push(raJson);
-            } catch (QueuesException e) {
-                return error(e, "Error while pushing down json resolved activity: [" + raJson + "] for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
-            }
-        } **/
         URI finalRedirectUri;
         try {
             finalRedirectUri = new URI(decodedFinalRedirect);
@@ -435,6 +412,52 @@ public class UserService extends JsonService {
             return error(ex, "Malformed redirect URL");
         }
         return Response.temporaryRedirect(finalRedirectUri).build();
+    }
+
+    private void grabInitialActivities(AtomicSignUp signUp) throws UserManagerException, QueuesException {
+        User user;
+        try {
+            user = userManager.getUser(signUp.getUsername());
+        } catch (UserManagerException e) {
+            throw new UserManagerException("Error while retrieving user: [" + signUp.getUsername() + "]", e);
+        }
+
+        // this should be configurable from beancounter.properties
+        final int LIMIT = 10;
+        List<Activity> activities;
+        try {
+            activities = userManager.grabUserActivities(
+                    user,
+                    signUp.getIdentifier(),
+                    signUp.getService(),
+                    LIMIT
+            );
+        } catch (UserManagerException e) {
+            throw new UserManagerException("Error while retrieving user: [" + signUp.getUsername() + "] initial activities", e);
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        for (Activity activity : activities) {
+            ResolvedActivity ra = new ResolvedActivity();
+            ra.setActivity(activity);
+            ra.setUserId(signUp.getUserId());
+            ra.setUser(user);
+            String raJson;
+            try {
+                raJson = mapper.writeValueAsString(ra);
+            } catch (IOException e) {
+                super.LOGGER.warn("error while serializing to JSON {}", ra);
+                // just skip this one
+                continue;
+            }
+            try {
+                queues.push(raJson);
+            } catch (QueuesException e) {
+                throw new QueuesException("Error while pushing down json " +
+                        "resolved activity: [" + raJson + "] for user [" + signUp.getUsername() + "] " +
+                        "on service [" + signUp.getService() + "]", e);
+            }
+        }
     }
 
     @GET
@@ -459,47 +482,15 @@ public class UserService extends JsonService {
         } catch (UserManagerException ume) {
             return error(ume, "Error while doing OAuth exchange for service: [" + service + "]");
         }
-
-        /**
-        User user;
         try {
-            user = userManager.getUser(signUp.getUsername());
+            grabInitialActivities(signUp);
         } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user: [" + signUp.getUsername() + "]");
+            return error(e, "Error while grabbing the first set of activities " +
+                    "for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
+        } catch (QueuesException e) {
+            return error(e, "Error while grabbing the first set of activities " +
+                    "for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
         }
-
-        final int LIMIT = 40;
-        List<Activity> activities;
-        try {
-            activities = userManager.grabUserActivities(
-                    user,
-                    signUp.getIdentifier(),
-                    signUp.getService(),
-                    LIMIT
-            );
-        } catch (UserManagerException e) {
-            return error(e, "Error while retrieving user: [" + signUp.getUsername() + "] initial activities");
-        }
-        // TODO (low) tidy up the following code.
-        ObjectMapper mapper = new ObjectMapper();
-        for (Activity activity : activities) {
-            ResolvedActivity ra = new ResolvedActivity();
-            ra.setActivity(activity);
-            ra.setUserId(signUp.getUserId());
-            ra.setUser(user);
-            String raJson;
-            try {
-                raJson = mapper.writeValueAsString(ra);
-            } catch (IOException e) {
-                // just skip this one
-                continue;
-            }
-            try {
-                queues.push(raJson);
-            } catch (QueuesException e) {
-                return error(e, "Error while pushing down json resolved activity: [" + raJson + "] for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
-            }
-        } **/
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
                 new AtomicSignUpResponse(

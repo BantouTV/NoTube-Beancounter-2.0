@@ -9,4 +9,8 @@ public class TwitterPublisherException extends Exception {
     public TwitterPublisherException(String message, Exception e) {
         super(message, e);
     }
+
+    public TwitterPublisherException(String message) {
+        super(message);
+    }
 }

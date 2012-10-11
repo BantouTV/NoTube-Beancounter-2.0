@@ -29,7 +29,7 @@ public class ProfilerRoute extends RouteBuilder {
                     @Override
                     public void process(Exchange exchange) throws Exception {
                         ResolvedActivity resolvedActivity = exchange.getIn().getBody(ResolvedActivity.class);
-                        LOGGER.debug("Profiling activity {}.", resolvedActivity);
+                        LOGGER.debug("profiling activity: {}.", resolvedActivity);
                         UserProfile profile;
                         try {
                             profile = profiler.profile(
@@ -39,8 +39,7 @@ public class ProfilerRoute extends RouteBuilder {
                             exchange.getIn().setBody(profile);
                         } catch (Exception e) {
                             // log the error but do not raise an exception
-                            final String errMsg = "Error while profiling user [" + resolvedActivity
-                                    .getUserId() + "]";
+                            final String errMsg = "error while profiling user [" + resolvedActivity.getUserId() + "]";
                             LOGGER.warn(errMsg, e);
                             exchange.getIn().setBody(null);
                         }

@@ -18,7 +18,7 @@ import java.util.Properties;
  */
 public class FacebookPublisher implements Processor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FacebookPublisher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FacebookPublisher.class);
 
     @Override
     public void process(Exchange exchange) throws FacebookPublisherException {
@@ -31,7 +31,7 @@ public class FacebookPublisher implements Processor {
             token = resolvedActivity.getUser().getServices().get("facebook").getSession();
         } catch (NullPointerException e) {
             final String errMessage = "Facebook service not authorized. Do you have the token?";
-            LOG.error(errMessage);
+            LOGGER.warn(errMessage);
             throw new FacebookPublisherException(errMessage, e);
         }
 
@@ -40,7 +40,7 @@ public class FacebookPublisher implements Processor {
         // Publish activity on user's FB feed. Should be configurable.
         FacebookType response = publisher.publishActivity(token, activity.getVerb(), activity.getObject());
 
-        LOG.debug("Published message ID: " + response.getId());
+        LOGGER.debug("published message ID: " + response.getId());
     }
 
     Publisher getPublisher(io.beancounter.commons.model.activity.Object object)
@@ -51,15 +51,15 @@ public class FacebookPublisher implements Processor {
             publisher = (Publisher) clazz.newInstance();
         } catch (InstantiationException e) {
             final String errMessage = "Error while instantiating class [" + clazz + "]";
-            LOG.error(errMessage);
+            LOGGER.error(errMessage);
             throw new FacebookPublisherException(errMessage, e);
         } catch (IllegalAccessException e) {
             final String errMessage = "Error while accessing [" + clazz + "]";
-            LOG.error(errMessage);
+            LOGGER.error(errMessage);
             throw new FacebookPublisherException(errMessage, e);
         } catch (NullPointerException e) {
             final String errMessage = "Object not supported [" + object.getClass().getCanonicalName() + "]";
-            LOG.error(errMessage);
+            LOGGER.error(errMessage);
             throw new FacebookPublisherException(errMessage, e);
         }
         return publisher;

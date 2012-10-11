@@ -26,7 +26,7 @@ import java.util.Set;
  */
 public class FacebookLikeProfilingRule extends ObjectProfilingRule<Like> {
 
-    private static final Logger logger = LoggerFactory.getLogger(FacebookLikeProfilingRule.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FacebookLikeProfilingRule.class);
 
     private final static String BASE_URI = "http://dati.rai.tv/";
 
@@ -44,6 +44,7 @@ public class FacebookLikeProfilingRule extends ObjectProfilingRule<Like> {
 
     @Override
     public void run(Properties properties) throws ProfilingRuleException {
+        LOGGER.debug("rule started");
         Like like = getObject();
         for(String category : like.getCategories()) {
             String cogitoCategory;
@@ -51,12 +52,12 @@ public class FacebookLikeProfilingRule extends ObjectProfilingRule<Like> {
                 cogitoCategory = getLinkingEngine().link(category);
             } catch (LinkNotFoundException e) {
                 final String errMsg = "could not find any link from [" + category + "]. Skipping.";
-                logger.error(errMsg, e);
+                LOGGER.error(errMsg, e);
                 continue;
             }
             catch (LinkingEngineException e) {
                 final String errMsg = "error while trying to link [" + category + "]";
-                logger.error(errMsg, e);
+                LOGGER.error(errMsg, e);
                 throw new ProfilingRuleException(errMsg, e);
             }
             try {
@@ -65,10 +66,11 @@ public class FacebookLikeProfilingRule extends ObjectProfilingRule<Like> {
                 );
             } catch (URISyntaxException e) {
                 final String errMsg = "error while trying to link [" + category + "]";
-                logger.error(errMsg, e);
+                LOGGER.error(errMsg, e);
                 throw new RuntimeException(errMsg, e);
             }
         }
+        LOGGER.debug("rule ended with {} interests found", result.size());
     }
 
     @Override

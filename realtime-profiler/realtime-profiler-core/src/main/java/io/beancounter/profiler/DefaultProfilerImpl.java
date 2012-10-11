@@ -79,6 +79,7 @@ public final class DefaultProfilerImpl implements Profiler {
         Class<? extends ObjectProfilingRule> ruleClass = objectRules.get(type);
         if(ruleClass == null) {
             // if I can't handle it, then send to >> /dev/null
+            LOGGER.warn("it seems I can't handle this activity [" + activity + "], setting to /dev/null rule");
             ruleClass = DevNullProfilingRule.class;
         }
         ObjectProfilingRule opr = build(
@@ -288,12 +289,14 @@ public final class DefaultProfilerImpl implements Profiler {
             );
         } catch (NoSuchMethodException e) {
             final String errMsg = "cannot find a constructor with type [" + type.getName() + "]";
+            LOGGER.error(errMsg, e);
             throw new ProfilerException(errMsg, e);
         }
         try {
             return constructor.newInstance(object, nlpEngine, linkEng);
         } catch (Exception e) {
             final String errMsg = "error while instantiating a [" + ruleClass.getName() + "] with type [" + type.getName() + "]";
+            LOGGER.error(errMsg, e);
             throw new ProfilerException(errMsg, e);
         }
     }

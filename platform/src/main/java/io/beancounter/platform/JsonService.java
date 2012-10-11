@@ -1,6 +1,8 @@
 package io.beancounter.platform;
 
 import io.beancounter.platform.responses.StringPlatformResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.Response;
 
@@ -10,6 +12,8 @@ import javax.ws.rs.core.Response;
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 public abstract class JsonService extends Service {
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(JsonService.class);
 
     public static Response error(
             Exception e,

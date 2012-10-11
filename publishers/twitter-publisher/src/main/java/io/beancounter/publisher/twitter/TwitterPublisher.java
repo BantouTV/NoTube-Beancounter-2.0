@@ -23,7 +23,7 @@ import java.util.Properties;
  */
 public class TwitterPublisher implements Processor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TwitterPublisher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TwitterPublisher.class);
 
     @Inject
     private Twitter twitter;
@@ -36,8 +36,8 @@ public class TwitterPublisher implements Processor {
         OAuthAuth auth = (OAuthAuth) resolvedActivity.getUser().getServices().get("twitter");
         if (auth == null) {
             final String errMessage = "Twitter service not authorized. Do you have the token?";
-            LOG.error(errMessage);
-            throw new TwitterPublisherException(errMessage, new NullPointerException());
+            LOGGER.warn(errMessage);
+            throw new TwitterPublisherException(errMessage);
         }
 
         setAccessToken(twitter, auth);
@@ -45,7 +45,7 @@ public class TwitterPublisher implements Processor {
         Publisher publisher = getPublisher(resolvedActivity.getActivity().getObject());
         Status status = publisher.publish(twitter, resolvedActivity.getActivity().getVerb(), object);
 
-        LOG.debug("Status updated to [" + status.getText() + "]");
+        LOGGER.debug("Status updated to [" + status.getText() + "]");
     }
 
     private void setAccessToken(Twitter twitter, OAuthAuth auth) throws TwitterPublisherException {
@@ -54,7 +54,7 @@ public class TwitterPublisher implements Processor {
             tokenSession = auth.getSession();
         } catch (NullPointerException e) {
             final String errMessage = "Error while getting the twitter token for user. Session not found!";
-            LOG.error(errMessage);
+            LOGGER.error(errMessage);
             throw new TwitterPublisherException(errMessage, e);
         }
         String tokenSecret;
@@ -62,7 +62,7 @@ public class TwitterPublisher implements Processor {
             tokenSecret = auth.getSecret();
         } catch (NullPointerException e) {
             final String errMessage = "Error while getting the twitter token for user. Secret not found!";
-            LOG.error(errMessage);
+            LOGGER.error(errMessage);
             throw new TwitterPublisherException(errMessage, e);
         }
         AccessToken token = getToken(tokenSession, tokenSecret);
@@ -81,15 +81,15 @@ public class TwitterPublisher implements Processor {
             publisher = (Publisher) clazz.newInstance();
         } catch (InstantiationException e) {
             final String errMessage = "Error while instantiating class [" + clazz + "]";
-            LOG.error(errMessage);
+            LOGGER.error(errMessage);
             throw new TwitterPublisherException(errMessage, e);
         } catch (IllegalAccessException e) {
             final String errMessage = "Error while accessing [" + clazz + "]";
-            LOG.error(errMessage);
+            LOGGER.error(errMessage);
             throw new TwitterPublisherException(errMessage, e);
         } catch (NullPointerException e) {
             final String errMessage = "Object not supported [" + object.getClass().getCanonicalName() + "]";
-            LOG.error(errMessage);
+            LOGGER.error(errMessage);
             throw new TwitterPublisherException(errMessage, e);
         }
         return publisher;

@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TVEventPublisher implements Publisher<TVEvent> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TVEventPublisher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TVEventPublisher.class);
 
     @Override
     public FacebookType publishActivity(String token, Verb verb, TVEvent tvEvent) throws FacebookPublisherException {
@@ -34,9 +34,9 @@ public class TVEventPublisher implements Publisher<TVEvent> {
         if(verb.equals(Verb.CHECKIN)) {
             message += "Mi sono appena connesso all'evento ";
         } else {
-            final String errMessage = "Verb [" + verb + "] not supported";
-            LOG.error(errMessage);
-            throw new FacebookPublisherException(errMessage, new UnsupportedOperationException());
+            final String errMsg = "Verb [" + verb + "] not supported";
+            LOGGER.warn(errMsg);
+            throw new FacebookPublisherException(errMsg);
         }
         message += tvEvent.getName();
         return message;

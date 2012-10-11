@@ -34,7 +34,6 @@ public class ProfilerWriterRoute extends RouteBuilder {
             LOGGER.error("error while init connection to HDFS", e);
             throw new RuntimeException("error while init connection to HDFS", e);
         }
-
         errorHandler(deadLetterChannel(errorEndpoint()));
 
         from(fromKestrel())
@@ -44,7 +43,7 @@ public class ProfilerWriterRoute extends RouteBuilder {
                     public void process(Exchange exchange) throws Exception {
                         UserProfile userProfile = exchange.getIn().getBody(UserProfile.class);
                         profileWriter.write(application, userProfile);
-                        LOGGER.info("successfully updating profile for user [" + userProfile.getUsername() + "]");
+                        LOGGER.debug("successfully updating profile for user {}", userProfile.getUserId());
                     }
                 });
     }

@@ -7,8 +7,12 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DispatcherRoute extends RouteBuilder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DispatcherRoute.class);
 
     @Inject
     @Named("kestrel.queue.dispatcher.prefix")
@@ -31,6 +35,7 @@ public class DispatcherRoute extends RouteBuilder {
     }
 
     protected String[] toEndpoints() {
+        LOGGER.debug("dispatching to queues: {}", queueNames);
         String[] queues = queueNames.split(",");
         Set<String> urls = new HashSet<String>();
         for (String queue : queues) {

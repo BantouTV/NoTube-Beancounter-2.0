@@ -32,8 +32,6 @@ public class JmsPublisherRoute extends RouteBuilder {
 
                 .setHeader(ORIGINAL_BODY_HEADER, body())
 
-                        // .unmarshal().json(JsonLibrary.Jackson, ResolvedActivity.class)
-
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
