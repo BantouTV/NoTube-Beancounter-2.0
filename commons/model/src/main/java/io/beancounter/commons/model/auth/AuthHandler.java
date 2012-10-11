@@ -94,12 +94,12 @@ public interface AuthHandler {
     /**
      * To grab an initial bunch of user activities.
      *
-     * @param secret
+     * @param auth
      * @param identifier
      * @param limit
      * @return
      * @throws AuthHandlerException
      */
-    public List<Activity> grabActivities(String secret, String identifier, int limit)
+    public List<Activity> grabActivities(OAuthAuth auth, String identifier, int limit)
             throws AuthHandlerException;
 }

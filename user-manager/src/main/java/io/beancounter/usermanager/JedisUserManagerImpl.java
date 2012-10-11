@@ -297,7 +297,8 @@ public class JedisUserManagerImpl implements UserManager {
             throw new UserManagerException(errMsg);
         }
         try {
-            return authHandler.grabActivities(auth.getSession(), identifier, limit);
+            // return authHandler.grabActivities(auth.getSession(), identifier, limit);
+            return authHandler.grabActivities(auth, identifier, limit);
         } catch (AuthHandlerException e) {
             final String errMsg = "OAuth token for [" + serviceName + "] on user [" + user.getUsername() + "] is expired";
             LOGGER.error(errMsg);

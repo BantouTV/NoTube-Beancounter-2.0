@@ -5,16 +5,20 @@ import com.google.inject.name.Named;
 import io.beancounter.commons.helper.UriUtils;
 import io.beancounter.commons.helper.jedis.JedisPoolFactory;
 import io.beancounter.commons.model.User;
+import io.beancounter.commons.model.activity.*;
+import io.beancounter.commons.model.activity.Tweet;
 import org.apache.commons.codec.EncoderException;
+import org.joda.time.DateTime;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.TwitterApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import io.beancounter.commons.model.*;
-import io.beancounter.commons.model.activity.Activity;
 import io.beancounter.commons.model.auth.AuthHandlerException;
 import io.beancounter.commons.model.auth.AuthenticatedUser;
 import io.beancounter.commons.model.auth.DefaultAuthHandler;
@@ -26,6 +30,7 @@ import twitter4j.auth.AccessToken;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,6 +39,8 @@ import java.util.List;
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 public class TwitterAuthHandler extends DefaultAuthHandler {
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(TwitterAuthHandler.class);
 
     private static final String SERVICE = "twitter";
 
@@ -47,6 +54,8 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
     private Twitter twitter;
 
     private final int database;
+
+    private static final String TWITTER_BASE_URL = "http://twitter.com/";
 
     @Inject
     public TwitterAuthHandler(
@@ -163,9 +172,63 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
     }
 
     @Override
-    public List<Activity> grabActivities(String secret, String username, int limit)
+    public List<Activity> grabActivities(OAuthAuth auth, String username, int limit)
             throws AuthHandlerException {
-        throw new UnsupportedOperationException("nah, NIY.");
+        twitter.setOAuthAccessToken(new AccessToken(auth.getSession(), auth.getSecret()));
+        Paging paging = new Paging(1, limit);
+        ResponseList<Status> statuses;
+        try {
+            statuses = twitter.getUserTimeline("", paging);
+        } catch (TwitterException e) {
+            final String errMsg = "error while getting tweets for user [" + username + "]";
+            LOGGER.error(errMsg, e);
+            throw new AuthHandlerException(errMsg, e);
+        }
+        return toActivities(statuses);
+    }
+
+    private List<Activity> toActivities(ResponseList<Status> statuses) {
+        List<Activity> activities = new ArrayList<Activity>();
+        for(Status status : statuses) {
+            Activity activity;
+            try {
+                activity = toActivity(status);
+            } catch (AuthHandlerException e) {
+                // just log and skip
+                LOGGER.error("error while converting this tweet {} to a beancounter activity", status, e);
+                continue;
+            }
+            activities.add(activity);
+        }
+        return activities;
+    }
+
+    private Activity toActivity(Status status) throws AuthHandlerException {
+        URL tweetUrl;
+        String tweetUrlCandidate = TWITTER_BASE_URL + status.getUser().getName() + "/status/" + status.getId();
+        try {
+            tweetUrl = new URL(tweetUrlCandidate);
+        } catch (MalformedURLException e) {
+            throw new AuthHandlerException("error [" + tweetUrlCandidate + "] is ill-formed", e);
+        }
+        io.beancounter.commons.model.activity.Tweet tweet = new Tweet();
+        tweet.setUrl(tweetUrl);
+        tweet.setText(status.getText());
+        for(HashtagEntity ht : status.getHashtagEntities()) {
+            tweet.addHashTag(ht.getText());
+        }
+        for(URLEntity urlEntity : status.getURLEntities()) {
+            tweet.addUrl(urlEntity.getExpandedURL());
+        }
+        Context context = new Context();
+        context.setService("twitter");
+        context.setUsername(status.getUser().getName());
+        context.setDate(new DateTime(status.getCreatedAt().getTime()));
+        Activity a = new Activity();
+        a.setVerb(Verb.TWEET);
+        a.setObject(tweet);
+        a.setContext(context);
+        return a;
     }
 
     private OAuthToken createOAuthServiceAndGetToken(String callback) throws AuthHandlerException {

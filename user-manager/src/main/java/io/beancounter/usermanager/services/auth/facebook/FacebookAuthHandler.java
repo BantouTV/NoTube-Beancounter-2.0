@@ -29,6 +29,8 @@ import io.beancounter.listener.facebook.core.converter.custom.ConverterException
 import io.beancounter.listener.facebook.core.converter.custom.FacebookLikeConverter;
 import io.beancounter.listener.facebook.core.converter.custom.FacebookShareConverter;
 import io.beancounter.listener.facebook.core.model.FacebookData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -41,6 +43,8 @@ import java.util.*;
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 public class FacebookAuthHandler extends DefaultAuthHandler {
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(FacebookAuthHandler.class);
 
     final static String SERVICE = "facebook";
 
@@ -260,9 +264,9 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
     }
 
     @Override
-    public List<Activity> grabActivities(String token, String identifier, int limit)
+    public List<Activity> grabActivities(OAuthAuth auth, String identifier, int limit)
             throws AuthHandlerException {
-        FacebookClient client = new DefaultFacebookClient(token);
+        FacebookClient client = new DefaultFacebookClient(auth.getSession());
         // grab shares
         Collection<Post> posts = FacebookUtils.fetch(Post.class, client, "feed", limit);
         FacebookShareConverter shareConverter = new FacebookShareConverter();
@@ -274,9 +278,9 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                 object = shareConverter.convert(post, true);
                 context = shareConverter.getContext(post, identifier);
             } catch (ConverterException e) {
-                // just skip
+                // just log and skip
+                LOGGER.error("error while converting Facebook POST from user {}", identifier, e);
                 continue;
-                // TODO (med) should log
             }
             Activity activity = toActivity(object, Verb.SHARE);
             activity.setContext(context);
@@ -297,9 +301,9 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                 object = likeConverter.convert(like, true);
                 context = likeConverter.getContext(like, identifier);
             } catch (ConverterException e) {
-                // just skip
+                // just log and skip
+                LOGGER.error("error while converting Facebook LIKE from user {}", identifier, e);
                 continue;
-                // TODO (med) should log
             }
             Activity activity = toActivity(object, Verb.LIKE);
             activity.setContext(context);

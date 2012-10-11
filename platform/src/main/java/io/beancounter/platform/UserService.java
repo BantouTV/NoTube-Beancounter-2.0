@@ -302,7 +302,7 @@ public class UserService extends JsonService {
         } catch (UserManagerException e) {
             return error(e, "Error while getting token from [" + service + "]");
         }
-
+        LOGGER.info("redirecting user to [" + finalRedirect + "]");
         // token asked, let's redirect
         URL redirect = oAuthToken.getRedirectPage();
         try {
@@ -382,17 +382,20 @@ public class UserService extends JsonService {
         } catch (UserManagerException ume) {
             return error(ume, "Error while doing OAuth exchange for service: [" + service + "]");
         }
-
+        LOGGER.info("grabbing first activities for user to [" + signUp.getUsername() + "]");
         try {
             grabInitialActivities(signUp);
         } catch (UserManagerException e) {
-            return error(e, "Error while grabbing the first set of activities " +
-                    "for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
+            final String errMsg = "Error while grabbing the first set of activities " +
+                    "for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]";
+            LOGGER.error(errMsg, e);
+            return error(e, errMsg);
         } catch (QueuesException e) {
-            return error(e, "Error while grabbing the first set of activities " +
-                    "for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
+            final String errMsg = "Error while pushing down the first set of activities " +
+                    "for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]";
+            LOGGER.error(errMsg, e);
+            return error(e, errMsg);
         }
-
         URI finalRedirectUri;
         try {
             finalRedirectUri = new URI(decodedFinalRedirect);

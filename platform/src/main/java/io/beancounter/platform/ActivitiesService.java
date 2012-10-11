@@ -115,6 +115,9 @@ public class ActivitiesService extends JsonService {
             final String errMsg = "Error while sending the resolved activity to the Queue";
             return error(e, errMsg);
         }
+        LOGGER.info("beancounter user with username [" + username + "] " +
+                "and id [" + user.getId() + "] added this activity [" + activity + "] " +
+                "with id [" + activity.getId() + "]");
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(new UUIDPlatformResponse(
                 UUIDPlatformResponse.Status.OK,
