@@ -334,7 +334,7 @@ public class JedisUserManagerImpl implements UserManager {
     }
 
     @Override
-    public synchronized User registerOAuthService(
+    public synchronized AuthenticatedUser registerOAuthService(
             String serviceName,
             User user,
             String token,
@@ -377,7 +377,7 @@ public class JedisUserManagerImpl implements UserManager {
         userWithAuth.setUserToken(userToken);
         storeUser(userWithAuth);
 
-        return userWithAuth;
+        return new AuthenticatedUser(auser.getUserId(), userWithAuth);
     }
 
 

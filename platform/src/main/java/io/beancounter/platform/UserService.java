@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import io.beancounter.commons.helper.UriUtils;
 import io.beancounter.commons.model.activity.Activity;
 import io.beancounter.commons.model.activity.ResolvedActivity;
+import io.beancounter.commons.model.auth.AuthenticatedUser;
 import io.beancounter.platform.validation.Validations;
 import io.beancounter.queues.QueuesException;
 import io.beancounter.usermanager.UserTokenManager;
@@ -384,7 +385,12 @@ public class UserService extends JsonService {
         }
         LOGGER.info("grabbing first activities for user to [" + signUp.getUsername() + "]");
         try {
-            grabInitialActivities(signUp);
+            grabInitialActivities(
+                    signUp.getUsername(),
+                    signUp.getService(),
+                    signUp.getIdentifier(),
+                    signUp.getUserId()
+            );
         } catch (UserManagerException e) {
             final String errMsg = "Error while grabbing the first set of activities " +
                     "for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]";
@@ -417,12 +423,12 @@ public class UserService extends JsonService {
         return Response.temporaryRedirect(finalRedirectUri).build();
     }
 
-    private void grabInitialActivities(AtomicSignUp signUp) throws UserManagerException, QueuesException {
+    private void grabInitialActivities(String bcUsername, String service, String userIdOnService, UUID userId) throws UserManagerException, QueuesException {
         User user;
         try {
-            user = userManager.getUser(signUp.getUsername());
+            user = userManager.getUser(bcUsername);
         } catch (UserManagerException e) {
-            throw new UserManagerException("Error while retrieving user: [" + signUp.getUsername() + "]", e);
+            throw new UserManagerException("Error while retrieving user: [" + bcUsername + "]", e);
         }
 
         // this should be configurable from beancounter.properties
@@ -431,19 +437,19 @@ public class UserService extends JsonService {
         try {
             activities = userManager.grabUserActivities(
                     user,
-                    signUp.getIdentifier(),
-                    signUp.getService(),
+                    userIdOnService,
+                    service,
                     LIMIT
             );
         } catch (UserManagerException e) {
-            throw new UserManagerException("Error while retrieving user: [" + signUp.getUsername() + "] initial activities", e);
+            throw new UserManagerException("Error while retrieving user: [" + bcUsername + "] initial activities", e);
         }
 
         ObjectMapper mapper = new ObjectMapper();
         for (Activity activity : activities) {
             ResolvedActivity ra = new ResolvedActivity();
             ra.setActivity(activity);
-            ra.setUserId(signUp.getUserId());
+            ra.setUserId(userId);
             ra.setUser(user);
             String raJson;
             try {
@@ -457,10 +463,11 @@ public class UserService extends JsonService {
                 queues.push(raJson);
             } catch (QueuesException e) {
                 throw new QueuesException("Error while pushing down json " +
-                        "resolved activity: [" + raJson + "] for user [" + signUp.getUsername() + "] " +
-                        "on service [" + signUp.getService() + "]", e);
+                        "resolved activity: [" + raJson + "] for user [" + bcUsername+ "] " +
+                        "on service [" + service + "]", e);
             }
         }
+
     }
 
     @GET
@@ -486,7 +493,12 @@ public class UserService extends JsonService {
             return error(ume, "Error while doing OAuth exchange for service: [" + service + "]");
         }
         try {
-            grabInitialActivities(signUp);
+            grabInitialActivities(
+                    signUp.getUsername(),
+                    signUp.getService(),
+                    signUp.getIdentifier(),
+                    signUp.getUserId()
+            );
         } catch (UserManagerException e) {
             return error(e, "Error while grabbing the first set of activities " +
                     "for user [" + signUp.getUsername() + "] on service [" + signUp.getService() + "]");
@@ -546,11 +558,27 @@ public class UserService extends JsonService {
         } catch (Exception ex) {
             return error(ex.getMessage());
         }
-
+        AuthenticatedUser au;
         try {
-            user = userManager.registerOAuthService(service, user, token, verifier);
+            au = userManager.registerOAuthService(service, user, token, verifier);
         } catch (UserManagerException e) {
             return error(e, "Error while OAuth-like exchange for service: '" + service + "'");
+        }
+        user = au.getUser();
+
+        try {
+            grabInitialActivities(
+                    username,
+                    service,
+                    au.getUserId(),
+                    user.getId()
+            );
+        } catch (UserManagerException e) {
+            return error(e, "Error while grabbing the first set of activities " +
+                    "for user [" + username + "] on service [" + username + "]");
+        } catch (QueuesException e) {
+            return error(e, "Error while grabbing the first set of activities " +
+                    "for user [" + username + "] on service [" + username + "]");
         }
 
         String finalRedirect;

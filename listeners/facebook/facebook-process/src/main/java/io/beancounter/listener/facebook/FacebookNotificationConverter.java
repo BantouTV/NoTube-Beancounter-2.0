@@ -132,7 +132,7 @@ public final class FacebookNotificationConverter implements ActivityConverter<Fa
                         LOGGER.debug("converting {} to {}", fetchedObj, verb);
                         result = converter.convert(fetchedObj, verb, userId);
                     } catch (UnconvertableFacebookActivityException e) {
-                        LOGGER.error("skipping an unconvertable object");
+                        LOGGER.warn("skipping an unconvertable object");
                         continue;
                     } catch (FacebookActivityConverterException e) {
                         final String errMgs = "Error while converting Facebook object " +

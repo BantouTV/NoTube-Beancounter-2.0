@@ -4,6 +4,7 @@ import io.beancounter.commons.model.OAuthToken;
 import io.beancounter.commons.model.Service;
 import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.activity.Activity;
+import io.beancounter.commons.model.auth.AuthenticatedUser;
 import io.beancounter.commons.model.auth.OAuthAuth;
 import io.beancounter.commons.model.auth.SimpleAuth;
 import io.beancounter.commons.tests.RandomBean;
@@ -94,7 +95,7 @@ public class MockUserManager implements UserManager {
             throws UserManagerException {}
 
     @Override
-    public User registerOAuthService(String service, User user, String token, String verifier)
+    public AuthenticatedUser registerOAuthService(String service, User user, String token, String verifier)
             throws UserManagerException {
         return null;
     }

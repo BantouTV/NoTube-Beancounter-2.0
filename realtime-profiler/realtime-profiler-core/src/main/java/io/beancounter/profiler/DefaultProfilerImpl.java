@@ -237,6 +237,7 @@ public final class DefaultProfilerImpl implements Profiler {
         UserProfile up = new UserProfile(userId);
         up.setInterests(new HashSet<Interest>(interests));
         up.setVisibility(UserProfile.Visibility.PUBLIC);
+        up.setLastUpdated(DateTime.now());
         return up;
     }
 

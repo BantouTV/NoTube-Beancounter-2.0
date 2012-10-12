@@ -10,20 +10,25 @@ import twitter4j.HashtagEntity;
 import twitter4j.Status;
 import twitter4j.URLEntity;
 
+/**
+ *
+ */
 public class TweetConverter {
 
     public TwitterTweet convert(Status status) {
+
         TwitterTweet tweet = new TwitterTweet();
 
         tweet.setCreatedAt(new DateTime(status.getCreatedAt()));
 
         tweet.setText(status.getText());
 
+        String twitterId = String.valueOf(status.getUser().getId());
         String screenName = status.getUser().getScreenName();
-        tweet.setUsername(screenName);
+        tweet.setUserId(twitterId);
 
         try {
-            URL tweetUrl = new URL("http://twitter.com/" + screenName + "/status/" + status.getId());
+            URL tweetUrl = new URL("http://twitter.com/" + screenName + "/status/" + twitterId);
             tweet.setUrl(tweetUrl);
         } catch (MalformedURLException e) {
             // leave it null

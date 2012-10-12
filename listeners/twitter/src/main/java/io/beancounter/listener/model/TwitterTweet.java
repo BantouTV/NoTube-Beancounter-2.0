@@ -19,7 +19,7 @@ public class TwitterTweet {
 
     private String text;
 
-    private String username;
+    private String userId;
 
     private List<URL> mentionedUrls = new ArrayList<URL>();
 
@@ -37,8 +37,8 @@ public class TwitterTweet {
         this.text = text;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public void setMentionedUrls(List<URL> mentionedUrls) {
@@ -61,8 +61,8 @@ public class TwitterTweet {
         return text;
     }
 
-    public String getUsername() {
-        return username;
+    public String getUserId() {
+        return userId;
     }
 
     public List<URL> getMentionedUrls() {
