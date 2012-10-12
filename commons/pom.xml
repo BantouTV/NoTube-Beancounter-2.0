@@ -23,6 +23,7 @@
         <module>cogito</module>
         <module>configuration</module>
         <module>camel-tests</module>
-    </modules>
+        <module>pig-udf</module>
+  </modules>
 
 </project>

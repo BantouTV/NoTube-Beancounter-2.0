@@ -486,9 +486,10 @@ public class JedisUserManagerImpl implements UserManager {
         }
 
         User user = authUser.getUser();
-        UUID userToken = updateUserWithOAuthCredentials(service, user.getAuth(service), candidateUsername).getUserToken();
+        User alreadyExistentUser = updateUserWithOAuthCredentials(service, user.getAuth(service), candidateUsername);
+        UUID userToken = alreadyExistentUser.getUserToken();
 
-        return new AtomicSignUp(user.getId(), user.getUsername(), true, service, authUser.getUserId(), userToken);
+        return new AtomicSignUp(alreadyExistentUser.getId(), user.getUsername(), true, service, authUser.getUserId(), userToken);
     }
 
     private void mapUserToServiceInResolver(
