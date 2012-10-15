@@ -5,7 +5,7 @@
     <parent>
         <artifactId>publishers</artifactId>
         <groupId>io.beancounter</groupId>
-        <version>1.5-SNAPSHOT</version>
+        <version>1.5</version>
     </parent>
 
     <groupId>io.beancounter.publishers</groupId>

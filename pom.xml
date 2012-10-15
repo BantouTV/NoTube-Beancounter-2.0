@@ -5,7 +5,7 @@
     <groupId>io.beancounter</groupId>
     <artifactId>parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.5</version>
     <name>Beancounter Parent</name>
 
     <modules>
@@ -492,7 +492,7 @@
     <scm>
         <connection>scm:git:https://github.com/dpalmisano/NoTube-Beancounter-2.0.git</connection>
         <developerConnection>scm:git:https://github.com/dpalmisano/NoTube-Beancounter-2.0.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v1.5</tag>
     </scm>
 
     <repositories>
