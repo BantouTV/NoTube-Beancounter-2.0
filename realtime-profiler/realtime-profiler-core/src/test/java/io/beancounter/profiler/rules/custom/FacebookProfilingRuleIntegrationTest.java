@@ -33,7 +33,7 @@ public class FacebookProfilingRuleIntegrationTest {
                 null
         );
         rule.run(null);
-        Collection<Interest> actual = rule.getResult();
+        Collection<Interest> actual = rule.getInterests();
         Assert.assertEquals(actual.size(), 0);
     }
 
@@ -45,7 +45,7 @@ public class FacebookProfilingRuleIntegrationTest {
                 null
         );
         rule.run(null);
-        Collection<Interest> actual = rule.getResult();
+        Collection<Interest> actual = rule.getInterests();
         Assert.assertEquals(actual.size(), 4);
         Assert.assertTrue(actual.contains(new Interest("software", new URI("http://dati.rai.tv/category/software"))));
         Assert.assertTrue(actual.contains(new Interest("computer science", new URI("http://dati.rai.tv/category/computer+science"))));
@@ -60,7 +60,7 @@ public class FacebookProfilingRuleIntegrationTest {
                 null
         );
         rule.run(null);
-        Collection<Interest> actual = rule.getResult();
+        Collection<Interest> actual = rule.getInterests();
         Assert.assertEquals(actual.size(), 4);
     }
 
@@ -72,7 +72,7 @@ public class FacebookProfilingRuleIntegrationTest {
                 null
         );
         rule.run(null);
-        Collection<Interest> actual = rule.getResult();
+        Collection<Interest> actual = rule.getInterests();
         Assert.assertEquals(actual.size(), 8);
         Assert.assertTrue(actual.contains(new Interest("sport", new URI("http://dati.rai.tv/category/sport"))));
         Assert.assertTrue(actual.contains(new Interest("cinema", new URI("http://dati.rai.tv/category/cinema"))));

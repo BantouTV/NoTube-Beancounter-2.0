@@ -39,8 +39,6 @@ public class DefaultProfilerImplTestCase {
     @BeforeTest
     public void setUp() throws ProfilerException {
         properties = new Properties();
-        // look into hashtags definition
-        properties.setProperty("tagdef.enable", "true");
         // tweets are more important than other
         properties.setProperty("verb.multiplier.TWEET", "1.1");
         // likes are nothing atm

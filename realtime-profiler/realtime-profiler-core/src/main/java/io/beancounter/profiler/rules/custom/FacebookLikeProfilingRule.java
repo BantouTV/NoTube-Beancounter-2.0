@@ -1,22 +1,20 @@
 package io.beancounter.profiler.rules.custom;
 
+import io.beancounter.commons.model.Category;
 import io.beancounter.commons.model.Interest;
+import io.beancounter.commons.nlp.NLPEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.beancounter.commons.linking.LinkNotFoundException;
 import io.beancounter.commons.linking.LinkingEngine;
 import io.beancounter.commons.linking.LinkingEngineException;
 import io.beancounter.commons.model.activity.facebook.Like;
-import io.beancounter.commons.nlp.*;
 import io.beancounter.profiler.rules.ObjectProfilingRule;
 import io.beancounter.profiler.rules.ProfilingRuleException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This {@link io.beancounter.profiler.rules.ProfilingRule} implementation is able
@@ -32,7 +30,9 @@ public class FacebookLikeProfilingRule extends ObjectProfilingRule<Like> {
 
     private final static String RELEVANT ="category/";
 
-    private Set<Interest> result = new HashSet<Interest>();
+    private Set<Interest> interests = new HashSet<Interest>();
+
+    private Set<Category> categories = new HashSet<Category>();
 
     public FacebookLikeProfilingRule(
             Like like,
@@ -61,8 +61,8 @@ public class FacebookLikeProfilingRule extends ObjectProfilingRule<Like> {
                 throw new ProfilingRuleException(errMsg, e);
             }
             try {
-                result.add(
-                        new Interest(cogitoCategory, new URI(BASE_URI + RELEVANT + cogitoCategory))
+                categories.add(
+                        new Category(cogitoCategory, new URI(BASE_URI + RELEVANT + cogitoCategory))
                 );
             } catch (URISyntaxException e) {
                 final String errMsg = "error while trying to link [" + category + "]";
@@ -70,12 +70,17 @@ public class FacebookLikeProfilingRule extends ObjectProfilingRule<Like> {
                 throw new RuntimeException(errMsg, e);
             }
         }
-        LOGGER.debug("rule ended with {} interests found", result.size());
+        LOGGER.debug("rule ended with {} interests found", interests.size());
     }
 
     @Override
-    public Collection<Interest> getResult() throws ProfilingRuleException {
-        return result;
+    public List<Interest> getInterests() throws ProfilingRuleException {
+        return new ArrayList<Interest>(interests);
+    }
+
+    @Override
+    public List<Category> getCategories() throws ProfilingRuleException {
+        return new ArrayList<Category>(categories);
     }
 
 }

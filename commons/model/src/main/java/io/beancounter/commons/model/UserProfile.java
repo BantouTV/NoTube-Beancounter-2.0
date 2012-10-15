@@ -25,6 +25,8 @@ public class UserProfile {
 
     private Set<Interest> interests = new HashSet<Interest>();
 
+    private Set<Category> categories = new HashSet<Category>();
+
     private DateTime lastUpdated;
 
     public UserProfile() {}
@@ -61,6 +63,14 @@ public class UserProfile {
 
     public Set<Interest> getInterests() {
         return interests;
+    }
+
+    public Set<Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(Set<Category> categories) {
+        this.categories = categories;
     }
 
     public UUID getUserId() {
@@ -104,6 +114,7 @@ public class UserProfile {
                 ", username='" + username + '\'' +
                 ", userId=" + userId +
                 ", interests=" + interests +
+                ", categories=" + categories +
                 ", lastUpdated=" + lastUpdated +
                 '}';
     }

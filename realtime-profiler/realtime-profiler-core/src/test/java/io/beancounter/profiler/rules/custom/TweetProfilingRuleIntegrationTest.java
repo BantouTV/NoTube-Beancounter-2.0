@@ -43,7 +43,7 @@ public class TweetProfilingRuleIntegrationTest {
                 null
         );
         rule.run(properties);
-        Collection<Interest> actual = rule.getResult();
+        Collection<Interest> actual = rule.getInterests();
         Assert.assertEquals(actual.size(), 1);
         Assert.assertTrue(actual.contains(new Interest("Londra", new URI("http://dati.rai.tv/entity/12631236"))));
     }
@@ -56,7 +56,7 @@ public class TweetProfilingRuleIntegrationTest {
                 null
         );
         rule.run(properties);
-        Collection<Interest> actual = rule.getResult();
+        Collection<Interest> actual = rule.getInterests();
         Assert.assertEquals(actual.size(), 5);
         Assert.assertTrue(actual.contains(new Interest("Londra", new URI("http://dati.rai.tv/entity/12631236"))));
         Assert.assertTrue(actual.contains(new Interest("science fiction", new URI("http://dati.rai.tv/category/science+fiction"))));
@@ -72,7 +72,7 @@ public class TweetProfilingRuleIntegrationTest {
                 null
         );
         rule.run(properties);
-        Collection<Interest> actual = rule.getResult();
+        Collection<Interest> actual = rule.getInterests();
         Assert.assertEquals(actual.size(), 11);
         Assert.assertTrue(actual.contains(new Interest("Londra", new URI("http://dati.rai.tv/entity/12631236"))));
         Assert.assertTrue(actual.contains(new Interest("science fiction", new URI("http://dati.rai.tv/category/science+fiction"))));

@@ -3,6 +3,7 @@ package io.beancounter.commons.model;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -10,15 +11,9 @@ import java.util.UUID;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class Interest implements Comparable<Interest> {
-
-    private URI resource;
-
-    private String label;
+public class Interest extends Topic<Interest> {
 
     private boolean visible;
-
-    private double weight;
 
     private Collection<UUID> activitiesUUIDs = new ArrayList<UUID>();
 
@@ -27,33 +22,7 @@ public class Interest implements Comparable<Interest> {
     public Interest() {}
 
     public Interest(String label, URI resource) {
-        super();
-        this.label = label;
-        this.resource = resource;
-    }
-
-    public void setResource(URI resource) {
-        this.resource = resource;
-    }
-
-    public URI getResource() {
-        return resource;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
-    public double getWeight() {
-        return weight;
-    }
-
-    public void setWeight(double weight) {
-        this.weight = weight;
+        super(resource, label);
     }
 
     public boolean isVisible() {
@@ -85,34 +54,28 @@ public class Interest implements Comparable<Interest> {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Interest interest = (Interest) o;
-
-        if (resource != null ? !resource.equals(interest.resource) : interest.resource != null)
-            return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return resource != null ? resource.hashCode() : 0;
-    }
-
-    @Override
     public String toString() {
         return "Interest{" +
                 "visible=" + visible +
-                ", weight=" + weight +
-                ", activities=" + activitiesUUIDs +
+                ", activitiesUUIDs=" + activitiesUUIDs +
+                ", activitiesSize=" + activitiesSize +
                 "} " + super.toString();
     }
 
     @Override
-    public int compareTo(Interest that) {
-        return Double.valueOf(that.weight).compareTo(Double.valueOf(weight));
+    public Interest merge(Interest nu, Interest old, int threshold) {
+        // if the activities of the old one are above the threshold, drop the exceeding ones
+        if(old.getActivities().size() > threshold) {
+            List<UUID> oldActivities = new ArrayList<UUID>(old.getActivities());
+            for(int i = 0; i < oldActivities.size() - threshold; i++) {
+                oldActivities.remove(i);
+            }
+            old.setActivities(oldActivities);
+        }
+        for(UUID activityId : nu.getActivities()) {
+            old.addActivity(activityId);
+        }
+        old.setWeight(old.getWeight() + nu.getWeight());
+        return old;
     }
 }

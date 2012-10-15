@@ -1,13 +1,12 @@
 package io.beancounter.profiler.rules.custom;
 
 import io.beancounter.commons.linking.LinkingEngine;
+import io.beancounter.commons.model.Category;
 import io.beancounter.commons.model.Interest;
 import io.beancounter.commons.model.activity.Tweet;
 import io.beancounter.commons.nlp.NLPEngine;
 import io.beancounter.commons.nlp.NLPEngineException;
 import io.beancounter.commons.nlp.NLPEngineResult;
-import io.beancounter.commons.tagdef.TagDef;
-import io.beancounter.commons.tagdef.TagDefException;
 import io.beancounter.profiler.rules.ProfilingRuleException;
 import io.beancounter.profiler.rules.ObjectProfilingRule;
 import org.slf4j.Logger;
@@ -26,7 +25,9 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenericObjectProfilingRule.class);
 
-    private Set<Interest> result = new HashSet<Interest>();
+    private Set<Interest> interests = new HashSet<Interest>();
+
+    private Set<Category> categories = new HashSet<Category>();
 
     public TweetProfilingRule(Tweet tweet, NLPEngine nlpEngine, LinkingEngine linkingEngine) {
         super(tweet, nlpEngine, linkingEngine);
@@ -35,27 +36,49 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
     public void run(Properties properties) throws ProfilingRuleException {
         LOGGER.debug("rule started");
         Tweet tweet = getObject();
-        // grab interests from pure tweet text
-        result.addAll(
-                    getResources(tweet.getText())
-            );
+        // grab interests and categories from pure tweet text
+        NLPEngineResult result = process(tweet.getText());
+        interests.addAll(InterestConverter.toInterests(result.getEntities()));
+        categories.addAll(InterestConverter.toCategories(result.getCategories()));
+
         // grab interests from urls eventually contained in the tweet
         for (URL url : tweet.getUrls()) {
-            result.addAll(getResources(url));
+            result = process(url);
+            interests.addAll(InterestConverter.toInterests(result.getEntities()));
+            Collection<Category> categories = InterestConverter.toCategories(result.getCategories());
+            for(Category category : categories) {
+                category.addUrl(url);
+            }
+            this.categories.addAll(categories);
         }
+        /*
+        // TODO (disabled) 'cause we can't rely on an external service such as tagdef
         // get resources from tweet eventual hashtags if enabled
         if (properties.getProperty("tagdef.enable").equals("true")) {
             for (String hashTag : tweet.getHashTags()) {
-                result.addAll(getResourcesFromHashTag(hashTag));
+                interests.addAll(getResourcesFromHashTag(hashTag));
             }
         }
-        LOGGER.debug("rule ended with {} interests found", result.size());
+        */
+        LOGGER.debug("rule ended with {} interests found", interests.size());
     }
 
-    private Collection<Interest> getResources(String text) throws ProfilingRuleException {
-        NLPEngineResult nlpResult;
+    private NLPEngineResult process(URL url) throws ProfilingRuleException {
         try {
-            nlpResult = getNLPEngine().enrich(text);
+            return getNLPEngine().enrich(url);
+        } catch (NLPEngineException e) {
+            final String errMsg = "Error while extracting interests from text [" + url + "]";
+            LOGGER.error(errMsg, e);
+            throw new ProfilingRuleException(
+                    errMsg,
+                    e
+            );
+        }
+    }
+
+    private NLPEngineResult process(String text) throws ProfilingRuleException {
+        try {
+            return getNLPEngine().enrich(text);
         } catch (NLPEngineException e) {
             final String errMsg = "Error while extracting interests from text [" + text + "]";
             LOGGER.error(errMsg, e);
@@ -64,24 +87,9 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
                     e
             );
         }
-        return InterestConverter.convert(nlpResult);
     }
 
-    private Collection<Interest> getResources(URL url) throws ProfilingRuleException {
-        NLPEngineResult nlpResult;
-        try {
-            nlpResult = getNLPEngine().enrich(url);
-        } catch (NLPEngineException e) {
-            final String errMsg = "Error while extracting interests from url [" + url + "]";
-            LOGGER.error(errMsg, e);
-            throw new ProfilingRuleException(
-                    "Error while extracting interests from url [" + url + "]",
-                    e
-            );
-        }
-        return InterestConverter.convert(nlpResult);
-    }
-
+    /*
     private Collection<Interest> getResourcesFromHashTag(String hashTag) throws ProfilingRuleException {
         TagDef tagDef = new TagDef();
         List<String> defs;
@@ -111,10 +119,16 @@ public class TweetProfilingRule extends ObjectProfilingRule<Tweet> {
             }
         }
         return resources;
+    }  */
+
+    @Override
+    public List<Interest> getInterests() throws ProfilingRuleException {
+        return new ArrayList<Interest>(interests);
     }
 
-    public Collection<Interest> getResult() throws ProfilingRuleException {
-        return result;
+    @Override
+    public List<Category> getCategories() throws ProfilingRuleException {
+        return new ArrayList<Category>(categories);
     }
 
 }

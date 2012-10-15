@@ -1,16 +1,14 @@
 package io.beancounter.profiler.rules.custom;
 
 import io.beancounter.commons.linking.LinkingEngine;
+import io.beancounter.commons.model.Category;
 import io.beancounter.commons.model.Interest;
 import io.beancounter.commons.model.activity.Object;
 import io.beancounter.commons.nlp.NLPEngine;
 import io.beancounter.profiler.rules.ObjectProfilingRule;
 import io.beancounter.profiler.rules.ProfilingRuleException;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * It simulates a <i>/dev/null</i>
@@ -19,7 +17,9 @@ import java.util.Set;
  */
 public class DevNullProfilingRule extends ObjectProfilingRule<Object> {
 
-    private final Set<Interest> result = new HashSet<Interest>();
+    private final Set<Interest> interests = new HashSet<Interest>();
+
+    private final Set<Category> categories = new HashSet<Category>();
 
     public DevNullProfilingRule() {
         this(null, null, null);
@@ -33,7 +33,12 @@ public class DevNullProfilingRule extends ObjectProfilingRule<Object> {
     public void run(Properties properties) throws ProfilingRuleException {}
 
     @Override
-    public Collection<Interest> getResult() throws ProfilingRuleException {
-        return result;
+    public List<Interest> getInterests() throws ProfilingRuleException {
+        return new ArrayList<Interest>(interests);
+    }
+
+    @Override
+    public List<Category> getCategories() throws ProfilingRuleException {
+        return new ArrayList<Category>(categories);
     }
 }
