@@ -6,12 +6,12 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>io.beancounter</groupId>
-        <version>1.5-SNAPSHOT</version>
+        <version>1.5</version>
     </parent>
 
     <groupId>io.beancounter</groupId>
     <artifactId>profiles</artifactId>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.5</version>
     <name>Beancounter Profiles Repository</name>
 
     <dependencies>
