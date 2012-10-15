@@ -5,7 +5,7 @@
     <parent>
         <artifactId>facebook</artifactId>
         <groupId>io.beancounter.listeners</groupId>
-        <version>1.5</version>
+        <version>1.6-SNAPSHOT</version>
     </parent>
 
     <groupId>io.beancounter.listeners.facebook</groupId>
