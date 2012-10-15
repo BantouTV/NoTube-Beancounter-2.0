@@ -6,11 +6,11 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>io.beancounter</groupId>
-        <version>1.5</version>
+        <version>1.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>realtime-profiler</artifactId>
-    <version>1.5</version>
+    <version>1.5-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Beancounter Realtime Profiler</name>
 
