@@ -19,5 +19,5 @@ public interface Analyses {
      */
     public void store(AnalysisResult ar) throws AnalysesException;
 
-    public AnalysisResult lookup(UUID analysesId) throws AnalysesException;
+    public AnalysisResult lookup(UUID analysisId) throws AnalysesException;
 }

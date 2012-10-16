@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>realtime-analyzer</artifactId>
+        <artifactId>realtime-analyser</artifactId>
         <groupId>io.beancounter</groupId>
         <version>1.6-SNAPSHOT</version>
     </parent>
