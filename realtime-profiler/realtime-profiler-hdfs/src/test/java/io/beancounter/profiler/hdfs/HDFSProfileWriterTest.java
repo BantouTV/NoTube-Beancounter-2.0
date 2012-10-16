@@ -101,6 +101,7 @@ public class HDFSProfileWriterTest {
         assertEquals(actual, expected);
 
         verify(client).mkdirs("/" + applicationId);
+        verify(outputStream, times(2)).close();
     }
 
     @Test(expectedExceptions = ProfileWriterException.class)
@@ -160,6 +161,7 @@ public class HDFSProfileWriterTest {
         String actual = new String(writtenBytesCaptor.getValue()).replace("\u0000", "");
         String expected = mapper.writeValueAsString(profile) + "\n";
         assertEquals(actual, expected);
+        verify(outputStream, times(2)).close();
     }
 
     @Test(expectedExceptions = ProfileWriterException.class)
@@ -220,6 +222,7 @@ public class HDFSProfileWriterTest {
         String actual = new String(writtenBytesCaptor.getValue()).replace("\u0000", "");
         String expected = mapper.writeValueAsString(profile) + "\n";
         assertEquals(actual, expected);
+        verify(outputStream, times(2)).close();
     }
 
     @Test(expectedExceptions = ProfileWriterException.class)

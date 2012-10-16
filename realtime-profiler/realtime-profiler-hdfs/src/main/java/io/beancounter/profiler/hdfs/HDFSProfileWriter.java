@@ -45,6 +45,7 @@ public class HDFSProfileWriter implements ProfileWriter {
     public void init() throws ProfileWriterException {
         LOGGER.debug("inizializing connection to HDFS");
         try {
+            // TODO (med): This should be configurable.
             dfs.initialize(new URI("hdfs://10.224.86.144:9000"), configuration);
         } catch (Exception e) {
             final String errMsg = "Error while initializing HDFS";
@@ -115,6 +116,9 @@ public class HDFSProfileWriter implements ProfileWriter {
             LOGGER.error(errMsg, e);
             throw new ProfileWriterException(errMsg, e);
         }
+        // TODO (med): Consider replacing PrintWriter with something more
+        // verbose and low-level - we don't want exceptions to be suppressed.
+        // Also, having to close the OutputStream twice seems dodgy.
         PrintWriter pw = new PrintWriter(os);
         pw.write(jsonProfile);
         pw.println();

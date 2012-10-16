@@ -61,6 +61,9 @@ public class FacebookLikeProfilingRule extends ObjectProfilingRule<Like> {
                 throw new ProfilingRuleException(errMsg, e);
             }
             try {
+                // TODO (med): This is where some of the NaNs are coming from.
+                // These interests will have a weight of 0. Consider giving
+                // them a default weight of 1.
                 result.add(
                         new Interest(cogitoCategory, new URI(BASE_URI + RELEVANT + cogitoCategory))
                 );
