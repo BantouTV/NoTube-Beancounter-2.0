@@ -3,6 +3,7 @@ package io.beancounter.usermanager;
 import io.beancounter.commons.model.OAuthToken;
 import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.activity.Activity;
+import io.beancounter.commons.model.auth.AuthenticatedUser;
 import io.beancounter.usermanager.services.auth.ServiceAuthorizationManager;
 
 import java.net.URL;
@@ -83,7 +84,7 @@ public interface UserManager {
      * @param user
      * @param token   @throws UserManagerException
      */
-    public User registerOAuthService(
+    public AuthenticatedUser registerOAuthService(
             String service,
             User user,
             String token,

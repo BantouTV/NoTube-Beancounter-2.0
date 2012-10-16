@@ -3,7 +3,7 @@ package io.beancounter.commons.model.auth;
 import io.beancounter.commons.model.User;
 
 /**
- * This class is used to bind an authenticated user, as they returned from
+ * This class is used to bind an authenticated user, as it is returned from
  * the {@link AuthHandler} interface, with the corresponding service
  * username or general identifier.
  *

@@ -1,10 +1,11 @@
 package io.beancounter.profiler.rules;
 
 import io.beancounter.commons.linking.LinkingEngine;
+import io.beancounter.commons.model.Category;
 import io.beancounter.commons.model.Interest;
 import io.beancounter.commons.nlp.NLPEngine;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -20,6 +21,8 @@ public interface ProfilingRule {
 
     public void run(Properties properties) throws ProfilingRuleException;
 
-    public Collection<Interest> getResult() throws ProfilingRuleException;
+    public List<Interest> getInterests() throws ProfilingRuleException;
+
+    public List<Category> getCategories() throws ProfilingRuleException;
 
 }

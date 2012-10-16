@@ -1,6 +1,7 @@
 package io.beancounter.profiler.utils;
 
 import io.beancounter.commons.model.Interest;
+import io.beancounter.commons.model.Topic;
 import io.beancounter.commons.model.activity.Activity;
 
 import java.net.URI;
@@ -13,50 +14,34 @@ import java.util.*;
  */
 public class Utils {
 
-    public static boolean contains(Interest i, Collection<Interest> interests) {
-        for(Interest interest : interests) {
-            if(interest.equals(i))
+    public static <T extends Topic> boolean contains(T t, Collection<T> ts) {
+        for(T ti : ts) {
+            if(ti.equals(t))
                 return true;
         }
         return false;
     }
 
-    public static Interest retrieve(URI resource, Set<Interest> oldInterests) {
-        for(Interest interest : oldInterests) {
-            if(resource.equals(interest.getResource()))
-                return interest;
+    public static <T extends Topic> T retrieve(URI resource, Set<T> oldTs) {
+        for(T t : oldTs) {
+            if(resource.equals(t.getResource()))
+                return t;
         }
         return null;
     }
 
-    public static Interest merge(Interest nu, Interest old, int threshold) {
-        // if the activities of the old one are above the threshold, drop the exceeding ones
-        if(old.getActivities().size() > threshold) {
-            List<UUID> oldActivities = new ArrayList<UUID>(old.getActivities());
-            for(int i = 0; i < oldActivities.size() - threshold; i++) {
-                oldActivities.remove(i);
-            }
-            old.setActivities(oldActivities);
-        }
-        for(UUID activityId : nu.getActivities()) {
-            old.addActivity(activityId);
-        }
-        old.setWeight(old.getWeight() + nu.getWeight());
-        return old;
-    }
-
-    public static List<Interest> union(
-            Collection<Interest> newInterests,
-            Collection<Interest> oldInterests
+    public static <T extends Topic> List<T> union(
+            Collection<T> newTopic,
+            Collection<T> oldTopic
     ) {
-        Collection<Interest> union = new HashSet<Interest>();
-        union.addAll(newInterests);
-        union.addAll(oldInterests);
-        return new ArrayList<Interest>(union);
+        Collection<T> union = new HashSet<T>();
+        union.addAll(newTopic);
+        union.addAll(oldTopic);
+        return new ArrayList<T>(union);
     }
 
-    public static List<Interest> cut(List<Interest> union, int cut) {
-        List<Interest> result = new ArrayList<Interest>();
+    public static <T extends Topic> List<T> cut(List<T> union, int cut) {
+        List<T> result = new ArrayList<T>();
         for(int i=0; i < cut; i++) {
             result.add(union.get(i));
         }

@@ -47,12 +47,12 @@ public class TweetConverterTest {
     }
 
     @Test
-    public void convertsScreenName() {
-        String userName = "Bob";
-        when(user.getScreenName()).thenReturn(userName);
+    public void checkTwitterUserId() {
+        final long userId = 2342352L;
+        when(user.getId()).thenReturn(userId);
 
         TwitterTweet twitterTweet = underTest.convert(status);
-        assertThat(twitterTweet.getUsername(), is(userName));
+        assertThat(twitterTweet.getUserId(), is(String.valueOf(userId)));
     }
 
     @Test

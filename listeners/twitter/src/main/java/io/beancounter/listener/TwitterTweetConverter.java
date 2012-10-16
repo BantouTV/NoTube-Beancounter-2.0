@@ -17,10 +17,8 @@ public class TwitterTweetConverter {
         tweets.add(tweet);
         TwitterResponse response = new TwitterResponse(tweets);
         Activity result = response.getResponse().get(0);
-        // TODO (med) this is a workaround to bypass the resolver in our sally demo.
-        // until the sally demo won't be better engineered.
         result.getContext().setService("twitter");
-        result.getContext().setUsername("sally-beancounter");
+        result.getContext().setUsername(tweet.getUserId());
         return result;
     }
 

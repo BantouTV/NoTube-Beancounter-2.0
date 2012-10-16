@@ -50,7 +50,7 @@ public class TwitterResponse implements ServiceResponse<List<Activity>> {
                 ab.setContext(
                         twitterTweet.getCreatedAt(),
                         twitter,
-                        twitterTweet.getUsername()
+                        twitterTweet.getUserId()
                 );
                 activities.add(ab.pop());
             } catch (ActivityBuilderException e) {

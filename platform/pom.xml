@@ -4,11 +4,11 @@
     <parent>
         <groupId>io.beancounter</groupId>
         <artifactId>parent</artifactId>
-        <version>1.5-SNAPSHOT</version>
+        <version>1.6-SNAPSHOT</version>
     </parent>
 
     <artifactId>platform</artifactId>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.6-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Beancounter Web REST API</name>
 
@@ -62,6 +62,10 @@
             <artifactId>activities</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.beancounter</groupId>
+            <artifactId>analyses</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-bundle</artifactId>
         </dependency>
@@ -109,6 +113,10 @@
         <dependency>
             <groupId>io.beancounter.filter</groupId>
             <artifactId>filter-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.beancounter.realtime-analyser</groupId>
+            <artifactId>realtime-analyser-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.grizzly</groupId>

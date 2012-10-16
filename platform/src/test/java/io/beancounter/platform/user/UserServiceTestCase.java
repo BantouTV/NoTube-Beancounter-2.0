@@ -19,6 +19,7 @@ import io.beancounter.commons.model.activity.ActivityBuilder;
 import io.beancounter.commons.model.activity.DefaultActivityBuilder;
 import io.beancounter.commons.model.activity.Tweet;
 import io.beancounter.commons.model.activity.Verb;
+import io.beancounter.commons.model.auth.AuthenticatedUser;
 import io.beancounter.commons.tests.Tests;
 import io.beancounter.commons.tests.TestsBuilder;
 import io.beancounter.platform.APIResponse;
@@ -631,6 +632,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void testHandleFacebookAuthCallback() throws Exception {
+        // TODO (low) fix this test, it's not testing anything actually
         String baseQuery = "user/oauth/callback/%s/%s?code=%s";
         String service = "facebook";
         String username = "test-user";
@@ -645,8 +647,9 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
         URL finalRedirect = new URL("http://example.com/final/redirect");
         User user = new User("Test", "User", username, "password");
+        AuthenticatedUser au = new AuthenticatedUser("facebook-identifier", user);
         when(userManager.getUser(username)).thenReturn(user);
-        when(userManager.registerOAuthService(service, user, token, code)).thenReturn(user);
+        when(userManager.registerOAuthService(service, user, token, code)).thenReturn(au);
         when(userManager.consumeUserFinalRedirect(username)).thenReturn(finalRedirect);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
@@ -678,7 +681,8 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         URL finalRedirect = new URL("http://example.com/final/redirect");
         User user = new User("Test", "User", username, "password");
         when(userManager.getUser(username)).thenReturn(user);
-        when(userManager.registerOAuthService(service, user, oauthToken, oauthVerifier)).thenReturn(user);
+        AuthenticatedUser au = new AuthenticatedUser("service-identifier", user);
+        when(userManager.registerOAuthService(service, user, oauthToken, oauthVerifier)).thenReturn(au);
         when(userManager.consumeUserFinalRedirect(username)).thenReturn(finalRedirect);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
@@ -707,8 +711,9 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         User user = new User("Test", "User", username, "password");
         User authenticatedUser = new User("Test", "User", username, "password");
         authenticatedUser.setUserToken(userToken);
+        AuthenticatedUser au = new AuthenticatedUser("service-identifier", authenticatedUser);
         when(userManager.getUser(username)).thenReturn(user);
-        when(userManager.registerOAuthService(service, user, token, verifier)).thenReturn(authenticatedUser);
+        when(userManager.registerOAuthService(service, user, token, verifier)).thenReturn(au);
         when(userManager.consumeUserFinalRedirect(username)).thenReturn(new URL(redirectUrl));
 
         Response response = userService.handleOAuthCallback(service, username, token, verifier);

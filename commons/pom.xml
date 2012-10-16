@@ -5,11 +5,11 @@
     <parent>
         <groupId>io.beancounter</groupId>
         <artifactId>parent</artifactId>
-        <version>1.5-SNAPSHOT</version>
+        <version>1.6-SNAPSHOT</version>
     </parent>
 
     <artifactId>commons</artifactId>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.6-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Beancounter Commons</name>
 
@@ -23,6 +23,7 @@
         <module>cogito</module>
         <module>configuration</module>
         <module>camel-tests</module>
-    </modules>
+        <module>pig-udf</module>
+  </modules>
 
 </project>

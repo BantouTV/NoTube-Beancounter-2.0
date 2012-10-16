@@ -334,7 +334,7 @@ public class JedisUserManagerImpl implements UserManager {
     }
 
     @Override
-    public synchronized User registerOAuthService(
+    public synchronized AuthenticatedUser registerOAuthService(
             String serviceName,
             User user,
             String token,
@@ -377,7 +377,7 @@ public class JedisUserManagerImpl implements UserManager {
         userWithAuth.setUserToken(userToken);
         storeUser(userWithAuth);
 
-        return userWithAuth;
+        return new AuthenticatedUser(auser.getUserId(), userWithAuth);
     }
 
 
@@ -486,9 +486,10 @@ public class JedisUserManagerImpl implements UserManager {
         }
 
         User user = authUser.getUser();
-        UUID userToken = updateUserWithOAuthCredentials(service, user.getAuth(service), candidateUsername).getUserToken();
+        User alreadyExistentUser = updateUserWithOAuthCredentials(service, user.getAuth(service), candidateUsername);
+        UUID userToken = alreadyExistentUser.getUserToken();
 
-        return new AtomicSignUp(user.getId(), user.getUsername(), true, service, authUser.getUserId(), userToken);
+        return new AtomicSignUp(alreadyExistentUser.getId(), user.getUsername(), true, service, authUser.getUserId(), userToken);
     }
 
     private void mapUserToServiceInResolver(

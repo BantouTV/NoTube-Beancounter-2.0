@@ -3,6 +3,7 @@ package io.beancounter.profiles;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -19,7 +20,7 @@ import java.util.UUID;
  */
 public class JedisProfilesImpl implements Profiles {
 
-    private static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(JedisProfilesImpl.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(JedisProfilesImpl.class);
 
     private JedisPool pool;
 
@@ -81,7 +82,7 @@ public class JedisProfilesImpl implements Profiles {
 
     @Override
     public UserProfile lookup(UUID userId) throws ProfilesException {
-        LOGGER.debug("looking up profile for user [" + userId + "] stored");
+        LOGGER.debug("looking up profile for user [" + userId + "]");
         UserProfile profile;
         Jedis jedis = getJedisResource();
         String stringProfile;

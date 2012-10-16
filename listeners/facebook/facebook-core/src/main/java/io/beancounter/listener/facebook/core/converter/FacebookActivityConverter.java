@@ -49,7 +49,7 @@ public class FacebookActivityConverter {
             innerObj = converter.convert(obj, true);
         } catch (UnconvertableException e) {
             final String errMsg = "object with type [" + obj.getClass() + "] cannot be converted";
-            LOGGER.error(errMsg, e);
+            LOGGER.warn(errMsg, e);
             throw new UnconvertableFacebookActivityException(errMsg, e);
         } catch (ConverterException e) {
             final String errMsg = "error while converting object with type [" + obj.getClass() + "]";
