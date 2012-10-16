@@ -24,7 +24,7 @@
         <module>dispatcher</module>
         <module>publishers</module>
         <module>monitor</module>
-        <module>realtime-analyzer</module>
+        <module>realtime-analyser</module>
         <module>analyses</module>
         <module>camel-redis</module>
     </modules>
