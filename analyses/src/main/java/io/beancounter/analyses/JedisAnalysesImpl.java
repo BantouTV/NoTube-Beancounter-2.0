@@ -11,7 +11,6 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
-import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -31,96 +30,87 @@ public class JedisAnalysesImpl implements Analyses {
     @Named("redis.db.analyses") private int database;
 
     @Inject
-    public JedisAnalysesImpl(JedisPoolFactory factory) {
+    public JedisAnalysesImpl(JedisPoolFactory factory, ObjectMapper mapper) {
         pool = factory.build();
-        mapper = new ObjectMapper();
+        this.mapper = mapper;
     }
 
     @Override
     public void store(AnalysisResult ar) throws AnalysesException {
         LOGGER.debug("storing result for analysis [" + ar.getAnalysis() + "]");
+
         String analysisJson;
         try {
             analysisJson = mapper.writeValueAsString(ar);
-        } catch (IOException e) {
+        } catch (Exception e) {
             final String errMsg = "Error while getting json for analysis result [" + ar.getAnalysis() + "]";
             LOGGER.error(errMsg, e);
-            throw new AnalysesException(
-                    errMsg,
-                    e
-            );
-        } catch (Exception e) {
-            final String errMsg = "Error while getting json for analysis result [" +  ar.getAnalysis() + "]";
-            LOGGER.error(errMsg, e);
-            throw new AnalysesException(
-                    errMsg,
-                    e
-            );
+            throw new AnalysesException(errMsg, e);
         }
+
         Jedis jedis = getJedisResource();
-        LOGGER.debug("storing result for analysis [" + ar.getAnalysis() + "] on database [" + database + "]");
         boolean isConnectionIssue = false;
         try {
             jedis.set(ar.getAnalysis().toString(), analysisJson);
-        } catch (JedisConnectionException e) {
+        } catch (JedisConnectionException jce) {
             isConnectionIssue = true;
             final String errMsg = "Jedis Connection error while storing result for analysis [" + ar.getAnalysis() + "]";
-            LOGGER.error(errMsg, e);
-            throw new AnalysesException(errMsg, e);
-        } catch (Exception e) {
+            LOGGER.error(errMsg, jce);
+            throw new AnalysesException(errMsg, jce);
+        } catch (Exception ex) {
             final String errMsg = "Error while storing result for analysis [" + ar.getAnalysis() + "]";
-            LOGGER.error(errMsg, e);
-            throw new AnalysesException(errMsg, e);
+            LOGGER.error(errMsg, ex);
+            throw new AnalysesException(errMsg, ex);
         } finally {
-            if(isConnectionIssue) {
+            if (isConnectionIssue) {
                 pool.returnBrokenResource(jedis);
             } else {
                 pool.returnResource(jedis);
             }
         }
+
         LOGGER.debug("result for analysis [" + ar.getAnalysis() + "] stored");
     }
 
     @Override
-    public AnalysisResult lookup(UUID analysesId) throws AnalysesException {
-        LOGGER.debug("looking up result for analysis [" + analysesId + "]");
-        AnalysisResult analysisResult;
-        Jedis jedis = getJedisResource();
+    public AnalysisResult lookup(UUID analysisId) throws AnalysesException {
+        LOGGER.debug("looking up result for analysis [" + analysisId + "]");
+
         String resultJson;
+        Jedis jedis = getJedisResource();
         boolean isConnectionIssue = false;
+
         try {
-            resultJson = jedis.get(analysesId.toString());
-        } catch (JedisConnectionException e) {
+            resultJson = jedis.get(analysisId.toString());
+        } catch (JedisConnectionException jce) {
             isConnectionIssue = true;
-            final String errMsg = "Error while retrieving result for analysis [" + analysesId + "]";
-            LOGGER.error(errMsg, e);
-            throw new AnalysesException(errMsg, e);
-        } catch (Exception e) {
-            final String errMsg = "Error while retrieving result for analysis [" + analysesId + "]";
-            LOGGER.error(errMsg, e);
-            throw new AnalysesException(errMsg, e);
+            final String errMsg = "Jedis Connection error while retrieving result for analysis [" + analysisId + "]";
+            LOGGER.error(errMsg, jce);
+            throw new AnalysesException(errMsg, jce);
+        } catch (Exception ex) {
+            final String errMsg = "Error while retrieving result for analysis [" + analysisId + "]";
+            LOGGER.error(errMsg, ex);
+            throw new AnalysesException(errMsg, ex);
         } finally {
-            if(isConnectionIssue) {
+            if (isConnectionIssue) {
                 pool.returnBrokenResource(jedis);
             } else {
                 pool.returnResource(jedis);
             }
         }
-        if(resultJson == null) {
+
+        if (resultJson == null) {
             return null;
         }
+
         try {
-            analysisResult = mapper.readValue(resultJson, AnalysisResult.class);
-        } catch (IOException e) {
-            final String errMsg = "Error while getting json for analysis [" + analysesId + "]";
+            LOGGER.debug("result for analysis [" + analysisId + "] looked up properly");
+            return mapper.readValue(resultJson, AnalysisResult.class);
+        } catch (Exception e) {
+            final String errMsg = "Error while getting json for analysis [" + analysisId + "]";
             LOGGER.error(errMsg, e);
-            throw new AnalysesException(
-                    errMsg,
-                    e
-            );
+            throw new AnalysesException(errMsg, e);
         }
-        LOGGER.debug("result for analysis [" + analysesId + "] looked up properly");
-        return analysisResult;
     }
 
     private Jedis getJedisResource() throws AnalysesException {

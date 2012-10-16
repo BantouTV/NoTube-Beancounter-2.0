@@ -116,7 +116,7 @@
             </dependency>
              <dependency>
                 <groupId>io.beancounter</groupId>
-                <artifactId>realtime-analyzer</artifactId>
+                <artifactId>realtime-analyser</artifactId>
                 <version>${project.version}</version>
             </dependency>
              <dependency>
@@ -494,6 +494,11 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
