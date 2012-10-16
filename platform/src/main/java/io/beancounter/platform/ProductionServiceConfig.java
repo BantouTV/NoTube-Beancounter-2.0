@@ -10,6 +10,8 @@ import com.sun.jersey.api.core.ClasspathResourceConfig;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
+import io.beancounter.analyses.Analyses;
+import io.beancounter.analyses.JedisAnalysesImpl;
 import io.beancounter.commons.model.auth.AuthHandler;
 import io.beancounter.platform.rai.MyRaiTVService;
 import io.beancounter.usermanager.JedisUserTokenManager;
@@ -81,6 +83,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(AliveService.class);
                 bind(FilterService.class);
                 bind(MyRaiTVService.class);
+                bind(AnalysisService.class);
 
                 // bind Production Implementations
                 Properties redisProperties = PropertiesHelper.readFromClasspath("/redis.properties");
@@ -117,6 +120,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(Queues.class).toInstance(new KestrelQueues(properties));
                 bind(FilterManager.class).to(JedisFilterManager.class);
                 bind(ServiceAuthorizationManager.class).to(DefaultServiceAuthorizationManager.class);
+                bind(Analyses.class).to(JedisAnalysesImpl.class);
 
                 // add bindings for Jackson
                 bind(JacksonJaxbJsonProvider.class).asEagerSingleton();

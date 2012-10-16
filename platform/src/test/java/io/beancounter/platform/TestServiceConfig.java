@@ -6,6 +6,8 @@ import com.google.inject.name.Names;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
+import io.beancounter.analyses.Analyses;
+import io.beancounter.analyses.MockAnalyses;
 import io.beancounter.platform.rai.MyRaiTVService;
 import io.beancounter.platform.user.MockUserTokenManager;
 import io.beancounter.usermanager.UserTokenManager;
@@ -51,6 +53,7 @@ public class TestServiceConfig extends GuiceServletContextListener {
                 bind(ActivityStore.class).to(MockActivityStore.class).asEagerSingleton();
                 bind(Queues.class).to(MockQueues.class);
                 bind(FilterManager.class).to(InMemoryFilterManager.class).asEagerSingleton();
+                bind(Analyses.class).to(MockAnalyses.class);
                 // add REST services
                 bind(ApplicationService.class);
                 bind(UserService.class);
@@ -62,6 +65,7 @@ public class TestServiceConfig extends GuiceServletContextListener {
 
                 bind(AliveService.class);
                 bind(FilterService.class);
+                bind(AnalysisService.class);
                 // add bindings for Jackson
                 bind(JacksonJaxbJsonProvider.class).asEagerSingleton();
                 bind(JacksonMixInProvider.class).asEagerSingleton();

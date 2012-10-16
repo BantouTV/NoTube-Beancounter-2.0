@@ -63,6 +63,10 @@ public class AnalysisResult {
         return setValue(key, valueStr);
     }
 
+    public void setValue(String key, UUID value) {
+        setValue(key, value.toString());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -89,4 +93,5 @@ public class AnalysisResult {
                 ", results=" + results +
                 '}';
     }
+
 }

@@ -115,10 +115,6 @@
             <artifactId>filter-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.beancounter.realtime-analyser</groupId>
-            <artifactId>realtime-analyser-core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.sun.grizzly</groupId>
             <artifactId>grizzly-servlet-webserver</artifactId>
             <scope>test</scope>
