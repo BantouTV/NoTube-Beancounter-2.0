@@ -17,6 +17,8 @@ public class InMemoryAnalysisManagerImpl implements AnalysisManager {
 
     public InMemoryAnalysisManagerImpl() {
         analyses = new ArrayList<Analysis>();
+        // reads the property file with class names of analysis (extends Analysis)
+        // load all the analysis here
     }
 
     public String register(String name, String description) throws AnalysisManagerException {

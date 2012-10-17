@@ -58,8 +58,6 @@ public class DefaultInMemoryAnalyserImpl implements Analyser {
      */
     @Override
     public Map<String, AnalysisResult> analyse(Activity activity) throws AnalyserException {
-        return new HashMap<String, AnalysisResult>();
-        /*
         Collection<Analysis> analyses;
         try {
             analyses = manager.getRegisteredAnalyses();
@@ -68,39 +66,16 @@ public class DefaultInMemoryAnalyserImpl implements Analyser {
         }
         Map<String, AnalysisResult> results = new HashMap<String, AnalysisResult>();
         for (Analysis analysis : analyses) {
-            AnalysisResult result;
+            // get previous result
+            AnalysisResult previous;
             try {
-                result = analysis.run(activity, null);
-            } catch (AnalysisNotApplicableException e) {
-                // just skip, log, warn but skip
-                continue;
-            } catch (AnalysisException e) {
+                previous = this.analyses.lookup(analysis.getId());
+            } catch (AnalysesException e) {
                 throw new AnalyserException();
             }
-            results.put(analysis.getId().toString(), result);
-        }
-        return results;
-        */
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<String, AnalysisResult> analyse(UserProfile profile) throws AnalyserException {
-        return new HashMap<String, AnalysisResult>();
-        /*
-        Collection<Analysis> analyses;
-        try {
-            analyses = manager.getRegisteredAnalyses();
-        } catch (AnalysisManagerException e) {
-            throw new AnalyserException();
-        }
-        Map<String, AnalysisResult> results = new HashMap<String, AnalysisResult>();
-        for (Analysis analysis : analyses) {
             AnalysisResult result;
             try {
-                result = analysis.run(profile, null);
+                result = analysis.run(activity, previous);
             } catch (AnalysisNotApplicableException e) {
                 // just skip, log, warn but skip
                 continue;
@@ -111,7 +86,41 @@ public class DefaultInMemoryAnalyserImpl implements Analyser {
             storeResult(result);
         }
         return results;
-        */
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<String, AnalysisResult> analyse(UserProfile profile) throws AnalyserException {
+        Collection<Analysis> analyses;
+        try {
+            analyses = manager.getRegisteredAnalyses();
+        } catch (AnalysisManagerException e) {
+            throw new AnalyserException();
+        }
+        Map<String, AnalysisResult> results = new HashMap<String, AnalysisResult>();
+        for (Analysis analysis : analyses) {
+            // get previous result
+            AnalysisResult previous;
+            try {
+                previous = this.analyses.lookup(analysis.getId());
+            } catch (AnalysesException e) {
+                throw new AnalyserException();
+            }
+            AnalysisResult result;
+            try {
+                result = analysis.run(profile, previous);
+            } catch (AnalysisNotApplicableException e) {
+                // just skip, log, warn but skip
+                continue;
+            } catch (AnalysisException e) {
+                throw new AnalyserException();
+            }
+            results.put(analysis.getId().toString(), result);
+            storeResult(result);
+        }
+        return results;
     }
 
     private void storeResult(AnalysisResult result) throws AnalyserException {
