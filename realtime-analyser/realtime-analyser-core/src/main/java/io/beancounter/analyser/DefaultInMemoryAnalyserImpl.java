@@ -42,7 +42,7 @@ public class DefaultInMemoryAnalyserImpl implements Analyser {
      */
     @Override
     public void refresh() throws AnalyserException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException("NIY");
     }
 
     /**
@@ -50,7 +50,7 @@ public class DefaultInMemoryAnalyserImpl implements Analyser {
      */
     @Override
     public void refresh(UUID analysis) throws AnalyserException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException("NIY");
     }
 
     /**
@@ -58,20 +58,16 @@ public class DefaultInMemoryAnalyserImpl implements Analyser {
      */
     @Override
     public Map<String, AnalysisResult> analyse(Activity activity) throws AnalyserException {
-        Collection<UUID> analysesIds;
+        return new HashMap<String, AnalysisResult>();
+        /*
+        Collection<Analysis> analyses;
         try {
-            analysesIds = manager.getRegisteredAnalysis();
+            analyses = manager.getRegisteredAnalyses();
         } catch (AnalysisManagerException e) {
             throw new AnalyserException();
         }
         Map<String, AnalysisResult> results = new HashMap<String, AnalysisResult>();
-        for(UUID analysisId : analysesIds) {
-            Analysis analysis;
-            try {
-                analysis = manager.get(analysisId);
-            } catch (AnalysisManagerException e) {
-                throw new AnalyserException();
-            }
+        for (Analysis analysis : analyses) {
             AnalysisResult result;
             try {
                 result = analysis.run(activity);
@@ -81,9 +77,10 @@ public class DefaultInMemoryAnalyserImpl implements Analyser {
             } catch (AnalysisException e) {
                 throw new AnalyserException();
             }
-            results.put(analysisId.toString(), result);
+            results.put(analysis.getId().toString(), result);
         }
         return results;
+        */
     }
 
     /**
@@ -91,20 +88,16 @@ public class DefaultInMemoryAnalyserImpl implements Analyser {
      */
     @Override
     public Map<String, AnalysisResult> analyse(UserProfile profile) throws AnalyserException {
-        Collection<UUID> analysesIds;
+        return new HashMap<String, AnalysisResult>();
+        /*
+        Collection<Analysis> analyses;
         try {
-            analysesIds = manager.getRegisteredAnalysis();
+            analyses = manager.getRegisteredAnalyses();
         } catch (AnalysisManagerException e) {
             throw new AnalyserException();
         }
         Map<String, AnalysisResult> results = new HashMap<String, AnalysisResult>();
-        for (UUID analysisId : analysesIds) {
-            Analysis analysis;
-            try {
-                analysis = manager.get(analysisId);
-            } catch (AnalysisManagerException e) {
-                throw new AnalyserException();
-            }
+        for (Analysis analysis : analyses) {
             AnalysisResult result;
             try {
                 result = analysis.run(profile);
@@ -114,10 +107,11 @@ public class DefaultInMemoryAnalyserImpl implements Analyser {
             } catch (AnalysisException e) {
                 throw new AnalyserException();
             }
-            results.put(analysisId.toString(), result);
+            results.put(analysis.getId().toString(), result);
             storeResult(result);
         }
         return results;
+        */
     }
 
     private void storeResult(AnalysisResult result) throws AnalyserException {

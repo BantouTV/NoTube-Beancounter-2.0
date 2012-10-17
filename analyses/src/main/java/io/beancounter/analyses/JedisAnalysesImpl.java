@@ -136,7 +136,7 @@ public class JedisAnalysesImpl implements Analyses {
             LOGGER.error(errMsg, e);
             throw new AnalysesException(errMsg, e);
         } finally {
-            if(isConnectionIssue) {
+            if (isConnectionIssue) {
                 pool.returnBrokenResource(jedis);
             }
         }

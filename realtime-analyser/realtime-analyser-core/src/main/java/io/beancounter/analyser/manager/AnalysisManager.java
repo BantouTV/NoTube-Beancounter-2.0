@@ -13,19 +13,19 @@ import java.util.UUID;
  */
 public interface AnalysisManager {
 
-    public String register(
+    String register(
             String name,
             String description
     ) throws AnalysisManagerException;
 
-    public Analysis get(UUID uuid) throws AnalysisManagerException;
+    Analysis get(UUID uuid) throws AnalysisManagerException;
 
-    public void delete(UUID uuid) throws AnalysisManagerException;
+    void delete(UUID uuid) throws AnalysisManagerException;
 
-    public void start(UUID uuid) throws AnalysisManagerException;
+    void start(UUID uuid) throws AnalysisManagerException;
 
-    public void stop(UUID uuid) throws AnalysisManagerException;
+    void stop(UUID uuid) throws AnalysisManagerException;
 
-    public Collection<UUID> getRegisteredAnalysis() throws AnalysisManagerException;
+    Collection<Analysis> getRegisteredAnalyses() throws AnalysisManagerException;
 
 }
