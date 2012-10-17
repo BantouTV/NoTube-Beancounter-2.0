@@ -20,7 +20,7 @@ public interface Analyser {
      * @throws AnalyserException
      * @see {@link io.beancounter.analyser.analysis.Analysis}.
      */
-    public void refresh() throws AnalyserException;
+    void refresh() throws AnalyserException;
 
     /**
      * Reloads in memory only the given {@link io.beancounter.analyser.analysis.Analysis}.
@@ -29,7 +29,7 @@ public interface Analyser {
      * @throws AnalyserException
      * @see {@link io.beancounter.analyser.analysis.Analysis}.
      */
-    public void refresh(UUID analysis) throws AnalyserException;
+    void refresh(UUID analysis) throws AnalyserException;
 
     /**
      * It runs all the registered analyses and returns all of the computed results.
@@ -38,7 +38,7 @@ public interface Analyser {
      * @return
      * @throws AnalyserException
      */
-    public Map<String, AnalysisResult> analyse(Activity activity) throws AnalyserException;
+    Map<String, AnalysisResult> analyse(Activity activity) throws AnalyserException;
 
     /**
      * It runs all the registered analyses and returns all of the computed results.
@@ -47,6 +47,6 @@ public interface Analyser {
      * @return
      * @throws AnalyserException
      */
-    public Map<String, AnalysisResult> analyse(UserProfile profile) throws AnalyserException;
+    Map<String, AnalysisResult> analyse(UserProfile profile) throws AnalyserException;
 
 }

@@ -1,11 +1,6 @@
 package io.beancounter.analyser.manager;
 
 import io.beancounter.analyser.analysis.Analysis;
-import io.beancounter.analyser.analysis.AnalysisException;
-import io.beancounter.commons.model.AnalysisResult;
-import io.beancounter.commons.model.UserProfile;
-import io.beancounter.commons.model.activity.Activity;
-import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,34 +13,10 @@ import java.util.UUID;
  */
 public class InMemoryAnalysisManagerImpl implements AnalysisManager {
 
-    Collection<Analysis> analyses = new ArrayList<Analysis>();
+    private Collection<Analysis> analyses;
 
     public InMemoryAnalysisManagerImpl() {
-        analyses.add(new Analysis() {
-
-            private UUID id = UUID.randomUUID();
-
-            @Override
-            public AnalysisResult run(Activity activity, AnalysisResult previous) throws AnalysisException {
-                AnalysisResult ar = new AnalysisResult(id);
-                ar.setLastUpdated(DateTime.now());
-                ar.setValue("result.value", "fake");
-                ar.setValue("result.type", "activity");
-                ar.setValue("activity.id", activity.getId());
-                return ar;
-            }
-
-            @Override
-            public AnalysisResult run(UserProfile userProfile, AnalysisResult previous) throws AnalysisException {
-                AnalysisResult ar = new AnalysisResult(id);
-                ar.setLastUpdated(DateTime.now());
-                ar.setValue("result.value", "fake");
-                ar.setValue("result.type", "profile");
-                ar.setValue("user.id", userProfile.getUserId());
-                return ar;
-            }
-        });
-
+        analyses = new ArrayList<Analysis>();
     }
 
     public String register(String name, String description) throws AnalysisManagerException {
@@ -53,7 +24,7 @@ public class InMemoryAnalysisManagerImpl implements AnalysisManager {
     }
 
     public Analysis get(UUID uuid) throws AnalysisManagerException {
-        return analyses.iterator().next();
+        throw new UnsupportedOperationException("niy");
     }
 
     public void delete(UUID uuid) throws AnalysisManagerException {
@@ -68,11 +39,11 @@ public class InMemoryAnalysisManagerImpl implements AnalysisManager {
         throw new UnsupportedOperationException("niy");
     }
 
-    public Collection<UUID> getRegisteredAnalysis() throws AnalysisManagerException {
-        Collection<UUID> uuids = new ArrayList<UUID>();
-        for(Analysis analysis : analyses) {
-            uuids.add(analysis.getId());
-        }
-        return uuids;
+    public Collection<Analysis> getRegisteredAnalyses() throws AnalysisManagerException {
+        // TODO (high): For the first sprint, load the analyses found on the
+        // classpath and configure them using a properties file. After doing
+        // this the first time, just return the same Collection (they won't
+        // change).
+        return analyses;
     }
 }
