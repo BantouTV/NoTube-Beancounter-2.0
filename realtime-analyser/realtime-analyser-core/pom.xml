@@ -24,6 +24,11 @@
             <groupId>io.beancounter</groupId>
             <artifactId>analyses</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.beancounter.realtime-analyser</groupId>
+            <artifactId>realtime-analyser-examples</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>
