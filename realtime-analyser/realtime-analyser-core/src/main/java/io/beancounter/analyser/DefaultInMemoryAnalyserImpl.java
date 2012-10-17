@@ -74,9 +74,9 @@ public class DefaultInMemoryAnalyserImpl implements Analyser {
             }
             AnalysisResult result;
             try {
-                result = analysis.run(activity);
+                result = analysis.run(activity, null);
             } catch (AnalysisNotApplicableException e) {
-                // just skip, log, warn but skipy
+                // just skip, log, warn but skip
                 continue;
             } catch (AnalysisException e) {
                 throw new AnalyserException();
@@ -107,7 +107,7 @@ public class DefaultInMemoryAnalyserImpl implements Analyser {
             }
             AnalysisResult result;
             try {
-                result = analysis.run(profile);
+                result = analysis.run(profile, null);
             } catch (AnalysisNotApplicableException e) {
                 // just skip, log, warn but skip
                 continue;

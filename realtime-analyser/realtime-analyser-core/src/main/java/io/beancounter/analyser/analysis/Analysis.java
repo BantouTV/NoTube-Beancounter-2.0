@@ -19,6 +19,9 @@ public abstract class Analysis {
 
     private String description;
 
+    // TODO (high) we should pass parameters
+    protected Analysis() {}
+
     public UUID getId() {
         return id;
     }
@@ -43,9 +46,9 @@ public abstract class Analysis {
         this.description = description;
     }
 
-    public abstract AnalysisResult run(Activity activity) throws AnalysisException;
+    public abstract AnalysisResult run(Activity activity, AnalysisResult previous) throws AnalysisException;
 
-    public abstract AnalysisResult run(UserProfile userProfile) throws AnalysisException;
+    public abstract AnalysisResult run(UserProfile userProfile, AnalysisResult previous) throws AnalysisException;
 
     @Override
     public boolean equals(Object o) {

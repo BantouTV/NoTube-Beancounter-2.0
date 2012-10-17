@@ -26,7 +26,7 @@ public class InMemoryAnalysisManagerImpl implements AnalysisManager {
             private UUID id = UUID.randomUUID();
 
             @Override
-            public AnalysisResult run(Activity activity) throws AnalysisException {
+            public AnalysisResult run(Activity activity, AnalysisResult previous) throws AnalysisException {
                 AnalysisResult ar = new AnalysisResult(id);
                 ar.setLastUpdated(DateTime.now());
                 ar.setValue("result.value", "fake");
@@ -36,7 +36,7 @@ public class InMemoryAnalysisManagerImpl implements AnalysisManager {
             }
 
             @Override
-            public AnalysisResult run(UserProfile userProfile) throws AnalysisException {
+            public AnalysisResult run(UserProfile userProfile, AnalysisResult previous) throws AnalysisException {
                 AnalysisResult ar = new AnalysisResult(id);
                 ar.setLastUpdated(DateTime.now());
                 ar.setValue("result.value", "fake");

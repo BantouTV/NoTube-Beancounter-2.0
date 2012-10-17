@@ -19,7 +19,8 @@ public class AnalysisResult {
 
     private Map<String, String> results = new HashMap<String, String>();
 
-    public AnalysisResult() {}
+    public AnalysisResult() {
+    }
 
     public AnalysisResult(UUID analysis) {
         this.analysis = analysis;
@@ -45,8 +46,10 @@ public class AnalysisResult {
         return results;
     }
 
-    public void setResults(Map<String, String> results) {
-        this.results = results;
+    public <T> void setResults(Map<String, T> results) {
+        for(String k : results.keySet()) {
+            this.results.put(k, String.valueOf(results.get(k)));
+        }
     }
 
     public String setValue(String key, String value) {
@@ -65,6 +68,10 @@ public class AnalysisResult {
 
     public void setValue(String key, UUID value) {
         setValue(key, value.toString());
+    }
+
+    public void setValue(String label, double weight) {
+        setValue(label, String.valueOf(weight));
     }
 
     @Override
