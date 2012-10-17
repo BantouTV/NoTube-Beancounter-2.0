@@ -209,6 +209,11 @@
                 <artifactId>facebook-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.beancounter.realtime-analyser</groupId>
+                <artifactId>realtime-analyser-examples</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.google.inject</groupId>

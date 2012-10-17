@@ -16,5 +16,6 @@
 
   <modules>
     <module>realtime-analyser-core</module>
+    <module>realtime-analyser-examples</module>
   </modules>
 </project>

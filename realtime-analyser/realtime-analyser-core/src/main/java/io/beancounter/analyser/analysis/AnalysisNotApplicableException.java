@@ -6,4 +6,9 @@ package io.beancounter.analyser.analysis;
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
 public class AnalysisNotApplicableException extends AnalysisException {
+
+    public AnalysisNotApplicableException(String message) {
+        super(message);
+    }
+
 }
