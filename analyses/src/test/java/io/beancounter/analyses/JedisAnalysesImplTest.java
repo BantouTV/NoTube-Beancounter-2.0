@@ -12,12 +12,13 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.io.IOException;
 import java.util.Properties;
-import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
 public class JedisAnalysesImplTest {
+
+    private static final int DATABASE_NUMBER = 8;
 
     private Analyses analyses;
     private Jedis jedis;
@@ -41,25 +42,25 @@ public class JedisAnalysesImplTest {
         Properties properties = PropertiesHelper.readFromClasspath("/redis.properties");
         int database = Integer.parseInt(properties.getProperty("redis.db.analyses"), 10);
         assertNotNull(database);
-        assertEquals(8, database);
+        assertEquals(DATABASE_NUMBER, database);
     }
 
     @Test
     public void storeNewAnalysisResult() throws Exception {
-        UUID analysisId = UUID.randomUUID();
-        AnalysisResult analysisResult = new AnalysisResult(analysisId);
+        String analysisName = "analysis-name";
+        AnalysisResult analysisResult = new AnalysisResult(analysisName);
 
         analyses.store(analysisResult);
 
         verify(jedisPool).getResource();
         verify(jedisPool).returnResource(jedis);
-        verify(jedis).set(analysisId.toString(), mapper.writeValueAsString(analysisResult));
+        verify(jedis).set(analysisName, mapper.writeValueAsString(analysisResult));
     }
 
     @Test
     public void givenJsonMappingErrorWhenStoringAnalysisResultThenThrowException() throws Exception {
-        UUID analysisId = UUID.randomUUID();
-        AnalysisResult analysisResult = new AnalysisResult(analysisId);
+        String analysisName = "analysis-name";
+        AnalysisResult analysisResult = new AnalysisResult(analysisName);
 
         when(mapper.writeValueAsString(analysisResult)).thenThrow(new IOException());
 
@@ -74,10 +75,10 @@ public class JedisAnalysesImplTest {
 
     @Test
     public void givenJedisConnectionProblemWhenStoringAnalysisResultThenThrowException() throws Exception {
-        UUID analysisId = UUID.randomUUID();
-        AnalysisResult analysisResult = new AnalysisResult(analysisId);
+        String analysisName = "analysis-name";
+        AnalysisResult analysisResult = new AnalysisResult(analysisName);
 
-        when(jedis.set(analysisId.toString(), mapper.writeValueAsString(analysisResult)))
+        when(jedis.set(analysisName, mapper.writeValueAsString(analysisResult)))
                 .thenThrow(new JedisConnectionException("error"));
 
         try {
@@ -91,10 +92,10 @@ public class JedisAnalysesImplTest {
 
     @Test
     public void givenSomeOtherProblemWhenStoringAnalysisResultThenThrowException() throws Exception {
-        UUID analysisId = UUID.randomUUID();
-        AnalysisResult analysisResult = new AnalysisResult(analysisId);
+        String analysisName = "analysis-name";
+        AnalysisResult analysisResult = new AnalysisResult(analysisName);
 
-        when(jedis.set(analysisId.toString(), mapper.writeValueAsString(analysisResult)))
+        when(jedis.set(analysisName, mapper.writeValueAsString(analysisResult)))
                 .thenThrow(new RuntimeException());
 
         try {
@@ -108,13 +109,13 @@ public class JedisAnalysesImplTest {
 
     @Test
     public void lookupExistingAnalysisResultShouldReturnCorrectAnalysisResult() throws Exception {
-        UUID analysisId = UUID.randomUUID();
-        AnalysisResult expectedResult = new AnalysisResult(analysisId);
+        String analysisName = "analysis-name";
+        AnalysisResult expectedResult = new AnalysisResult(analysisName);
         String expectedResultJson = mapper.writeValueAsString(expectedResult);
 
-        when(jedis.get(analysisId.toString())).thenReturn(expectedResultJson);
+        when(jedis.get(analysisName)).thenReturn(expectedResultJson);
 
-        AnalysisResult analysisResult = analyses.lookup(analysisId);
+        AnalysisResult analysisResult = analyses.lookup(analysisName);
         assertNotNull(analysisResult);
         assertEquals(analysisResult, expectedResult);
 
@@ -124,11 +125,11 @@ public class JedisAnalysesImplTest {
 
     @Test
     public void lookupNonExistentAnalysisResultShouldReturnNull() throws Exception {
-        UUID analysisId = UUID.randomUUID();
+        String analysisName = "analysis-name";
 
-        when(jedis.get(analysisId.toString())).thenReturn(null);
+        when(jedis.get(analysisName)).thenReturn(null);
 
-        AnalysisResult analysisResult = analyses.lookup(analysisId);
+        AnalysisResult analysisResult = analyses.lookup(analysisName);
         assertNull(analysisResult);
 
         verify(jedisPool).getResource();
@@ -137,15 +138,15 @@ public class JedisAnalysesImplTest {
 
     @Test
     public void givenJsonMappingErrorWhenLookingUpAnalysisResultThenThrowException() throws Exception {
-        UUID analysisId = UUID.randomUUID();
-        AnalysisResult analysisResult = new AnalysisResult(analysisId);
+        String analysisName = "analysis-name";
+        AnalysisResult analysisResult = new AnalysisResult(analysisName);
         String resultJson = mapper.writeValueAsString(analysisResult);
 
-        when(jedis.get(analysisId.toString())).thenReturn(resultJson);
+        when(jedis.get(analysisName)).thenReturn(resultJson);
         when(mapper.readValue(resultJson, AnalysisResult.class)).thenThrow(new IOException());
 
         try {
-            analyses.lookup(analysisId);
+            analyses.lookup(analysisName);
             fail();
         } catch (AnalysesException expected) {
             verify(jedisPool).getResource();
@@ -155,13 +156,13 @@ public class JedisAnalysesImplTest {
 
     @Test
     public void givenJedisConnectionProblemWhenLookingUpAnalysisResultThenThrowException() throws Exception {
-        UUID analysisId = UUID.randomUUID();
+        String analysisName = "analysis-name";
 
-        when(jedis.get(analysisId.toString()))
+        when(jedis.get(analysisName))
                 .thenThrow(new JedisConnectionException("error"));
 
         try {
-            analyses.lookup(analysisId);
+            analyses.lookup(analysisName);
             fail();
         } catch (AnalysesException expected) {
             verify(jedisPool).getResource();
@@ -171,12 +172,12 @@ public class JedisAnalysesImplTest {
 
     @Test
     public void givenSomeOtherProblemWhenLookingUpAnalysisResultThenThrowException() throws Exception {
-        UUID analysisId = UUID.randomUUID();
+        String analysisName = "analysis-name";
 
-        when(jedis.get(analysisId.toString())).thenThrow(new RuntimeException());
+        when(jedis.get(analysisName)).thenThrow(new RuntimeException());
 
         try {
-            analyses.lookup(analysisId);
+            analyses.lookup(analysisName);
             fail();
         } catch (AnalysesException expected) {
             verify(jedisPool).getResource();

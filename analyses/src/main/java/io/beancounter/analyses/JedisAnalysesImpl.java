@@ -11,8 +11,6 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
-import java.util.UUID;
-
 /**
  * put class description here
  *
@@ -37,13 +35,13 @@ public class JedisAnalysesImpl implements Analyses {
 
     @Override
     public void store(AnalysisResult ar) throws AnalysesException {
-        LOGGER.debug("storing result for analysis [" + ar.getAnalysis() + "]");
+        LOGGER.debug("storing result for analysis [" + ar.getAnalysisName() + "]");
 
         String analysisJson;
         try {
             analysisJson = mapper.writeValueAsString(ar);
         } catch (Exception e) {
-            final String errMsg = "Error while getting json for analysis result [" + ar.getAnalysis() + "]";
+            final String errMsg = "Error while getting json for analysis result [" + ar.getAnalysisName() + "]";
             LOGGER.error(errMsg, e);
             throw new AnalysesException(errMsg, e);
         }
@@ -51,14 +49,14 @@ public class JedisAnalysesImpl implements Analyses {
         Jedis jedis = getJedisResource();
         boolean isConnectionIssue = false;
         try {
-            jedis.set(ar.getAnalysis().toString(), analysisJson);
+            jedis.set(ar.getAnalysisName(), analysisJson);
         } catch (JedisConnectionException jce) {
             isConnectionIssue = true;
-            final String errMsg = "Jedis Connection error while storing result for analysis [" + ar.getAnalysis() + "]";
+            final String errMsg = "Jedis Connection error while storing result for analysis [" + ar.getAnalysisName() + "]";
             LOGGER.error(errMsg, jce);
             throw new AnalysesException(errMsg, jce);
         } catch (Exception ex) {
-            final String errMsg = "Error while storing result for analysis [" + ar.getAnalysis() + "]";
+            final String errMsg = "Error while storing result for analysis [" + ar.getAnalysisName() + "]";
             LOGGER.error(errMsg, ex);
             throw new AnalysesException(errMsg, ex);
         } finally {
@@ -69,26 +67,26 @@ public class JedisAnalysesImpl implements Analyses {
             }
         }
 
-        LOGGER.debug("result for analysis [" + ar.getAnalysis() + "] stored");
+        LOGGER.debug("result for analysis [" + ar.getAnalysisName() + "] stored");
     }
 
     @Override
-    public AnalysisResult lookup(UUID analysisId) throws AnalysesException {
-        LOGGER.debug("looking up result for analysis [" + analysisId + "]");
+    public AnalysisResult lookup(String analysisName) throws AnalysesException {
+        LOGGER.debug("looking up result for analysis [" + analysisName + "]");
 
         String resultJson;
         Jedis jedis = getJedisResource();
         boolean isConnectionIssue = false;
 
         try {
-            resultJson = jedis.get(analysisId.toString());
+            resultJson = jedis.get(analysisName);
         } catch (JedisConnectionException jce) {
             isConnectionIssue = true;
-            final String errMsg = "Jedis Connection error while retrieving result for analysis [" + analysisId + "]";
+            final String errMsg = "Jedis Connection error while retrieving result for analysis [" + analysisName + "]";
             LOGGER.error(errMsg, jce);
             throw new AnalysesException(errMsg, jce);
         } catch (Exception ex) {
-            final String errMsg = "Error while retrieving result for analysis [" + analysisId + "]";
+            final String errMsg = "Error while retrieving result for analysis [" + analysisName + "]";
             LOGGER.error(errMsg, ex);
             throw new AnalysesException(errMsg, ex);
         } finally {
@@ -104,10 +102,10 @@ public class JedisAnalysesImpl implements Analyses {
         }
 
         try {
-            LOGGER.debug("result for analysis [" + analysisId + "] looked up properly");
+            LOGGER.debug("result for analysis [" + analysisName + "] looked up properly");
             return mapper.readValue(resultJson, AnalysisResult.class);
         } catch (Exception e) {
-            final String errMsg = "Error while getting json for analysis [" + analysisId + "]";
+            final String errMsg = "Error while getting json for analysis [" + analysisName + "]";
             LOGGER.error(errMsg, e);
             throw new AnalysesException(errMsg, e);
         }

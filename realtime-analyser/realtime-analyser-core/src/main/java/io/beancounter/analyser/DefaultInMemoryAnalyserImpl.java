@@ -69,7 +69,7 @@ public class DefaultInMemoryAnalyserImpl implements Analyser {
             // get previous result
             AnalysisResult previous;
             try {
-                previous = this.analyses.lookup(analysis.getId());
+                previous = this.analyses.lookup(analysis.getName());
             } catch (AnalysesException e) {
                 throw new AnalyserException();
             }
@@ -82,7 +82,7 @@ public class DefaultInMemoryAnalyserImpl implements Analyser {
             } catch (AnalysisException e) {
                 throw new AnalyserException();
             }
-            results.put(analysis.getId().toString(), result);
+            results.put(analysis.getName(), result);
             storeResult(result);
         }
         return results;
@@ -104,7 +104,7 @@ public class DefaultInMemoryAnalyserImpl implements Analyser {
             // get previous result
             AnalysisResult previous;
             try {
-                previous = this.analyses.lookup(analysis.getId());
+                previous = this.analyses.lookup(analysis.getName());
             } catch (AnalysesException e) {
                 throw new AnalyserException();
             }
@@ -117,7 +117,7 @@ public class DefaultInMemoryAnalyserImpl implements Analyser {
             } catch (AnalysisException e) {
                 throw new AnalyserException();
             }
-            results.put(analysis.getId().toString(), result);
+            results.put(analysis.getName(), result);
             storeResult(result);
         }
         return results;

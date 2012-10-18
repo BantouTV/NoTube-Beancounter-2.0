@@ -2,8 +2,6 @@ package io.beancounter.analyses;
 
 import io.beancounter.commons.model.AnalysisResult;
 
-import java.util.UUID;
-
 /**
  * put class description here
  *
@@ -19,5 +17,5 @@ public interface Analyses {
      */
     public void store(AnalysisResult ar) throws AnalysesException;
 
-    public AnalysisResult lookup(UUID analysisId) throws AnalysesException;
+    public AnalysisResult lookup(String analysisName) throws AnalysesException;
 }

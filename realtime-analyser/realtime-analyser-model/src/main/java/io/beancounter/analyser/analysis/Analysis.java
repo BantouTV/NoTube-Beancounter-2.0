@@ -4,8 +4,6 @@ import io.beancounter.commons.model.AnalysisResult;
 import io.beancounter.commons.model.UserProfile;
 import io.beancounter.commons.model.activity.Activity;
 
-import java.util.UUID;
-
 /**
  * put class description here
  *
@@ -13,22 +11,12 @@ import java.util.UUID;
  */
 public abstract class Analysis {
 
-    private UUID id = UUID.randomUUID();
-
     private String name;
 
     private String description;
 
     // TODO (high) we should pass parameters
     protected Analysis() {}
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -57,7 +45,7 @@ public abstract class Analysis {
 
         Analysis analysis = (Analysis) o;
 
-        if (id != null ? !id.equals(analysis.id) : analysis.id != null)
+        if (name != null ? !name.equals(analysis.name) : analysis.name != null)
             return false;
 
         return true;
@@ -65,14 +53,13 @@ public abstract class Analysis {
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        return name != null ? name.hashCode() : 0;
     }
 
     @Override
     public String toString() {
         return "Analysis{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
+                "name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 '}';
     }

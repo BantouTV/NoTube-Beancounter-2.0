@@ -32,7 +32,7 @@ public class TrendingInterestsAnalysis extends Analysis {
 
     @Override
     public AnalysisResult run(UserProfile userProfile, AnalysisResult previous) throws AnalysisException {
-        AnalysisResult result = new AnalysisResult(getId());
+        AnalysisResult result = new AnalysisResult(getName());
         if (previous == null) {
             // it's the first time this analysis runs
             // as a strategy, just grab the first TOP of this profile

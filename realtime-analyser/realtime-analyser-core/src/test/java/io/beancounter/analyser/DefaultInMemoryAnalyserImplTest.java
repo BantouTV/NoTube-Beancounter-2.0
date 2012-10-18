@@ -57,10 +57,10 @@ public class DefaultInMemoryAnalyserImplTest {
         Collection<Analysis> analyses = new ArrayList<Analysis>();
         analyses.add(analysis);
 
-        UUID analysisId = UUID.randomUUID();
-        when(analysis.getId()).thenReturn(UUID.randomUUID());
+        String analysisName = "analysis-name";
+        when(analysis.getName()).thenReturn(analysisName);
         when(analysisManager.getRegisteredAnalyses()).thenReturn(analyses);
-        when(analysis.run(activity, null)).thenReturn(new AnalysisResult(analysisId));
+        when(analysis.run(activity, null)).thenReturn(new AnalysisResult(analysisName));
 
         Map<String, AnalysisResult> analysisResults = analyser.analyse(activity);
         assertNotNull(analysisResults);

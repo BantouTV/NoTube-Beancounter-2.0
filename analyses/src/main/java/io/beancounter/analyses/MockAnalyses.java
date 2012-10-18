@@ -2,8 +2,6 @@ package io.beancounter.analyses;
 
 import io.beancounter.commons.model.AnalysisResult;
 
-import java.util.UUID;
-
 /**
  * put class description here
  *
@@ -17,7 +15,7 @@ public class MockAnalyses implements Analyses {
     }
 
     @Override
-    public AnalysisResult lookup(UUID analysesId) throws AnalysesException {
+    public AnalysisResult lookup(String analysesId) throws AnalysesException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

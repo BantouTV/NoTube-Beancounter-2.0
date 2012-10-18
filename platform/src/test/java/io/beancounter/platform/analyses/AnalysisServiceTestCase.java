@@ -36,17 +36,15 @@ import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
 /**
- * Reference test case for {@link io.beancounter.platform.FilterService}
- *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class AnalysesServiceTestCase extends AbstractJerseyTestCase {
+public class AnalysisServiceTestCase extends AbstractJerseyTestCase {
 
     private static String APIKEY;
 
     private static Analyses analyses;
 
-    protected AnalysesServiceTestCase() {
+    protected AnalysisServiceTestCase() {
         super(9995);
     }
 
@@ -54,7 +52,7 @@ public class AnalysesServiceTestCase extends AbstractJerseyTestCase {
     protected void startFrontendService() throws IOException {
         server = new GrizzlyWebServer(9995);
         ServletAdapter ga = new ServletAdapter();
-        ga.addServletListener(FilterServiceTestConfig.class.getName());
+        ga.addServletListener(AnalysisServiceTestConfig.class.getName());
         ga.setServletPath("/");
         ga.addFilter(new GuiceFilter(), "analysis", null);
         server.addGrizzlyAdapter(ga, null);
@@ -81,11 +79,11 @@ public class AnalysesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void getResultWithAnExistentResultShouldBeOk() throws Exception {
-        UUID analysisId = UUID.randomUUID();
+        String analysisId = "analysis-name";
         String baseQuery = "analysis/%s/result?apikey=%s";
         String query = String.format(
                 baseQuery,
-                analysisId.toString(),
+                analysisId,
                 APIKEY
         );
 
@@ -106,7 +104,7 @@ public class AnalysesServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(response.getStatus(), AnalysisResultPlatformResponse.Status.OK);
         assertEquals(response.getMessage(), "analysis [" + analysisId + "] result found");
         AnalysisResult actual = response.getObject();
-        assertEquals(actual.getAnalysis(), analysisId);
+        assertEquals(actual.getAnalysisName(), analysisId);
         assertEquals(actual.getResults().size(), 3);
         assertEquals(actual.getResults().get("result.type"), "activity");
         assertEquals(actual.getResults().get("result.value"), "fake");
@@ -114,11 +112,11 @@ public class AnalysesServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void getResultWithAnNonExistentResultShouldReturnError() throws Exception {
-        UUID analysisId = UUID.randomUUID();
+        String analysisId = "analysis-name";
         String baseQuery = "analysis/%s/result?apikey=%s";
         String query = String.format(
                 baseQuery,
-                analysisId.toString(),
+                analysisId,
                 APIKEY
         );
 
@@ -140,7 +138,7 @@ public class AnalysesServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(response.getMessage(), "result for analysis [" + analysisId + "] not found");
     }
 
-    private AnalysisResult getAnalysisResult(UUID analysisId) {
+    private AnalysisResult getAnalysisResult(String analysisId) {
         AnalysisResult ar = new AnalysisResult(analysisId);
         ar.setLastUpdated(DateTime.now());
         ar.setValue("result.value", "fake");
@@ -149,7 +147,7 @@ public class AnalysesServiceTestCase extends AbstractJerseyTestCase {
         return ar;
     }
 
-    public static class FilterServiceTestConfig extends GuiceServletContextListener {
+    public static class AnalysisServiceTestConfig extends GuiceServletContextListener {
         @Override
         protected Injector getInjector() {
             return Guice.createInjector(new JerseyServletModule() {

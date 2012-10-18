@@ -56,28 +56,21 @@ public class AnalysisService extends JsonService {
             @PathParam("analysisId") String analysisId,
             @QueryParam("apikey") String apikey
     ) {
-        UUID analysisIdUUID;
         try {
-            analysisIdUUID = UUID.fromString(analysisId);
             Validations.validateApiKey(apikey, applicationsManager, RETRIEVE, FILTER);
         } catch (Exception ex) {
             return error(ex.getMessage());
         }
+
         AnalysisResult analysisResult;
         try {
-            analysisResult = analyses.lookup(analysisIdUUID);
+            analysisResult = analyses.lookup(analysisId);
         } catch (AnalysesException e) {
             return error(e, "error while getting result for analysis [" + analysisId + "]");
         }
+
         if (analysisResult == null) {
-            Response.ResponseBuilder rb = Response.serverError();
-            rb.entity(
-                    new StringPlatformResponse(
-                            StringPlatformResponse.Status.NOK,
-                            "result for analysis [" + analysisId + "] not found"
-                    )
-            );
-            return rb.build();
+            return error("result for analysis [" + analysisId + "] not found");
         }
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
@@ -85,7 +78,7 @@ public class AnalysisService extends JsonService {
                         AnalysisResultPlatformResponse.Status.OK,
                         "analysis [" + analysisId + "] result found",
                         analysisResult
-                    )
+                )
         );
         return rb.build();
     }

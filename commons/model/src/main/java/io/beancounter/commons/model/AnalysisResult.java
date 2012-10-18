@@ -13,7 +13,7 @@ import java.util.UUID;
  */
 public class AnalysisResult {
 
-    private UUID analysis;
+    private String analysisName;
 
     private DateTime lastUpdated;
 
@@ -22,16 +22,16 @@ public class AnalysisResult {
     public AnalysisResult() {
     }
 
-    public AnalysisResult(UUID analysis) {
-        this.analysis = analysis;
+    public AnalysisResult(String analysisName) {
+        this.analysisName = analysisName;
     }
 
-    public UUID getAnalysis() {
-        return analysis;
+    public String getAnalysisName() {
+        return analysisName;
     }
 
-    public void setAnalysis(UUID analysis) {
-        this.analysis = analysis;
+    public void setAnalysisName(String analysisName) {
+        this.analysisName = analysisName;
     }
 
     public DateTime getLastUpdated() {
@@ -75,7 +75,9 @@ public class AnalysisResult {
 
         AnalysisResult that = (AnalysisResult) o;
 
-        if (analysis != null ? !analysis.equals(that.analysis) : that.analysis != null)
+        if (analysisName != null ? !analysisName.equals(that.analysisName) : that.analysisName != null)
+            return false;
+        if (lastUpdated != null ? !lastUpdated.equals(that.lastUpdated) : that.lastUpdated != null)
             return false;
 
         return true;
@@ -83,13 +85,15 @@ public class AnalysisResult {
 
     @Override
     public int hashCode() {
-        return analysis != null ? analysis.hashCode() : 0;
+        int result = analysisName != null ? analysisName.hashCode() : 0;
+        result = 31 * result + (lastUpdated != null ? lastUpdated.hashCode() : 0);
+        return result;
     }
 
     @Override
     public String toString() {
         return "AnalysisResult{" +
-                "analysis=" + analysis +
+                "analysisName=" + analysisName +
                 ", lastUpdated=" + lastUpdated +
                 ", results=" + results +
                 '}';

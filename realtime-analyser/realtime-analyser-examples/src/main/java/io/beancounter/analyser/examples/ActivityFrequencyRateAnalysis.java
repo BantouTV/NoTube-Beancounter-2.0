@@ -24,7 +24,7 @@ public class ActivityFrequencyRateAnalysis extends Analysis {
 
     @Override
     public AnalysisResult run(Activity activity, AnalysisResult previous) throws AnalysisException {
-        AnalysisResult result = new AnalysisResult(getId());
+        AnalysisResult result = new AnalysisResult(getName());
         if(previous == null) {
             result.setValue(ACTIVITIES + '.' + RATE, 0.0d);
             result.setValue(ACTIVITIES + '.' + LAST_TS, DateTime.now().getMillis());
@@ -41,7 +41,7 @@ public class ActivityFrequencyRateAnalysis extends Analysis {
 
     @Override
     public AnalysisResult run(UserProfile userProfile, AnalysisResult previous) throws AnalysisException {
-        AnalysisResult result = new AnalysisResult(getId());
+        AnalysisResult result = new AnalysisResult(getName());
         if(previous == null) {
             result.setValue(PROFILES + '.' + RATE, 0.0d);
             result.setValue(PROFILES + '.' + LAST_TS, DateTime.now().getMillis());
