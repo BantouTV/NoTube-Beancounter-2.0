@@ -15,7 +15,7 @@ import java.util.UUID;
 public interface Analyser {
 
     /**
-     * Reloads all the started filters.
+     * Reloads all the analyses.
      *
      * @throws AnalyserException
      * @see {@link io.beancounter.analyser.analysis.Analysis}.

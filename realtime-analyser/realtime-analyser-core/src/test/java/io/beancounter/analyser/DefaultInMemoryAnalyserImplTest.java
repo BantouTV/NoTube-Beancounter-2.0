@@ -12,15 +12,19 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 public class DefaultInMemoryAnalyserImplTest {
 
     private Analyser analyser;
+
     private Analyses analysisResultsStore;
+
     private AnalysisManager analysisManager;
 
     @BeforeMethod
@@ -35,6 +39,7 @@ public class DefaultInMemoryAnalyserImplTest {
         Activity activity = mock(Activity.class);
         Map<String, AnalysisResult> analysisResults = analyser.analyse(activity);
         assertNotNull(analysisResults);
+        assertEquals(analysisResults.size(), 0);
     }
 
     @Test
@@ -42,6 +47,7 @@ public class DefaultInMemoryAnalyserImplTest {
         UserProfile profile = mock(UserProfile.class);
         Map<String, AnalysisResult> analysisResults = analyser.analyse(profile);
         assertNotNull(analysisResults);
+        assertEquals(analysisResults.size(), 0);
     }
 
     @Test
@@ -51,7 +57,10 @@ public class DefaultInMemoryAnalyserImplTest {
         Collection<Analysis> analyses = new ArrayList<Analysis>();
         analyses.add(analysis);
 
+        UUID analysisId = UUID.randomUUID();
+        when(analysis.getId()).thenReturn(UUID.randomUUID());
         when(analysisManager.getRegisteredAnalyses()).thenReturn(analyses);
+        when(analysis.run(activity, null)).thenReturn(new AnalysisResult(analysisId));
 
         Map<String, AnalysisResult> analysisResults = analyser.analyse(activity);
         assertNotNull(analysisResults);

@@ -14,8 +14,9 @@
     <packaging>pom</packaging>
     <name>Beancounter Realtime Analyser</name>
 
-  <modules>
-    <module>realtime-analyser-core</module>
-    <module>realtime-analyser-examples</module>
-  </modules>
+    <modules>
+        <module>realtime-analyser-model</module>
+        <module>realtime-analyser-core</module>
+        <module>realtime-analyser-examples</module>
+    </modules>
 </project>

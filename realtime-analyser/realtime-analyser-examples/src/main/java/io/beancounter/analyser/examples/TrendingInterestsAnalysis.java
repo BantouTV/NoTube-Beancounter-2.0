@@ -38,7 +38,7 @@ public class TrendingInterestsAnalysis extends Analysis {
             // as a strategy, just grab the first TOP of this profile
             List<Interest> interests = new ArrayList<Interest>(userProfile.getInterests());
             Map<String, Double> results = computeTop(interests, TOP);
-            result.setResults(results);
+            setResults(result, results);
             result.setLastUpdated(DateTime.now());
             return result;
         }
@@ -46,9 +46,15 @@ public class TrendingInterestsAnalysis extends Analysis {
         List<Interest> oldInterests = toInterests(previous.getResults());
         List<Interest> merged = merge(oldInterests, new ArrayList<Interest>(userProfile.getInterests()));
         Map<String, Double> results = computeTop(merged, TOP);
-        result.setResults(results);
+        setResults(result, results);
         result.setLastUpdated(DateTime.now());
         return result;
+    }
+
+    private void setResults(AnalysisResult result, Map<String, Double> results) {
+        for (Map.Entry<String, Double> r : results.entrySet()) {
+            result.setValue(r.getKey(), r.getValue());
+        }
     }
 
     private List<Interest> merge(List<Interest> oldInterests, List<Interest> interests) {

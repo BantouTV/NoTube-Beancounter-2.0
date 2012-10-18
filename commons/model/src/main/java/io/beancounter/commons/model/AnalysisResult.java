@@ -46,12 +46,6 @@ public class AnalysisResult {
         return results;
     }
 
-    public <T> void setResults(Map<String, T> results) {
-        for(String k : results.keySet()) {
-            this.results.put(k, String.valueOf(results.get(k)));
-        }
-    }
-
     public String setValue(String key, String value) {
         return results.put(key, value);
     }
