@@ -149,7 +149,7 @@ public class RealTimeAnalyserRouteTest extends CamelTestSupport {
         UserProfile profile = getProfile();
 
         when(analyser.analyse(profile)).thenThrow(new AnalyserException());
-        template.sendBody(ACTIVITIES, mapper.writeValueAsString(profile));
+        template.sendBody(PROFILES, mapper.writeValueAsString(profile));
 
         error.assertIsSatisfied();
     }
