@@ -54,6 +54,8 @@ public class UtilsTestCase {
 
     @Test
     public void testSortByDate() {
+        // TODO (med): This test breaks when the activities
+        // are already ordered.
         Assert.assertFalse(sorted(activities));
         Utils.sortByDate(activities);
         Assert.assertTrue(sorted(activities));

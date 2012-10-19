@@ -94,7 +94,13 @@ public class Context implements Serializable {
 
         Context context = (Context) o;
 
-        if (date != null ? !date.equals(context.date) : context.date != null) return false;
+        if (date != null) {
+            if (context.date == null) return false;
+            if (date.getMillis() != context.date.getMillis()) return false;
+        } else {
+            if (context.date != null) return false;
+        }
+
         if (service != null ? !service.equals(context.service) : context.service != null) return false;
 
         return true;

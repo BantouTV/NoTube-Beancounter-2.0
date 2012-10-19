@@ -1,5 +1,6 @@
 package io.beancounter.analyser.manager;
 
+import com.google.inject.Inject;
 import io.beancounter.analyser.analysis.Analysis;
 
 import java.util.Collection;
@@ -14,6 +15,7 @@ public class InMemoryAnalysisManagerImpl implements AnalysisManager {
 
     private Collection<Analysis> analyses;
 
+    @Inject
     public InMemoryAnalysisManagerImpl(InMemoryAnalysisManagerConfig config) {
         analyses = config.getAnalyses();
     }
