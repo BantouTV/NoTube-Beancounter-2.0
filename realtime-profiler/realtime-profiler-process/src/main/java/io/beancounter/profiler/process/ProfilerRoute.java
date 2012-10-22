@@ -48,10 +48,14 @@ public class ProfilerRoute extends RouteBuilder {
                 .filter(body().isNotNull())
                 .marshal().json(JsonLibrary.Jackson)
                 .convertBodyTo(String.class)
-                .to(toKestrel());
+                .multicast().to(toWriter(), toAnalyser());
     }
 
-    protected String toKestrel() {
+    protected String toAnalyser() {
+        return "kestrel://{{kestrel.queue.analyser.profiles.url}}";
+    }
+
+    protected String toWriter() {
         return "kestrel://{{kestrel.queue.profiles.url}}";
     }
 

@@ -279,7 +279,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                 context = shareConverter.getContext(post, identifier);
             } catch (ConverterException e) {
                 // just log and skip
-                LOGGER.error("error while converting Facebook POST from user {}", identifier, e);
+                LOGGER.warn("error while converting Facebook POST from user {}", identifier, e);
                 continue;
             }
             Activity activity = toActivity(object, Verb.SHARE);
@@ -302,7 +302,7 @@ public class FacebookAuthHandler extends DefaultAuthHandler {
                 context = likeConverter.getContext(like, identifier);
             } catch (ConverterException e) {
                 // just log and skip
-                LOGGER.error("error while converting Facebook LIKE from user {}", identifier, e);
+                LOGGER.warn("error while converting Facebook LIKE from user {}", identifier, e);
                 continue;
             }
             Activity activity = toActivity(object, Verb.LIKE);

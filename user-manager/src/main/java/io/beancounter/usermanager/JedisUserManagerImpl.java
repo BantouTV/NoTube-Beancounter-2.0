@@ -95,7 +95,7 @@ public class JedisUserManagerImpl implements UserManager {
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         } finally {
-            if(isConnectionIssue) {
+            if (isConnectionIssue) {
                 pool.returnBrokenResource(jedis);
             } else {
                 pool.returnResource(jedis);
@@ -120,7 +120,7 @@ public class JedisUserManagerImpl implements UserManager {
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         } finally {
-            if(isConnectionIssue) {
+            if (isConnectionIssue) {
                 pool.returnBrokenResource(jedis);
             } else {
                 pool.returnResource(jedis);
@@ -297,7 +297,6 @@ public class JedisUserManagerImpl implements UserManager {
             throw new UserManagerException(errMsg);
         }
         try {
-            // return authHandler.grabActivities(auth.getSession(), identifier, limit);
             return authHandler.grabActivities(auth, identifier, limit);
         } catch (AuthHandlerException e) {
             final String errMsg = "OAuth token for [" + serviceName + "] on user [" + user.getUsername() + "] is expired";
@@ -462,34 +461,47 @@ public class JedisUserManagerImpl implements UserManager {
                     service
             );
         } catch (ResolverMappingNotFoundException e) {
-            // ok, this is the first access from this user so:
-            // 1. Create a new user token for them (no need to check if there
-            //    is an existing one because this is a new user).
-            // 2. Add a record to the resolver
-            User user = authUser.getUser();
-            UUID userToken = tokenManager.createUserToken(user.getUsername());
-            user.setUserToken(userToken);
-            mapUserToServiceInResolver(service, authUser);
-            storeUser(user);
-            return new AtomicSignUp(
-                    user.getId(),
-                    user.getUsername(),
-                    false,
-                    service,
-                    authUser.getUserId(),
-                    userToken
-            );
+            return nonExistentUser(service, authUser);
         } catch (ResolverException e) {
             final String errMsg = "Error while asking mapping for user [" + authUser.getUser().getUsername() + "] with identifier [" + authUser.getUserId() + "] on service [" + service + "]";
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         }
-
+        // check if the user is really in the usermanager db
+        User reallyExistentUser = getUser(candidateUsername);
+        if (reallyExistentUser == null) {
+            // this code is executed to be sure that if in the resolver we have
+            // a mapping but there is no a user object in the usermanager db (due to some corrupted data)
+            // then the sign is guaranteed to be completed
+            return nonExistentUser(service, authUser);
+        }
         User user = authUser.getUser();
-        User alreadyExistentUser = updateUserWithOAuthCredentials(service, user.getAuth(service), candidateUsername);
+        reallyExistentUser.setMetadata(user.getMetadata());
+        User alreadyExistentUser = updateUserWithOAuthCredentials(reallyExistentUser, service, user.getAuth(service));
         UUID userToken = alreadyExistentUser.getUserToken();
 
         return new AtomicSignUp(alreadyExistentUser.getId(), user.getUsername(), true, service, authUser.getUserId(), userToken);
+    }
+
+    private AtomicSignUp nonExistentUser(String service, AuthenticatedUser authUser)
+            throws UserManagerException {
+        // ok, this is the first access from this user so:
+        // 1. Create a new user token for them (no need to check if there
+        //    is an existing one because this is a new user).
+        // 2. Add a record to the resolver
+        User user = authUser.getUser();
+        UUID userToken = tokenManager.createUserToken(user.getUsername());
+        user.setUserToken(userToken);
+        mapUserToServiceInResolver(service, authUser);
+        storeUser(user);
+        return new AtomicSignUp(
+                user.getId(),
+                user.getUsername(),
+                false,
+                service,
+                authUser.getUserId(),
+                userToken
+        );
     }
 
     private void mapUserToServiceInResolver(
@@ -511,27 +523,20 @@ public class JedisUserManagerImpl implements UserManager {
     }
 
     private User updateUserWithOAuthCredentials(
+            User user,
             String service,
-            Auth auth,
-            String username
+            Auth auth
     ) throws UserManagerException {
-        User user = getUser(username);
-        if (user == null) {
-            throw new UserManagerException("User [" + username + "] does not exist");
-        }
         user.addService(service, auth);
-
         if (user.getUserToken() != null) {
             tokenManager.deleteUserToken(user.getUserToken());
         }
         UUID userToken = tokenManager.createUserToken(user.getUsername());
         user.setUserToken(userToken);
-
         storeUser(user);
-
         return user;
     }
-    
+
     private Jedis getJedisResource() throws UserManagerException {
         Jedis jedis;
         try {
@@ -555,7 +560,7 @@ public class JedisUserManagerImpl implements UserManager {
             LOGGER.error(errMsg, e);
             throw new UserManagerException(errMsg, e);
         } finally {
-            if(isConnectionIssue) {
+            if (isConnectionIssue) {
                 pool.returnBrokenResource(jedis);
             }
         }

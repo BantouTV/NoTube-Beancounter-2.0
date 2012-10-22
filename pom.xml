@@ -114,6 +114,11 @@
                 <artifactId>pig-udf</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.beancounter.realtime-analyser</groupId>
+                <artifactId>realtime-analyser-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
              <dependency>
                 <groupId>io.beancounter</groupId>
                 <artifactId>realtime-analyser</artifactId>

@@ -59,8 +59,13 @@ public class ProfilerRouteTest extends CamelTestSupport {
                     }
 
                     @Override
-                    protected String toKestrel() {
+                    protected String toWriter() {
                         return "direct:writer";
+                    }
+
+                    @Override
+                    protected String toAnalyser() {
+                        return "direct:analyser";
                     }
                 });
             }

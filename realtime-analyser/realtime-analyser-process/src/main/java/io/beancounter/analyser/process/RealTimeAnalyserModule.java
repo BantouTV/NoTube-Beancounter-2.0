@@ -23,7 +23,6 @@ public class RealTimeAnalyserModule extends CamelModuleWithMatchingRoutes {
     @Override
     protected void configure() {
         super.configure();
-
         Properties redisProperties = PropertiesHelper.readFromClasspath("/redis.properties");
         Names.bindProperties(binder(), redisProperties);
 
@@ -31,6 +30,9 @@ public class RealTimeAnalyserModule extends CamelModuleWithMatchingRoutes {
         bind(Analyses.class).to(JedisAnalysesImpl.class);
         bind(AnalysisManager.class).to(InMemoryAnalysisManagerImpl.class);
         bind(Analyser.class).to(DefaultInMemoryAnalyserImpl.class);
+
+        // binding the route
+        bind(RealTimeAnalyserRoute.class);
     }
 
     @Provides

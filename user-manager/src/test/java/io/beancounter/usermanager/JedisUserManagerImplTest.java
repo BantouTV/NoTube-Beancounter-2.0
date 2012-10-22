@@ -27,6 +27,7 @@ import java.util.UUID;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 public class JedisUserManagerImplTest {
 
@@ -544,7 +545,7 @@ public class JedisUserManagerImplTest {
         verify(tokenManager).deleteUserToken(oldUserToken);
         verify(tokenManager).createUserToken(username);
         verify(jedis, times(2)).select(0);
-        verify(jedis).get(username);
+        verify(jedis, times(1)).get(username);
         verify(jedis).set(username, mapper.writeValueAsString(newUser));
         verify(jedisPool, times(2)).getResource();
         verify(jedisPool, times(2)).returnResource(jedis);
@@ -764,11 +765,8 @@ public class JedisUserManagerImplTest {
         userManager.storeUserFromOAuth(serviceName, token, code);
     }
 
-    @Test(
-            expectedExceptions = UserManagerException.class,
-            expectedExceptionsMessageRegExp = "User \\[deleted-user\\] does not exist"
-    )
-    public void givenDeletedTwitterUserWhenLoggingInThenThrowAnException() throws Exception {
+    @Test
+    public void givenDeletedTwitterUserWhenLoggingShouldCreateNewUser() throws Exception {
         String serviceName = "twitter";
         String username = "deleted-user";
         String serviceUserId = "17473832";
@@ -786,14 +784,16 @@ public class JedisUserManagerImplTest {
         when(resolver.resolveUsername(serviceUserId, serviceName)).thenReturn(username);
         when(jedis.get(username)).thenReturn(null);
 
-        userManager.storeUserFromOAuth(serviceName, token, verifier);
+        AtomicSignUp atomicSignUp = userManager.storeUserFromOAuth(serviceName, token, verifier);
+        assertNotNull(atomicSignUp);
+        assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertEquals(atomicSignUp.getService(), serviceName);
+        assertEquals(atomicSignUp.getUsername(), username);
+        assertEquals(atomicSignUp.isReturning(), false);
     }
 
-    @Test(
-            expectedExceptions = UserManagerException.class,
-            expectedExceptionsMessageRegExp = "User \\[deleted-user\\] does not exist"
-    )
-    public void givenDeletedFacebookUserWhenLoggingInThenThrowAnException() throws Exception {
+    @Test
+    public void givenDeletedFacebookUserWhenLoggingInShouldCreateNewUser() throws Exception {
         String serviceName = "facebook";
         String username = "deleted-user";
         String serviceUserId = "17473832";
@@ -811,7 +811,12 @@ public class JedisUserManagerImplTest {
         when(resolver.resolveUsername(serviceUserId, serviceName)).thenReturn(username);
         when(jedis.get(username)).thenReturn(null);
 
-        userManager.storeUserFromOAuth(serviceName, token, code);
+        AtomicSignUp atomicSignUp = userManager.storeUserFromOAuth(serviceName, token, code);
+        assertNotNull(atomicSignUp);
+        assertEquals(atomicSignUp.getIdentifier(), serviceUserId);
+        assertEquals(atomicSignUp.getService(), serviceName);
+        assertEquals(atomicSignUp.getUsername(), username);
+        assertEquals(atomicSignUp.isReturning(), false);
     }
 
     @Test
