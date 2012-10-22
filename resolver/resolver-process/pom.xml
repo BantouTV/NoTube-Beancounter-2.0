@@ -6,7 +6,7 @@
     <parent>
         <artifactId>resolver</artifactId>
         <groupId>io.beancounter</groupId>
-        <version>1.6-SNAPSHOT</version>
+        <version>1.6</version>
     </parent>
 
     <groupId>io.beancounter.resolver</groupId>

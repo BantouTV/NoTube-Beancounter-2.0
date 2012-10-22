@@ -5,11 +5,11 @@
     <parent>
         <groupId>io.beancounter</groupId>
         <artifactId>parent</artifactId>
-        <version>1.6-SNAPSHOT</version>
+        <version>1.6</version>
     </parent>
 
     <artifactId>activities</artifactId>
-    <version>1.6-SNAPSHOT</version>
+    <version>1.6</version>
     <name>Beancounter Activity Store</name>
 
     <dependencies>
