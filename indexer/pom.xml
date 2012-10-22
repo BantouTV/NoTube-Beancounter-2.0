@@ -6,12 +6,12 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>io.beancounter</groupId>
-        <version>1.6</version>
+        <version>1.7.0-SNAPSHOT</version>
     </parent>
 
     <groupId>io.beancounter</groupId>
     <artifactId>indexer</artifactId>
-    <version>1.6</version>
+    <version>1.7.0-SNAPSHOT</version>
     <name>Beancounter Indexer</name>
 
     <dependencies>

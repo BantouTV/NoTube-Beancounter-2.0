@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.beancounter</groupId>
         <artifactId>realtime-profiler</artifactId>
-        <version>1.6</version>
+        <version>1.7.0-SNAPSHOT</version>
     </parent>
 
     <groupId>io.beancounter.realtime-profiler</groupId>
