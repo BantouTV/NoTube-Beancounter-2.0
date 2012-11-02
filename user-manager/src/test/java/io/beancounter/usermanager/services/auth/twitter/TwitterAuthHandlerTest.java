@@ -29,9 +29,7 @@ import java.net.URL;
 import java.util.Properties;
 
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
 public class TwitterAuthHandlerTest {
@@ -184,10 +182,10 @@ public class TwitterAuthHandlerTest {
         assertEquals(auth.getSession(), accessToken.getToken());
         assertEquals(auth.getSecret(), accessToken.getSecret());
 
-        verify(jedis).select(database);
+        verify(jedis, times(2)).select(database);
         verify(jedis).get(REQUEST_TOKEN);
         verify(jedis).del(REQUEST_TOKEN);
-        verify(jedisPool).returnResource(jedis);
+        verify(jedisPool, times(2)).returnResource(jedis);
         verify(twitter).setOAuthAccessToken(new AccessToken(ACCESS_TOKEN, ACCESS_TOKEN_SECRET));
         verify(twitter).verifyCredentials();
     }

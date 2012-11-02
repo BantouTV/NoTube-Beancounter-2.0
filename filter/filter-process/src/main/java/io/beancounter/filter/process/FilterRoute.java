@@ -85,7 +85,7 @@ public class FilterRoute extends RouteBuilder {
     }
 
     protected String fromRedis() {
-        // TODO (low) this should be configurable and not embedded
+        // TODO (med) this should be configurable and not embedded
         return "redis://localhost:6379?command=SUBSCRIBE&channels=filters&serializer=#serializer";
     }
 

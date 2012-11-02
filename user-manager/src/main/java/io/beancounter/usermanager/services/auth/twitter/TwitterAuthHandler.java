@@ -24,6 +24,7 @@ import io.beancounter.commons.model.auth.AuthenticatedUser;
 import io.beancounter.commons.model.auth.DefaultAuthHandler;
 import io.beancounter.commons.model.OAuthToken;
 import io.beancounter.commons.model.auth.OAuthAuth;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 import twitter4j.*;
 import twitter4j.auth.AccessToken;
 
@@ -43,6 +44,8 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
     protected static final Logger LOGGER = LoggerFactory.getLogger(TwitterAuthHandler.class);
 
     private static final String SERVICE = "twitter";
+
+    private static final String CHANNEL = "register";
 
     // 2 hours
     private static final int EXPIRE_TIME = 7200;
@@ -105,6 +108,8 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
                 new OAuthAuth(accessToken.getToken(), accessToken.getSecret())
         );
 
+        notify(twitterId, CHANNEL);
+
         return new AuthenticatedUser(twitterId, user);
     }
 
@@ -128,7 +133,7 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
                 service.getName(),
                 new OAuthAuth(accessToken.getToken(), accessToken.getSecret())
         );
-
+        notify(twitterId, CHANNEL);
         return new AuthenticatedUser(twitterId, user);
     }
 
@@ -295,4 +300,57 @@ public class TwitterAuthHandler extends DefaultAuthHandler {
 
         return twitterUser;
     }
+
+    private void notify(String name, String channel) throws AuthHandlerException {
+        Jedis jedis = getJedisResource();
+        boolean isConnectionIssue = false;
+        try {
+            jedis.publish(channel, name);
+        } catch (JedisConnectionException e) {
+            final String errMsg = "Jedis Connection error while publishing filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new AuthHandlerException(errMsg, e);
+        } catch (Exception e) {
+            final String errMsg = "Error while publishing filter [" + name + "]";
+            LOGGER.error(errMsg, e);
+            throw new AuthHandlerException(errMsg, e);
+        } finally {
+            if(isConnectionIssue) {
+                jedisPool.returnBrokenResource(jedis);
+            } else {
+                jedisPool.returnResource(jedis);
+            }
+        }
+    }
+
+    private Jedis getJedisResource() throws AuthHandlerException {
+        Jedis jedis;
+        try {
+            jedis = jedisPool.getResource();
+        } catch (Exception e) {
+            final String errMsg = "Error while getting a Jedis resource";
+            LOGGER.error(errMsg, e);
+            throw new AuthHandlerException(errMsg, e);
+        }
+        boolean isConnectionIssue = false;
+        try {
+            jedis.select(database);
+        } catch (JedisConnectionException e) {
+            isConnectionIssue = true;
+            final String errMsg = "Jedis Connection error while selecting database [" + database + "]";
+            LOGGER.error(errMsg, e);
+            throw new AuthHandlerException(errMsg, e);
+        } catch (Exception e) {
+            jedisPool.returnResource(jedis);
+            final String errMsg = "Error while selecting database [" + database + "]";
+            LOGGER.error(errMsg, e);
+            throw new AuthHandlerException(errMsg, e);
+        } finally {
+            if(isConnectionIssue) {
+                jedisPool.returnBrokenResource(jedis);
+            }
+        }
+        return jedis;
+    }
+
 }

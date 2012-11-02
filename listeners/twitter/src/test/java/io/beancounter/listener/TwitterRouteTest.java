@@ -1,12 +1,19 @@
 package io.beancounter.listener;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
+import com.google.inject.*;
+import io.beancounter.resolver.Resolver;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.testng.CamelTestSupport;
+import org.guiceyfruit.jndi.JndiBind;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.SerializationException;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import twitter4j.HashtagEntity;
@@ -19,25 +26,71 @@ import static org.mockito.Mockito.when;
 
 public class TwitterRouteTest extends CamelTestSupport {
 
+    private Injector injector;
+
+    private Resolver resolver;
+
     @Override
     protected RouteBuilder createRouteBuilder() throws Exception {
-        return new TwitterRoute() {
-            @Override
-            protected String fromEndpoint() {
-                return "direct:start";
-            }
+        return injector.getInstance(TwitterRoute.class);
+    }
 
-            @Override
-            public String toEndpoint() {
-                return "mock:result";
-            }
+    @BeforeMethod
+    public void setUp() throws Exception {
+        injector = Guice.createInjector(new Module() {
+            @Provides
+            @JndiBind("serializer")
+            RedisSerializer redisSerializer() {
+                return new RedisSerializer<String>() {
+                    private static final String CHARSET = "UTF-8";
 
+                    @Override
+                    public byte[] serialize(String s) throws SerializationException {
+                        try {
+                            return s.getBytes(CHARSET);
+                        } catch (UnsupportedEncodingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
 
-            @Override
-            public String errorEndpoint() {
-                return "mock:error";
+                    @Override
+                    public String deserialize(byte[] bytes) throws SerializationException {
+                        try {
+                            return new String(bytes, CHARSET);
+                        } catch (UnsupportedEncodingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                };
             }
-        };
+            @Override
+            public void configure(Binder binder) {
+                resolver = mock(Resolver.class);
+                binder.bind(Resolver.class).toInstance(resolver);
+                binder.bind(TwitterRoute.class).toInstance(new TwitterRoute() {
+                    @Override
+                    public String fromEndpoint() {
+                        return "direct:start";
+                    }
+
+                    @Override
+                    public String fromRegisterChannel() {
+                        return "direct:redis";
+                    }
+
+                    @Override
+                    public String toEndpoint() {
+                        return "mock:result";
+                    }
+
+                    @Override
+                    public String errorEndpoint() {
+                        return "mock:error";
+                    }
+                });
+            }
+        });
+        super.setUp();
     }
 
     @Test
