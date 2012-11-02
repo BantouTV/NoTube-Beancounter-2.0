@@ -23,6 +23,10 @@
             <artifactId>resolver-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.beancounter</groupId>
+            <artifactId>camel-redis</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-kestrel</artifactId>
         </dependency>

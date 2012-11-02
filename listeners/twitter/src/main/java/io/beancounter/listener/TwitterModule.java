@@ -1,5 +1,6 @@
 package io.beancounter.listener;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -18,6 +19,8 @@ import io.beancounter.commons.helper.jedis.JedisPoolFactory;
 import io.beancounter.commons.helper.resolver.Services;
 import io.beancounter.resolver.JedisResolver;
 import io.beancounter.resolver.Resolver;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.SerializationException;
 
 public class TwitterModule extends CamelModuleWithMatchingRoutes {
 
@@ -53,5 +56,33 @@ public class TwitterModule extends CamelModuleWithMatchingRoutes {
         list.add(new ResourceCleanupStrategy(factory));
         return list;
     }
+
+    @Provides
+    @JndiBind("serializer")
+    RedisSerializer redisSerializer() {
+        return new RedisSerializer<String>() {
+
+            private static final String CHARSET = "UTF-8";
+
+            @Override
+            public byte[] serialize(String s) throws SerializationException {
+                try {
+                    return s.getBytes(CHARSET);
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public String deserialize(byte[] bytes) throws SerializationException {
+                try {
+                    return new String(bytes, CHARSET);
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+    }
+
 }
 
