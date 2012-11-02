@@ -1,5 +1,6 @@
 package io.beancounter.commons.model.activity;
 
+import io.beancounter.commons.model.activity.rai.RaiTvObject;
 import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import io.beancounter.commons.model.activity.facebook.Like;
@@ -26,6 +27,7 @@ import java.net.URL;
         @JsonSubTypes.Type(value = ContentItem.class, name = "RAI-CONTENT-ITEM"),
         @JsonSubTypes.Type(value = TVEvent.class, name = "RAI-TV-EVENT"),
         @JsonSubTypes.Type(value = Comment.class, name = "RAI-TV-COMMENT"),
+        @JsonSubTypes.Type(value = RaiTvObject.class, name = "RAI-TV-OBJECT"),
         @JsonSubTypes.Type(value = Like.class, name = "FB-LIKE")
 })
 public class Object implements Serializable {
