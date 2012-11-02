@@ -34,6 +34,7 @@ public class Activity implements Serializable {
 
     @Random(names = { "v", "obj", "c"} )
     public Activity(Verb v, Object obj, Context c) {
+        this();
         verb = v;
         object = obj;
         context = c;

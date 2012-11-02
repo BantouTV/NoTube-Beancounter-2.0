@@ -33,6 +33,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <camel.version>2.10.0</camel.version>
         <guice.version>2.0</guice.version>
+        <guava.version>13.0.1</guava.version>
         <slf4j-api.version>1.6.1</slf4j-api.version>
         <log4j.version>1.2.16</log4j.version>
         <testng.version>6.3</testng.version>
@@ -234,6 +235,11 @@
                 <groupId>com.google.inject.extensions</groupId>
                 <artifactId>guice-multibindings</artifactId>
                 <version>${guice.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
