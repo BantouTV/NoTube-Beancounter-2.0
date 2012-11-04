@@ -57,13 +57,8 @@ public final class FacebookGrabber implements ActivityGrabber {
         FacebookClient client = new DefaultFacebookClient();
         List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>();
 
-        if (hasValidLimit(SHARES)) {
-            grabAndAddActivities(Post.class, Verb.SHARE, new FacebookShareConverter(), client, activities, "feed", SHARES);
-        }
-
-        if (hasValidLimit(LIKES)) {
-            grabAndAddActivities(FacebookData.class, Verb.LIKE, new FacebookLikeConverter(), client, activities, "likes", LIKES);
-        }
+        grabAndAddActivities(Post.class, Verb.SHARE, new FacebookShareConverter(), client, activities, "feed", SHARES);
+        grabAndAddActivities(FacebookData.class, Verb.LIKE, new FacebookLikeConverter(), client, activities, "likes", LIKES);
 
         return activities;
     }
@@ -81,7 +76,17 @@ public final class FacebookGrabber implements ActivityGrabber {
             String field,
             String fieldType
     ) {
-        Collection<T> posts = FacebookUtils.fetch(type, client, field, limits.get(fieldType));
+        if (!hasValidLimit(fieldType)) return;
+
+        Collection<T> posts;
+        try {
+            posts = FacebookUtils.fetch(type, client, field, limits.get(fieldType));
+        } catch (Exception ex) {
+            // TODO (med): What is the desired behaviour here?
+            LOG.error("Error grabbing activities from Facebook for user [{}]", serviceUserId, ex);
+            return;
+        }
+
         for (T post : posts) {
             Activity activity;
             try {

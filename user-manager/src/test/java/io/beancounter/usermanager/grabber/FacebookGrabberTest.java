@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.restfb.DefaultJsonMapper;
 import com.restfb.FacebookClient;
+import com.restfb.exception.FacebookOAuthException;
+import com.restfb.types.FacebookType;
 import com.restfb.types.Post;
 import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.activity.*;
@@ -25,6 +27,7 @@ import java.util.List;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -43,7 +46,7 @@ public class FacebookGrabberTest {
 
     private ActivityGrabber grabber;
 
-    @Test(enabled = false)
+    @Test
     public void shouldCreateFacebookClientWithCorrectOAuthCredentials() throws Exception {
         // TODO: There is no nice way to check the OAuth access token being used
         // by the FacebookClient with the current implementation. See TODO in
@@ -337,6 +340,23 @@ public class FacebookGrabberTest {
 
         assertNotNull(activities);
         assertEquals(activities.size(), 3);
+    }
+
+    @Test
+    public void shouldHandleFacebookExceptionWhenGrabbingActivities() throws Exception {
+        ImmutableMap<String, Integer> limits = ImmutableMap.of(
+                FacebookGrabber.SHARES, 2
+        );
+
+        mockStatic(FacebookUtils.class);
+        when(FacebookUtils.fetch(eq(Post.class), any(FacebookClient.class), anyString(), anyInt()))
+                .thenThrow(new FacebookOAuthException("oauth", "error"));
+
+        grabber = new FacebookGrabber(createUser(), "facebook-user-id", limits);
+        List<ResolvedActivity> activities = grabber.grab();
+
+        assertNotNull(activities);
+        assertTrue(activities.isEmpty());
     }
 
     private User createUser() {
