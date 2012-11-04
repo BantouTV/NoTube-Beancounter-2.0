@@ -8,6 +8,7 @@ import com.restfb.types.Post;
 import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.activity.*;
 import io.beancounter.commons.model.activity.Object;
+import io.beancounter.commons.model.auth.Auth;
 import io.beancounter.listener.facebook.core.FacebookUtils;
 import io.beancounter.listener.facebook.core.converter.custom.Converter;
 import io.beancounter.listener.facebook.core.converter.custom.ConverterException;
@@ -33,28 +34,33 @@ public final class FacebookGrabber implements ActivityGrabber {
 
     private final User user;
     private final String serviceUserId;
+    private final FacebookClient client;
     private final ImmutableMap<String, Integer> limits;
 
-    public FacebookGrabber(User user, String serviceUserId, ImmutableMap<String, Integer> limits) {
+    public static FacebookGrabber create(User user, String serviceUserId) {
+        Auth facebookAuth = user.getAuth("facebook");
+        if (facebookAuth == null) {
+            throw new IllegalArgumentException("User [" + user.getUsername() + "] does not have Facebook authentication");
+        }
+
+        // TODO: Load custom settings from bc.prop
+        ImmutableMap<String, Integer> limits = ImmutableMap.of(
+                SHARES, 10,
+                LIKES, 5
+        );
+        DefaultFacebookClient facebookClient = new DefaultFacebookClient(facebookAuth.getSession());
+        return new FacebookGrabber(user, serviceUserId, facebookClient, limits);
+    }
+
+    FacebookGrabber(User user, String serviceUserId, FacebookClient client, ImmutableMap<String, Integer> limits) {
         this.user = user;
         this.serviceUserId = serviceUserId;
+        this.client = client;
         this.limits = ImmutableMap.copyOf(limits);
     }
 
     @Override
     public List<ResolvedActivity> grab() {
-        // TODO: Instead of creating the client here, could pass it in to the
-        // constructor. In practice, would need to use a static factory method
-        // to create instances of the FacebookGrabber, because the
-        // DefaultFacebookClient needs to be instantiated with the correct
-        // OAuth credentials, which are available in the User object. E.g.
-        //
-        // public static ActivityGrabber create(User, serviceId) {
-        //      create limits from bc.prop or sensible defaults
-        //      new DefaultFacebookClient(user.getAuth("facebook").getSession());
-        //      return new FacebookGrabber(User, serviceId, client, limits);
-        // }
-        FacebookClient client = new DefaultFacebookClient();
         List<ResolvedActivity> activities = new ArrayList<ResolvedActivity>();
 
         grabAndAddActivities(Post.class, Verb.SHARE, new FacebookShareConverter(), client, activities, "feed", SHARES);

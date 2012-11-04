@@ -2,10 +2,10 @@ package io.beancounter.usermanager.grabber;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.restfb.DefaultFacebookClient;
 import com.restfb.DefaultJsonMapper;
 import com.restfb.FacebookClient;
 import com.restfb.exception.FacebookOAuthException;
-import com.restfb.types.FacebookType;
 import com.restfb.types.Post;
 import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.activity.*;
@@ -16,6 +16,7 @@ import io.beancounter.listener.facebook.core.FacebookUtils;
 import io.beancounter.listener.facebook.core.converter.custom.FacebookLikeConverter;
 import io.beancounter.listener.facebook.core.model.FacebookData;
 import org.joda.time.DateTime;
+import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.IObjectFactory;
 import org.testng.annotations.ObjectFactory;
@@ -32,6 +33,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.verifyNew;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
@@ -39,39 +41,12 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 @PrepareForTest({ FacebookUtils.class, FacebookGrabber.class })
 public class FacebookGrabberTest {
 
     private ActivityGrabber grabber;
-
-    @Test
-    public void shouldCreateFacebookClientWithCorrectOAuthCredentials() throws Exception {
-        // TODO: There is no nice way to check the OAuth access token being used
-        // by the FacebookClient with the current implementation. See TODO in
-        // FacebookGrabber for another idea.
-        fail();
-        User user = createUser();
-        ImmutableMap<String, Integer> limits = ImmutableMap.of(
-                FacebookGrabber.SHARES, 1,
-                FacebookGrabber.LIKES, 1
-        );
-        List<Post> retrievedShares = listOfShares(1);
-        List<FacebookData> retrievedLikes = listOfLikes(1);
-
-        //ArgumentCaptor<FacebookClient> clientCaptor = ArgumentCaptor.forClass(FacebookClient.class);
-        mockStatic(FacebookUtils.class);
-        when(FacebookUtils.fetch(eq(Post.class), any(FacebookClient.class), eq("feed"), eq(1)))
-                .thenReturn(retrievedShares);
-        when(FacebookUtils.fetch(eq(FacebookData.class), any(FacebookClient.class), eq("likes"), eq(1)))
-                .thenReturn(retrievedLikes);
-
-        grabber = new FacebookGrabber(user, "facebook-user-id", limits);
-        List<ResolvedActivity> activities = grabber.grab();
-
-        //FacebookClient client = clientCaptor.getValue();
-    }
+    private DefaultFacebookClient client;
 
     @Test
     public void shouldReturnEmptyListWhenLimitsAreZero() throws Exception {
@@ -82,13 +57,9 @@ public class FacebookGrabberTest {
         List<Post> retrievedShares = listOfShares(0);
         List<FacebookData> retrievedLikes = listOfLikes(0);
 
-        mockStatic(FacebookUtils.class);
-        when(FacebookUtils.fetch(eq(Post.class), any(FacebookClient.class), eq("feed"), eq(0)))
-                .thenReturn(retrievedShares);
-        when(FacebookUtils.fetch(eq(FacebookData.class), any(FacebookClient.class), eq("likes"), eq(0)))
-                .thenReturn(retrievedLikes);
+        initMocks(0, retrievedShares, 0, retrievedLikes);
 
-        grabber = new FacebookGrabber(createUser(), "facebook-user-id", limits);
+        grabber = new FacebookGrabber(createUser(), "facebook-user-id", client, limits);
         List<ResolvedActivity> activities = grabber.grab();
 
         assertNotNull(activities);
@@ -106,7 +77,7 @@ public class FacebookGrabberTest {
 
         initMocks(1, retrievedShares, 1, retrievedLikes);
 
-        grabber = new FacebookGrabber(createUser(), "facebook-user-id", limits);
+        grabber = new FacebookGrabber(createUser(), "facebook-user-id", client, limits);
         List<ResolvedActivity> activities = grabber.grab();
 
         assertNotNull(activities);
@@ -124,7 +95,7 @@ public class FacebookGrabberTest {
 
         initMocks(5, retrievedShares, 0, retrievedLikes);
 
-        grabber = new FacebookGrabber(createUser(), "facebook-user-id", limits);
+        grabber = new FacebookGrabber(createUser(), "facebook-user-id", client, limits);
         List<ResolvedActivity> activities = grabber.grab();
 
         assertNotNull(activities);
@@ -142,7 +113,7 @@ public class FacebookGrabberTest {
 
         initMocks(0, retrievedShares, 5, retrievedLikes);
 
-        grabber = new FacebookGrabber(createUser(), "facebook-user-id", limits);
+        grabber = new FacebookGrabber(createUser(), "facebook-user-id", client, limits);
         List<ResolvedActivity> activities = grabber.grab();
 
         assertNotNull(activities);
@@ -160,7 +131,7 @@ public class FacebookGrabberTest {
 
         initMocks(5, retrievedShares, 5, retrievedLikes);
 
-        grabber = new FacebookGrabber(createUser(), "facebook-user-id", limits);
+        grabber = new FacebookGrabber(createUser(), "facebook-user-id", client, limits);
         List<ResolvedActivity> activities = grabber.grab();
 
         assertNotNull(activities);
@@ -177,7 +148,7 @@ public class FacebookGrabberTest {
 
         initMocks(5, retrievedShares, 0, listOfLikes(0));
 
-        grabber = new FacebookGrabber(createUser(), "facebook-user-id", limits);
+        grabber = new FacebookGrabber(createUser(), "facebook-user-id", client, limits);
         List<ResolvedActivity> activities = grabber.grab();
 
         assertNotNull(activities);
@@ -196,7 +167,7 @@ public class FacebookGrabberTest {
 
         initMocks(0, listOfShares(0), 5, retrievedLikes);
 
-        grabber = new FacebookGrabber(createUser(), "facebook-user-id", limits);
+        grabber = new FacebookGrabber(createUser(), "facebook-user-id", client, limits);
         List<ResolvedActivity> activities = grabber.grab();
 
         assertNotNull(activities);
@@ -215,7 +186,7 @@ public class FacebookGrabberTest {
 
         initMocks(5, retrievedShares, -1, listOfLikes(0));
 
-        grabber = new FacebookGrabber(createUser(), "facebook-user-id", limits);
+        grabber = new FacebookGrabber(createUser(), "facebook-user-id", client, limits);
         List<ResolvedActivity> activities = grabber.grab();
 
         assertNotNull(activities);
@@ -234,7 +205,7 @@ public class FacebookGrabberTest {
 
         initMocks(-1, listOfShares(0), 5, retrievedLikes);
 
-        grabber = new FacebookGrabber(createUser(), "facebook-user-id", limits);
+        grabber = new FacebookGrabber(createUser(), "facebook-user-id", client, limits);
         List<ResolvedActivity> activities = grabber.grab();
 
         assertNotNull(activities);
@@ -255,7 +226,7 @@ public class FacebookGrabberTest {
         when(FacebookUtils.fetch(eq(Post.class), any(FacebookClient.class), eq("feed"), eq(1)))
                 .thenReturn(retrievedShares);
 
-        grabber = new FacebookGrabber(user, "facebook-user-id", limits);
+        grabber = new FacebookGrabber(user, "facebook-user-id", client, limits);
         List<ResolvedActivity> activities = grabber.grab();
 
         assertNotNull(activities);
@@ -295,7 +266,7 @@ public class FacebookGrabberTest {
         when(FacebookUtils.fetch(eq(FacebookData.class), any(FacebookClient.class), eq("likes"), eq(1)))
                 .thenReturn(retrievedLikes);
 
-        grabber = new FacebookGrabber(user, "facebook-user-id", limits);
+        grabber = new FacebookGrabber(user, "facebook-user-id", client, limits);
         List<ResolvedActivity> activities = grabber.grab();
 
         assertNotNull(activities);
@@ -335,7 +306,7 @@ public class FacebookGrabberTest {
 
         initMocks(2, retrievedShares, 2, retrievedLikes);
 
-        grabber = new FacebookGrabber(createUser(), "facebook-user-id", limits);
+        grabber = new FacebookGrabber(createUser(), "facebook-user-id", client, limits);
         List<ResolvedActivity> activities = grabber.grab();
 
         assertNotNull(activities);
@@ -352,11 +323,39 @@ public class FacebookGrabberTest {
         when(FacebookUtils.fetch(eq(Post.class), any(FacebookClient.class), anyString(), anyInt()))
                 .thenThrow(new FacebookOAuthException("oauth", "error"));
 
-        grabber = new FacebookGrabber(createUser(), "facebook-user-id", limits);
+        client = new DefaultFacebookClient();
+        grabber = new FacebookGrabber(createUser(), "facebook-user-id", client, limits);
         List<ResolvedActivity> activities = grabber.grab();
 
         assertNotNull(activities);
         assertTrue(activities.isEmpty());
+    }
+
+    @Test
+    public void factoryMethodShouldCreateNewInstanceOfFacebookGrabberWithDefaultLimits() throws Exception {
+        User user = createUser();
+        String serviceUserId = "facebook-user-id";
+        ImmutableMap<String, Integer> defaultLimits = ImmutableMap.of(
+                FacebookGrabber.SHARES, 10,
+                FacebookGrabber.LIKES, 5
+        );
+
+        whenNew(FacebookGrabber.class)
+                .withArguments(any(User.class), anyString(), any(FacebookClient.class), any(ImmutableMap.class))
+                .thenReturn(Mockito.mock(FacebookGrabber.class));
+
+        FacebookGrabber facebookGrabber = FacebookGrabber.create(user, serviceUserId);
+        assertNotNull(facebookGrabber);
+        verifyNew(FacebookGrabber.class)
+                .withArguments(eq(user), eq(serviceUserId), any(FacebookClient.class), eq(defaultLimits));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void factoryMethodShouldThrowExceptionWhenUserDoesNotHaveFacebookAuth() throws Exception {
+        User userWithoutAuth = new User("Test", "User", "test-user", "password");
+        String serviceUserId = "facebook-user-id";
+
+        FacebookGrabber.create(userWithoutAuth, serviceUserId);
     }
 
     private User createUser() {
