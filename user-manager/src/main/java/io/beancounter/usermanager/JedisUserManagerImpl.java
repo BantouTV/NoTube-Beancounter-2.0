@@ -277,6 +277,7 @@ public class JedisUserManagerImpl implements UserManager {
     }
 
     @Override
+    @Deprecated
     public List<Activity> grabUserActivities(
             User user,
             String identifier,

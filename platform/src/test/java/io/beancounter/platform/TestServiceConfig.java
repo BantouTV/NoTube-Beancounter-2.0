@@ -11,6 +11,7 @@ import io.beancounter.analyses.MockAnalyses;
 import io.beancounter.platform.rai.MyRaiTVService;
 import io.beancounter.platform.user.MockUserTokenManager;
 import io.beancounter.usermanager.UserTokenManager;
+import io.beancounter.usermanager.grabber.ActivityGrabberManager;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import io.beancounter.activities.ActivityStore;
@@ -33,6 +34,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.mockito.Mockito.mock;
+
 /**
  *
  * @author Enrico Candino (enrico.candino@gmail.com)
@@ -54,6 +57,7 @@ public class TestServiceConfig extends GuiceServletContextListener {
                 bind(Queues.class).to(MockQueues.class);
                 bind(FilterManager.class).to(InMemoryFilterManager.class).asEagerSingleton();
                 bind(Analyses.class).to(MockAnalyses.class);
+                bind(ActivityGrabberManager.class).toInstance(mock(ActivityGrabberManager.class));
                 // add REST services
                 bind(ApplicationService.class);
                 bind(UserService.class);

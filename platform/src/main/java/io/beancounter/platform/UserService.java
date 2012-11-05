@@ -22,6 +22,9 @@ import io.beancounter.usermanager.AtomicSignUp;
 import io.beancounter.usermanager.UserManager;
 import io.beancounter.usermanager.UserManagerException;
 import io.beancounter.usermanager.grabber.ActivityGrabberManager;
+import io.beancounter.usermanager.grabber.Callback;
+import io.beancounter.usermanager.grabber.FacebookGrabber;
+import io.beancounter.usermanager.grabber.TwitterGrabber;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.*;
@@ -452,43 +455,46 @@ public class UserService extends JsonService {
             throw new UserManagerException("Error while retrieving user: [" + bcUsername + "]", e);
         }
 
-        // this should be configurable from beancounter.properties
-        final int LIMIT = 10;
-        List<Activity> activities;
-        try {
-            activities = userManager.grabUserActivities(
-                    user,
-                    userIdOnService,
-                    service,
-                    LIMIT
-            );
-        } catch (UserManagerException e) {
-            throw new UserManagerException("Error while retrieving user: [" + bcUsername + "] initial activities", e);
+        OAuthAuth auth = (OAuthAuth) user.getAuth(service);
+        if (auth == null) {
+            throw new UserManagerException("User [" + user.getUsername() + "] has no auth for service [" + service + "]");
+        }
+        if (auth.isExpired()) {
+            throw new UserManagerException("OAuth token for [" + service + "] on user [" + user.getUsername() + "] has expired");
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        for (Activity activity : activities) {
-            ResolvedActivity ra = new ResolvedActivity();
-            ra.setActivity(activity);
-            ra.setUserId(userId);
-            ra.setUser(user);
-            String raJson;
-            try {
-                raJson = mapper.writeValueAsString(ra);
-            } catch (IOException e) {
-                super.LOGGER.warn("error while serializing to JSON {}", ra);
-                // just skip this one
-                continue;
-            }
-            try {
-                queues.push(raJson);
-            } catch (QueuesException e) {
-                throw new QueuesException("Error while pushing down json " +
-                        "resolved activity: [" + raJson + "] for user [" + bcUsername + "] " +
-                        "on service [" + service + "]", e);
-            }
-        }
+        Callback<List<ResolvedActivity>> callback = new Callback<List<ResolvedActivity>>() {
+            @Override
+            public void complete(List<ResolvedActivity> result) {
+                ObjectMapper mapper = new ObjectMapper();
+                for (ResolvedActivity activity : result) {
+                    String raJson;
+                    try {
+                        raJson = mapper.writeValueAsString(activity);
+                    } catch (IOException e) {
+                        // Just skip this one
+                        LOGGER.warn("Error while serializing to JSON {}", activity);
+                        continue;
+                    }
 
+                    try {
+                        queues.push(raJson);
+                    } catch (QueuesException e) {
+                        LOGGER.error("Error while pushing down json " +
+                                "resolved activity: [" + raJson + "] for user [" + activity.getUser().getUsername() + "] " +
+                                "on service [" + activity.getActivity().getContext().getService() + "]", e);
+                    }
+                }
+            }
+        };
+
+        if ("facebook".equals(service)) {
+            grabberManager.submit(FacebookGrabber.create(user, userIdOnService), callback);
+        } else if ("twitter".equals(service)) {
+            grabberManager.submit(TwitterGrabber.create(user, userIdOnService), callback);
+        } else {
+            throw new UserManagerException("Service [" + service + "] is not supported");
+        }
     }
 
     @GET

@@ -191,12 +191,16 @@ public interface UserManager {
     /**
      * This method grabs the latest activities a user performed on a service.
      *
+     * Deprecated since 1.7.0. The preferable method is to use the
+     * ActivityGrabberManager.
+     *
      * @param user
      * @param identifier
      * @param service
      * @param limit
      * @return
      */
+    @Deprecated
     public List<Activity> grabUserActivities(User user, String identifier, String service, int limit)
             throws UserManagerException;
 

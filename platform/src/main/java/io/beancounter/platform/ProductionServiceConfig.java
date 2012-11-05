@@ -16,6 +16,8 @@ import io.beancounter.commons.model.auth.AuthHandler;
 import io.beancounter.platform.rai.MyRaiTVService;
 import io.beancounter.usermanager.JedisUserTokenManager;
 import io.beancounter.usermanager.UserTokenManager;
+import io.beancounter.usermanager.grabber.ActivityGrabberManager;
+import io.beancounter.usermanager.grabber.DefaultActivityGrabberManager;
 import io.beancounter.usermanager.services.auth.facebook.FacebookAuthHandler;
 import io.beancounter.usermanager.services.auth.twitter.TwitterAuthHandler;
 import io.beancounter.usermanager.services.auth.twitter.TwitterFactoryWrapper;
@@ -49,6 +51,8 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Enrico Candino (enrico.candino@gmail.com)
@@ -91,6 +95,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
 
                 bind(JedisPoolFactory.class).to(DefaultJedisPoolFactory.class).asEagerSingleton();
                 bind(TwitterFactoryWrapper.class).in(Singleton.class);
+                bind(ExecutorService.class).toInstance(Executors.newFixedThreadPool(10));
 
                 Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
                 Names.bindProperties(binder(), properties);
@@ -121,6 +126,7 @@ public class ProductionServiceConfig extends GuiceServletContextListener {
                 bind(FilterManager.class).to(JedisFilterManager.class);
                 bind(ServiceAuthorizationManager.class).to(DefaultServiceAuthorizationManager.class);
                 bind(Analyses.class).to(JedisAnalysesImpl.class);
+                bind(ActivityGrabberManager.class).to(DefaultActivityGrabberManager.class).asEagerSingleton();
 
                 // add bindings for Jackson
                 bind(JacksonJaxbJsonProvider.class).asEagerSingleton();

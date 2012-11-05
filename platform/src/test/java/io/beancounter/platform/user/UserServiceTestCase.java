@@ -22,6 +22,7 @@ import io.beancounter.commons.model.activity.ResolvedActivity;
 import io.beancounter.commons.model.activity.Tweet;
 import io.beancounter.commons.model.activity.Verb;
 import io.beancounter.commons.model.auth.AuthenticatedUser;
+import io.beancounter.commons.model.auth.OAuthAuth;
 import io.beancounter.commons.tests.Tests;
 import io.beancounter.commons.tests.TestsBuilder;
 import io.beancounter.platform.APIResponse;
@@ -42,6 +43,9 @@ import io.beancounter.usermanager.UserManager;
 import io.beancounter.usermanager.UserManagerException;
 import io.beancounter.usermanager.UserTokenManager;
 import io.beancounter.usermanager.grabber.ActivityGrabberManager;
+import io.beancounter.usermanager.grabber.Callback;
+import io.beancounter.usermanager.grabber.FacebookGrabber;
+import io.beancounter.usermanager.grabber.TwitterGrabber;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
@@ -652,6 +656,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
         URL finalRedirect = new URL("http://example.com/final/redirect");
         User user = new User("Test", "User", username, "password");
+        user.addService("facebook", new OAuthAuth("facebook-session", null));
         AuthenticatedUser au = new AuthenticatedUser("facebook-identifier", user);
         when(userManager.getUser(username)).thenReturn(user);
         when(userManager.registerOAuthService(service, user, token, code)).thenReturn(au);
@@ -671,7 +676,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
     @Test
     public void testHandleOAuthCallback() throws Exception {
         String baseQuery = "user/oauth/callback/%s/%s?oauth_token=%s&oauth_verifier=%s";
-        String service = "fake-service-1";
+        String service = "twitter";
         String username = "test-user";
         String oauthToken = "OAUTH-TOKEN";
         String oauthVerifier = "OAUTH-VERIFIER";
@@ -685,6 +690,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
         URL finalRedirect = new URL("http://example.com/final/redirect");
         User user = new User("Test", "User", username, "password");
+        user.addService("twitter", new OAuthAuth("twitter-access-token", "twitter-access-secret"));
         when(userManager.getUser(username)).thenReturn(user);
         AuthenticatedUser au = new AuthenticatedUser("service-identifier", user);
         when(userManager.registerOAuthService(service, user, oauthToken, oauthVerifier)).thenReturn(au);
@@ -694,8 +700,6 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         HttpClient client = new HttpClient();
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
 
         assertFalse(responseBody.isEmpty());
         assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
@@ -715,9 +719,11 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
         User user = new User("Test", "User", username, "password");
         User authenticatedUser = new User("Test", "User", username, "password");
+        authenticatedUser.addService("twitter", new OAuthAuth("twitter-access-token", "twitter-access-secret"));
         authenticatedUser.setUserToken(userToken);
         AuthenticatedUser au = new AuthenticatedUser("service-identifier", authenticatedUser);
-        when(userManager.getUser(username)).thenReturn(user);
+
+        when(userManager.getUser(username)).thenReturn(user, authenticatedUser);
         when(userManager.registerOAuthService(service, user, token, verifier)).thenReturn(au);
         when(userManager.consumeUserFinalRedirect(username)).thenReturn(new URL(redirectUrl));
 
@@ -1220,6 +1226,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void handlingAtomicTwitterOAuthCallbackFromWebShouldRedirectWithoutErrors() throws Exception {
         String baseQuery = "user/oauth/atomic/callback/%s/web/%s?oauth_token=%s&oauth_verifier=%s";
         String service = "twitter";
@@ -1239,14 +1246,12 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         );
 
         User user = new User("Test", "User", username, "password");
+        user.addService("twitter", new OAuthAuth("twitter-access-token", "twitter-access-secret"));
         AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
-        List<Activity> activities = generateActivities(service, serviceUserId, 3);
 
         when(userManager.storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl))
                 .thenReturn(signUp);
         when(userManager.getUser(username)).thenReturn(user);
-        when(userManager.grabUserActivities(user, serviceUserId, service, 10))
-                .thenReturn(activities);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -1257,19 +1262,12 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         assertFalse(responseBody.isEmpty());
         assertEquals(getMethod.getURI().getHost(), "www.iana.org");
 
-        ObjectMapper mapper = new ObjectMapper();
-        for (Activity activity : activities) {
-            ResolvedActivity ra = new ResolvedActivity();
-            ra.setActivity(activity);
-            ra.setUserId(user.getId());
-            ra.setUser(user);
-
-            verify(queues).push(mapper.writeValueAsString(ra));
-        }
+        verify(grabberManager).submit(any(TwitterGrabber.class), any(Callback.class));
         verify(userManager).storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl);
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void handlingAtomicTwitterOAuthCallbackFromMobileShouldRespondCorrectly() throws Exception {
         String baseQuery = "user/oauth/atomic/callback/%s?oauth_token=%s&oauth_verifier=%s";
         String service = "twitter";
@@ -1286,14 +1284,12 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         );
 
         User user = new User("Test", "User", username, "password");
+        user.addService("twitter", new OAuthAuth("twitter-access-token", "twitter-access-secret"));
         user.setUserToken(userToken);
         AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
-        List<Activity> activities = generateActivities(service, serviceUserId, 3);
 
         when(userManager.storeUserFromOAuth(service, token, verifier)).thenReturn(signUp);
         when(userManager.getUser(username)).thenReturn(user);
-        when(userManager.grabUserActivities(user, serviceUserId, service, 10))
-                .thenReturn(activities);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -1311,15 +1307,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(response.getObject().getUsername(), username);
         assertEquals(response.getObject().getUserToken(), userToken);
 
-        ObjectMapper mapper = new ObjectMapper();
-        for (Activity activity : activities) {
-            ResolvedActivity ra = new ResolvedActivity();
-            ra.setActivity(activity);
-            ra.setUserId(user.getId());
-            ra.setUser(user);
-
-            verify(queues).push(mapper.writeValueAsString(ra));
-        }
+        verify(grabberManager).submit(any(TwitterGrabber.class), any(Callback.class));
         verify(userManager).storeUserFromOAuth(service, token, verifier);
     }
 
@@ -1343,10 +1331,12 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         );
 
         User user = new User("Test", "User", username, "password");
+        user.addService("twitter", new OAuthAuth("twitter-access-token", "twitter-access-secret"));
         AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
 
         when(userManager.storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl))
                 .thenReturn(signUp);
+        when(userManager.getUser(username)).thenReturn(user);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -1395,9 +1385,11 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String finalRedirectUrl = String.format(baseRedirectUrl + "?username=%s&token=%s", username, userToken);
 
         User user = new User("Test", "User", username, "password");
+        user.addService("twitter", new OAuthAuth("twitter-access-token", "twitter-access-secret"));
         AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
         when(userManager.storeUserFromOAuth(service, token, verifier, baseRedirectUrl))
                 .thenReturn(signUp);
+        when(userManager.getUser(username)).thenReturn(user);
 
         Response response = userService.handleAtomicOAuthCallbackWeb(service, encodedFinalRedirectUrl, token, verifier, null, null);
         assertEquals(response.getStatus(), HttpStatus.SC_TEMPORARY_REDIRECT);
@@ -1420,9 +1412,11 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         String finalRedirectUrl = String.format(baseRedirectUrl + "&username=%s&token=%s", username, userToken);
 
         User user = new User("Test", "User", username, "password");
+        user.addService("twitter", new OAuthAuth("twitter-access-token", "twitter-access-secret"));
         AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
         when(userManager.storeUserFromOAuth(service, token, verifier, baseRedirectUrl))
                 .thenReturn(signUp);
+        when(userManager.getUser(username)).thenReturn(user);
 
         Response response = userService.handleAtomicOAuthCallbackWeb(service, encodedFinalRedirectUrl, token, verifier, null, null);
         assertEquals(response.getStatus(), HttpStatus.SC_TEMPORARY_REDIRECT);
@@ -1450,10 +1444,12 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         );
 
         User user = new User("Test", "User", username, "password");
+        user.addService("twitter", new OAuthAuth("twitter-access-token", "twitter-access-secret"));
         AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
 
         when(userManager.storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl))
                 .thenReturn(signUp);
+        when(userManager.getUser(username)).thenReturn(user);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -1492,10 +1488,12 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         );
 
         User user = new User("Test", "User", username, "password");
+        user.addService("twitter", new OAuthAuth("twitter-access-token", "twitter-access-secret"));
         AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
 
         when(userManager.storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl))
                 .thenReturn(signUp);
+        when(userManager.getUser(username)).thenReturn(user);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -1534,10 +1532,12 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         );
 
         User user = new User("Test", "User", username, "password");
+        user.addService("twitter", new OAuthAuth("twitter-access-token", "twitter-access-secret"));
         AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
 
         when(userManager.storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl))
                 .thenReturn(signUp);
+        when(userManager.getUser(username)).thenReturn(user);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -1556,30 +1556,88 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(actual, expected);
     }
 
-    private List<Activity> generateActivities(
-            String service,
-            String serviceUserId,
-            int numActivities
-    ) throws Exception {
-        List<Activity> activities = new ArrayList<Activity>(numActivities);
-        ActivityBuilder builder = new DefaultActivityBuilder();
+    @Test
+    @SuppressWarnings("unchecked")
+    public void handlingAtomicFacebookOAuthCallbackFromWebShouldRedirectWithoutErrors() throws Exception {
+        String baseQuery = "user/oauth/atomic/callback/%s/web/%s?code=%s";
+        String service = "facebook";
+        String serviceUserId = "1234564321";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        String token = null;
+        String verifier = "facebook-oauth-code";
+        String decodedFinalRedirectUrl = "http://example.com/final/redirect";
+        String encodedFinalRedirectUrl = UriUtils.encodeBase64(decodedFinalRedirectUrl);
+        String query = String.format(
+                baseQuery,
+                service,
+                encodedFinalRedirectUrl,
+                verifier
+        );
 
-        for (int i = 0; i < numActivities; i++) {
-            builder.push();
-            builder.setVerb(Verb.TWEET);
-            Map<String, Object> fields = new HashMap<String, Object>();
-            fields.put("setText", "Fake tweet number " + (i + 1));
-            builder.setObject(
-                    Tweet.class,
-                    new URL("http://twitter.com/status/1237281" + i),
-                    "Tweet Name",
-                    fields
-            );
-            builder.setContext(new DateTime(), service, serviceUserId);
-            activities.add(builder.pop());
-        }
+        User user = new User("Test", "User", username, "password");
+        user.addService(service, new OAuthAuth("facebook-session", null));
+        AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
 
-        return activities;
+        when(userManager.storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl))
+                .thenReturn(signUp);
+        when(userManager.getUser(username)).thenReturn(user);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+
+        assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
+        assertFalse(responseBody.isEmpty());
+        assertEquals(getMethod.getURI().getHost(), "www.iana.org");
+
+        verify(grabberManager).submit(any(FacebookGrabber.class), any(Callback.class));
+        verify(userManager).storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void handlingAtomicFacebookOAuthCallbackFromMobileShouldRespondCorrectly() throws Exception {
+        String baseQuery = "user/oauth/atomic/callback/%s?code=%s";
+        String service = "facebook";
+        String serviceUserId = "1234564321";
+        String username = "test-user";
+        UUID userToken = UUID.randomUUID();
+        String token = null;
+        String verifier = "facebook-oauth-code";
+        String query = String.format(
+                baseQuery,
+                service,
+                verifier
+        );
+
+        User user = new User("Test", "User", username, "password");
+        user.addService(service, new OAuthAuth("facebook-session", null));
+        user.setUserToken(userToken);
+        AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
+
+        when(userManager.storeUserFromOAuth(service, token, verifier)).thenReturn(signUp);
+        when(userManager.getUser(username)).thenReturn(user);
+
+        GetMethod getMethod = new GetMethod(base_uri + query);
+        HttpClient client = new HttpClient();
+        int result = client.executeMethod(getMethod);
+        String responseBody = new String(getMethod.getResponseBody());
+        assertEquals(result, HttpStatus.SC_OK);
+        assertFalse(responseBody.isEmpty());
+
+        AtomicSignUpResponse response = fromJson(responseBody, AtomicSignUpResponse.class);
+        assertEquals(response.getStatus(), AtomicSignUpResponse.Status.OK);
+        assertEquals(response.getMessage(), "user with user name [" + username + "] logged in with service [" + service + "]");
+        assertEquals(response.getObject().getService(), service);
+        assertEquals(response.getObject().getIdentifier(), serviceUserId);
+        assertEquals(response.getObject().getUserId(), user.getId());
+        assertEquals(response.getObject().getUsername(), username);
+        assertEquals(response.getObject().getUserToken(), userToken);
+
+        verify(grabberManager).submit(any(FacebookGrabber.class), any(Callback.class));
+        verify(userManager).storeUserFromOAuth(service, token, verifier);
     }
 
     public static class UserServiceTestConfig extends GuiceServletContextListener {

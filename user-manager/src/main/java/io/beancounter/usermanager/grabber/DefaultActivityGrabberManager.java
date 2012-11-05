@@ -1,5 +1,6 @@
 package io.beancounter.usermanager.grabber;
 
+import com.google.inject.Inject;
 import io.beancounter.commons.model.activity.ResolvedActivity;
 
 import java.util.List;
@@ -15,6 +16,7 @@ public class DefaultActivityGrabberManager implements ActivityGrabberManager {
 
     private final ExecutorService executorService;
 
+    @Inject
     public DefaultActivityGrabberManager(ExecutorService executorService) {
         this.executorService = executorService;
     }

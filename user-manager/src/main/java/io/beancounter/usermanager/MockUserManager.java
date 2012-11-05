@@ -153,6 +153,7 @@ public class MockUserManager implements UserManager {
     }
 
     @Override
+    @Deprecated
     public List<Activity> grabUserActivities(User user, String identifier, String service, int limit) throws UserManagerException {
         throw new UnsupportedOperationException("nah, niy");
     }
