@@ -60,9 +60,17 @@ public final class TwitterGrabber implements ActivityGrabber {
     private final String serviceUserId;
     private final int limit;
 
-    public TwitterGrabber(User user, String serviceUserId, int limit) {
+    public static TwitterGrabber create(User user, String serviceUserId) {
+        return new TwitterGrabber(user, serviceUserId, 10);
+    }
+
+    TwitterGrabber(User user, String serviceUserId, int limit) {
         if (limit < 1) {
             throw new IllegalArgumentException("Limit must be at least 1");
+        }
+
+        if (user.getAuth("twitter") == null) {
+            throw new IllegalArgumentException("User [" + user.getUsername() + "] does not have Twitter authentication");
         }
 
         this.user = user;

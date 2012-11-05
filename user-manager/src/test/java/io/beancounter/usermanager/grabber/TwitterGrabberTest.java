@@ -30,9 +30,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.verifyNew;
 import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.whenNew;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -52,6 +57,12 @@ public class TwitterGrabberTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void shouldThrowExceptionIfLimitIsLessThanOne() throws Exception {
         grabber = new TwitterGrabber(createUser(), "twitter-user-id", 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldThrowExceptionIfUserDoesNotHaveTwitterAuth() throws Exception {
+        User userWithoutAuth = new User("Test", "User", "test-user", "password");
+        grabber = new TwitterGrabber(userWithoutAuth, "twitter-user-id", 10);
     }
 
     @Test
@@ -164,6 +175,21 @@ public class TwitterGrabberTest {
         assertNotNull(configuration);
         assertEquals(configuration.getOAuthConsumerKey(), "Vs9UkC1ZhE3pT9P4JwbA");
         assertEquals(configuration.getOAuthConsumerSecret(), "BRDzw6MFJB3whzmm1rWlzjsD5LoXJmlmYT40lhravRs");
+    }
+
+    @Test
+    public void factoryMethodShouldCreateNewInstanceOfTwitterGrabberWithDefaultLimit() throws Exception {
+        User user = createUser();
+        String serviceUserId = "twitter-user-id";
+        int defaultLimit = 10;
+
+        whenNew(TwitterGrabber.class)
+                .withArguments(any(User.class), anyString(), anyInt())
+                .thenReturn(mock(TwitterGrabber.class));
+
+        TwitterGrabber twitterGrabber = TwitterGrabber.create(user, serviceUserId);
+        assertNotNull(twitterGrabber);
+        verifyNew(TwitterGrabber.class).withArguments(user, serviceUserId, defaultLimit);
     }
 
     private User createUser() {
