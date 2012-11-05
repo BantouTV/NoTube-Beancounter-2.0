@@ -18,9 +18,11 @@ import twitter4j.Paging;
 import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.Twitter;
+import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.URLEntity;
 import twitter4j.auth.AccessToken;
+import twitter4j.conf.Configuration;
 
 import java.net.URI;
 import java.net.URL;
@@ -139,6 +141,29 @@ public class TwitterGrabberTest {
         assertEquals(context.getService(), "twitter");
         assertEquals(context.getUsername(), "twitter-user-id");
         assertEquals(context.getDate(), new DateTime("2012-10-19T21:13:37+0000"));
+    }
+
+    @Test
+    public void shouldHandleTwitterConnectionError() throws Exception {
+        int limit = 1;
+        initMocks(1, 1);
+
+        when(twitter.getUserTimeline("", new Paging(1, limit))).thenThrow(new TwitterException("error"));
+
+        grabber = new TwitterGrabber(createUser(), "twitter-user-id", limit);
+        List<ResolvedActivity> activities = grabber.grab();
+
+        assertNotNull(activities);
+        assertTrue(activities.isEmpty());
+    }
+
+    @Test
+    public void internalTwitterFactoryShouldBeConfiguredWithCorrectConsumerCredentials() throws Exception {
+        TwitterFactory twitterFactory = Whitebox.getInternalState(TwitterGrabber.class, TwitterFactory.class);
+        Configuration configuration = Whitebox.getInternalState(twitterFactory, Configuration.class);
+        assertNotNull(configuration);
+        assertEquals(configuration.getOAuthConsumerKey(), "Vs9UkC1ZhE3pT9P4JwbA");
+        assertEquals(configuration.getOAuthConsumerSecret(), "BRDzw6MFJB3whzmm1rWlzjsD5LoXJmlmYT40lhravRs");
     }
 
     private User createUser() {

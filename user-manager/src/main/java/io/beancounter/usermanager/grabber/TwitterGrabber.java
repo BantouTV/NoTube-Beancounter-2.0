@@ -1,5 +1,6 @@
 package io.beancounter.usermanager.grabber;
 
+import io.beancounter.commons.helper.PropertiesHelper;
 import io.beancounter.commons.model.User;
 import io.beancounter.commons.model.activity.Activity;
 import io.beancounter.commons.model.activity.Context;
@@ -19,11 +20,14 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.URLEntity;
 import twitter4j.auth.AccessToken;
+import twitter4j.conf.Configuration;
+import twitter4j.conf.ConfigurationBuilder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * @author Alex Cowell
@@ -31,8 +35,22 @@ import java.util.List;
 public final class TwitterGrabber implements ActivityGrabber {
 
     private static final Logger LOG = LoggerFactory.getLogger(TwitterGrabber.class);
-    private static final TwitterFactory TWITTER_FACTORY = new TwitterFactory();
+    // TODO: This should be pre-configured with the correct consumer API credentials.
+    private static final TwitterFactory TWITTER_FACTORY;
     private static final String TWITTER_BASE_URL = "http://twitter.com/";
+
+    static {
+        Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
+        String consumerKey = properties.getProperty("service.twitter.apikey");
+        String consumerSecret = properties.getProperty("service.twitter.secret");
+
+        Configuration configuration = new ConfigurationBuilder()
+                .setOAuthConsumerKey(consumerKey)
+                .setOAuthConsumerSecret(consumerSecret)
+                .build();
+
+        TWITTER_FACTORY = new TwitterFactory(configuration);
+    }
 
     private final User user;
     private final String serviceUserId;
