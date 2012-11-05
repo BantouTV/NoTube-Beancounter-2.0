@@ -35,14 +35,18 @@ import java.util.Properties;
 public final class TwitterGrabber implements ActivityGrabber {
 
     private static final Logger LOG = LoggerFactory.getLogger(TwitterGrabber.class);
-    // TODO: This should be pre-configured with the correct consumer API credentials.
-    private static final TwitterFactory TWITTER_FACTORY;
     private static final String TWITTER_BASE_URL = "http://twitter.com/";
+    private static final TwitterFactory TWITTER_FACTORY;
 
     static {
         Properties properties = PropertiesHelper.readFromClasspath("/beancounter.properties");
         String consumerKey = properties.getProperty("service.twitter.apikey");
         String consumerSecret = properties.getProperty("service.twitter.secret");
+
+        if (!checkProperty(consumerKey) || !checkProperty(consumerSecret)) {
+            throw new IllegalArgumentException("Twitter OAuth Consumer API settings are not valid. "
+                    + "Please check your beancounter.properties file.");
+        }
 
         Configuration configuration = new ConfigurationBuilder()
                 .setOAuthConsumerKey(consumerKey)
@@ -116,5 +120,9 @@ public final class TwitterGrabber implements ActivityGrabber {
         context.setDate(new DateTime(status.getCreatedAt().getTime()));
 
         return new Activity(Verb.TWEET, tweet, context);
+    }
+
+    private static boolean checkProperty(String property) {
+        return property != null && !property.trim().isEmpty();
     }
 }
