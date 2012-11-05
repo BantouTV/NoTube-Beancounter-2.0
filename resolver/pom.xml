@@ -6,11 +6,11 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>io.beancounter</groupId>
-        <version>1.7.0</version>
+        <version>1.7.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>resolver</artifactId>
-    <version>1.7.0</version>
+    <version>1.7.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Beancounter Resolver</name>
 
