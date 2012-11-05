@@ -21,6 +21,7 @@ import io.beancounter.queues.Queues;
 import io.beancounter.usermanager.AtomicSignUp;
 import io.beancounter.usermanager.UserManager;
 import io.beancounter.usermanager.UserManagerException;
+import io.beancounter.usermanager.grabber.ActivityGrabberManager;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.*;
@@ -52,6 +53,8 @@ public class UserService extends JsonService {
 
     private Queues queues;
 
+    private ActivityGrabberManager grabberManager;
+
     @Inject
     @Named("oauth.fail.redirect")
     String oAuthFailRedirect;
@@ -62,13 +65,15 @@ public class UserService extends JsonService {
             final UserManager um,
             final UserTokenManager tokenManager,
             final Profiles ps,
-            final Queues queues
+            final Queues queues,
+            final ActivityGrabberManager grabberManager
     ) {
         this.applicationsManager = am;
         this.tokenManager = tokenManager;
         this.userManager = um;
         this.profiles = ps;
         this.queues = queues;
+        this.grabberManager = grabberManager;
     }
 
     @POST

@@ -18,6 +18,7 @@ import io.beancounter.commons.model.UserProfile;
 import io.beancounter.commons.model.activity.Activity;
 import io.beancounter.commons.model.activity.ActivityBuilder;
 import io.beancounter.commons.model.activity.DefaultActivityBuilder;
+import io.beancounter.commons.model.activity.ResolvedActivity;
 import io.beancounter.commons.model.activity.Tweet;
 import io.beancounter.commons.model.activity.Verb;
 import io.beancounter.commons.model.auth.AuthenticatedUser;
@@ -40,6 +41,7 @@ import io.beancounter.usermanager.AtomicSignUp;
 import io.beancounter.usermanager.UserManager;
 import io.beancounter.usermanager.UserManagerException;
 import io.beancounter.usermanager.UserTokenManager;
+import io.beancounter.usermanager.grabber.ActivityGrabberManager;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
@@ -47,6 +49,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
@@ -83,6 +86,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
     private static UserTokenManager tokenManager;
     private static Queues queues;
     private static Profiles profiles;
+    private static ActivityGrabberManager grabberManager;
 
     protected UserServiceTestCase() {
         super(9995);
@@ -114,7 +118,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @BeforeMethod
     private void resetMocks() throws Exception {
-        reset(userManager, tokenManager, queues, profiles);
+        reset(userManager, tokenManager, queues, profiles, grabberManager);
     }
 
     @Test
@@ -699,7 +703,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void handlingOAuthCallbackForUserShouldRedirectWithCorrectParameters() throws Exception {
-        UserService userService = new UserService(new MockApplicationsManager(), userManager, tokenManager, profiles, queues);
+        UserService userService = new UserService(new MockApplicationsManager(), userManager, tokenManager, profiles, queues, grabberManager);
 
         String service = "twitter";
         String username = "test-user";
@@ -1241,22 +1245,18 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         when(userManager.storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl))
                 .thenReturn(signUp);
         when(userManager.getUser(username)).thenReturn(user);
-        when(userManager.grabUserActivities(user, serviceUserId, service, 40))
+        when(userManager.grabUserActivities(user, serviceUserId, service, 10))
                 .thenReturn(activities);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
         int result = client.executeMethod(getMethod);
         String responseBody = new String(getMethod.getResponseBody());
-        logger.info("result code: " + result);
-        logger.info("response body: " + responseBody);
 
         assertEquals(result, HttpStatus.SC_OK, "\"Unexpected result: [" + result + "]");
         assertFalse(responseBody.isEmpty());
         assertEquals(getMethod.getURI().getHost(), "www.iana.org");
-        // TODO: Uncomment this once the UserManager.grabUserActivities() issue
-        // is resolved.
-        /*
+
         ObjectMapper mapper = new ObjectMapper();
         for (Activity activity : activities) {
             ResolvedActivity ra = new ResolvedActivity();
@@ -1266,7 +1266,6 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
             verify(queues).push(mapper.writeValueAsString(ra));
         }
-        */
         verify(userManager).storeUserFromOAuth(service, token, verifier, decodedFinalRedirectUrl);
     }
 
@@ -1289,8 +1288,12 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         User user = new User("Test", "User", username, "password");
         user.setUserToken(userToken);
         AtomicSignUp signUp = new AtomicSignUp(user.getId(), username, false, service, serviceUserId, userToken);
+        List<Activity> activities = generateActivities(service, serviceUserId, 3);
 
         when(userManager.storeUserFromOAuth(service, token, verifier)).thenReturn(signUp);
+        when(userManager.getUser(username)).thenReturn(user);
+        when(userManager.grabUserActivities(user, serviceUserId, service, 10))
+                .thenReturn(activities);
 
         GetMethod getMethod = new GetMethod(base_uri + query);
         HttpClient client = new HttpClient();
@@ -1308,9 +1311,6 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         assertEquals(response.getObject().getUsername(), username);
         assertEquals(response.getObject().getUserToken(), userToken);
 
-        // TODO: Uncomment this once the UserManager.grabUserActivities() issue
-        // is resolved.
-        /*
         ObjectMapper mapper = new ObjectMapper();
         for (Activity activity : activities) {
             ResolvedActivity ra = new ResolvedActivity();
@@ -1320,7 +1320,6 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
             verify(queues).push(mapper.writeValueAsString(ra));
         }
-        */
         verify(userManager).storeUserFromOAuth(service, token, verifier);
     }
 
@@ -1383,7 +1382,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void handlingAtomicOAuthCallbackFromWebShouldRedirectWithCorrectParameters() throws Exception {
-        UserService userService = new UserService(new MockApplicationsManager(), userManager, tokenManager, profiles, queues);
+        UserService userService = new UserService(new MockApplicationsManager(), userManager, tokenManager, profiles, queues, grabberManager);
 
         String service = "twitter";
         String serviceUserId = "1234564321";
@@ -1408,7 +1407,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
 
     @Test
     public void handlingAtomicOAuthCallbackFromWebShouldAppendParametersToExistingUrlParameters() throws Exception {
-        UserService userService = new UserService(new MockApplicationsManager(), userManager, tokenManager, profiles, queues);
+        UserService userService = new UserService(new MockApplicationsManager(), userManager, tokenManager, profiles, queues, grabberManager);
 
         String service = "twitter";
         String serviceUserId = "1234564321";
@@ -1593,14 +1592,18 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
                     tokenManager = mock(UserTokenManager.class);
                     queues = mock(Queues.class);
                     profiles = mock(Profiles.class);
+                    grabberManager = mock(ActivityGrabberManager.class);
+
                     Map<String, String> props = new HashMap<String, String>();
                     props.put("oauth.fail.redirect", "http://api.beancounter.io/");
                     Names.bindProperties(binder(), props);
+
                     bind(ApplicationsManager.class).to(MockApplicationsManager.class).asEagerSingleton();
                     bind(UserTokenManager.class).toInstance(tokenManager);
                     bind(UserManager.class).toInstance(userManager);
                     bind(Profiles.class).toInstance(profiles);
                     bind(Queues.class).toInstance(queues);
+                    bind(ActivityGrabberManager.class).toInstance(grabberManager);
 
                     // add REST services
                     bind(ApplicationService.class);
