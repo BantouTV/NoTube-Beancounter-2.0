@@ -2,6 +2,7 @@ package io.beancounter.platform.user;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.name.Names;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.sun.grizzly.http.embed.GrizzlyWebServer;
@@ -1399,7 +1400,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         when(userManager.storeUserFromOAuth(service, token, verifier, baseRedirectUrl))
                 .thenReturn(signUp);
 
-        Response response = userService.handleAtomicOAuthCallbackWeb(service, encodedFinalRedirectUrl, token, verifier);
+        Response response = userService.handleAtomicOAuthCallbackWeb(service, encodedFinalRedirectUrl, token, verifier, null, null);
         assertEquals(response.getStatus(), HttpStatus.SC_TEMPORARY_REDIRECT);
         URI actualRedirectUrl = (URI) response.getMetadata().get(HttpHeaders.LOCATION).get(0);
         assertEquals(actualRedirectUrl, new URI(finalRedirectUrl));
@@ -1424,7 +1425,7 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
         when(userManager.storeUserFromOAuth(service, token, verifier, baseRedirectUrl))
                 .thenReturn(signUp);
 
-        Response response = userService.handleAtomicOAuthCallbackWeb(service, encodedFinalRedirectUrl, token, verifier);
+        Response response = userService.handleAtomicOAuthCallbackWeb(service, encodedFinalRedirectUrl, token, verifier, null, null);
         assertEquals(response.getStatus(), HttpStatus.SC_TEMPORARY_REDIRECT);
         URI actualRedirectUrl = (URI) response.getMetadata().get(HttpHeaders.LOCATION).get(0);
         assertEquals(actualRedirectUrl, new URI(finalRedirectUrl));
@@ -1592,6 +1593,9 @@ public class UserServiceTestCase extends AbstractJerseyTestCase {
                     tokenManager = mock(UserTokenManager.class);
                     queues = mock(Queues.class);
                     profiles = mock(Profiles.class);
+                    Map<String, String> props = new HashMap<String, String>();
+                    props.put("oauth.fail.redirect", "http://api.beancounter.io/");
+                    Names.bindProperties(binder(), props);
                     bind(ApplicationsManager.class).to(MockApplicationsManager.class).asEagerSingleton();
                     bind(UserTokenManager.class).toInstance(tokenManager);
                     bind(UserManager.class).toInstance(userManager);

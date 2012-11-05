@@ -1,6 +1,7 @@
 package io.beancounter.platform;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import io.beancounter.commons.helper.UriUtils;
 import io.beancounter.commons.model.activity.Activity;
 import io.beancounter.commons.model.activity.ResolvedActivity;
@@ -50,6 +51,10 @@ public class UserService extends JsonService {
     private Profiles profiles;
 
     private Queues queues;
+
+    @Inject
+    @Named("oauth.fail.redirect")
+    String oAuthFailRedirect;
 
     @Inject
     public UserService(
@@ -132,9 +137,9 @@ public class UserService extends JsonService {
         Response.ResponseBuilder rb = Response.ok();
         rb.entity(
                 new UserPlatformResponse(
-                    UserPlatformResponse.Status.OK,
-                    "user [" + username + "] found",
-                    user
+                        UserPlatformResponse.Status.OK,
+                        "user [" + username + "] found",
+                        user
                 )
         );
         return rb.build();
@@ -368,8 +373,19 @@ public class UserService extends JsonService {
             @PathParam("service") String service,
             @PathParam("redirect") String finalRedirect,
             @QueryParam("oauth_token") String token,
-            @QueryParam("oauth_verifier") String verifier
+            @QueryParam("oauth_verifier") String verifier,
+            @QueryParam("error") String error,
+            @QueryParam("denied") String denied
     ) {
+        // check if the OAuth exchange is interrupted by the user
+        if (denied != null || (error != null && error.equals("access_denied"))) {
+            // facebook uses 'error' param, while twitter uses 'denied'
+            try {
+                return Response.temporaryRedirect(new URI(oAuthFailRedirect)).build();
+            } catch (URISyntaxException e) {
+                return error(e, "[" + oAuthFailRedirect + "] is not a well-formed URI - check your beancounter.properties file");
+            }
+        }
         String decodedFinalRedirect;
         try {
             decodedFinalRedirect = UriUtils.decodeBase64(finalRedirect);
@@ -463,7 +479,7 @@ public class UserService extends JsonService {
                 queues.push(raJson);
             } catch (QueuesException e) {
                 throw new QueuesException("Error while pushing down json " +
-                        "resolved activity: [" + raJson + "] for user [" + bcUsername+ "] " +
+                        "resolved activity: [" + raJson + "] for user [" + bcUsername + "] " +
                         "on service [" + service + "]", e);
             }
         }
@@ -474,9 +490,10 @@ public class UserService extends JsonService {
     @Path("/oauth/atomic/callback/facebook/web/{redirect}")
     public Response handleAtomicFacebookOAuthCallbackWeb(
             @PathParam("redirect") String finalRedirect,
-            @QueryParam("code") String verifier
+            @QueryParam("code") String verifier,
+            @QueryParam("error") String error
     ) {
-        return handleAtomicOAuthCallbackWeb("facebook", finalRedirect, null, verifier);
+        return handleAtomicOAuthCallbackWeb("facebook", finalRedirect, null, verifier, error, null);
     }
 
     @GET
@@ -484,8 +501,19 @@ public class UserService extends JsonService {
     public Response handleAtomicOAuthCallbackMobile(
             @PathParam("service") String service,
             @QueryParam("oauth_token") String token,
-            @QueryParam("oauth_verifier") String verifier
+            @QueryParam("oauth_verifier") String verifier,
+            @QueryParam("error") String error,
+            @QueryParam("denied") String denied
     ) {
+        // check if the OAuth exchange is interrupted by the user
+        if (denied != null || (error != null && error.equals("access_denied"))) {
+            // facebook uses error param, while twitter uses denied
+            try {
+                return Response.temporaryRedirect(new URI(oAuthFailRedirect)).build();
+            } catch (URISyntaxException e) {
+                return error(e, "[" + oAuthFailRedirect + "] is not a well-formed URI - check your beancounter.properties file");
+            }
+        }
         AtomicSignUp signUp;
         try {
             signUp = userManager.storeUserFromOAuth(service, token, verifier);
@@ -520,9 +548,10 @@ public class UserService extends JsonService {
     @GET
     @Path("/oauth/atomic/callback/facebook/")
     public Response handleAtomicFacebookOAuthCallbackMobile(
-            @QueryParam("code") String verifier
+            @QueryParam("code") String verifier,
+            @QueryParam("error") String error
     ) {
-        return handleAtomicOAuthCallbackMobile("facebook", null, verifier);
+        return handleAtomicOAuthCallbackMobile("facebook", null, verifier, error, null);
     }
 
     @GET
