@@ -3,9 +3,11 @@ package io.beancounter.listener;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import io.beancounter.commons.model.activity.Coordinates;
 import org.joda.time.DateTime;
 
 import io.beancounter.listener.model.TwitterTweet;
+import twitter4j.GeoLocation;
 import twitter4j.HashtagEntity;
 import twitter4j.Status;
 import twitter4j.URLEntity;
@@ -38,6 +40,13 @@ public class TweetConverter {
         }
         for (HashtagEntity hashtagEntity : status.getHashtagEntities()) {
             tweet.addHashTag(hashtagEntity.getText());
+        }
+        GeoLocation geoLocation = status.getGeoLocation();
+        if(geoLocation != null) {
+            tweet.setCoords(new Coordinates<Double, Double>(
+                    geoLocation.getLatitude(),
+                    geoLocation.getLongitude())
+            );
         }
         return tweet;
     }

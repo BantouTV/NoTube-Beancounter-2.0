@@ -35,6 +35,7 @@ public class TwitterResponse implements ServiceResponse<List<Activity>> {
                 ab.setVerb(Verb.TWEET);
                 Map<String, Object> fields = new HashMap<String, Object>();
                 fields.put("setText", twitterTweet.getText());
+                fields.put("setGeo", twitterTweet.getCoords());
                 ab.setObject(
                         Tweet.class,
                         twitterTweet.getUrl(),

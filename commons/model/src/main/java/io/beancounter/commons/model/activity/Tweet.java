@@ -17,6 +17,8 @@ public class Tweet extends io.beancounter.commons.model.activity.Object {
 
     private List<URL> urls = new ArrayList<URL>();
 
+    private Coordinates<Double, Double> geo;
+
     public String getText() {
         return text;
     }
@@ -47,5 +49,13 @@ public class Tweet extends io.beancounter.commons.model.activity.Object {
 
     public boolean addUrl(URL url) {
         return urls.add(url);
+    }
+
+    public Coordinates<Double, Double> getGeo() {
+        return geo;
+    }
+
+    public void setGeo(Coordinates<Double, Double> geo) {
+        this.geo = geo;
     }
 }

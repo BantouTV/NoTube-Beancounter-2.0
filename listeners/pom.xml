@@ -18,6 +18,7 @@
         <module>listeners-commons</module>
         <module>twitter</module>
         <module>facebook</module>
+        <module>twitter-ear</module>
     </modules>
 
     <dependencies>

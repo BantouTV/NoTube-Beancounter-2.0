@@ -1,5 +1,6 @@
 package io.beancounter.listener.model;
 
+import io.beancounter.commons.model.activity.Coordinates;
 import org.joda.time.DateTime;
 
 import java.net.URL;
@@ -28,6 +29,8 @@ public class TwitterTweet {
     private Set<String> hashTags = new HashSet<String>();
 
     private URL url;
+
+    private Coordinates<Double, Double> coords;
 
     public void setCreatedAt(DateTime createdAt) {
         this.createdAt = createdAt;
@@ -92,4 +95,13 @@ public class TwitterTweet {
     public URL getUrl() {
         return url;
     }
+
+    public void setCoords(Coordinates<Double, Double> coords) {
+        this.coords = coords;
+    }
+
+    public Coordinates<Double, Double> getCoords() {
+        return coords;
+    }
+
 }
