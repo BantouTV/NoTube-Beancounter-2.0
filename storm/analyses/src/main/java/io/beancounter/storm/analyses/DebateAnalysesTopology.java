@@ -18,18 +18,31 @@ import storm.redis.RedisBolt;
 public class DebateAnalysesTopology {
 
     public static void main(String[] args) {
+        JedisPoolConfigSerializable config = new JedisPoolConfigSerializable();
+        config.setMaxIdle(16);
+        config.setMaxActive(16);
+
         TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout(
                 "tweets",
                 new KestrelThriftSpout("46.4.89.183", 2229, "social-web-activities", new StringScheme()),
                 1
         );
-        JedisPoolConfigSerializable config = new JedisPoolConfigSerializable();
-        config.setMaxIdle(16);
-        config.setMaxActive(16);
-        builder.setBolt("tweets-count", new MentionCountBolt(config, "46.4.89.183", "london", "shoreditch", "BBC", "tube"), 1).shuffleGrouping("tweets");
-        builder.setBolt("to-kestrel", new KestrelBolt("46.4.89.183", 2229, "mentions"), 1).shuffleGrouping("tweets-count");
-        builder.setBolt("storage", new RedisBolt(config, "46.4.89.183", false), 1).shuffleGrouping("tweets-count");
+
+        // 1. Total Number of Tweets
+        builder.setBolt("tweet-counter", new CounterBolt(), 1)
+                .shuffleGrouping("tweets");
+        builder.setBolt("tweet-counter-kestrel", new KestrelBolt("46.4.89.183", 2229, "tweet-count"), 1)
+                .shuffleGrouping("tweet-counter");
+
+        // 3. Counting Mentions
+        builder.setBolt("mentions-count", new MentionCountBolt(config, "46.4.89.183", "london", "shoreditch", "BBC", "tube"), 1)
+                .shuffleGrouping("tweets");
+        builder.setBolt("mentions-count-kestrel", new KestrelBolt("46.4.89.183", 2229, "mentions"), 1)
+                .shuffleGrouping("mentions-count");
+        builder.setBolt("storage", new RedisBolt(config, "46.4.89.183", false), 1)
+                .shuffleGrouping("mentions-count");
+
         Config conf = new Config();
         conf.setDebug(false);
         conf.setNumWorkers(1);
