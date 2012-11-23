@@ -1,9 +1,11 @@
 package storm.redis;
 
+import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.topology.IBasicBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import redis.clients.jedis.Jedis;
@@ -18,7 +20,7 @@ import java.util.Map;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class RedisBolt implements IBasicBolt {
+public class RedisBolt extends BaseRichBolt {
 
     public static final String DATABASE = "database";
 
@@ -40,6 +42,8 @@ public class RedisBolt implements IBasicBolt {
 
     private TopologyContext topologyContext;
 
+    private OutputCollector outputCollector;
+
     public RedisBolt(JedisPoolConfigSerializable config, String address, boolean isNotifying) {
         this.config = config;
         this.address = address;
@@ -47,9 +51,10 @@ public class RedisBolt implements IBasicBolt {
     }
 
     @Override
-    public void prepare(Map map, TopologyContext topologyContext) {
+    public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.map = map;
         this.topologyContext = topologyContext;
+        this.outputCollector = outputCollector;
         pool = new JedisPool(
                 config,
                 address
@@ -57,7 +62,7 @@ public class RedisBolt implements IBasicBolt {
     }
 
     @Override
-    public void execute(Tuple tuple, BasicOutputCollector basicOutputCollector) {
+    public void execute(Tuple tuple) {
         int database = tuple.getIntegerByField(DATABASE);
         String key = tuple.getStringByField(KEY);
         String value = tuple.getStringByField(VALUE);
@@ -69,6 +74,7 @@ public class RedisBolt implements IBasicBolt {
         // okay, now notify it to redis
         if(isNotifying) notify(jedis, key);
         pool.returnResource(jedis);
+        outputCollector.ack(tuple);
     }
 
     @Override

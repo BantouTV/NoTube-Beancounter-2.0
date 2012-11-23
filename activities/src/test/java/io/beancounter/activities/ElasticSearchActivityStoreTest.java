@@ -1304,7 +1304,7 @@ public class ElasticSearchActivityStoreTest {
 
         Map<String, Object> object = (Map<String, Object>) esActivity.get("object");
         Tweet tweet = (Tweet) activity.getActivity().getObject();
-        assertEquals(object.size(), 8);
+        assertEquals(object.size(), 9);
         assertEquals(object.get("text"), tweet.getText());
         assertEquals(object.get("url"), tweet.getUrl().toString());
         assertEquals(object.get("hashTags"), new ArrayList<String>(tweet.getHashTags()));

@@ -19,6 +19,8 @@ public class Tweet extends io.beancounter.commons.model.activity.Object {
 
     private Coordinates<Double, Double> geo;
 
+    private Set<String> mentionedUsers = new HashSet<String>();
+
     public String getText() {
         return text;
     }
@@ -58,4 +60,17 @@ public class Tweet extends io.beancounter.commons.model.activity.Object {
     public void setGeo(Coordinates<Double, Double> geo) {
         this.geo = geo;
     }
+
+    public Set<String> getMentionedUsers() {
+        return mentionedUsers;
+    }
+
+    public void setMentionedUsers(Set<String> mentionedUsers) {
+        this.mentionedUsers = mentionedUsers;
+    }
+
+    public void addMentionedUsers(String mentionedUser) {
+        mentionedUsers.add(mentionedUser);
+    }
+
 }

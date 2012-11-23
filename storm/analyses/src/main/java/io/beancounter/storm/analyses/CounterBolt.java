@@ -18,22 +18,22 @@ import java.util.Map;
  */
 public class CounterBolt extends BaseRichBolt {
 
+    private final static int DATABASE = 10;
+
     private OutputCollector collector;
+
     private long count = 0L;
 
-    @Override
     public void prepare(Map map, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
     }
 
-    @Override
     public void execute(Tuple tuple) {
-        collector.emit(tuple, new Values(++count));
+        collector.emit(new Values(DATABASE, "overall-number-tweets", String.valueOf(count++)));
         collector.ack(tuple);
     }
 
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("count"));
+    public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
+        outputFieldsDeclarer.declare(new Fields("database", "key", "value"));
     }
 }

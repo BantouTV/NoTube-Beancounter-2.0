@@ -46,7 +46,7 @@ public class RedisBoltTestCase {
         JedisPoolConfigSerializable config = new JedisPoolConfigSerializable();
         config.setMaxIdle(16);
         config.setMaxActive(16);
-        IBasicBolt redisBolt = new RedisBolt(config, "46.4.89.183", false);
+        RedisBolt redisBolt = new RedisBolt(config, "46.4.89.183", false);
         builder.setBolt("redisBolt", redisBolt, 1).shuffleGrouping("spout");
         conf = new Config();
 		conf.setDebug(true);

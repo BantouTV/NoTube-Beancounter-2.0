@@ -16,21 +16,18 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 import storm.redis.JedisPoolConfigSerializable;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * put class description here
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class MentionCountBolt extends BaseRichBolt {
+public class KeywordsCountBolt extends BaseRichBolt {
 
-    private final static int DATABASE = 8;
+    private final static int DATABASE = 10;
 
-    private final static int MAX_USERS = 5;
+    private String[] keywords;
 
     private Map map;
 
@@ -46,7 +43,8 @@ public class MentionCountBolt extends BaseRichBolt {
 
     private String address;
 
-    public MentionCountBolt(JedisPoolConfigSerializable config, String address) {
+    public KeywordsCountBolt(JedisPoolConfigSerializable config, String address, String... keywords) {
+        this.keywords = keywords;
         this.config = config;
         this.address = address;
     }
@@ -71,53 +69,28 @@ public class MentionCountBolt extends BaseRichBolt {
         } catch (IOException e) {
             return;
         }
-        Map<String, Integer> oldMentionCounts = getOldMentionCounts();
-        Set<String> tweetMentions = tweet.getMentionedUsers();
-        for (String username : oldMentionCounts.keySet()) {
-            if (tweetMentions.contains(username)) {
-                oldMentionCounts.put(
-                        username,
-                        oldMentionCounts.get(username) + 1
-                );
-                tweetMentions.remove(username);
+        for (String keyword : keywords) {
+            String text = tweet.getText();
+            if (contains(text, keyword)) {
+                int oldValue = getOldValue(keyword);
+                Values values = getValues(keyword, oldValue + 1);
+                outputCollector.emit(values);
             }
         }
-        for (String username : tweetMentions) {
-            oldMentionCounts.put(username, 1);
-        }
-        ValueComparator bvc = new ValueComparator(oldMentionCounts);
-        Map<String, Integer> sortedValue = new TreeMap<String, Integer>(bvc);
-        sortedValue.putAll(oldMentionCounts);
-
-        Map<String, Integer> limitedSortedValue = new TreeMap<String, Integer>();
-        int i = 0;
-        for (Map.Entry<String, Integer> value : sortedValue.entrySet()) {
-            if (i > MAX_USERS) {
-                continue;
-            }
-            limitedSortedValue.put(value.getKey(), value.getValue());
-            i++;
-        }
-        Values values = getValues("_most_mentioned_users_", limitedSortedValue);
-        outputCollector.emit(values);
     }
 
-    private Map<String, Integer> getOldMentionCounts() {
+    private int getOldValue(String keyword) {
         Jedis jedis = getJedisResource(DATABASE);
-        String jsonValue;
+        String value;
         try {
-            jsonValue = jedis.get("_most_mentioned_users_");
+          value = jedis.get(keyword);
         } finally {
             pool.returnResource(jedis);
         }
-        if (jsonValue == null) {
-            return new HashMap<String, Integer>();
+        if(value == null) {
+            return 0;
         }
-        try {
-            return (Map<String, Integer>) mapper.readValue(jsonValue, Map.class);
-        } catch (IOException e) {
-            throw new RuntimeException("error while deserializing in json the value", e);
-        }
+        return Integer.valueOf(value);
     }
 
     private Jedis getJedisResource(int database) {
@@ -134,21 +107,21 @@ public class MentionCountBolt extends BaseRichBolt {
             final String errMsg = "Error while selecting database [" + database + "]";
             throw new RuntimeException(errMsg, e);
         } finally {
-            if (isConnectionIssue) {
+            if(isConnectionIssue) {
                 pool.returnBrokenResource(jedis);
             }
         }
         return jedis;
     }
 
-    private Values getValues(String keyword, Map<String, Integer> value) {
-        String jsonValue;
-        try {
-            jsonValue = mapper.writeValueAsString(value);
-        } catch (IOException e) {
-            throw new RuntimeException("error while serializing in json the value", e);
-        }
-        return new Values(DATABASE, keyword, jsonValue);
+    private boolean contains(String text, String key) {
+        String lowerCaseText = text.toLowerCase();
+        String lowerCasekey = key.toLowerCase();
+        return lowerCaseText.contains(lowerCasekey);
+    }
+
+    private Values getValues(String keyword, int value) {
+        return new Values(DATABASE, keyword, String.valueOf(value));
     }
 
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
