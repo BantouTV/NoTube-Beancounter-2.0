@@ -43,7 +43,7 @@ public class TweetConverter {
         }
         GeoLocation geoLocation = status.getGeoLocation();
         if(geoLocation != null) {
-            tweet.setCoords(new Coordinates<Double, Double>(
+            tweet.setCoords(new Coordinates(
                     geoLocation.getLatitude(),
                     geoLocation.getLongitude())
             );
