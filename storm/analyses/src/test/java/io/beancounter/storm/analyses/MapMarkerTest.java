@@ -15,6 +15,7 @@ import java.util.Collections;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -103,6 +104,50 @@ public class MapMarkerTest {
     @Test
     public void environmentKeywordSynonymsShouldBeUsedToCategoriseText() throws Exception {
         Tuple tuple = mockTuple(8.0, 40.3, "Stop climate change!");
+
+        boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
+        boltUnderTest.execute(tuple);
+
+        verify(collector).ack(tuple);
+        verify(collector).emit(new Values(8.0, 40.3, "environment"));
+    }
+
+    @Test
+    public void textWithNoKeywordsShouldBeIgnored() throws Exception {
+        Tuple tuple = mockTuple(8.0, 40.3, "A message which cannot be categorised");
+
+        boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
+        boltUnderTest.execute(tuple);
+
+        verify(collector).ack(tuple);
+        verify(collector, never()).emit(any(Values.class));
+    }
+
+    @Test
+    public void textWithMostlyEconomyKeywordsShouldBeCategorisedAsEconomy() throws Exception {
+        Tuple tuple = mockTuple(8.0, 40.3, "I want to know about the economy, budget and environment.");
+
+        boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
+        boltUnderTest.execute(tuple);
+
+        verify(collector).ack(tuple);
+        verify(collector).emit(new Values(8.0, 40.3, "economy"));
+    }
+
+    @Test
+    public void textWithMostlyEnvironmentKeywordsShouldBeCategorisedAsEnvironment() throws Exception {
+        Tuple tuple = mockTuple(8.0, 40.3, "I care more about the environment and climate change than the economy.");
+
+        boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
+        boltUnderTest.execute(tuple);
+
+        verify(collector).ack(tuple);
+        verify(collector).emit(new Values(8.0, 40.3, "environment"));
+    }
+
+    @Test
+    public void textWithEqualCountsOfKeywordsShouldResolveIntoOneCategory() throws Exception {
+        Tuple tuple = mockTuple(8.0, 40.3, "I care equally about the environment and the economy.");
 
         boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
         boltUnderTest.execute(tuple);

@@ -7,12 +7,13 @@ import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multiset;
 
 import java.text.BreakIterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Expects tuples of the form:
@@ -27,7 +28,8 @@ public class MapMarker extends BaseRichBolt {
 
     private OutputCollector collector;
 
-    private final Map<String, String> categories;
+    /* Map of keyword->category */
+    private final ImmutableMap<String, String> categories;
 
     public MapMarker() {
         categories = ImmutableMap.of(
@@ -46,33 +48,44 @@ public class MapMarker extends BaseRichBolt {
     // TODO: Check if the coordinates are even in Italy! Could be done in the
     // GeoTagFilter?
 
-    // TODO: Multiple categories in same text?
+    // TODO: How to order equally ranked categories? Currently by hash order.
 
     // TODO: Check Italian text works
 
     @Override
     public void execute(Tuple tuple) {
+        // TODO: Locale.ITALY or Locale.ITALIAN?
         String text = tuple.getString(2).toLowerCase(Locale.ITALY);
         BreakIterator boundary = BreakIterator.getWordInstance(Locale.ITALY);
         boundary.setText(text);
 
-        TreeMap<String, Integer> ranking = new TreeMap<String, Integer>();
+        Multiset<String> ranking = HashMultiset.create();
 
         int start = boundary.first();
         for (int end = boundary.next(); end != BreakIterator.DONE; start = end, end = boundary.next()) {
             String word = text.substring(start, end);
-            String category = categories.get(word);
+            if (word.trim().isEmpty()) continue;
 
+            String category = categories.get(word);
             if (category != null) {
-                Integer categoryScore = ranking.get(category);
-                if (categoryScore == null) {
-                    categoryScore = 0;
-                }
-                ranking.put(category, ++categoryScore);
+                ranking.add(category);
             }
         }
-        collector.emit(new Values(tuple.getDouble(0), tuple.getDouble(1), ranking.firstKey()));
+
+        if (!ranking.isEmpty()) {
+            collector.emit(new Values(tuple.getDouble(0), tuple.getDouble(1), selectTopCategory(ranking)));
+        }
         collector.ack(tuple);
+    }
+
+    private String selectTopCategory(Multiset<String> ranking) {
+        String topCategory = null;
+        for (String category : ranking) {
+            if (ranking.count(category) > ranking.count(topCategory)) {
+                topCategory = category;
+            }
+        }
+        return topCategory;
     }
 
     @Override
