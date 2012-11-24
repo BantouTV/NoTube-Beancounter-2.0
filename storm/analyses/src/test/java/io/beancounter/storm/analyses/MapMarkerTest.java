@@ -113,14 +113,14 @@ public class MapMarkerTest {
     }
 
     @Test
-    public void textWithNoKeywordsShouldBeIgnored() throws Exception {
+    public void textWithNoKeywordsShouldBeMarkedAsOther() throws Exception {
         Tuple tuple = mockTuple(8.0, 40.3, "A message which cannot be categorised");
 
         boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
         boltUnderTest.execute(tuple);
 
         verify(collector).ack(tuple);
-        verify(collector, never()).emit(any(Values.class));
+        verify(collector).emit(new Values(8.0, 40.3, "other"));
     }
 
     @Test
@@ -154,6 +154,17 @@ public class MapMarkerTest {
 
         verify(collector).ack(tuple);
         verify(collector).emit(new Values(8.0, 40.3, "environment"));
+    }
+
+    @Test
+    public void textWithItalianKeywordShouldBeCorrectlyCategorised() throws Exception {
+        Tuple tuple = mockTuple(8.0, 40.3, "Something about università.");
+
+        boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
+        boltUnderTest.execute(tuple);
+
+        verify(collector).ack(tuple);
+        verify(collector).emit(new Values(8.0, 40.3, "education"));
     }
 
     @Test

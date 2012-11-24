@@ -12,14 +12,13 @@ import io.beancounter.commons.model.activity.Coordinates;
 import io.beancounter.commons.model.activity.Tweet;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
  * Simple bolt to drop any Tweets which do not contain geo-location data.
  *
  * For Tweets with location data, it will emit a tuple containing:
- *      [ lat, long, text ]
+ *      [ lat:double, long:double, text:string ]
  *
  * @author Alex Cowell
  */
