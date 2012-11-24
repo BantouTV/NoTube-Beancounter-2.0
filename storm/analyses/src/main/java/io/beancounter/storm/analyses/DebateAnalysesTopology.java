@@ -26,8 +26,8 @@ public class DebateAnalysesTopology {
         JedisPoolConfigSerializable config = new JedisPoolConfigSerializable();
         config.setMaxIdle(32);
         config.setMaxActive(32);
-        // define analysis bolts
 
+        // define analysis bolts
         builder.setBolt("mentions", new KeywordsCountBolt(config, "46.4.89.183", "london", "shoreditch", "BBC", "tube"), 1).shuffleGrouping("tweets");
         builder.setBolt("unique-users", new UniqueUsersCountBolt(config, "46.4.89.183"), 1).shuffleGrouping("tweets");
         builder.setBolt("tweet-counter", new CounterBolt(), 1).shuffleGrouping("tweets");

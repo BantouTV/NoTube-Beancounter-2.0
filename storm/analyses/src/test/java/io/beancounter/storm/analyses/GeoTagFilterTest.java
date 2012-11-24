@@ -86,7 +86,7 @@ public class GeoTagFilterTest {
     }
 
     @Test
-    public void shouldDeclareCorrectOuputFields() throws Exception {
+    public void shouldDeclareCorrectOutputFields() throws Exception {
         OutputFieldsDeclarer declarer = mock(OutputFieldsDeclarer.class);
         ArgumentCaptor<Fields> fieldsCaptor = ArgumentCaptor.forClass(Fields.class);
         doNothing().when(declarer).declare(fieldsCaptor.capture());
@@ -98,7 +98,7 @@ public class GeoTagFilterTest {
         assertEquals(declaredFields.toList(), new Fields("lat", "long", "text").toList());
     }
 
-    private Activity getActivity(boolean hasLocationData) throws MalformedURLException {
+    private Activity getActivity(boolean hasLocationData) throws Exception {
         Tweet tweet = new Tweet();
         tweet.setUrl(new URL("http://twitter.com/test-user/status/123456"));
         tweet.setName("Test User");
