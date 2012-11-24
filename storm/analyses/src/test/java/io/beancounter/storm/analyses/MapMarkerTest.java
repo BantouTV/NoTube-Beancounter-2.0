@@ -168,6 +168,28 @@ public class MapMarkerTest {
     }
 
     @Test
+    public void shouldUsePhrasesToCategoriseTextIntoEconomyCategory() throws Exception {
+        Tuple tuple = mockTuple(8.0, 40.3, "Si! Decreto cresci Italia?");
+
+        boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
+        boltUnderTest.execute(tuple);
+
+        verify(collector).ack(tuple);
+        verify(collector).emit(new Values(8.0, 40.3, "economy"));
+    }
+
+    @Test
+    public void shouldUsePhrasesToCategoriseTextIntoTaxesCategory() throws Exception {
+        Tuple tuple = mockTuple(8.0, 40.3, "Decreto aumento età pensionabile.");
+
+        boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
+        boltUnderTest.execute(tuple);
+
+        verify(collector).ack(tuple);
+        verify(collector).emit(new Values(8.0, 40.3, "taxes"));
+    }
+
+    @Test
     public void shouldDeclareCorrectOutputFields() throws Exception {
         OutputFieldsDeclarer declarer = mock(OutputFieldsDeclarer.class);
         ArgumentCaptor<Fields> fieldsCaptor = ArgumentCaptor.forClass(Fields.class);

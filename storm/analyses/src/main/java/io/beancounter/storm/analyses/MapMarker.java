@@ -31,15 +31,29 @@ public class MapMarker extends BaseRichBolt {
     /* Map of keyword->category */
     private final Map<String, String> keywords;
 
+    /* Map of phrases->category */
+    private final Map<String, String> phrases;
+
     public MapMarker() {
-        keywords = new HashMap<String, String>(109);
-        addKeywords(keywords, "economy", "economy", "budget", "finmeccanica", "industria", "fiat", "economia", "marchionne", "termini imerese", "fiom", "cgil", "sindacati", "sindacato", "sciopero", "scioperi", "metalmeccanici", "ilva", "startups", "turismo", "landini", "camusso", "chrysler", "ferrari", "montezemolo", "airaudo", "cisl", "uil", "btp", "bce", "merkel", "tremonti", "euro", "pil", "spagna", "bailout", "industriale", "draghi", "contratto", "contratti", "fabbrica", "lavoro", "debito", "grilli");
-        addKeywords(keywords, "civil-rights", "vendola", "senonoraquando", "bullismo", "chinascequiédiqui", "lesbiche", "donne", "gay", "giovani", "precari", "studenti", "rosa", "immigrazione", "sbarchi", "lampedusa", "cittadinanza", "rifugiati", "bossi-fini", "castelvolturno", "capolarato");
-        addKeywords(keywords, "crime", "falcone", "borsellino", "corruzione", "criminalità", "mafia", "parlamentari", "sobrietà", "crimine", "camorra", "ndrangheta", "casalesi", "napoli", "crimine", "scampia", "secondigliano", "saviano", "omicidio", "trattativa");
+        keywords = new HashMap<String, String>(179);
+        addKeywords(keywords, "economy", "economy", "budget", "finmeccanica", "industria", "fiat", "economia", "marchionne", "fiom", "cgil", "sindacati", "sindacato", "sciopero", "scioperi", "metalmeccanici", "ilva", "startups", "turismo", "landini", "camusso", "chrysler", "ferrari", "montezemolo", "airaudo", "cisl", "uil", "btp", "bce", "merkel", "tremonti", "euro", "pil", "spagna", "bailout", "industriale", "draghi", "contratto", "contratti", "fabbrica", "lavoro", "debito", "grilli");
+        addKeywords(keywords, "civil-rights", "vendola", "senonoraquando", "bullismo", "chinascequiédiqui", "lesbiche", "violenza", "donne", "gay", "giovani", "precari", "studenti", "rosa", "immigrazione", "sbarchi", "lampedusa", "cittadinanza", "rifugiati", "bossi-fini", "castelvolturno", "capolarato");
+        addKeywords(keywords, "crime", "falcone", "borsellino", "corruzione", "criminalità", "mafia", "parlamentari", "sobrietà", "crimine", "camorra", "ndrangheta", "casalesi", "napoli", "scampia", "secondigliano", "saviano", "omicidio", "trattativa");
         addKeywords(keywords, "environment", "environment", "climate", "tav", "energia", "enel", "eni", "petrolio", "inceneritore", "inceneritori", "acerra", "gas", "eolico", "solare", "rigassificatori", "spazzatura", "rifiuti", "nucleare", "ambiente", "alluvione", "alluvioni", "terremoto", "terremoti", "cemento", "cementificazione", "clima", "greenpeace", "veolia");
-        addKeywords(keywords, "education", "scuola", "università", "lavoro", "sanità", "scioperi", "sciopero", "concorsi", "precariato", "riforma", "manifestazione", "manifestazioni", "cisl", "uil", "cgil", "ospedali", "declino", "concorsi", "tagli", "asl", "donne", "ichino", "reddito", "redditi", "giovanile", "disoccupazione");
+        addKeywords(keywords, "education", "scuola", "università", "lavoro", "sanità", "scioperi", "sciopero", "concorsi", "precariato", "riforma", "manifestazione", "manifestazioni", "cisl", "uil", "cgil", "ospedali", "declino", "tagli", "asl", "donne", "ichino", "reddito", "redditi", "giovanile", "disoccupazione");
         addKeywords(keywords, "taxes", "equitalia", "tasse", "fisco", "redditometro", "befera", "iva", "irpef", "pensione", "pensioni", "precariato", "imu", "esodati", "fornero", "inps", "irpeg", "tassazione", "economica");
         addKeywords(keywords, "public-funding", "vitalizi", "fiorito", "marucci", "lusi", "margherita", "m5s", "idv", "polverini", "capogruppo", "lazio", "lombardia", "parlamentare", "parlamentari", "regionale", "giunta", "regione", "travaglio");
+        addKeywords(keywords, "foreign-policy", "libia", "germania", "merkel", "hollande", "bce", "grecia", "europa", "palestina", "siria", "gaza", "israele", "egitto", "medioriente", "piigs", "fed", "obama", "cameron", "londra", "parigi", "berlino", "sarkozy", "mubarak", "sicurezza", "onu");
+
+        phrases = new HashMap<String, String>(67);
+        addKeywords(phrases, "economy", "termini imerese", "decreto sviluppo", "decreto cresci italia", "riforma fornero", "legge biagi", "legge trenta", "legge 30", "ministro passera", "oscar giannino", "giorgio cremaschi", "buoni del tesoro", "mario monti", "banca centrale europa", "prodotto interno lordo", "tobin tax", "unione europea", "legge finanziaria", "patto di stabilità");
+        addKeywords(phrases, "civil-rights", "diritti delle minoranze", "suicidio davide", "voto agli immigrati", "yvan sagnet", "centri di permanenza temporanea", "legge bossi fini", "roberto saviano");
+        addKeywords(phrases, "crime", "colletti bianchi", "norma sul falso in bilancio", "cosa nostra", "sacra corona unita", "nicola mancino", "bernardo provenzano", "marcello dell'utri", "nicola cosentino");
+        addKeywords(phrases, "environment", "energie pulite", "energie rinnovabili", "crisi energetica", "sfruttamento territorio", "privatizzazione dell'acqua", "acqua pubblica", "ponte sullo stretto", "val di susa", "alta velocità");
+        addKeywords(phrases, "education", "art.18", "sindacato", "diritto dei lavoratori", "articolo 18");
+        addKeywords(phrases, "taxes", "guardia di finanza", "aumento età pensionabile", "pressione fiscale", "riforma del lavoro", "cuneo fiscale");
+        addKeywords(phrases, "public-funding", "beppe grillo", "finanziamento pubblico ai partiti", "movimento 5 stelle", "di pietro", "italia dei valori", "costi della politica");
+        addKeywords(phrases, "foreign-policy", "unione europea", "primavera araba", "mario monti", "massimo d'alema", "medio oriente");
     }
 
     @Override
@@ -50,8 +64,6 @@ public class MapMarker extends BaseRichBolt {
     // TODO: Check if the coordinates are even in Italy! Could be done in the
     // GeoTagFilter?
 
-    // TODO: Phrases
-
     @Override
     public void execute(Tuple tuple) {
         String text = tuple.getString(2).toLowerCase(Locale.ITALY);
@@ -60,6 +72,7 @@ public class MapMarker extends BaseRichBolt {
 
         Multiset<String> ranking = HashMultiset.create();
 
+        // Single keywords
         int start = boundary.first();
         for (int end = boundary.next(); end != BreakIterator.DONE; start = end, end = boundary.next()) {
             String word = text.substring(start, end);
@@ -68,6 +81,13 @@ public class MapMarker extends BaseRichBolt {
             String category = keywords.get(word);
             if (category != null) {
                 ranking.add(category);
+            }
+        }
+
+        // Phrases
+        for (Map.Entry<String, String> phrasePair : phrases.entrySet()) {
+            if (text.contains(phrasePair.getKey())) {
+                ranking.add(phrasePair.getValue());
             }
         }
 
