@@ -5,9 +5,12 @@ import backtype.storm.LocalCluster;
 import backtype.storm.scheme.StringScheme;
 import backtype.storm.spout.KestrelThriftSpout;
 import backtype.storm.topology.TopologyBuilder;
+import backtype.storm.tuple.Fields;
 import backtype.storm.utils.Utils;
 import storm.redis.JedisPoolConfigSerializable;
 import storm.redis.RedisBolt;
+
+import java.util.Locale;
 
 /**
  * put class description here
@@ -43,6 +46,15 @@ public class DebateAnalysesTopology {
         builder.setBolt("mentions-storage", new RedisBolt(config, "46.4.89.183", false), 1).shuffleGrouping("mentions");
         builder.setBolt("unique-storage", new RedisBolt(config, "46.4.89.183", false), 1).shuffleGrouping("unique-users");
         builder.setBolt("usernames-storage", new RedisBolt(config, "46.4.89.183", false), 1).shuffleGrouping("usernames");
+
+        // Example use of the WordSplitter and KeywordCounter to avoid the use
+        // of Redis for storing intermediate results.
+        /*
+        builder.setBolt("word-splitter", new WordSplitter(), 4)
+                .shuffleGrouping("tweets");
+        builder.setBolt("keyword-counter", new KeywordCounter("London", "Shoreditch", "BBC", "tube"), 4)
+                .fieldsGrouping("word-splitter", new Fields("word"));
+        */
 
         Config conf = new Config();
         conf.setDebug(true);
