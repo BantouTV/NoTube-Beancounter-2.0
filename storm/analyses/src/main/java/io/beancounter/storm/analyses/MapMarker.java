@@ -61,9 +61,6 @@ public class MapMarker extends BaseRichBolt {
         this.collector = collector;
     }
 
-    // TODO: Check if the coordinates are even in Italy! Could be done in the
-    // GeoTagFilter?
-
     @Override
     public void execute(Tuple tuple) {
         String text = tuple.getString(2).toLowerCase(Locale.ITALY);

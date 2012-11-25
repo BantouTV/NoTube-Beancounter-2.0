@@ -24,7 +24,8 @@ import java.util.Map;
  * out Tweets which do contain location data, but are not coming from the
  * specified country.
  *
- * For Tweets with location data, it will emit a tuple containing:
+ * For Tweets with location data and in the specified country, it will emit a
+ * tuple containing:
  *      [ lat:double, long:double, text:string ]
  *
  * @author Alex Cowell
