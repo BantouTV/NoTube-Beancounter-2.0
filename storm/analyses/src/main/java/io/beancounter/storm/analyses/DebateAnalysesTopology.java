@@ -1,7 +1,6 @@
 package io.beancounter.storm.analyses;
 
 import backtype.storm.Config;
-import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
 import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.InvalidTopologyException;
@@ -9,11 +8,8 @@ import backtype.storm.scheme.StringScheme;
 import backtype.storm.spout.KestrelThriftSpout;
 import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.tuple.Fields;
-import backtype.storm.utils.Utils;
 import storm.redis.JedisPoolConfigSerializable;
 import storm.redis.RedisBolt;
-
-import java.util.Locale;
 
 /**
  * put class description here
@@ -44,11 +40,6 @@ public class DebateAnalysesTopology {
         builder.setBolt("unique-users", new UniqueUsersCountBolt(config, REDIS), NTHREADS).shuffleGrouping("tweets");
         builder.setBolt("tweet-counter", new CounterBolt(), 1).shuffleGrouping("tweets");
         builder.setBolt("usernames", new MentionCountBolt(config, REDIS), NTHREADS).shuffleGrouping("tweets");
-        // define bolts pushing results to kestrel
-        builder.setBolt("mentions-to-kestrel", new KestrelBolt(KESTREL, 2229, "mentions"), NTHREADS).shuffleGrouping("mentions");
-        builder.setBolt("unique-to-kestrel", new KestrelBolt(KESTREL, 2229, "unique"), NTHREADS).shuffleGrouping("unique-users");
-        builder.setBolt("counter-to-kestrel", new KestrelBolt(KESTREL, 2229, "tweet-count"), NTHREADS).shuffleGrouping("tweet-counter");
-        builder.setBolt("usernames-to-kestrel", new JsonKestrelBolt(KESTREL, 2229, "usernames"), NTHREADS).shuffleGrouping("usernames");
 
         // define bolts pushing results to kestrel
         builder.setBolt("mentions-to-kestrel", new KestrelBolt(KESTREL, 2229, "mentions"), 1).shuffleGrouping("mentions");
