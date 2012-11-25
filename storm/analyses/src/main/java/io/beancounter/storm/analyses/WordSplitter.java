@@ -25,11 +25,13 @@ import java.util.Map;
 public class WordSplitter extends BaseRichBolt {
 
     private final Locale locale;
+    private final ObjectMapper mapper;
 
     private OutputCollector collector;
 
     public WordSplitter(Locale locale) {
         this.locale = locale;
+        mapper = new ObjectMapper();
     }
 
     @Override
@@ -39,12 +41,12 @@ public class WordSplitter extends BaseRichBolt {
 
     @Override
     public void execute(Tuple tuple) {
-        String tweetJson = tuple.getString(0);
         collector.ack(tuple);
 
         Tweet tweet;
         try {
-            tweet = (Tweet) new ObjectMapper().readValue(tweetJson, Activity.class).getObject();
+            String tweetJson = tuple.getString(0);
+            tweet = (Tweet) mapper.readValue(tweetJson, Activity.class).getObject();
         } catch (Exception ex) {
             return;
         }

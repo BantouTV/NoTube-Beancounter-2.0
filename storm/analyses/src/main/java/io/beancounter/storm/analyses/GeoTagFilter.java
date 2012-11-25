@@ -36,11 +36,13 @@ public class GeoTagFilter extends BaseRichBolt {
 
     private final String countryCode;
     private final Client client;
+    private final ObjectMapper mapper;
 
     private OutputCollector collector;
 
     public GeoTagFilter(String countryCode) {
         client = Client.create();
+        mapper = new ObjectMapper();
         this.countryCode = countryCode;
     }
 
@@ -56,7 +58,7 @@ public class GeoTagFilter extends BaseRichBolt {
 
         Tweet tweet;
         try {
-            tweet = (Tweet) new ObjectMapper().readValue(tweetJson, Activity.class).getObject();
+            tweet = (Tweet) mapper.readValue(tweetJson, Activity.class).getObject();
         } catch (Exception ex) {
             return;
         }
