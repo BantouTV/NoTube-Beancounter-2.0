@@ -2,6 +2,9 @@ package io.beancounter.storm.analyses;
 
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
+import backtype.storm.StormSubmitter;
+import backtype.storm.generated.AlreadyAliveException;
+import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.scheme.StringScheme;
 import backtype.storm.spout.KestrelThriftSpout;
 import backtype.storm.topology.TopologyBuilder;
@@ -16,40 +19,49 @@ import storm.redis.RedisBolt;
  */
 public class DebateAnalysesTopology {
 
+    private static final String KESTREL = "10.166.6.30";
+
+    private static final String REDIS = "10.166.6.30";
+
+    private static final int NTHREADS = 5;
+
     public static void main(String[] args) {
         TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout(
                 "tweets",
-                new KestrelThriftSpout("46.4.89.183", 2229, "social-web-activities", new StringScheme()),
-                1
+                new KestrelThriftSpout(KESTREL, 2229, "social-web-activities", new StringScheme()),
+                NTHREADS
         );
         JedisPoolConfigSerializable config = new JedisPoolConfigSerializable();
         config.setMaxIdle(32);
         config.setMaxActive(32);
         // define analysis bolts
-        builder.setBolt("mentions", new KeywordsCountBolt(config, "46.4.89.183", "london", "shoreditch", "BBC", "tube"), 1).shuffleGrouping("tweets");
-        builder.setBolt("unique-users", new UniqueUsersCountBolt(config, "46.4.89.183"), 1).shuffleGrouping("tweets");
+        builder.setBolt("mentions", new KeywordsCountBolt(config, REDIS, "london", "shoreditch", "BBC", "tube"), NTHREADS).shuffleGrouping("tweets");
+        builder.setBolt("unique-users", new UniqueUsersCountBolt(config, REDIS), NTHREADS).shuffleGrouping("tweets");
         builder.setBolt("tweet-counter", new CounterBolt(), 1).shuffleGrouping("tweets");
-        builder.setBolt("usernames", new MentionCountBolt(config, "46.4.89.183"), 1).shuffleGrouping("tweets");
+        builder.setBolt("usernames", new MentionCountBolt(config, REDIS), NTHREADS).shuffleGrouping("tweets");
         // define bolts pushing results to kestrel
-        builder.setBolt("mentions-to-kestrel", new KestrelBolt("46.4.89.183", 2229, "mentions"), 1).shuffleGrouping("mentions");
-        builder.setBolt("unique-to-kestrel", new KestrelBolt("46.4.89.183", 2229, "unique"), 1).shuffleGrouping("unique-users");
-        builder.setBolt("counter-to-kestrel", new KestrelBolt("46.4.89.183", 2229, "tweet-count"), 1).shuffleGrouping("tweet-counter");
-        builder.setBolt("usernames-to-kestrel", new JsonKestrelBolt("46.4.89.183", 2229, "usernames"), 1).shuffleGrouping("usernames");
+        builder.setBolt("mentions-to-kestrel", new KestrelBolt(KESTREL, 2229, "mentions"), NTHREADS).shuffleGrouping("mentions");
+        builder.setBolt("unique-to-kestrel", new KestrelBolt(KESTREL, 2229, "unique"), NTHREADS).shuffleGrouping("unique-users");
+        builder.setBolt("counter-to-kestrel", new KestrelBolt(KESTREL, 2229, "tweet-count"), NTHREADS).shuffleGrouping("tweet-counter");
+        builder.setBolt("usernames-to-kestrel", new JsonKestrelBolt(KESTREL, 2229, "usernames"), NTHREADS).shuffleGrouping("usernames");
         // define bolts storing intermediate results
-        builder.setBolt("mentions-storage", new RedisBolt(config, "46.4.89.183", false), 1).shuffleGrouping("mentions");
-        builder.setBolt("unique-storage", new RedisBolt(config, "46.4.89.183", false), 1).shuffleGrouping("unique-users");
-        builder.setBolt("usernames-storage", new RedisBolt(config, "46.4.89.183", false), 1).shuffleGrouping("usernames");
+        builder.setBolt("mentions-storage", new RedisBolt(config, KESTREL, false), NTHREADS).shuffleGrouping("mentions");
+        builder.setBolt("unique-storage", new RedisBolt(config, KESTREL, false), NTHREADS).shuffleGrouping("unique-users");
+        builder.setBolt("usernames-storage", new RedisBolt(config, KESTREL, false), NTHREADS).shuffleGrouping("usernames");
 
         Config conf = new Config();
         conf.setDebug(true);
-        conf.setNumWorkers(1);
+        conf.setNumWorkers(2);
 
-        LocalCluster cluster = new LocalCluster();
-        cluster.submitTopology("analyses", conf, builder.createTopology());
-        Utils.sleep(Integer.MAX_VALUE);
-        cluster.killTopology("analyses");
-        cluster.shutdown();
+        try {
+            StormSubmitter.submitTopology("analyses", conf, builder.createTopology());
+        } catch (AlreadyAliveException e) {
+            throw new RuntimeException("error while submitting topology", e);
+        } catch (InvalidTopologyException e) {
+            throw new RuntimeException("error while submitting topology", e);
+        }
+
     }
 
 }
