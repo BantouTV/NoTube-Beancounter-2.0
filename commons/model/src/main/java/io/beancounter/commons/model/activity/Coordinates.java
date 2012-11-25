@@ -5,30 +5,33 @@ package io.beancounter.commons.model.activity;
  *
  * @author Davide Palmisano ( dpalmisano@gmail.com )
  */
-public class Coordinates<T, H> {
+public class Coordinates {
 
-    private T lat;
+    private double lat;
 
-    private H lon;
+    private double lon;
 
-    public Coordinates(T lat, H lon) {
+    /** For Jackson */
+    public Coordinates() {}
+
+    public Coordinates(double lat, double lon) {
         this.lat = lat;
         this.lon = lon;
     }
 
-    public T getLat() {
+    public double getLat() {
         return lat;
     }
 
-    public void setLat(T lat) {
+    public void setLat(double lat) {
         this.lat = lat;
     }
 
-    public H getLon() {
+    public double getLon() {
         return lon;
     }
 
-    public void setLon(H lon) {
+    public void setLon(double lon) {
         this.lon = lon;
     }
 

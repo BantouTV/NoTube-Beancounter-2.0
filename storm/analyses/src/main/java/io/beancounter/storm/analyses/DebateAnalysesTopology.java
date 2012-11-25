@@ -35,6 +35,7 @@ public class DebateAnalysesTopology {
         JedisPoolConfigSerializable config = new JedisPoolConfigSerializable();
         config.setMaxIdle(32);
         config.setMaxActive(32);
+
         // define analysis bolts
         builder.setBolt("mentions", new KeywordsCountBolt(config, REDIS, "london", "shoreditch", "BBC", "tube"), NTHREADS).shuffleGrouping("tweets");
         builder.setBolt("unique-users", new UniqueUsersCountBolt(config, REDIS), NTHREADS).shuffleGrouping("tweets");
@@ -45,6 +46,13 @@ public class DebateAnalysesTopology {
         builder.setBolt("unique-to-kestrel", new KestrelBolt(KESTREL, 2229, "unique"), NTHREADS).shuffleGrouping("unique-users");
         builder.setBolt("counter-to-kestrel", new KestrelBolt(KESTREL, 2229, "tweet-count"), NTHREADS).shuffleGrouping("tweet-counter");
         builder.setBolt("usernames-to-kestrel", new JsonKestrelBolt(KESTREL, 2229, "usernames"), NTHREADS).shuffleGrouping("usernames");
+
+        // define bolts pushing results to kestrel
+        builder.setBolt("mentions-to-kestrel", new KestrelBolt(KESTREL, 2229, "mentions"), 1).shuffleGrouping("mentions");
+        builder.setBolt("unique-to-kestrel", new KestrelBolt(KESTREL, 2229, "unique"), 1).shuffleGrouping("unique-users");
+        builder.setBolt("counter-to-kestrel", new KestrelBolt(KESTREL, 2229, "tweet-count"), 1).shuffleGrouping("tweet-counter");
+        builder.setBolt("usernames-to-kestrel", new JsonKestrelBolt(KESTREL, 2229, "usernames"), 1).shuffleGrouping("usernames");
+
         // define bolts storing intermediate results
         builder.setBolt("mentions-storage", new RedisBolt(config, KESTREL, false), NTHREADS).shuffleGrouping("mentions");
         builder.setBolt("unique-storage", new RedisBolt(config, KESTREL, false), NTHREADS).shuffleGrouping("unique-users");

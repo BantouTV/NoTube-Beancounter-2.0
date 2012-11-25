@@ -30,7 +30,7 @@ public class TwitterTweet {
 
     private URL url;
 
-    private Coordinates<Double, Double> coords;
+    private Coordinates coords;
 
     List<String> mentionedUser = new ArrayList<String>();
 
@@ -98,11 +98,11 @@ public class TwitterTweet {
         return url;
     }
 
-    public void setCoords(Coordinates<Double, Double> coords) {
+    public void setCoords(Coordinates coords) {
         this.coords = coords;
     }
 
-    public Coordinates<Double, Double> getCoords() {
+    public Coordinates getCoords() {
         return coords;
     }
 
