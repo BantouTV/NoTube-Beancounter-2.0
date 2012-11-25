@@ -7,15 +7,22 @@ import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
 import io.beancounter.commons.model.activity.Activity;
 import io.beancounter.commons.model.activity.Coordinates;
 import io.beancounter.commons.model.activity.Tweet;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
+import javax.ws.rs.core.MediaType;
 import java.util.Map;
 
 /**
- * Simple bolt to drop any Tweets which do not contain geo-location data.
+ * Drops any Tweets which do not contain geo-location data. Additionally filters
+ * out Tweets which do contain location data, but are not coming from the
+ * specified country.
  *
  * For Tweets with location data, it will emit a tuple containing:
  *      [ lat:double, long:double, text:string ]
@@ -24,7 +31,17 @@ import java.util.Map;
  */
 public class GeoTagFilter extends BaseRichBolt {
 
+    private static final String COUNTRY_CODE = "countryCode";
+
+    private final String countryCode;
+    private final Client client;
+
     private OutputCollector collector;
+
+    public GeoTagFilter(String countryCode) {
+        client = Client.create();
+        this.countryCode = countryCode;
+    }
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector collector) {
@@ -44,9 +61,22 @@ public class GeoTagFilter extends BaseRichBolt {
         }
 
         Coordinates coordinates = tweet.getGeo();
-        if (coordinates != null) {
+        if (coordinates != null && isInCountry(coordinates)) {
             collector.emit(new Values(coordinates.getLat(), coordinates.getLon(), tweet.getText()));
         }
+    }
+
+    boolean isInCountry(Coordinates coordinates) {
+        WebResource resource = client.resource("http://ws.geonames.org/countryCode");
+        String geoNamesResponse = resource
+                .queryParam("lat", String.valueOf(coordinates.getLat()))
+                .queryParam("lng", String.valueOf(coordinates.getLon()))
+                .queryParam("type", "json")
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .get(String.class);
+        JSONObject json = (JSONObject) JSONValue.parse(geoNamesResponse);
+
+        return json.containsKey(COUNTRY_CODE) && countryCode.equals(json.get(COUNTRY_CODE));
     }
 
     @Override

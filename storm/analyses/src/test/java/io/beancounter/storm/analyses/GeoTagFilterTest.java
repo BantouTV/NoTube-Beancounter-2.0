@@ -14,14 +14,15 @@ import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -42,7 +43,7 @@ public class GeoTagFilterTest {
         collector = mock(OutputCollector.class);
         tuple = mock(Tuple.class);
 
-        boltUnderTest = new GeoTagFilter();
+        boltUnderTest = spy(new GeoTagFilter("IT"));
 
         mapper = new ObjectMapper();
     }
@@ -57,25 +58,40 @@ public class GeoTagFilterTest {
 
         verify(collector).ack(tuple);
         verify(collector, never()).emit(any(Values.class));
+        verify(boltUnderTest, never()).isInCountry(any(Coordinates.class));
     }
 
     @Test
-    public void tweetWithLocationDataShouldBeAckedAndSentOn() throws Exception {
-        String tweetJson = new ObjectMapper().writeValueAsString(getActivity(true));
+    public void tweetWithLocationDataAndInSpecifiedCountryShouldBeAckedAndSentOn() throws Exception {
+        String tweetJson = mapper.writeValueAsString(getActivity(true));
         when(tuple.getString(0)).thenReturn(tweetJson);
+        doReturn(true).when(boltUnderTest).isInCountry(any(Coordinates.class));
 
         boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
         boltUnderTest.execute(tuple);
 
         verify(collector).ack(tuple);
-        verify(collector).emit(new Values(8.0, 40.3, "This is a test tweet!"));
+        verify(collector).emit(new Values(44.2, 11.4, "This is a test tweet!"));
+    }
+
+    @Test
+    public void tweetWithLocationDataAndNotInSpecifiedCountryShouldBeDropped() throws Exception {
+        String tweetJson = mapper.writeValueAsString(getActivity(true));
+        when(tuple.getString(0)).thenReturn(tweetJson);
+        doReturn(false).when(boltUnderTest).isInCountry(any(Coordinates.class));
+
+        boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
+        boltUnderTest.execute(tuple);
+
+        verify(collector).ack(tuple);
+        verify(collector, never()).emit(any(Values.class));
     }
 
     @Test
     public void activityWhichIsNotATweetShouldBeAckedAndDropped() throws Exception {
         Activity activity = getActivity(false);
         activity.setObject(new Like());
-        String invalidJson = new ObjectMapper().writeValueAsString(activity);
+        String invalidJson = mapper.writeValueAsString(activity);
         when(tuple.getString(0)).thenReturn(invalidJson);
 
         boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
@@ -83,6 +99,7 @@ public class GeoTagFilterTest {
 
         verify(collector).ack(tuple);
         verify(collector, never()).emit(any(Values.class));
+        verify(boltUnderTest, never()).isInCountry(any(Coordinates.class));
     }
 
     @Test
@@ -104,7 +121,7 @@ public class GeoTagFilterTest {
         tweet.setName("Test User");
         tweet.setText("This is a test tweet!");
         if (hasLocationData) {
-            tweet.setGeo(new Coordinates(8.0, 40.3));
+            tweet.setGeo(new Coordinates(44.2, 11.4));
         }
 
         Context context = new Context(DateTime.now());
