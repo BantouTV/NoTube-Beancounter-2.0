@@ -1,14 +1,13 @@
 package io.beancounter.storm.analyses;
 
 import backtype.storm.Config;
-import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
 import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.scheme.StringScheme;
 import backtype.storm.spout.KestrelThriftSpout;
 import backtype.storm.topology.TopologyBuilder;
-import backtype.storm.utils.Utils;
+import backtype.storm.tuple.Fields;
 import storm.redis.JedisPoolConfigSerializable;
 import storm.redis.RedisBolt;
 
@@ -49,7 +48,7 @@ public class DebateAnalysesTopology {
         builder.setBolt("mentions-to-kestrel", new KestrelBolt(KESTREL, 2229, "mentions"), NTHREADS).shuffleGrouping("mentions");
         builder.setBolt("unique-to-kestrel", new KestrelBolt(KESTREL, 2229, "unique"), NTHREADS).shuffleGrouping("unique-users");
         builder.setBolt("counter-to-kestrel", new KestrelBolt(KESTREL, 2229, "tweet-count"), NTHREADS).shuffleGrouping("tweet-counter");
-        builder.setBolt("rate-to-kestrel", new KestrelBolt(KESTREL, 2229, "tweets-rate"), NTHREADS).shuffleGrouping("tweets-rate");
+        builder.setBolt("rate-to-kestrel", new GenericJsonKestrelBolt(KESTREL, 2229, "tweets-rate"), NTHREADS).shuffleGrouping("tweets-rate");
         builder.setBolt("usernames-to-kestrel", new JsonKestrelBolt(KESTREL, 2229, "usernames"), NTHREADS).shuffleGrouping("usernames");
         builder.setBolt("geo-marker-to-kestrel", new GenericJsonKestrelBolt(KESTREL, 2229, "geomarker"), NTHREADS).shuffleGrouping("marker");
 
@@ -57,6 +56,15 @@ public class DebateAnalysesTopology {
         builder.setBolt("mentions-storage", new RedisBolt(config, KESTREL, false), NTHREADS).shuffleGrouping("mentions");
         builder.setBolt("unique-storage", new RedisBolt(config, KESTREL, false), NTHREADS).shuffleGrouping("unique-users");
         builder.setBolt("usernames-storage", new RedisBolt(config, KESTREL, false), NTHREADS).shuffleGrouping("usernames");
+
+        // Example use of the WordSplitter and KeywordCounter to avoid the use
+        // of Redis for storing intermediate results.
+        /*
+        builder.setBolt("word-splitter", new WordSplitter(), 4)
+                .shuffleGrouping("tweets");
+        builder.setBolt("keyword-counter", new KeywordCounter("London", "Shoreditch", "BBC", "tube"), 4)
+                .fieldsGrouping("word-splitter", new Fields("word"));
+        */
 
         Config conf = new Config();
         conf.setDebug(true);

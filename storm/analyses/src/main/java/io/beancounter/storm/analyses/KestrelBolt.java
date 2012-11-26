@@ -64,8 +64,8 @@ public class KestrelBolt extends BaseRichBolt {
 
     public void execute(Tuple tuple) {
         String keyword = tuple.getString(1);
-        outputCollector.ack(tuple);
         int mentions = Integer.valueOf(tuple.getString(2));
+        outputCollector.ack(tuple);
         String jsonValue = getJsonValue(keyword, mentions);
         try {
             kestrelClient.put(queue, jsonValue, Integer.MAX_VALUE);

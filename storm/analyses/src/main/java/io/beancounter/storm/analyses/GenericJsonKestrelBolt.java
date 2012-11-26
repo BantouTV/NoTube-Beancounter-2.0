@@ -75,7 +75,7 @@ public class GenericJsonKestrelBolt extends BaseRichBolt {
     private Map<String, String> getValues(Tuple tuple) {
         Map<String, String> result = new HashMap<String, String>();
         for(String field : tuple.getFields()) {
-            result.put(field, tuple.getStringByField(field));
+            result.put(field, String.valueOf(tuple.getValueByField(field)));
         }
         return result;
     }

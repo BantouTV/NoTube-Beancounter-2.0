@@ -16,8 +16,8 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Splits a Tweet's text up into words according to the specified Locale and
- * outputs a tuple for each word:
+ * Splits a Tweet's text up into lowercase words according to the specified
+ * Locale and outputs a tuple for each word:
  *      [ word:string ]
  *
  * @author Alex Cowell
@@ -28,6 +28,10 @@ public class WordSplitter extends BaseRichBolt {
     private final ObjectMapper mapper;
 
     private OutputCollector collector;
+
+    public WordSplitter() {
+        this(Locale.ENGLISH);
+    }
 
     public WordSplitter(Locale locale) {
         this.locale = locale;

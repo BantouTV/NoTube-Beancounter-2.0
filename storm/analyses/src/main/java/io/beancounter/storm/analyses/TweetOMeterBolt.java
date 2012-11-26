@@ -20,8 +20,6 @@ import java.util.Queue;
  */
 public class TweetOMeterBolt extends BaseRichBolt {
 
-    private final static int DATABASE = 10;
-
     private OutputCollector collector;
 
     private long lastupdate = 0L;
@@ -50,7 +48,7 @@ public class TweetOMeterBolt extends BaseRichBolt {
         }
         precedentValues.add(new InstantValue(now, tps));
         double average = avg(precedentValues);
-        collector.emit(new Values(DATABASE, "tweets-per-second", String.valueOf(average)));
+        collector.emit(new Values("_tweets_per_second_", String.valueOf(average)));
     }
 
     private double avg(LinkedList<InstantValue> precedentValues) {
@@ -62,6 +60,6 @@ public class TweetOMeterBolt extends BaseRichBolt {
     }
 
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("database", "key", "value"));
+        outputFieldsDeclarer.declare(new Fields("key", "value"));
     }
 }

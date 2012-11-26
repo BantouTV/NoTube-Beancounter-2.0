@@ -54,7 +54,7 @@ public class WordSplitterTest {
         String tweetJson = mapper.writeValueAsString(getActivity("This is a test tweet!"));
         when(tuple.getString(0)).thenReturn(tweetJson);
 
-        boltUnderTest = new WordSplitter(Locale.ENGLISH);
+        boltUnderTest = new WordSplitter();
         boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
         boltUnderTest.execute(tuple);
 
@@ -103,7 +103,7 @@ public class WordSplitterTest {
         ArgumentCaptor<Fields> fieldsCaptor = ArgumentCaptor.forClass(Fields.class);
         doNothing().when(declarer).declare(fieldsCaptor.capture());
 
-        boltUnderTest = new WordSplitter(null);
+        boltUnderTest = new WordSplitter();
         boltUnderTest.declareOutputFields(declarer);
 
         verify(declarer).declare(any(Fields.class));

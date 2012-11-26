@@ -86,7 +86,6 @@ public class MapMarker extends BaseRichBolt {
                 ranking.add(phrasePair.getValue());
             }
         }
-
         collector.emit(new Values(tuple.getDouble(0), tuple.getDouble(1), selectTopCategory(ranking)));
     }
 
