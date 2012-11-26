@@ -38,7 +38,7 @@ public class DebateAnalysesTopology {
         // define analysis bolts
         builder.setBolt("mentions", new KeywordsCountBolt(config, REDIS, "london", "shoreditch", "BBC", "tube"), NTHREADS).shuffleGrouping("tweets");
         builder.setBolt("unique-users", new UniqueUsersCountBolt(config, REDIS), NTHREADS).shuffleGrouping("tweets");
-        builder.setBolt("tweet-counter", new CounterBolt(), 1).shuffleGrouping("tweets");
+        builder.setBolt("tweet-counter", new CounterBolt()).globalGrouping("tweets");
         builder.setBolt("usernames", new MentionCountBolt(config, REDIS), NTHREADS).shuffleGrouping("tweets");
 
         // define bolts pushing results to kestrel
@@ -59,6 +59,17 @@ public class DebateAnalysesTopology {
                 .shuffleGrouping("tweets");
         builder.setBolt("keyword-counter", new KeywordCounter("London", "Shoreditch", "BBC", "tube"), 4)
                 .fieldsGrouping("word-splitter", new Fields("word"));
+        */
+
+        // Example use of the UsernameExtractor, PartialUniqueUsersCounter and
+        // CounterBolt.
+        /*
+        builder.setBolt("username-extractor", new UsernameExtractor(), 4)
+                .shuffleGrouping("tweets");
+        builder.setBolt("partial-unique-users", new PartialUniqueUsersCounter(), 4)
+                .fieldsGrouping("username-extractor", new Fields("username"));
+        builder.setBolt("unique-users-counter", new CounterBolt())
+                .globalGrouping("partial-unique-users");
         */
 
         Config conf = new Config();

@@ -29,7 +29,7 @@ public class DebateAnalysesTestTopology {
         // define analysis bolts
         builder.setBolt("mentions", new KeywordsCountBolt(config, "46.4.89.183", "london", "shoreditch", "BBC", "tube"), 1).shuffleGrouping("tweets");
         builder.setBolt("unique-users", new UniqueUsersCountBolt(config, "46.4.89.183"), 1).shuffleGrouping("tweets");
-        builder.setBolt("tweet-counter", new CounterBolt(), 1).shuffleGrouping("tweets");
+        builder.setBolt("tweet-counter", new CounterBolt()).globalGrouping("tweets");
         builder.setBolt("usernames", new MentionCountBolt(config, "46.4.89.183"), 1).shuffleGrouping("tweets");
         // define bolts pushing results to kestrel
         builder.setBolt("mentions-to-kestrel", new KestrelBolt("46.4.89.183", 2229, "mentions"), 1).shuffleGrouping("mentions");

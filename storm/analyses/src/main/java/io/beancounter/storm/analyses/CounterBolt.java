@@ -12,7 +12,8 @@ import java.util.Map;
 
 /**
  * Simply counts how many tuples have been processed. This bolt will only give
- * accurate stream data if it is a singleton.
+ * accurate stream data if it is a singleton or operating on a global stream
+ * grouping.
  *
  * @author Alex Cowell
  */
