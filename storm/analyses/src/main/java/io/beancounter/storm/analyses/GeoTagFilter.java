@@ -35,27 +35,24 @@ public class GeoTagFilter extends BaseRichBolt {
     private static final String COUNTRY_CODE = "countryCode";
 
     private final String countryCode;
-    private final Client client;
-    private final ObjectMapper mapper;
+    private Client client;
+    private ObjectMapper mapper;
 
     private OutputCollector collector;
 
     public GeoTagFilter(String countryCode) {
-        client = Client.create();
-        mapper = new ObjectMapper();
         this.countryCode = countryCode;
     }
 
-    @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector collector) {
         this.collector = collector;
+        client = Client.create();
+        mapper = new ObjectMapper();
     }
 
-    @Override
     public void execute(Tuple tuple) {
         String tweetJson = tuple.getString(0);
         collector.ack(tuple);
-
         Tweet tweet;
         try {
             tweet = (Tweet) mapper.readValue(tweetJson, Activity.class).getObject();
@@ -82,7 +79,6 @@ public class GeoTagFilter extends BaseRichBolt {
         return json.containsKey(COUNTRY_CODE) && countryCode.equals(json.get(COUNTRY_CODE));
     }
 
-    @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
         declarer.declare(new Fields("lat", "long", "text"));
     }
