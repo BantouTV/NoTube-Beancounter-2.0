@@ -35,20 +35,20 @@ public class GeoTagFilter extends BaseRichBolt {
     private static final String COUNTRY_CODE = "countryCode";
 
     private final String countryCode;
-    private final Client client;
-    private final ObjectMapper mapper;
+    private Client client;
+    private ObjectMapper mapper;
 
     private OutputCollector collector;
 
     public GeoTagFilter(String countryCode) {
-        client = Client.create();
-        mapper = new ObjectMapper();
         this.countryCode = countryCode;
     }
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector collector) {
         this.collector = collector;
+        client = Client.create();
+        mapper = new ObjectMapper();
     }
 
     @Override

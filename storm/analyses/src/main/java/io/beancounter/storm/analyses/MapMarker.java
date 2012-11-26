@@ -64,6 +64,8 @@ public class MapMarker extends BaseRichBolt {
     @Override
     public void execute(Tuple tuple) {
         String text = tuple.getString(2).toLowerCase(Locale.ITALY);
+        collector.ack(tuple);
+
         BreakIterator boundary = BreakIterator.getWordInstance(Locale.ITALY);
         boundary.setText(text);
 
@@ -89,7 +91,6 @@ public class MapMarker extends BaseRichBolt {
         }
 
         collector.emit(new Values(tuple.getDouble(0), tuple.getDouble(1), selectTopCategory(ranking)));
-        collector.ack(tuple);
     }
 
     private String selectTopCategory(Multiset<String> ranking) {

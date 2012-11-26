@@ -19,7 +19,7 @@ public class TwitterEarRoute extends RouteBuilder {
     public void configure() {
         //errorHandler(deadLetterChannel("file:logs/error"));
 
-        from("twitter://streaming/filter?type=event&keywords=london&consumerKey={{consumer.key}}&consumerSecret={{consumer.secret}}&accessToken={{access.token}}&accessTokenSecret={{access.token.secret}}")
+        from("twitter://streaming/filter?type=event&keywords=primarie&consumerKey={{consumer.key}}&consumerSecret={{consumer.secret}}&accessToken={{access.token}}&accessTokenSecret={{access.token.secret}}")
 
                 .process(new Processor() {
                     public void process(Exchange exchange) throws Exception {
@@ -28,9 +28,6 @@ public class TwitterEarRoute extends RouteBuilder {
                         Status status = exchange.getIn().getBody(Status.class);
                         TwitterTweet twitterTweet = new TweetConverter().convert(status);
                         Activity activity = new TwitterTweetConverter().convert(twitterTweet);
-                        if(((Tweet)activity.getObject()).getMentionedUsers().size() > 0) {
-                            System.out.println("found a tweet with a number of mentions:" + ((Tweet)activity.getObject()).getMentionedUsers().size());
-                        }
                         exchange.getIn().setBody(activity);
                     }
                 })

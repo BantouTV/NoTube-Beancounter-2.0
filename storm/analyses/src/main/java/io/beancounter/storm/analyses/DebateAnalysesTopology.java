@@ -36,16 +36,21 @@ public class DebateAnalysesTopology {
         config.setMaxActive(32);
 
         // define analysis bolts
-        builder.setBolt("mentions", new KeywordsCountBolt(config, REDIS, "london", "shoreditch", "BBC", "tube"), NTHREADS).shuffleGrouping("tweets");
+        builder.setBolt("mentions", new KeywordsCountBolt(config, REDIS, "#15minuti", "#pb2013", "#oppurevendola", "#csxiamo"), NTHREADS).shuffleGrouping("tweets");
         builder.setBolt("unique-users", new UniqueUsersCountBolt(config, REDIS), NTHREADS).shuffleGrouping("tweets");
         builder.setBolt("tweet-counter", new CounterBolt()).globalGrouping("tweets");
+        builder.setBolt("tweets-rate", new TweetOMeterBolt(), 1).shuffleGrouping("tweets");
         builder.setBolt("usernames", new MentionCountBolt(config, REDIS), NTHREADS).shuffleGrouping("tweets");
+        builder.setBolt("geo", new GeoTagFilter("IT"), NTHREADS + 5).shuffleGrouping("tweets");
+        builder.setBolt("marker", new MapMarker(), NTHREADS).shuffleGrouping("geo");
 
         // define bolts pushing results to kestrel
-        builder.setBolt("mentions-to-kestrel", new KestrelBolt(KESTREL, 2229, "mentions"), 1).shuffleGrouping("mentions");
-        builder.setBolt("unique-to-kestrel", new KestrelBolt(KESTREL, 2229, "unique"), 1).shuffleGrouping("unique-users");
-        builder.setBolt("counter-to-kestrel", new KestrelBolt(KESTREL, 2229, "tweet-count"), 1).shuffleGrouping("tweet-counter");
-        builder.setBolt("usernames-to-kestrel", new JsonKestrelBolt(KESTREL, 2229, "usernames"), 1).shuffleGrouping("usernames");
+        builder.setBolt("mentions-to-kestrel", new KestrelBolt(KESTREL, 2229, "mentions"), NTHREADS).shuffleGrouping("mentions");
+        builder.setBolt("unique-to-kestrel", new KestrelBolt(KESTREL, 2229, "unique"), NTHREADS).shuffleGrouping("unique-users");
+        builder.setBolt("counter-to-kestrel", new KestrelBolt(KESTREL, 2229, "tweet-count"), NTHREADS).shuffleGrouping("tweet-counter");
+        builder.setBolt("rate-to-kestrel", new GenericJsonKestrelBolt(KESTREL, 2229, "tweets-rate"), NTHREADS).shuffleGrouping("tweets-rate");
+        builder.setBolt("usernames-to-kestrel", new JsonKestrelBolt(KESTREL, 2229, "usernames"), NTHREADS).shuffleGrouping("usernames");
+        builder.setBolt("geo-marker-to-kestrel", new GenericJsonKestrelBolt(KESTREL, 2229, "geomarker"), NTHREADS).shuffleGrouping("marker");
 
         // define bolts storing intermediate results
         builder.setBolt("mentions-storage", new RedisBolt(config, KESTREL, false), NTHREADS).shuffleGrouping("mentions");
