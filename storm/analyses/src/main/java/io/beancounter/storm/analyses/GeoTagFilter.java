@@ -17,6 +17,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import javax.ws.rs.core.MediaType;
+import java.awt.*;
+import java.awt.geom.Path2D;
 import java.util.Map;
 
 /**
@@ -35,6 +37,7 @@ public class GeoTagFilter extends BaseRichBolt {
     private static final String COUNTRY_CODE = "countryCode";
 
     private final String countryCode;
+    private final Path2D.Double italyBoundingBox;
     private Client client;
     private ObjectMapper mapper;
 
@@ -42,6 +45,18 @@ public class GeoTagFilter extends BaseRichBolt {
 
     public GeoTagFilter(String countryCode) {
         this.countryCode = countryCode;
+
+        double minLong = 6.627730622759041;
+        double minLat = 35.49495394783578;
+        double maxLong = 18.52114715613408;
+        double maxLat = 47.092550464892554;
+
+        italyBoundingBox = new Path2D.Double();
+        italyBoundingBox.moveTo(minLong, minLat);
+        italyBoundingBox.lineTo(minLong, maxLat);
+        italyBoundingBox.lineTo(maxLong, maxLat);
+        italyBoundingBox.lineTo(maxLong, minLat);
+        italyBoundingBox.closePath();
     }
 
     @Override
@@ -69,7 +84,8 @@ public class GeoTagFilter extends BaseRichBolt {
         }
     }
 
-    boolean isInCountry(Coordinates coordinates) {
+    private boolean isInCountry(Coordinates coordinates) {
+        /*
         WebResource resource = client.resource("http://ws.geonames.org/countryCode");
         String geoNamesResponse = resource
                 .queryParam("lat", String.valueOf(coordinates.getLat()))
@@ -80,6 +96,9 @@ public class GeoTagFilter extends BaseRichBolt {
         JSONObject json = (JSONObject) JSONValue.parse(geoNamesResponse);
 
         return json.containsKey(COUNTRY_CODE) && countryCode.equals(json.get(COUNTRY_CODE));
+        */
+
+        return italyBoundingBox.contains(coordinates.getLon(), coordinates.getLat());
     }
 
     @Override

@@ -22,7 +22,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -43,14 +42,14 @@ public class GeoTagFilterTest {
         collector = mock(OutputCollector.class);
         tuple = mock(Tuple.class);
 
-        boltUnderTest = spy(new GeoTagFilter("IT"));
+        boltUnderTest = new GeoTagFilter("IT");
 
         mapper = new ObjectMapper();
     }
 
     @Test
     public void tweetWithoutLocationDataShouldBeDroppedAndAcked() throws Exception {
-        String tweetJson = mapper.writeValueAsString(getActivity(false));
+        String tweetJson = mapper.writeValueAsString(getActivity(null));
         when(tuple.getString(0)).thenReturn(tweetJson);
 
         boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
@@ -58,14 +57,14 @@ public class GeoTagFilterTest {
 
         verify(collector).ack(tuple);
         verify(collector, never()).emit(any(Values.class));
-        verify(boltUnderTest, never()).isInCountry(any(Coordinates.class));
+//        verify(boltUnderTest, never()).isInCountry(any(Coordinates.class));
     }
 
     @Test
     public void tweetWithLocationDataAndInSpecifiedCountryShouldBeAckedAndSentOn() throws Exception {
-        String tweetJson = mapper.writeValueAsString(getActivity(true));
+        String tweetJson = mapper.writeValueAsString(getActivity(new Coordinates(44.2, 11.4)));
         when(tuple.getString(0)).thenReturn(tweetJson);
-        doReturn(true).when(boltUnderTest).isInCountry(any(Coordinates.class));
+//        doReturn(true).when(boltUnderTest).isInCountry(any(Coordinates.class));
 
         boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
         boltUnderTest.execute(tuple);
@@ -76,9 +75,9 @@ public class GeoTagFilterTest {
 
     @Test
     public void tweetWithLocationDataAndNotInSpecifiedCountryShouldBeDropped() throws Exception {
-        String tweetJson = mapper.writeValueAsString(getActivity(true));
+        String tweetJson = mapper.writeValueAsString(getActivity(new Coordinates(3.2, 24.4)));
         when(tuple.getString(0)).thenReturn(tweetJson);
-        doReturn(false).when(boltUnderTest).isInCountry(any(Coordinates.class));
+//        doReturn(false).when(boltUnderTest).isInCountry(any(Coordinates.class));
 
         boltUnderTest.prepare(Collections.emptyMap(), mock(TopologyContext.class), collector);
         boltUnderTest.execute(tuple);
@@ -89,7 +88,7 @@ public class GeoTagFilterTest {
 
     @Test
     public void activityWhichIsNotATweetShouldBeAckedAndDropped() throws Exception {
-        Activity activity = getActivity(false);
+        Activity activity = getActivity(null);
         activity.setObject(new Like());
         String invalidJson = mapper.writeValueAsString(activity);
         when(tuple.getString(0)).thenReturn(invalidJson);
@@ -99,7 +98,7 @@ public class GeoTagFilterTest {
 
         verify(collector).ack(tuple);
         verify(collector, never()).emit(any(Values.class));
-        verify(boltUnderTest, never()).isInCountry(any(Coordinates.class));
+//        verify(boltUnderTest, never()).isInCountry(any(Coordinates.class));
     }
 
     @Test
@@ -115,13 +114,13 @@ public class GeoTagFilterTest {
         assertEquals(declaredFields.toList(), new Fields("lat", "long", "text").toList());
     }
 
-    private Activity getActivity(boolean hasLocationData) throws Exception {
+    private Activity getActivity(Coordinates location) throws Exception {
         Tweet tweet = new Tweet();
         tweet.setUrl(new URL("http://twitter.com/test-user/status/123456"));
         tweet.setName("Test User");
         tweet.setText("This is a test tweet!");
-        if (hasLocationData) {
-            tweet.setGeo(new Coordinates(44.2, 11.4));
+        if (location != null) {
+            tweet.setGeo(location);
         }
 
         Context context = new Context(DateTime.now());
