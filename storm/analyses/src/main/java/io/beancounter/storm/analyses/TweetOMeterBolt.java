@@ -10,7 +10,6 @@ import backtype.storm.tuple.Values;
 
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 
 /**
  * Simply counts how many tuples have been processed. This bolt will only give
@@ -22,14 +21,14 @@ public class TweetOMeterBolt extends BaseRichBolt {
 
     private OutputCollector collector;
 
-    private long lastupdate = 0L;
+    private long lastupdate = -1L;
 
     private LinkedList<InstantValue> precedentValues;
 
     /**
      * calculates the average only from the last SIZE tweets.
      */
-    private static final int SIZE = 100;
+    private static final int SIZE = 10;
 
     public void prepare(Map map, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
@@ -39,21 +38,28 @@ public class TweetOMeterBolt extends BaseRichBolt {
     public void execute(Tuple tuple) {
         collector.ack(tuple);
         long now = System.currentTimeMillis();
-        long interval = now - lastupdate;
-        if(interval == 0) interval = 1; // to avoid DBZ
-        double tps = (1 / interval) * 1000;
-        if(precedentValues.size() > SIZE) {
-            for(int i=0; i < precedentValues.size() - SIZE; i++)
-                precedentValues.removeLast();
+        if (lastupdate == -1L) {
+            lastupdate = now;
+            return;
         }
-        precedentValues.add(new InstantValue(now, tps));
+
+        long interval = now - lastupdate;
+        if (interval == 0) interval = 1; // to avoid DBZ
+        double tps = (1.0 / interval) * 1000.0;
+
+        if (precedentValues.size() > SIZE - 1) {
+            precedentValues.removeLast();
+        }
+        precedentValues.addFirst(new InstantValue(now, tps));
+
         double average = avg(precedentValues);
-        collector.emit(new Values("_tweets_per_second_", String.valueOf(average)));
+        lastupdate = now;
+        collector.emit(new Values("_tweets_per_second_", String.format("%.2f", average)));
     }
 
     private double avg(LinkedList<InstantValue> precedentValues) {
         double sum = 0.0d;
-        for(InstantValue iv : precedentValues) {
+        for (InstantValue iv : precedentValues) {
             sum += iv.getTps();
         }
         return sum / precedentValues.size();
