@@ -17,7 +17,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import javax.ws.rs.core.MediaType;
-import java.awt.*;
 import java.awt.geom.Path2D;
 import java.util.Map;
 
@@ -38,7 +37,7 @@ public class GeoTagFilter extends BaseRichBolt {
 
     private final String countryCode;
     private final Path2D.Double italyBoundingBox;
-    private Client client;
+//    private Client client;
     private ObjectMapper mapper;
 
     private OutputCollector collector;
@@ -62,7 +61,7 @@ public class GeoTagFilter extends BaseRichBolt {
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector collector) {
         this.collector = collector;
-        client = Client.create();
+//        client = Client.create();
         mapper = new ObjectMapper();
     }
 
